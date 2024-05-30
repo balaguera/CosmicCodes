@@ -1,0 +1,1022 @@
+#ifndef __ANGULAR_POWER_SPECTRUM_TH__
+#define __ANGULAR_POWER_SPECTRUM_TH__
+
+//#define _WRTITE_OUTPUTS_APSTH_
+
+
+// CLASS TO COMPUTE LINEAR AND NON LINEAR MATTER angular POWER SPECTRUM
+// BASED ON THE EISENSTEIN AND HU FITTING FORMULAE
+// AND THE HALO-FIT FROM SMITH ET AL.
+
+
+# include <iostream>
+# include <math.h>
+# include <cmath>
+# include <cctype>
+# include <stdio.h>
+# include <fstream>
+# include <omp.h>
+# include "NumericalMethods.h"
+# include "CosmologicalFunctions.h"
+# include "PowerSpectrumTH.h"
+# include "FileOutput.h"
+# include "ScreenOutput.h"
+# include "Galaxy.h"
+
+
+using namespace std;
+using namespace Constants;
+
+
+
+
+
+
+/**
+ *  @class AngularPowerTH.h
+ *  @brief The class AngularPowerTH_
+ *
+ */
+
+
+class AngularPowerTH{
+  
+ protected:
+
+ private:
+
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief Obejct of type pointing, used in HealPix operations
+  */
+  pointing point;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec rms_nran;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec mean_number_randoms_pix;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  int Nrings;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  int nzbins;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> z_min;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> z_max;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<vector<vector<real_prec> > > Wigner3J;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  void get_mean_redshift(void *p);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static gsl_real idndz(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static gsl_real idndz_spect(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static gsl_real idndz_spect_norm(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static gsl_real idndz_spect_mean_redshift(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static gsl_real ingal_halo_model(real_prec , void *);
+
+ //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static real_prec iKernel(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static real_prec iKernelx(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static real_prec iCl(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static real_prec iCl_limber_linear(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static real_prec iCl_limber_non_linear_hf(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static real_prec iCl_limber_non_linear_hm(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static real_prec iCl_limber_non_linear_pt(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static real_prec iCl_limber_non_linear_pt_inter(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  static real_prec iget_ngal_halo_model(real_prec , void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  gsl_interp_accel *acc_dndz;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  gsl_spline *spline_dndz ;
+
+public:
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Default Constructor
+   */
+
+  AngularPowerTH(){}
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Constructor meant to be used in scenarios suchas  CosmicBirth
+   */
+ 
+  AngularPowerTH(s_CosmologicalParameters &_scp, real_prec _z_min_clth, real_prec _z_max_clth, real_prec _zmin_bin, real_prec _z_max_bin, int _Lmin, int _Lmax, int _L_break, int _nside, bool _use_non_linear_pk, string _type_of_nl_power,string _code, vector<gsl_real>&_dndz,vector<gsl_real>&_dz):
+  z_min_clth(_z_min_clth), z_max_clth(_z_max_clth), zmin_bin(_zmin_bin),zmax_bin(_z_max_bin), Lmin(_Lmin),Lmax(_Lmax),L_break(_L_break),nside(_nside),use_non_linear_pk(_use_non_linear_pk), type_of_nl_power(_type_of_nl_power),
+  code(_code), dn_spect(_dndz),dz(_dz)
+  {
+
+    this->k_min_integration_cl=_scp.kmin_int;
+    this->k_max_integration_cl=_scp.kmax_int;
+    this->use_zmin_zmax_from_dndz_file=false;
+    this->window_type="tophat";
+    this->pdf_zerrors="delta";
+    this->number_of_kmodes=1000;   
+    this->read_dndz_from_file=false;
+    this->set_vectors();
+    this->dn_photo =this->dn_spect;
+    this->set_Lbins();
+    if(this->L_break>0)
+      this->get_bessel();
+    this->compute_int_table(); 
+    this->set_interpolation_tools_dndz();
+
+//    this->read_mixing_matrix_lbins(); // input file not yet provided
+    this->pclth.zmax_bin=this->zmax_bin;
+    this->pclth.zmin_bin=this->zmin_bin;
+    this->pclth.dn_spect=this->dn_spect;
+    this->pclth.dn_photo=this->dn_photo;
+    this->pclth.dz=this->dz;
+    this->pclth.sBessel=this->Bessel;
+    this->pclth.sxBessel=this->xBessel;
+    this->pclth.k_min_integration=this->k_min_integration_cl;
+    this->pclth.k_max_integration=this->k_max_integration_cl;
+    this->pclth.wtype=this->window_type;
+    this->pclth.pdf_zerrors=this->pdf_zerrors;
+    this->pclth.sigma_p_errors=this->sigma_p_errors;
+    this->gal.scp=_scp;
+    real_prec pk_normalization;
+    if(this->use_non_linear_pk==false)
+     {
+       this->Ps.normalization((void *)&this->gal.scp,pk_normalization);
+       this->gal.scp.pk_normalization=pk_normalization;
+    }
+    this->get_normal();
+    cout<<"Normalization of angular power spectrum using spectroscopic-derived  dndz = "<<this->normal_cl_power<<endl;
+    this->gal.get_cosmo(100,true);
+
+    this->pclth.rmin_bin=gsl_inter_new(this->gal.scp.zv,this->gal.scp.rv, this->z_min_clth);
+    this->pclth.rmax_bin=gsl_inter_new(this->gal.scp.zv,this->gal.scp.rv, this->z_max_clth);
+    if(this->use_non_linear_pk==true)
+      this->get_HALO_FIT_scales();
+    if(this->use_non_linear_pk==true)
+      this->pclth.HF_i4=this->HF_i4;// This is used if we use P(K,z) inside the integrals
+    if(this->use_non_linear_pk==true)
+     this->pclth.HF_i2=this->HF_i2;// This is used if we use P(K,z) inside the integrals
+    this->pclth.kv=this->k_th;
+    this->pclth.rv=this->gal.rv;
+    this->pclth.zv=this->gal.zv;
+    this->pclth.gv=this->gal.gv;
+    this->pclth.M_nl=this->Mass_nl ;
+    if(this->use_non_linear_pk==true)
+      this->pclth.sigma_mass=this->sigma_mass;
+    this->pclth.gfv=this->gal.gfv;
+    this->pclth.Hv=this->gal.Hv;
+    this->pclth.bias_zv=this->gal.bias_zv;
+    this->pclth.klnv=this->klnv;
+    this->pclth.use_non_linear_pk=this->use_non_linear_pk;
+    this->pclth.type_of_nl_power=this->type_of_nl_power ;
+
+    this->get_Cl_theo();
+//    this->get_Cl_bin_convolved(); enable when mixing matrix is provided
+   }
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Default destructor
+   */
+
+  ~AngularPowerTH(){}
+
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Operations with the galaxy catalog. This class
+   * has a GALAXY type member
+   */
+  GALAXY gal;
+  //////////////////////////////////////////////////////////
+  /**
+  *    @brief Inpput/Output
+  */
+
+  FileOutput File;
+  ScreenOutput So;
+
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Random generator
+  */
+  gsl_rng * r;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief  Type of code running
+  */
+  string code;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string file_type_mask;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string bin_type;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string define_z_bins;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec>pixel_window;
+ //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+   string redshift;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string window_type;
+
+
+  bool read_dndz_from_file;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string input_cl_file;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string input_mixing_matrix_lbins;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string input_mixing_matrix_l;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  int Lmin;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  int Lmax;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  int nside;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  int N_L_bins;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  ULONG ngal;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  bool use_external_pk_file;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec zmin;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec zmax;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  ULONG nran;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec alpha;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec sigma_p_errors;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec zmin_bin;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec zmax_bin;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec area_pixel;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec mean_number_galaxies_pix; //expected number of galaxies in one pixel
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec mean_number_galaxies; //expected number of galaxies. Ngal/Area
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec rms_ngal;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec area_survey;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec sky_fraction;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string pdf_zerrors;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec sigma2_property;
+  //////////////////////////////////////////////////////////
+
+  /**
+  * @brief 
+  */
+  vector<real_prec> theta_new;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> phi_new;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> theta_new_pix;
+
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> Mean_ngal_pix; // mean surface density of galaxies per pixel
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> Mean_ngal; //mean surface density of galaxies in sample
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> Shot_Noise;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> pixmask;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<vector<real_prec> > Jlm;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string coord;
+
+  /**
+  * @brief 
+  */
+  void get_pars_mask();
+
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Vector to allocate zmin and zmax of nbins in z.
+   * The first 0-0 refers to the fill z-interval. Used only for
+   * FLS z-interval. Used only for FLS
+   */
+  vector< vector<real_prec> >zminmax;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<real_prec> Wl;
+  /**
+   * @brief  
+  */
+
+  real_prec PDF_errors(string te, real_prec zp, real_prec zs, real_prec s);
+  /**
+   * @brief  
+  */
+  void set_Lbins();
+
+  void set_vectors();  //////////////////////////////////////////////////////////
+  /**
+   * @brief Vector containing the l-modes
+  */
+  vector<int> lvec;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<real_prec> Clvec;
+  //////////////////////////////////////////////////////////
+
+  /**
+   * @brief  
+  */
+  vector<real_prec> Clvec_nsn;
+
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<real_prec> lbin;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<real_prec> lbin_min;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<real_prec> lbin_max;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<real_prec> Clbin;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<real_prec> Clbin_meas;
+  //////////////////////////////////////////////////////////
+  vector<real_prec> eClbin;
+  /**
+   * @brief  
+  */
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<int> nmodes;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<real_prec> Wlbin;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<vector<real_prec> > R;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<vector<real_prec> > tR;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  vector<vector<real_prec> > Rll_bin;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  ULONG ngal_used;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  ULONG nran_used;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  ULONG n_observed_pixels;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  ULONG n_total_pixels;  
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  ULONG n_pixels;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+  */
+  void read_pars(string &);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+ void read_mixing_matrix_lbins();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  void read_mixing_matrix_l();
+
+  //////////////////////////////////////////////////////////
+  // Definition pof functions used in the generation of gaussia/lognormal  Cl
+  //////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  void get_ngal_halo_model(void *);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  void get_alm_gaussian(int, vector<real_prec>&, Alm<xcomplex<real_prec> >&);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  void get_Cl_gaussian(int, vector<real_prec>&, vector<real_prec>&);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  void get_lg_map(Healpix_Map<real_prec>, Healpix_Map<real_prec>&);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  void get_stat(vector<vector<real_prec> >Cr,vector<real_prec>& Cl_mean,vector<real_prec>&Cl_var,vector<vector<real_prec> >&Cova);
+  //////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////
+  // Definition pof functions used in the generation of Cl model
+  //////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  params_clth pclth;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  real_prec normal_cl_power;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  real_prec normal_cl_power_photo;
+   //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec>XX_z;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec>WW_z;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec>XX_z_cl;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec>WW_z_cl;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec>XX_k;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec>WW_k;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector< vector<real_prec > > Bessel;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> xBessel;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  gsl_integration_glfixed_table *wf;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  gsl_integration_glfixed_table *wfd;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  gsl_integration_glfixed_table *wfc;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  void compute_int_table();
+
+  void set_interpolation_tools_dndz();
+
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  void free_gsl_table();
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec dndz_photo(real_prec, void *);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec dndz_spect(real_prec, void *);
+
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec window(real_prec, void *);  
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec get_Kernel(void*);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec get_Kernelx(void*);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+
+  real_prec iCl_limber_non_linear_hm_FAST(int, void *);
+
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec get_cl_exact(void*);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec get_cl_limber_pt_inter(void*);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec get_cl_limber(void*);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  void get_normal(void*);
+  void get_normal();
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  void get_bessel();
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec k_min_integration_cl;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec k_max_integration_cl;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  int number_of_kmodes;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec z_min_clth;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec z_max_clth;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  int Bin_index;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  int L_break;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string input_dndz_file;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string input_nbar_file;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec mean_redshift;
+
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  bool use_zmin_zmax_from_dndz_file;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string input_pk_file;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string output_clth_file;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string output_clth_file_bin;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  PowerSpectrum Ps;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  bool use_non_linear_pk;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string type_of_nl_power;
+
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> pk_th;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> pk_th1;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> pk_th2;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> k_th;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> klnv;
+  //////////////////////////////////////////////////////////
+
+  /**
+  * @brief 
+  */
+  vector<real_prec> HF_i4;
+  //////////////////////////////////////////////////////////
+
+  /**
+  * @brief 
+  */
+  vector<real_prec> HF_i2;
+  //////////////////////////////////////////////////////////
+
+
+  /**
+  * @brief 
+  */
+  vector<real_prec> Mass_nl;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> sigma_mass;
+
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  void get_pk(real_prec);
+  /**
+  * @brief 
+  */
+  void get_HALO_FIT_scales();
+  /**
+  * @brief 
+  */
+  void get_HM_scales();
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> dn_photo;
+  /**
+  * @brief 
+  */
+  vector<real_prec> dn_spect;
+  /**
+  * @brief 
+  */
+  vector<real_prec> nbar_photo;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  vector<real_prec> dz;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  void read_dndz_photo();
+  /**
+  * @brief 
+  */
+  void read_nbar_photo();
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  void get_dndz_spect(params_clth, int );
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  void get_Cl_theo(params_clth, string);
+  void get_Cl_theo();
+  //////////////////////////////////////////////////////////
+  void get_Cl_bin_convolved();
+  /**
+  * @brief 
+  */
+  void get_Cl_bin_convolved(int);
+  /**
+  * @brief 
+  */
+  void get_Cl_bin_convolved(int, int);
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  string input_file_measured_Clbin;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  real_prec Ngal_expected;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief 
+  */
+  void write_cosmo_pars();
+
+
+};
+#endif  
