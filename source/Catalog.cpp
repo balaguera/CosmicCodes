@@ -7533,9 +7533,8 @@ void Catalog::get_local_mach_number_chuncks(real_prec scale)
               this->Halo[index_gal_slice].concentration_closest_neighbour=0;
           }
         }
-
-          // Either we set an if for only mach number or we use lambda/sigma lambda for separations. Open issue
-          if(counter_gal>1)// IF we have only one tracer (the ith), we can have a non-well defined variance.
+      // Either we set an if for only mach number or we use lambda/sigma lambda for separations. Open issue
+       if(counter_gal>1)// IF we have only one tracer (the ith), we can have a non-well defined variance.
         {
           meanv/=static_cast<double>(counter_gal);
           meand/=static_cast<double>(counter_gal);

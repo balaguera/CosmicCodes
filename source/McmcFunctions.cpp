@@ -2502,9 +2502,7 @@ void McmcFunctions::distance_priors_cmb_model(int I, int J, s_CosmologicalParame
   real_prec omega_m  = (scp->Om_matter)*pow(scp->hubble,2);
 
   // Baryon drag epoch:
-  real_prec z_drag_a  = 0.0783*pow(omega_b,(real_prec)-0.238)/(1.+39.5*pow(omega_b,(real_prec)0.763));
-  real_prec z_drag_b  = 0.560/(1+21.1*pow(omega_b,(real_prec)1.81));
-  real_prec z_drag    = 1048.0*(1.+0.00124*pow(omega_b,(real_prec)-0.738))*(1.+z_drag_a*pow(omega_m,(real_prec)z_drag_b));
+  real_prec z_drag = CF.drag_redshift(); 
   real_prec da_zd  = CF.proper_angular_diameter_distance(z_drag);
   real_prec rsound = CF.comoving_sound_horizon(z_drag);
   real_prec R      = (1+z_drag)*da_zd*sqrt(scp->Om_matter)*scp->Hubble/Constants::speed_light;

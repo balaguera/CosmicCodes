@@ -187,48 +187,6 @@ real_prec Cosmology:: Distance_Modulus(real_prec redshift){
   return dm;
 }
 ////////////////////////////////////////////////////////////////////////////
-real_prec Cosmology::drag_redshift(){
-  real_prec omega_b  = (this->s_cosmo_pars.Om_baryons)*pow(this->s_cosmo_pars.hubble,2);
-  real_prec omega_m  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
-  real_prec z_drag_a  = 0.0783*pow(omega_b,-0.238)/(1.+39.5*pow(omega_b,0.763));
-  real_prec z_drag_b  = 0.560/(1+21.1*pow(omega_b,1.81));
-  return  1048.0*(1.+0.00124*pow(omega_b,-0.738))*(1.+z_drag_a*pow(omega_m,z_drag_b));
-}
-////////////////////////////////////////////////////////////////////////////
-real_prec Cosmology::R_drag(){
-  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
-  real_prec obhh  = (this->s_cosmo_pars.Om_baryons)*pow(this->s_cosmo_pars.hubble,2);
-  return 31.5*obhh/pow(theta_cmb,4)*(1000.0/(1.+this->drag_redshift()));
-}
-////////////////////////////////////////////////////////////////////////////
-real_prec Cosmology::R_equality(){
-  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
-  real_prec obhh  = (this->s_cosmo_pars.Om_baryons)*pow(this->s_cosmo_pars.hubble,2);
-  return 31.5*obhh/pow(theta_cmb,4)*(1000./this->redshift_equality());
-}
-////////////////////////////////////////////////////////////////////////////
-real_prec Cosmology::redshift_equality(){
-  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
-  real_prec omhh  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
-  return  2.50e4*omhh/pow(theta_cmb,4);
-}
-////////////////////////////////////////////////////////////////////////////
-real_prec Cosmology::k_equality(){
-  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
-  real_prec omhh  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
-  return   0.0746*omhh/pow(theta_cmb,2);
-}
-////////////////////////////////////////////////////////////////////////////
-real_prec Cosmology::k_Silk(){
-  real_prec omhh  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
-  real_prec obhh  = (this->s_cosmo_pars.Om_baryons)*pow(this->s_cosmo_pars.hubble,2);
-  return  1.6*pow(obhh,0.52)*pow(omhh,0.73)*(1+pow(10.4*omhh,-0.95));
-}
-////////////////////////////////////////////////////////////////////////////
-real_prec Cosmology::sound_horizon(){
-  return 2./3./this->k_equality()*sqrt(6./this->R_equality())*log((sqrt(1+this->R_drag())+sqrt(this->R_drag()+this->R_equality()))/(1+sqrt(this->R_equality())));
-}
-////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology:: inter_Distance_Modulus(real_prec redshift){
   // ***************************
   // DISTANCE MODULUS
@@ -433,3 +391,66 @@ void F_dF(gsl_real z, void *p, gsl_real *y, gsl_real *dy){
   *y=s_cp->Mabs-s_cp->mlim+25.0+5.0*log10(tcd*(1+z))+cf.K_correction(z)+cf.e_correction(z);
   *dy= (5.0/log(10.0))*( 1./(1.+z) + cf.derivative_transverse_comoving_distance(z)/tcd)+ cf.dK_correction_dz(z)+cf.de_correction_dz(z);
 }
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::drag_redshift(){
+  real_prec omega_b  = this->s_cosmo_pars.Om_baryons*pow(this->s_cosmo_pars.hubble,2);
+  real_prec omega_m  = this->s_cosmo_pars.Om_matter*pow(this->s_cosmo_pars.hubble,2);
+  real_prec z_drag_a  = 0.0783*pow(omega_b,-0.238)/(1.+39.5*pow(omega_b,0.763));
+  real_prec z_drag_b  = 0.560/(1+21.1*pow(omega_b,1.81));
+  return  1048.0*(1.+0.00124*pow(omega_b,-0.738))*(1.+z_drag_a*pow(omega_m,z_drag_b));
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::R_drag(){
+  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
+  real_prec obhh  = this->s_cosmo_pars.Om_baryons*pow(this->s_cosmo_pars.hubble,2);
+  return 31.5*obhh/pow(theta_cmb,4)*(1000.0/(1.+this->drag_redshift()));
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::R_equality(){
+  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
+  real_prec obhh  = (this->s_cosmo_pars.Om_baryons)*pow(this->s_cosmo_pars.hubble,2);
+  return 31.5*obhh/pow(theta_cmb,4)*(1000./this->redshift_equality());
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::redshift_equality(){
+  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
+  real_prec omhh  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
+  return  2.50e4*omhh/pow(theta_cmb,4);
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::k_equality(){
+  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
+  real_prec omhh  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
+  return   0.0746*omhh/pow(theta_cmb,2);
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::k_Silk(){
+  real_prec omhh  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
+  real_prec obhh  = (this->s_cosmo_pars.Om_baryons)*pow(this->s_cosmo_pars.hubble,2);
+  return  1.6*pow(obhh,0.52)*pow(omhh,0.73)*(1+pow(10.4*omhh,-0.95));
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::sound_horizon(){
+  real_prec Rdrag=this->R_drag();
+  real_prec Req=this->R_equality();
+  return 2./3./this->k_equality()*sqrt(6./Req)*log((sqrt(1+Rdrag)+sqrt(Rdrag+Req))/(1+sqrt(Req)));
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::TFsound_horizon_fit(){
+  real_prec omhh = this->s_cosmo_pars.Om_matter*pow(this->s_cosmo_pars.hubble,2) ;
+  real_prec sound_horizon_fit_mpc = 44.5*log(9.83/omhh)/sqrt(1.+10.0*pow(omhh*this->s_cosmo_pars.f_baryon,0.75));
+  return sound_horizon_fit_mpc*this->s_cosmo_pars.hubble;
+}
+////////////////////////////////////////////////////////////////////////////
+  /* Output: The approximate location of the first baryonic peak, in h Mpc^-1 */
+  real_prec Cosmology::TFk_peak()
+  {
+    real_prec omhh = this->s_cosmo_pars.Om_matter*pow(this->s_cosmo_pars.hubble,2) ;
+    real_prec k_peak_mpc = 2.5*3.14159*(1+0.217*omhh)/(this->sound_horizon()*this->s_cosmo_pars.hubble);//    or use COsmology::TFsound_horizon_fit(omhh,f_baryon,1.0);
+    return k_peak_mpc/this->s_cosmo_pars.hubble;
+  }
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////

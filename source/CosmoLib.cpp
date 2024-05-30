@@ -142,6 +142,7 @@ void CosmoLib::show_cosmo_struct()
 #ifdef _USE_ABACUS_COSMOLOGY_
   So.message_screen("Using cosmological parameters from ABACUS simulation ");
 #endif
+  Cf.check_cosmo_pars();
   So.message_screen("Omega Matter =", this->s_cosmo_par.Om_matter);
   So.message_screen("Omega CDM =", this->s_cosmo_par.Om_cdm);
   So.message_screen("Omega Vacuum =", this->s_cosmo_par.Om_vac);
@@ -158,7 +159,6 @@ void CosmoLib::show_cosmo_struct()
   So.message_screen("Mean CMB temperature =", this->s_cosmo_par.Tcmb);
   So.message_screen("Delta Spherical overdensity =", this->s_cosmo_par.Delta_SO);
   So.message_screen("f_baryon =", this->s_cosmo_par.f_baryon);
-  Cf.check_cosmo_pars();
   this->Ps.set_cosmo_pars(this->s_cosmo_par);
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -296,25 +296,23 @@ void CosmoLib::get_cosmolib(){
   hout.open("hm_check.log");
   // *********************************************************
   this->Cf.set_cosmo_pars(this->s_cosmo_par);
-
   real_prec critical_density=Cf.critical_overdensity(redshift);
   real_prec density_contrast_top_hat=Cf.density_contrast_top_hat(redshift);
-
   if(this->params._Get_SO_from_BN()==true)
     {
       this->s_cosmo_par.Delta_SO=density_contrast_top_hat;
       So.message_screen("Using density contrast top hat as SO");
   }
-  this->Cf.set_cosmo_pars(s_cosmo_par);
+  this->Cf.set_cosmo_pars(this->s_cosmo_par);// update
+  this->Ps.set_cosmo_pars(this->s_cosmo_par);// update
   real_prec Hubble_function=Cf.Hubble_function(redshift);
   real_prec comoving_distance=this->Cf.comoving_distance(redshift);
   real_prec comoving_angular_diameter_distance=Cf.comoving_angular_diameter_distance(redshift);
   real_prec mean_matter_density=Cf.mean_matter_density(redshift);
   real_prec age_universe=Cf.age_universe(redshift);
-  real_prec comoving_sound_horizon=Cf.comoving_sound_horizon(redshift);
+  real_prec comoving_sound_horizon=Cf.comoving_sound_horizon(this->Cf.drag_redshift());
   real_prec growth_factor=Cf.growth_factor(redshift);
   real_prec growth_factor_z0=Cf.growth_factor(0.0);
-  real_prec growth_factor_z1=Cf.growth_factor(1.0);
   real_prec growth_index=Cf.growth_index(redshift);
   real_prec halo_dynamical_time=Cf.halo_dynamical_time(redshift);
   real_prec omega_matter=Cf.omega_matter(redshift);
@@ -323,20 +321,19 @@ void CosmoLib::get_cosmolib(){
   // Normalize power spectrum
   if(false==this->params._use_file_power())
     pk_normalization=Ps.normalization();
-  s_cosmo_par.pk_normalization=pk_normalization;
-  this->Ps.set_cosmo_pars(s_cosmo_par);// update
-  this->Cf.set_cosmo_pars(s_cosmo_par);
-
-  cout<<endl;
+  this->s_cosmo_par.pk_normalization=pk_normalization;
+  this->Ps.set_cosmo_pars(this->s_cosmo_par);// update
+  this->Cf.set_cosmo_pars(this->s_cosmo_par);
   So.message_screen("Redshift z =", this->params._redshift());
-  cout<<endl;
   So.message_screen("Derived quantities");
   So.message_screen("Omega matter at this redshift =", omega_matter);
   So.message_screen("Hubble parameter at this redshift =", Hubble_function);
   So.message_screen("Mean matter density =", mean_matter_density, "(Ms/h)/(Mpc/h)^(-3)");
   So.message_screen("Comoving distance to current redshift =", comoving_distance, "Mpc/h");
   So.message_screen("Comoving angular diameter distance to current resdhift =", comoving_angular_diameter_distance, "Mpc/h");
-  So.message_screen("Comoving sound horizon =", comoving_sound_horizon, "Mpc/h");
+  So.message_screen("Drag reedshift =", this->Cf.drag_redshift());
+  So.message_screen("Comoving sound horizon @ z_drag =", comoving_sound_horizon, "Mpc/h");
+  So.message_screen("Comoving sound horizon (fit) =", Cf.sound_horizon(), "Mpc");
   So.message_screen("Age of the Universe at current redshift =", age_universe/1e9, "Gyr/h");
   So.message_screen("Distance Modulus =", Distance_Modulus);
   So.message_screen("Growth D(z) at redshift z =", growth_factor);
@@ -351,7 +348,7 @@ void CosmoLib::get_cosmolib(){
   // Compute tables to perform integrals using GL weights
   this->Cs.compute_int_table_wavenumber(this->params._kmin_ps(),this->params._kmax_ps());
   // ***********************************************************************************************
-  this->Cs.compute_int_table_mass(params._M_min_effective(), params._M_max_effective());
+  this->Cs.compute_int_table_mass(this->params._M_min_effective(), this->params._M_max_effective());
   if(true==this->params._use_file_power())
   {
     vector<real_prec>prop;
@@ -364,8 +361,8 @@ void CosmoLib::get_cosmolib(){
 #endif
     for(int i=0;i<NLINES;++i)
     {
-        s_cosmo_par.kvector_external[i]=static_cast<gsl_real>(prop[NCOLS*i]);
-        s_cosmo_par.power_external[i]=static_cast<gsl_real>(prop[1+NCOLS*i]);
+      s_cosmo_par.kvector_external[i]=static_cast<gsl_real>(prop[NCOLS*i]);
+      s_cosmo_par.power_external[i]=static_cast<gsl_real>(prop[1+NCOLS*i]);
     }
     prop.clear(); prop.shrink_to_fit();
     Cs.use_external_power=this->params._use_file_power();
@@ -379,21 +376,20 @@ void CosmoLib::get_cosmolib(){
     So.message_screen("Maximum k-in external file = ", this->params._kmax_ps());
   }
   else
-     So.message_screen("Normalization of matter P(k,z) =", pk_normalization);
-
+    So.message_screen("Normalization of matter P(k,z) =", pk_normalization);
   growth_factor/=Cf.growth_factor(0);
   // Normalize the growth factor to compute the processed linear matter power spectrum
   // Aca reacomodo algunos de estos factores en la estructura grande
-  s_cosmo_par.critical_density=critical_density;
-  s_cosmo_par.density_contrast_top_hat=density_contrast_top_hat;
-  s_cosmo_par.mean_matter_density=mean_matter_density;
-  s_cosmo_par.growth_factor=growth_factor;
+  this->s_cosmo_par.critical_density=critical_density;
+  this->s_cosmo_par.density_contrast_top_hat=density_contrast_top_hat;
+  this->s_cosmo_par.mean_matter_density=mean_matter_density;
+  this->s_cosmo_par.growth_factor=growth_factor;
   // ***********************************************************************************************
-  this->Cf.set_cosmo_pars(s_cosmo_par);
-  this->Ps.set_cosmo_pars(s_cosmo_par);// update
-  this->Cs.set_cosmo_pars(s_cosmo_par);
+  this->Cf.set_cosmo_pars(this->s_cosmo_par);
+  this->Ps.set_cosmo_pars(this->s_cosmo_par);// update
+  this->Cs.set_cosmo_pars(this->s_cosmo_par);
   // ***********************************************************************************************
-  real_prec sigma_from_As=Cs.As2sigma8(&s_cosmo_par);
+//  real_prec sigma_from_As=Cs.As2sigma8(&s_cosmo_par);
   // ***********************************************************************************************
   // Generating mass function
   this->v_mass.resize(params._npoints_mf(),0);
@@ -403,7 +399,6 @@ void CosmoLib::get_cosmolib(){
   time_t start;
   time (&start);
  #ifdef _GET_ONLY_MASS_FUNCTION_
-  cout<<endl;
   So.message_screen("Computing Sigma(M)");
   if(params._scale_mf()=="linear")
 #ifdef _USE_OMP_
@@ -417,22 +412,23 @@ void CosmoLib::get_cosmolib(){
 #endif
     for(int i=0; i<v_mass.size();i++)
       this->v_mass[i]=static_cast<gsl_real>(log10(params._M_min_mf())+i*(log10(params._M_max_mf())-log10(params._M_min_mf()))/static_cast<double>(v_mass.size()));
-  // DO not parallelize this loop.
-   for(int i=0; i<v_mass.size();i++)
+  for(int i=0; i<v_mass.size();i++) // DO not parallelize this loop.
     this->v_sigma_mass[i]=static_cast<gsl_real>(Cs.sigma_masa(v_mass[i],redshift));
-  
   So.DONE();
   s_cosmo_par.v_mass=this->v_mass;
   s_cosmo_par.v_sigma_mass=this->v_sigma_mass;
+  this->Cs.set_cosmo_pars(s_cosmo_par);
+  this->Cs.set_spline_vars_sigma();
   So.message_screen("Computing halo mass-function");
   for(int i=0; i<v_mass.size();i++)
-  {
+   {
 #ifdef TIME
     comp_time(start, v_mass.size(), i);
 #endif    
     this->v_mass_function[i]=static_cast<gsl_real>(Cs.mass_function_D(static_cast<real_prec>(this->v_mass[i]), redshift));
     this->v_halo_mass_bias[i]=static_cast<gsl_real>(Cs.bias(static_cast<real_prec>(this->v_mass[i]),redshift,&s_cosmo_par));
   }
+  So.DONE();
 #ifndef _GET_EFF_BIAS_REDSHIFT_
   File.write_to_file(this->params._mass_function_output_file(),v_mass,v_mass_function,v_sigma_mass);
   File.write_to_file(this->params._halo_mass_bias_output_file(),v_mass,v_halo_mass_bias);
@@ -443,13 +439,13 @@ void CosmoLib::get_cosmolib(){
   s_cosmo_par.v_mass=this->v_mass;
   s_cosmo_par.v_mass_function=this->v_mass_function;
   s_cosmo_par.v_halo_mass_bias=this->v_halo_mass_bias;
+  //this->Cs.set_spline_vars_mfunction();// Ready for interpolations, buut with problems, as it uses this in static memebr functiuons, impossible
   // Once this has been created, we can compute integrals with respect to the mass.
   // Let us go for effective halo_mass bias as a function of a minimum mass
   v_effective_halo_mass_bias.resize(this->params._npoints_mf(),0);
   v_effective_halo_mean_number_density.resize(this->params._npoints_mf(),0);
   s_cosmo_par.M_min_effective=params._M_min_effective();
   s_cosmo_par.M_max_effective=params._M_max_effective();
-  cout<<endl;
   So.message_screen("Computing effective halo mass-bias");
 //#pragma omp parallel for
   for(int i=0; i<v_mass.size();i++){
@@ -464,8 +460,6 @@ void CosmoLib::get_cosmolib(){
   File.write_to_file(params._effective_halo_mass_bias_output_file(),v_mass, v_effective_halo_mass_bias);
   File.write_to_file(params._effective_halo_mean_number_density_output_file(),v_mass,v_effective_halo_mean_number_density);
 #endif
-  // ***********************************************************************************************
-  // ***********************************************************************************************
   // ***********************************************************************************************
   // ***********************************************************************************************
   real_prec eff_bias=Cs.effective_halo_mass_bias( log10(params._M_min_effective()),redshift,&s_cosmo_par);
@@ -483,22 +477,20 @@ bout.close();
 #endif
 #ifdef _GET_POWER_SPECTRUM_
   // ***********************************************************************************************
-  // ***********************************************************************************************
   // Calculamos las escalas que definen que es linal approx, usando sigma = 1
-  // ***********************************************************************************************
   real_prec Mnl, rnl, sigman, knl;
  #ifdef _GET_NL_POWER_SPECTRUM_
   s_cosmo_par.aux_var1=params._redshift(); //ESTO LO PUEDO HACER MEJOR CON LAS NON SCALES DEL HALO FIT, VER CODIO cl_functions
   this->Cs.set_cosmo_pars(s_cosmo_par);
-  this->Cs.non_linear_scales(&knl,&Mnl,&rnl,&sigman);
+  this->Cs.non_linear_scales(knl,Mnl,rnl,sigman);
   s_cosmo_par.Mnl=Mnl;
   s_cosmo_par.knl=knl;
   s_cosmo_par.rnl=rnl;
   So.message_screen("Non linear mass scale Mnl",Mnl,"Ms/h");
   So.message_screen("Non linear wave number knl",knl,"h/Mpc");
   So.message_screen("Non linear scales rnl",rnl,"Mpc/h");
-  So.message_screen("Sanity check: sigma(Mnl)",sigman);
-  hout<<"Non linear scales : mass = "<<Mnl<<" Ms/h "<<endl;
+  So.message_screen("\tSanity check: sigma(Mnl)",sigman);
+  hout<<"Non linear scales : Mass = "<<Mnl<<" Ms/h "<<endl;
   hout<<"Non linear scales : k    = "<<knl<<" h/Mpc "<<endl;
   hout<<"Non linear scales : r    = "<<rnl<<" Mpc/h "<<endl;
   hout<<"Sanity check: sigma(Mnl) = "<<sigman<<endl;
@@ -538,22 +530,21 @@ bout.close();
     for(int i=0;i<v_k_ps.size();++i)
       this->v_k_ps[i]=pow(10,(log10(0.5*params._kmin_ps())+i*(log10(2.*params._kmax_ps())-log10(0.5*params._kmin_ps()))/static_cast<double>(v_k_ps.size())));
   this->s_cosmo_par.v_k_ps=v_k_ps;
-
   Ps.set_cosmo_pars(this->s_cosmo_par); // update
   for(int i=0; i<v_k_ps.size();i++)
       v_l_power_spectrum[i]=Ps.Linear_Matter_Power_Spectrum(this->v_k_ps[i]);
   File.write_to_file(params._linear_matter_ps_output_file(),this->v_k_ps,this->v_l_power_spectrum);
   s_cosmo_par.v_lin_power_spectrum=v_l_power_spectrum;
   Ps.set_cosmo_pars(this->s_cosmo_par); // update
-  real_prec knl_hf, rnl_hf;
   vector<real_prec> rrs(100,0);
   vector<real_prec> sss(100,0);
-  Ps.nl_scales_halo_fit( &knl_hf, &rnl_hf, rrs, sss,true);
+  real_prec knl_hf, rnl_hf;
+  Ps.nl_scales_halo_fit( knl_hf, rnl_hf, rrs, sss,true);
   s_cosmo_par.knl_hf=knl_hf;
   s_cosmo_par.rnl_hf=rnl_hf;
   Ps.set_cosmo_pars(this->s_cosmo_par); // update
   real_prec kstar;
-  Ps.kstar_integral(&kstar);
+  Ps.kstar_integral(kstar);
   s_cosmo_par.kstar=kstar;
   Ps.set_cosmo_pars(s_cosmo_par); // update
   hout<<"Non linear scales halo fit: k       = "<<knl_hf<<" h/Mpc "<<endl;
@@ -563,7 +554,6 @@ bout.close();
   //  hout<<"Sigma8 from As                      = "<<sigma_from_As<<endl;
   So.message_screen("k* = ",kstar," h/Mpc");
   time (&start);
-  cout<<endl;
   So.message_screen("Defining bins in k-space");
   So.message_screen("Computing Non linear matter power spectrum");
 #ifdef _USE_OMP_

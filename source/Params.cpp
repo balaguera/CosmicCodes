@@ -3461,7 +3461,7 @@ void Params::read_pars(string file)
   this->N_eff =  COSMOPARS::N_eff;
   this->sigma8 = COSMOPARS::sigma8;
   this->Tcmb = COSMOPARS::Tcmb;
-  this->use_wiggles = true;
+  this->use_wiggles = COSMOPARS::use_wiggles;
   this->RR = COSMOPARS::RR;
   this->alpha_s=COSMOPARS::alpha_s;
   this->Delta_SO=COSMOPARS::Delta_SO;

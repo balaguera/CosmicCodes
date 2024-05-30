@@ -10,8 +10,6 @@
 #ifndef __STATISTICS__
 #define __STATISTICS__
 ////////////////////////////////////////////////////////////////////////////
-#define GSL_INT_SIZE_k 200
-#define GSL_INT_SIZE_M 600
 ////////////////////////////////////////////////////////////////////////////
 # include "../headers/Statistics.h"
 ////////////////////////////////////////////////////////////////////////////
@@ -21,7 +19,6 @@ void Statistics::compute_int_table_mass(real_prec M_min_integration, real_prec M
   this->WW_Mass.resize(nss_k);
   this->XX_Mass.resize(nss_k);
   gsl_get_GL_weights(static_cast<gsl_real>(log10(M_min_integration)),static_cast<gsl_real>(0.99*log10(M_max_integration)),this->wfd,this->XX_Mass,this->WW_Mass);
-
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -32,7 +29,6 @@ void Statistics::compute_int_table_mass(real_prec M_min_integration, real_prec M
   real_prec lMIN=static_cast<gsl_real>(log10(M_min_integration));
   real_prec lMAX=static_cast<gsl_real>(0.99*log10(M_max_integration));
   gsl_get_GL_weights(lMIN,lMAX,this->wfd,this->XX_Mass,this->WW_Mass);
-
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -53,11 +49,9 @@ void Statistics::compute_int_table_wavenumber(real_prec k_min_integration, real_
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 real_prec  Statistics::As2sigma8(s_CosmologicalParameters *scp){
-Cosmology cf;
   real_prec lkmin=log10(scp->kmin_int);
   real_prec lkmax=log10(scp->kmax_int);
-  real_prec ans=sqrt(gsl_integration(iAs2sigma8,(void *)scp,lkmin,lkmax));
-  return ans;
+  return sqrt(gsl_integration(iAs2sigma8,(void *)scp,lkmin,lkmax));
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -66,7 +60,6 @@ gsl_real Statistics::iAs2sigma8(gsl_real lk,void *p){  /* Integrand for sigma^2 
   s_CosmologicalParameters * scp= (struct s_CosmologicalParameters *)p;
   PowerSpectrum ps;
   ps.set_cosmo_pars(*scp);
-  Cosmology cf(*scp);
   gsl_real ans=(log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*ps.Linear_Matter_Power_Spectrum(k)*pow(window(k,scp->RR),2);
   return ans;
 }
@@ -82,7 +75,6 @@ real_prec Statistics::sigma_masa(real_prec m, real_prec z){
   real_prec ans=gsl_integration(isigma_nu,(void *)&this->s_cosmo_pars,this->XX_K,this->WW_K,false);
   return sqrt(ans/(2.*M_PI*M_PI));
 }
-
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 real_prec Statistics::peak_height(real_prec m, real_prec z, s_CosmologicalParameters *scp){
@@ -228,16 +220,13 @@ gsl_real Statistics::i_effective_halo_mass_bias(gsl_real m, void *p){
   s_CosmologicalParameters * s_cp= (struct s_CosmologicalParameters *)p;
   real_prec M=pow(10,m);
   real_prec jacobian= log(10.0)*M;
-  vector<gsl_real> v_mass = s_cp->v_mass;
-  vector<gsl_real> v_mass_function = s_cp->v_mass_function;
-  vector<gsl_real> v_halo_mass_bias = s_cp->v_halo_mass_bias;
-  return jacobian*gsl_inter_new(v_mass,v_mass_function,m)*gsl_inter_new(v_mass,v_halo_mass_bias,m);
+  return jacobian*gsl_inter_new(s_cp->v_mass,s_cp->v_mass_function,m)*gsl_inter_new(s_cp->v_mass,s_cp->v_halo_mass_bias,m);
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 real_prec Statistics::effective_halo_mean_number_density(real_prec m, real_prec z, s_CosmologicalParameters *scp){
   // This computes the mean number density of objects with masses greater than M
-scp->aux_var2=z;     
+  scp->aux_var2=z;     
    // note that since we are interpolating over quantities already computed, 
   // we do not need now explicitely the redshift
   return gsl_integration(i_mass_function,(void *)scp, m, log10(scp->M_max_effective));
@@ -251,117 +240,11 @@ gsl_real Statistics::i_mass_function(gsl_real m, void *p){
   real_prec M=pow(10,m);
   real_prec jacobian= log(10.0)*M;
   s_CosmologicalParameters * s_cp= (struct s_CosmologicalParameters *)p;
-  vector<gsl_real> v_mass = s_cp->v_mass;
-  vector<gsl_real> v_mass_function = s_cp->v_mass_function;
-  return jacobian*gsl_inter_new(v_mass,v_mass_function,m);
+  return jacobian*gsl_inter_new(s_cp->v_mass,s_cp->v_mass_function,m);
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-
-// real_prec Statistics::cluster_mass_function(real_prec x, real_prec xt, real_prec z, s_CosmologicalParameters *scp){
-//   return gsl_integration(i_cluster_mass_function_feedback,p,m_min,m_max);
-// }
-
-// real_prec Statistics::i_cluster_mass_function_feedback(real_prec m, void *p){
-
-//   real_prec xt=(params->p1);
-//   real_prec z=(params->p2);
-//   Astrophysics ap;
-//   return (log(10.0)*pow(10,m)*(M_reference))*(ap.Mobs_Mnb_distribution(m,0, p))*gsl_inter_pointers(mass_array_p,mass_functionpoints,nn,m);
-// }
-// real_prec Statistics::scale_dependent_bias(real_prec x, real_prec z, void *p){
-//   real_prec r=x;
-//   /*r en log(scale)*/
-//   /*Tinker parametrization of scale-dependent bias in terms of the non-linear correlatin function*/
-//   real_prec xi= gsl_inter_pointers(xRp,XI_NLp,nn,r);
-//   //  real_prec f= ( r<*xRp ? 0 : pow(1.+1.17*xi,1.49)/pow(1.+0.69*xi,2.09));
-//   real_prec f=  pow(1.+1.17*xi,1.49)/pow(1.+0.69*xi,2.09);
-//   return f;
-// }
-// // ******************************************************************************
-// // ******************************************************************************
-
-// real_prec Statistics::delta_fof(real_prec x, real_prec z, void *p){
-//   /*Calculo de Delta para halos FOF siguiendo los resultados de MOre et al 2011, en donde 
-//     se asume un perfil NFW y una concentracion dada por la masa*/
-//   real_prec al,fc,rv,c,rhos,rs,ans;
-//   /*NOT ACCURATE. WARNING*/
-//   //nfw_parameters(x,&fc,&rv,&mean_c,&rhos,&rs);
-//   c=8.0;
-//   fc   = log(1+(c))-((c)/(1.+(c)));
-//   ans=3.*(0.652960)*pow(0.2,-3)*fc*(1+c)*pow(c,2);
-//   return ans;
-// }
-// // ******************************************************************************
-// // ******************************************************************************
-// real_prec Statistics::mass_function_light_cone(){
-//   real_prec ans;  PowerSpectrum ps(*scp);
-
-//   real_prec rcmax,rcmin;
-//   real_prec zmax=0.2;
-//   real_prec zmin=0.001;
-//   Cosmology cf;
-//   real_prec mfz[nzpoints+1], zp[nzpoints+1];
-//   for(int i=0;i<=nzpoints;i++)zp[i]=0;
-//   for(int i=0;i<=nzpoints;i++)mfz[i]=0;  
-//   mf_z_generator(x,1.1*zmax,zp,mfz);   /*THE FACTOR 1.1 PREVENTS NANS WHEN ONE NEEDS TO INTERPOLATE...*/
-//   mfz_p=&mfz[0];
-//   zp_p= &zp[0];
-//   rcmax=cf.comoving_distance(zmax);
-//   rcmin=cf.comoving_distance(zmin);
-//   struct my_parameters par ={0,0,0};
-//   return (3./(pow(rcmax,3)-pow(rcmin,3)))*gsl_integration(i_mass_function_m_z,&par,zmin,zmax);
-// }
-// // ******************************************************************************
-// // ******************************************************************************
-
-// real_prec Statistics::mass_functionpointsrediction(real_prec x, real_prec z, void *p){  /*Mass function as a function of x=log10(M/masa_ns)*/
-//   /*ACA LAS ENTRADAS SON MASAS; EL Z LO TOMAMOS EL PUNTERO*/
-//   real_prec xmax=x;
-//   real_prec xmin=z;
-//   real_prec dxmax=(M_reference)*pow(10,xmax);
-//   real_prec dxmin=(M_reference)*pow(10,xmin);
-//   struct my_parameters par ={0,0,0};
-//   return gsl_integration(imass_functionpointsrediction,&par,xmin,xmax)/(dxmax-dxmin); // las masas estan en unidades de 10 a la 14  cuando mido n(m) de LBASICC
-// }
-// // ******************************************************************************
-// // ******************************************************************************
-
-
-// real_prec Statistics::lum_func_prediction(real_prec x, real_prec z, void *p){
-//   real_prec l=x;
-//   struct my_parameters par=  {l};
-//   return gsl_integration(ilum_func_prediction,&par,m_min,m_max);
-// }
-// // ******************************************************************************
-// // ******************************************************************************
-// real_prec Statistics::occupancy_variance_numerator(real_prec x, real_prec z, void *p){   /*See Smith et al 2011*/
-//   real_prec l=x;
-//   struct my_parameters par=  {l};
-//   return gsl_integration(i_occupancy_variance,&par,m_min,m_max);
-// }
-// // ******************************************************************************
-// // ******************************************************************************
-// real_prec Statistics::lum_func_reflex(real_prec x, real_prec z, void *p){
-//   real_prec L=exp(x);                      /*L en unidades de 10^44 erg/s/h^2*/
-//   return ncero*pow(L/lstar,alpha_lf+1)*Qexponential(qq,-L/lstar)/L; 
-// // ******************************************************************************
-// // ******************************************************************************
-// real_prec Statistics::i_baryon_mass_function_reionization(real_prec x, real_prec z, void *p){
-//   // struct my_parameters * params = (struct my_parameters *)p;
-//   // real_prec xb=(params->p1);
-//   // real_prec z =(params->p2);
-//   Astrophysics ap;
-//   real_prec ans=(log(10)*pow(10,x)*(M_reference))*ap.baryon_mass_virial_mass_distribution(x,z,p)*gsl_inter_pointers(mass_array_p,mass_functionpoints,nn,x);
-//   return  ans;
-// }
-// real_prec Statistics::baryon_mass_function_reionization(real_prec x, real_prec l, real_prec z, void *p){
-//   struct my_parameters par=  {x,z};
-//   return gsl_integration(i_baryon_mass_function_reionization,&par,m_min,m_max);
-// }
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-void Statistics::non_linear_scales(real_prec *knl,real_prec *Mnl,real_prec *rnl, real_prec *sigman){
+void Statistics::non_linear_scales(real_prec &knl,real_prec &Mnl,real_prec &rnl, real_prec &sigman){
   real_prec z=this->s_cosmo_pars.cosmological_redshift;
   real_prec den=this->s_cosmo_pars.mean_matter_density*pow(1+z,-3);
   real_prec sig2,fac2,ms2,df2,dm2;
@@ -379,26 +262,18 @@ void Statistics::non_linear_scales(real_prec *knl,real_prec *Mnl,real_prec *rnl,
     this->s_cosmo_pars.aux_var1 = log10(pow(10,ms2)*M_reference);
     df2=-gsl_integration(dsigma_dR,(void *)&this->s_cosmo_pars,log10(this->s_cosmo_pars.kmin_int),log10(this->s_cosmo_pars.kmax_int));
     fac2=(4.*M_PI*den*pow(this->cosmo.rr(pow(10,ms2)*M_reference,z),2))/(log(10.0)*(M_reference)*pow(10,ms2));
-    if(log10(pow(10,ms2)*M_reference)>init_mass){
-      sig2=gsl_inter_new(this->s_cosmo_pars.v_mass, this->s_cosmo_pars.v_sigma_mass, log10(pow(10,ms2)*M_reference));
+    if(log10(pow(10,ms2)*M_reference)>init_mass)
+    {
+      sig2= gsl_spline_eval (spline_mass_sigma, log10(pow(10,ms2)*M_reference), acc_mass_sigma);
       dm2=fac2*(pow(sig2,2)-1.0)/df2;
       ms2-=dm2;
     }
   }
-  *Mnl=pow(10,ms2)*(M_reference);
-  *knl=pow(6.*(pow(10,ms2)*(M_reference))/(M_PI*(this->cosmo.mean_matter_density(z))),-1./3.);
-  *sigman=sigma_masa(log10(pow(10,ms2)*M_reference),z);
-  *rnl=1./(*knl);
+  Mnl=pow(10,ms2)*(M_reference);
+  knl=pow(6.*(pow(10,ms2)*(M_reference))/(M_PI*(this->cosmo.mean_matter_density(z))),-1./3.);
+  sigman=sigma_masa(log10(pow(10,ms2)*M_reference),z);
+  rnl=1./knl;
 }
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-/*
-real_prec Statistics::mean_galaxy_number_density(real_prec redshift, s_CosmologicalParameters *scp){
-  scp->aux_var3=redshift;
-  //Integrate from the value mmin_hod
-  return gsl_integration(30,i_mean_galaxy_number_density,(void *)scp,log10(scp->M_min_effective),log10(scp->M_max_effective));
-}
-*/
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 real_prec Statistics::mean_galaxy_number_density(real_prec redshift, vector<gsl_real>&XX, vector<gsl_real>&WW){

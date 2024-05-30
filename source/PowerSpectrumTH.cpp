@@ -110,7 +110,6 @@ real_prec PowerSpectrum::Linear_Matter_Power_Spectrum(real_prec k){        /*thi
   // Linear matter power spectrum 
     real_prec baryon_piece, cdm_piece;
     real_prec kk=k*this->s_cosmo_pars.hubble;// convert to units of 1/Mpc
-    TFset_parameters(this->s_cosmo_pars.Om_matter*this->s_cosmo_pars.hubble*this->s_cosmo_pars.hubble, this->s_cosmo_pars.f_baryon, this->s_cosmo_pars.Tcmb);
     real_prec tf_thisk = TFfit_onek(kk, baryon_piece, cdm_piece);
     real_prec Tfunc = true==this->s_cosmo_pars.use_wiggles ? pow(fabs(tf_thisk),2.): pow(fabs(cdm_piece),2.) ;
     return this->s_cosmo_pars.pk_normalization*Tfunc*Primordial_Matter_Power_Spectrum(k)*pow(this->s_cosmo_pars.growth_factor,2);
@@ -119,7 +118,6 @@ real_prec PowerSpectrum::Linear_Matter_Power_Spectrum(real_prec k){        /*thi
 ////////////////////////////////////////////////////////////////////////////
 real_prec PowerSpectrum::Linear_Matter_Power_Spectrum_z(real_prec k, real_prec gr){        /*this k comes in h/Mpc */
   real_prec tf_thisk, baryon_piece, cdm_piece;
-  TFset_parameters((this->s_cosmo_pars.Om_matter)*this->s_cosmo_pars.hubble*this->s_cosmo_pars.hubble, this->s_cosmo_pars.f_baryon, this->s_cosmo_pars.Tcmb);
   tf_thisk = TFfit_onek(k*this->s_cosmo_pars.hubble, baryon_piece, cdm_piece);
   real_prec Tfunc = true==this->s_cosmo_pars.use_wiggles ? pow(fabs(tf_thisk),2.): pow(fabs(cdm_piece),2.) ;
   return this->s_cosmo_pars.pk_normalization*Tfunc*this->Primordial_Matter_Power_Spectrum(k)*gr*gr;
@@ -132,7 +130,6 @@ real_prec PowerSpectrum::Q_Model_Matter_Power_Spectrum(real_prec k){        /*th
   real_prec alpha_s=this->s_cosmo_pars.alpha_s;
   real_prec A_ps=this->s_cosmo_pars.A_PS;
   real_prec Q_ps=this->s_cosmo_pars.Q_PS;
-  TFset_parameters((this->s_cosmo_pars.Om_matter)*this->s_cosmo_pars.hubble*this->s_cosmo_pars.hubble, this->s_cosmo_pars.f_baryon, this->s_cosmo_pars.Tcmb);
   tf_thisk = TFfit_onek(k*this->s_cosmo_pars.hubble, baryon_piece, cdm_piece);
   if(true==this->s_cosmo_pars.use_wiggles)
     ans=Primordial_Matter_Power_Spectrum(k)*pow(fabs(tf_thisk),2.);
@@ -150,7 +147,6 @@ real_prec PowerSpectrum::Primordial_Matter_Power_Spectrum(real_prec k){        /
 real_prec PowerSpectrum::Linear_Matter_Power_Spectrum_NW(real_prec k){        /*this k comes in h/Mpc */
   real_prec tf_thisk, baryon_piece, cdm_piece;
   real_prec alpha_s=this->s_cosmo_pars.alpha_s;
-  TFset_parameters((this->s_cosmo_pars.Om_matter)*this->s_cosmo_pars.hubble*this->s_cosmo_pars.hubble, this->s_cosmo_pars.f_baryon, this->s_cosmo_pars.Tcmb);
   tf_thisk =  TFfit_onek(k*this->s_cosmo_pars.hubble, baryon_piece, cdm_piece);
   real_prec prim= Primordial_Matter_Power_Spectrum(k)*pow(fabs(cdm_piece),2.);
   return this->s_cosmo_pars.pk_normalization*prim*pow(this->s_cosmo_pars.growth_factor,2);
@@ -170,9 +166,9 @@ real_prec  PowerSpectrum ::Linear_Matter_Power_Spectrum_G_NW(real_prec k){      
 ////////////////////////////////////////////////////////////////////////////
 void PowerSpectrum ::normalization(real_prec &nm){
   if(true==this->s_cosmo_pars.use_wiggles)
-    nm=pow(this->s_cosmo_pars.sigma8,2)/gsl_integration(fun,(void *)&this->s_cosmo_pars, -7,7);
+    nm=pow(this->s_cosmo_pars.sigma8,2)/gsl_integration(fun,(void *)&this->s_cosmo_pars, -4,5);
   else 
-    nm=pow(this->s_cosmo_pars.sigma8,2)/gsl_integration(fun_nw,(void *)&this->s_cosmo_pars, -7,7);
+    nm=pow(this->s_cosmo_pars.sigma8,2)/gsl_integration(fun_nw,(void *)&this->s_cosmo_pars, -4,5);
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -190,9 +186,9 @@ gsl_real PowerSpectrum ::fun(gsl_real lk, void *p){
   struct s_CosmologicalParameters * scp= (struct s_CosmologicalParameters *)p;
   PowerSpectrum Ps;
   Ps.set_cosmo_pars(*scp);
+  Ps.TFset_parameters();
   real_prec tf_thisk, baryon_piece, cdm_piece;
-  real_prec k=pow(10,lk );
-  Ps.TFset_parameters(scp->Om_matter*pow(scp->hubble, 2),scp->f_baryon,scp->Tcmb);
+  real_prec k=pow(10,lk);
   tf_thisk =  Ps.TFfit_onek(k*scp->hubble, baryon_piece, cdm_piece);
   return static_cast<gsl_real>((log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*Ps.Primordial_Matter_Power_Spectrum(k)*pow(tf_thisk,2)*pow(window(k,scp->RR),2));
 }
@@ -202,33 +198,34 @@ gsl_real PowerSpectrum ::fun_nw(gsl_real lk, void *p){
   struct s_CosmologicalParameters * scp= (struct s_CosmologicalParameters *)p;
   PowerSpectrum Ps;
   Ps.set_cosmo_pars(*scp);
+  Ps.TFset_parameters();
   real_prec k=pow(10,lk);
-  Ps.TFset_parameters(scp->Om_matter*pow(scp->hubble,2),scp->f_baryon,scp->Tcmb);
-  real_prec tfnw=Ps.TFnowiggles(scp->Om_cdm,scp->f_baryon,scp->hubble,scp->Tcmb, k);
+  real_prec tfnw=Ps.TFnowiggles(k);
   return static_cast<gsl_real>((log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*Ps.Primordial_Matter_Power_Spectrum(k)*pow(tfnw,2)*pow(window(k,scp->RR),2));//*pow(this->s_cosmo_pars.growth_factor,2);
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // Compute Kastar at z=0
-void  PowerSpectrum::kstar_integral(real_prec *ksta){
-  *ksta=pow((real_prec)((1./(6.*M_PI*M_PI))*gsl_integration(Power_Spectrum_i,(void *)&this->s_cosmo_pars,log10(this->s_cosmo_pars.kmin_int),log10(this->s_cosmo_pars.kmax_int))),(real_prec)-0.5);
+void  PowerSpectrum::kstar_integral(real_prec &ksta){
+  ksta=pow((real_prec)((1./(6.*M_PI*M_PI))*gsl_integration(Power_Spectrum_i,(void *)&this->s_cosmo_pars,log10(this->s_cosmo_pars.kmin_int),log10(this->s_cosmo_pars.kmax_int))),(real_prec)-0.5);
 }
 ////////////////////////////////////////////////////////////////////////////
 gsl_real PowerSpectrum::Power_Spectrum_i(gsl_real lk, void *p){        /*this k comes in h/Mpc */
   struct s_CosmologicalParameters * scp= (struct s_CosmologicalParameters *)p;
   PowerSpectrum Ps;
   Ps.set_cosmo_pars(*scp);
+  Ps.TFset_parameters();
   real_prec k=pow(10,lk);
   return static_cast<gsl_real>((log(10.0)*k)*Ps.Linear_Matter_Power_Spectrum_z(k,1.0));
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec PowerSpectrum::Non_Linear_Matter_Power_Spectrum_Halo_Fit(real_prec k){
   real_prec ql, p, p_dw;
-  halo_fit(k,&ql,&p,&p_dw);
+  halo_fit(k,ql,p,p_dw);
   return p;
 }
 ////////////////////////////////////////////////////////////////////////////
-void PowerSpectrum::halo_fit(real_prec k, real_prec *ql,real_prec *pp,real_prec *pp_dw){
+void PowerSpectrum::halo_fit(real_prec k, real_prec &ql,real_prec &pp,real_prec &pp_dw){
   real_prec wde_eos=this->s_cosmo_pars.wde_eos;
   real_prec fac   = (1./(2.0*M_PI*M_PI))*pow(k,3);
   real_prec dh,dh_dw, dql, dql_dw;
@@ -256,23 +253,23 @@ void PowerSpectrum::halo_fit(real_prec k, real_prec *ql,real_prec *pp,real_prec 
   real_prec integration_aux2=gsl_integration(fun_aux_halo_fit2,(void *)&this->s_cosmo_pars, kmin,kmax);
   real_prec cc    = 4.0*pow(rnl_hf,2)*integration_aux4+4*pow(rnl_hf,4)*pow(integration_aux2,2);
   real_prec neff  =-3.0+2.0*pow(rnl_hf,2.)*integration_aux2;
-  hf_aux(neff,cc,wde_eos, Omv,&a,&b,&c,&alpha,&beta,&gama,&mu,&nu);
+  hf_aux(neff,cc,wde_eos, Omv,a,b,c,alpha,beta,gama,mu,nu);
   real_prec dl  = fac*this->Linear_Matter_Power_Spectrum(k);
   dql   = dl*(pow(1.+dl, beta)/(1.+alpha*dl))*exp(-y/4.-y*y/8.);
   real_prec dhp   = a*pow(y,3.0*f1)/(1.+b*pow(y,f2)+pow(c*f3*y,3-gama));
   dh    = dhp/(1.+(mu/y)+nu*pow(y,-2));
-  *ql=dql/fac;
-  *pp=(dh+dql)/fac;
-  *pp_dw=(dh_dw+dql_dw)/fac;
+  ql=dql/fac;
+  pp=(dh+dql)/fac;
+  pp_dw=(dh_dw+dql_dw)/fac;
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec PowerSpectrum::Non_Linear_Matter_Power_Spectrum_Halo_Fit_z(real_prec k, real_prec z, real_prec g, real_prec h4, real_prec h2, real_prec kln){
   real_prec ql, p;
-  halo_fit_z(k, z,g,h4, h2, kln, &ql,&p);
+  halo_fit_z(k, z,g,h4, h2, kln, ql,p);
   return p;
 }
 ////////////////////////////////////////////////////////////////////////////
-void PowerSpectrum::halo_fit_z(real_prec k, real_prec z, real_prec gf, real_prec h4, real_prec h2, real_prec knl, real_prec *ql,real_prec *pp){
+void PowerSpectrum::halo_fit_z(real_prec k, real_prec z, real_prec gf, real_prec h4, real_prec h2, real_prec knl, real_prec &ql,real_prec &pp){
   real_prec fac   = (1./(2.0*M_PI*M_PI))*pow(k,3);
   Cosmology cCf(this->s_cosmo_pars);
   real_prec Omz=cCf.omega_matter(z);
@@ -293,52 +290,48 @@ void PowerSpectrum::halo_fit_z(real_prec k, real_prec z, real_prec gf, real_prec
   real_prec cc    = 4.0*pow(rnl_hf,2)*h4+4.0*pow(rnl_hf,4)*pow(h2,2);
   real_prec neff  =-3.0+2.*pow(rnl_hf,2.)*h2;
   real_prec a, b, c, alpha, beta, gama, mu, nu;
-  hf_aux(neff,cc,this->s_cosmo_pars.wde_eos, Omv,&a,&b,&c,&alpha,&beta,&gama,&mu,&nu);
+  hf_aux(neff,cc,this->s_cosmo_pars.wde_eos, Omv,a,b,c,alpha,beta,gama,mu,nu);
   // Two-halo term Delta Q
   real_prec dl    = fac*this->Linear_Matter_Power_Spectrum_z(k,gf);
   real_prec dql   = dl*(pow(1.+dl, beta)/(1.+alpha*dl))*exp(-y/4.0-y*y/8.0);
   // One halo term Delta H
   real_prec dhp   = a*pow(y,3.0*f1)/(1.+b*pow(y,f2)+pow(c*f3*y, 3.-gama));
   real_prec dh    = dhp/(1.+nu*pow(y,-2));  // mu = 0 for the fit of Takahashi
-  *ql=dh/fac;
-  *pp=(dh+dql)/fac;
+  ql=dh/fac;
+  pp=(dh+dql)/fac;
 }
 ////////////////////////////////////////////////////////////////////////////
-void PowerSpectrum::halo_fit_integrals(real_prec *inte4, real_prec *inte2 ){
+void PowerSpectrum::halo_fit_integrals(real_prec &inte4, real_prec &inte2 ){
   real_prec kmin  = log10(this->s_cosmo_pars.kmin_int);
   real_prec kmax  = log10(this->s_cosmo_pars.kmax_int);
   int Ni = 100;
   real_prec integ4, integ2;
   if (true==this->s_cosmo_pars.use_wiggles){
-   integ4=gsl_integration(Ni,fun_aux_halo_fit4,(void *)&this->s_cosmo_pars, kmin,kmax);
-   integ2=gsl_integration(Ni,fun_aux_halo_fit2,(void *)&this->s_cosmo_pars, kmin,kmax);
+   inte4=gsl_integration(Ni,fun_aux_halo_fit4,(void *)&this->s_cosmo_pars, kmin,kmax);
+   inte2=gsl_integration(Ni,fun_aux_halo_fit2,(void *)&this->s_cosmo_pars, kmin,kmax);
   }
-  else
-    {
+  else{
       /*for the de-wigled power spectrum*/
-      integ4=gsl_integration(Ni,fun_aux_halo_fit4_dw,(void *)&this->s_cosmo_pars,kmin,kmax);
-      integ2=gsl_integration(Ni,fun_aux_halo_fit2_dw,(void *)&this->s_cosmo_pars, kmin,kmax);
-    }
-  *inte4=integ4;
-  *inte2=integ2;
+    inte4=gsl_integration(Ni,fun_aux_halo_fit4_dw,(void *)&this->s_cosmo_pars,kmin,kmax);
+    inte2=gsl_integration(Ni,fun_aux_halo_fit2_dw,(void *)&this->s_cosmo_pars, kmin,kmax);
+   }
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-void PowerSpectrum::hf_aux(real_prec index, real_prec cc,real_prec weos, real_prec Omv,real_prec *a, real_prec *b, real_prec *c, real_prec *alpha,real_prec *beta,real_prec *gama,real_prec *mu, real_prec *nu){
+void PowerSpectrum::hf_aux(real_prec index, real_prec cc,real_prec weos, real_prec Omv,real_prec &a, real_prec &b, real_prec &c, real_prec &alpha,real_prec &beta,real_prec &gama,real_prec &mu, real_prec &nu){
   /*Funciones auxiliares del halo fit*/
-  *a   = pow(10,1.5222+2.8553*index+2.3706*index*index+0.9903*index*index*index+0.2250*pow(index,4)-0.6038*cc+0.1749*Omv*(1+weos));
-  *b   = pow(10,-0.5642+0.5864*index+0.5716*index*index-1.5474*cc+0.2279*Omv*(1+weos));
-  *c   = pow(10,0.3698+2.0404*index+0.8161*index*index+0.5869*cc);
-  *alpha= abs(6.0835+1.3373*index-0.1959*index*index-5.5274*cc);
-  *beta = 2.0379-0.7354*index+0.3157*index*index+1.2490*pow(index,3)+0.3980*pow(index,4)-0.1682*cc;
-  *gama = 0.1971-0.0843*index+0.8460*cc;
-  *mu   = 0.0;         //pow(10,-3.5442+0.1908*index);
-  *nu   = pow(10,5.2105+3.6902*index);
-  return ;
+  a   = pow(10,1.5222+2.8553*index+2.3706*index*index+0.9903*index*index*index+0.2250*pow(index,4)-0.6038*cc+0.1749*Omv*(1+weos));
+  b   = pow(10,-0.5642+0.5864*index+0.5716*index*index-1.5474*cc+0.2279*Omv*(1+weos));
+  c   = pow(10,0.3698+2.0404*index+0.8161*index*index+0.5869*cc);
+  alpha= abs(6.0835+1.3373*index-0.1959*index*index-5.5274*cc);
+  beta = 2.0379-0.7354*index+0.3157*index*index+1.2490*pow(index,3)+0.3980*pow(index,4)-0.1682*cc;
+  gama = 0.1971-0.0843*index+0.8460*cc;
+  mu   = 0.0;         //pow(10,-3.5442+0.1908*index);
+  nu   = pow(10,5.2105+3.6902*index);
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-void PowerSpectrum::nl_scales_halo_fit(real_prec *knl_hf,real_prec *rnl_hf, vector<real_prec>&rr, vector<real_prec>&sums, bool silence){
+void PowerSpectrum::nl_scales_halo_fit(real_prec &knl_hf,real_prec &rnl_hf, vector<real_prec>&rr, vector<real_prec>&sums, bool silence){
   if(silence)
     So.message_screen("Computing non linear scales for halo fit using Halo Fit by S03 and revised by Takahashi et al 2012");
   int nr=rr.size();
@@ -356,13 +349,14 @@ void PowerSpectrum::nl_scales_halo_fit(real_prec *knl_hf,real_prec *rnl_hf, vect
   vector<gsl_real> rr_aux (sums.size(),0);
 #ifdef SINGLE_PREC
   for(int i=0;i<sums.size();++i)
-       sums_aux[i]=static_cast<gsl_real>(sums[i]);
+    sums_aux[i]=static_cast<gsl_real>(sums[i]);
   for(int i=0;i<sums.size();++i)
-       rr_aux[i]=static_cast<gsl_real>(rr[i]);
+    rr_aux[i]=static_cast<gsl_real>(rr[i]);
 #else
   sums_aux=sums;
 #endif
-  for(int i=0;i<rr.size();++i){
+  for(int i=0;i<rr.size();++i)
+  {
     real_prec Rr= pow(10, log10(rinic)+i*log10(rfinal/rinic)/((real_prec)nr-1.));
     s_aux<PowerSpectrum>ssa;
     ssa.raux=Rr;
@@ -371,16 +365,16 @@ void PowerSpectrum::nl_scales_halo_fit(real_prec *knl_hf,real_prec *rnl_hf, vect
     // Compute sigma**2 (R,z=0)
     sums_aux[nr-1-i]= gsl_integration(400,fun_aux_halo_fit,(void *)&ssa,log10(this->s_cosmo_pars.kmin_int),log10(this->s_cosmo_pars.kmax_int));
   }
-  *rnl_hf=gsl_inter_new(sums_aux,rr_aux,num_1);
-  *knl_hf=1./(*rnl_hf);
+  rnl_hf=gsl_inter_new(sums_aux,rr_aux,num_1);
+  knl_hf=1./rnl_hf;
   silence=true;
   if(silence){
     s_aux<PowerSpectrum> ssb;
-    ssb.raux=*rnl_hf;
+    ssb.raux=rnl_hf;
     ssb.scp_a=&this->s_cosmo_pars;
     real_prec ss_check=gsl_integration(500,fun_aux_halo_fit,(void *)&ssb,log10(this->s_cosmo_pars.kmin_int),log10(this->s_cosmo_pars.kmax_int));
-    So.message_screen("Check: Sigma(r) at r = Rnl",ss_check);
-    So.message_screen("Absolute error",100.0*abs(1- ss_check)," %");
+    So.message_screen("\tCheck: Sigma(r) at r = Rnl",ss_check);
+    So.message_screen("\tAbsolute error",100.0*abs(1- ss_check)," %");
   }
 #ifdef SINGLE_PREC
   for(int i=0;i<sums.size();++i)
@@ -391,8 +385,7 @@ void PowerSpectrum::nl_scales_halo_fit(real_prec *knl_hf,real_prec *rnl_hf, vect
   sums=sums_aux;
   rr=rr_aux;
 #endif
- return;
- }
+}
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 gsl_real PowerSpectrum::fun_aux_halo_fit(gsl_real lk, void *p){
@@ -400,11 +393,11 @@ gsl_real PowerSpectrum::fun_aux_halo_fit(gsl_real lk, void *p){
    s_CosmologicalParameters * scp = saa->scp_a ;
    PowerSpectrum Ps;
    Ps.set_cosmo_pars(*scp);
+   Ps.TFset_parameters();
    real_prec k=pow(10,lk);
    real_prec r = saa->raux;
    real_prec power=Ps.Linear_Matter_Power_Spectrum(k);
-   real_prec ans=static_cast<gsl_real>((log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*power*exp(-pow(k*r,2)));
-   return ans ;
+   return static_cast<gsl_real>((log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*power*exp(-pow(k*r,2)));
  }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -412,16 +405,18 @@ gsl_real PowerSpectrum::fun_aux_halo_fit_dw(gsl_real lk, void *p){
   struct s_CosmologicalParameters * scp= (struct s_CosmologicalParameters *)p;
   PowerSpectrum Ps;
   Ps.set_cosmo_pars(*scp);
-    real_prec k=pow(10,lk);
-    real_prec r = scp->aux_var3;
-    return  static_cast<gsl_real>((log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*Ps.Linear_Matter_Power_Spectrum_DW(k)*exp(-pow(k*r,2)));
-  }
+  Ps.TFset_parameters();
+  real_prec k=pow(10,lk);
+  real_prec r = scp->aux_var3;
+  return  static_cast<gsl_real>((log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*Ps.Linear_Matter_Power_Spectrum_DW(k)*exp(-pow(k*r,2)));
+ }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 gsl_real PowerSpectrum::fun_aux_halo_fit2(gsl_real lk, void *p){
     struct s_CosmologicalParameters * scp= (struct s_CosmologicalParameters *)p;
     PowerSpectrum Ps;
     Ps.set_cosmo_pars(*scp);
+    Ps.TFset_parameters();
     real_prec k=pow(10,lk);
     real_prec r = scp->aux_var3;
     return (log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*Ps.Linear_Matter_Power_Spectrum(k)*exp(-pow(k*r,2))*pow(k,2);
@@ -432,6 +427,7 @@ gsl_real PowerSpectrum::fun_aux_halo_fit2_dw(gsl_real lk, void *p){
     struct s_CosmologicalParameters * scp= (struct s_CosmologicalParameters *)p;
     PowerSpectrum Ps;
     Ps.set_cosmo_pars(*scp);
+    Ps.TFset_parameters();
     real_prec k=pow(10,lk);
     real_prec r = scp->aux_var3;
     return  (log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*Ps.Linear_Matter_Power_Spectrum_DW(k)*exp(-pow(k*r,2))*pow(k,2);
@@ -442,6 +438,7 @@ gsl_real PowerSpectrum::fun_aux_halo_fit2_dw(gsl_real lk, void *p){
     struct s_CosmologicalParameters * scp= (struct s_CosmologicalParameters *)p;
     PowerSpectrum Ps;
     Ps.set_cosmo_pars(*scp);
+    Ps.TFset_parameters();
     real_prec k=pow(10,lk);
     real_prec r = scp->aux_var3;
     return (log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*Ps.Linear_Matter_Power_Spectrum(k)*exp(-pow(k*r,2))*pow(k,2)*(1.-pow(r*k,2));
@@ -452,6 +449,7 @@ gsl_real PowerSpectrum::fun_aux_halo_fit2_dw(gsl_real lk, void *p){
     struct s_CosmologicalParameters * scp= (struct s_CosmologicalParameters *)p;
     PowerSpectrum Ps;
     Ps.set_cosmo_pars(*scp);
+    Ps.TFset_parameters();
     real_prec k=pow(10,lk);
     real_prec r = scp->aux_var3;
     real_prec ans=(log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*Ps.Linear_Matter_Power_Spectrum_DW(k)*exp(-pow(k*r,2))*k*k*(1.-pow(r*k,2));
@@ -578,36 +576,36 @@ real_prec PowerSpectrum::mean_galaxy_number_density(real_prec redshift){
   global variables in case you wish to access them, e.g. by declaring
   them as extern variables in your main program. */
   /* Note that all internal scales are in Mpc, without any Hubble constants! */
- void PowerSpectrum ::TFset_parameters(real_prec omega0hh, real_prec f_baryon, real_prec Tcmb)
+ void PowerSpectrum ::TFset_parameters()
   {
-     real_prec alpha_c_a1, alpha_c_a2, beta_c_b1, beta_c_b2, alpha_b_G, y;
-     if (f_baryon<=0.0 || omega0hh<=0.0)
-     {
-        cout<<"f_baryon= "<<f_baryon<<" , omega0hh= "<<omega0hh<<endl;
-        throw std::invalid_argument("Illegal input in cosmological parameters");
-     }
-    this->omhh = omega0hh;
-    this->obhh = omhh*f_baryon;
-    if (Tcmb<=0.0) Tcmb=2.728;	/* COBE FIRAS */
     Cosmology cf(this->s_cosmo_pars);
+    real_prec omhh = this->s_cosmo_pars.Om_matter*pow(this->s_cosmo_pars.hubble,2);
+    real_prec obhh = this->s_cosmo_pars.Om_baryons*pow(this->s_cosmo_pars.hubble,2);
+    if (this->s_cosmo_pars.f_baryon<=0.0 || omhh <=0.0)
+     {
+       cout<<"f_baryon= "<<this->s_cosmo_pars.f_baryon<<" , omega0hh= "<<omhh<<endl;
+       throw std::invalid_argument("Illegal input in cosmological parameters");
+     }
+    if (this->s_cosmo_pars.Tcmb<=0.0) 
+      this->s_cosmo_pars.Tcmb=2.728;	/* COBE FIRAS */
     this->k_equality = cf.k_equality();
     this->sound_horizon = cf.sound_horizon(); 
     this->k_silk = cf.k_Silk();  
-    alpha_c_a1 = pow(46.9*omhh,0.670)*(1+pow(32.1*omhh,-0.532));
-    alpha_c_a2 = pow(12.0*omhh,0.424)*(1+pow(45.0*omhh,-0.582));
-    this->alpha_c = pow(alpha_c_a1,-f_baryon)*pow(alpha_c_a2,-pow(f_baryon,3));
-    beta_c_b1 = 0.944/(1.+pow(458.0*this->omhh,-0.708));
-    beta_c_b2 = pow(0.395*omhh, -0.0266);
-    this->beta_c = 1.0/(1+beta_c_b1*(pow(1-f_baryon, beta_c_b2)-1));
-    y = cf.redshift_equality()/(1.+ cf.drag_redshift());
-    alpha_b_G = y*(-6.*sqrt(1+y)+(2.+3.*y)*log((sqrt(1+y)+1)/(sqrt(1+y)-1)));
-    alpha_b = 2.07*k_equality*sound_horizon*pow(1+cf.R_drag(),-0.75)*alpha_b_G;
+    real_prec alpha_c_a1 = pow(46.9*omhh,0.670)*(1+pow(32.1*omhh,-0.532));
+    real_prec alpha_c_a2 = pow(12.0*omhh,0.424)*(1+pow(45.0*omhh,-0.582));
+    this->alpha_c = pow(alpha_c_a1,-this->s_cosmo_pars.f_baryon)*pow(alpha_c_a2,-pow(this->s_cosmo_pars.f_baryon,3));
+    real_prec beta_c_b1 = 0.944/(1.+pow(458.0*omhh,-0.708));
+    real_prec beta_c_b2 = pow(0.395*omhh, -0.0266);
+    this->beta_c = 1.0/(1+beta_c_b1*(pow(1-this->s_cosmo_pars.f_baryon, beta_c_b2)-1));
+    real_prec y = cf.redshift_equality()/(1.+ cf.drag_redshift());
+    real_prec alpha_b_G = y*(-6.*sqrt(1+y)+(2.+3.*y)*log((sqrt(1+y)+1)/(sqrt(1+y)-1)));
+    this->alpha_b = 2.07*this->k_equality*this->sound_horizon*pow(1+cf.R_drag(),-0.75)*alpha_b_G;
     this->beta_node = 8.41*pow(omhh, 0.435);  
-    this->beta_b = 0.5+f_baryon+(3.-2.*f_baryon)*sqrt(pow(17.2*omhh,2.0)+1);
-    this->k_peak = 2.5*3.14159*(1+0.217*omhh)/sound_horizon;
+    this->beta_b = 0.5+this->s_cosmo_pars.f_baryon+(3.-2.*this->s_cosmo_pars.f_baryon)*sqrt(pow(17.2*omhh,2.0)+1);
+    this->k_peak = 2.5*3.14159*(1+0.217*omhh)/this->sound_horizon;
     this->sound_horizon_fit = 44.5*log(9.83/omhh)/sqrt(1+10.0*pow(obhh,0.75));
-    this->alpha_gamma = 1-0.328*log(431.0*omhh)*f_baryon + 0.38*log(22.3*omhh)*pow(f_baryon,2);
-    return;
+    this->alpha_gamma = 1-0.328*log(431.0*omhh)*this->s_cosmo_pars.f_baryon + 0.38*log(22.3*omhh)*pow(this->s_cosmo_pars.f_baryon,2);
+     return;
   }
 ////////////////////////////////////////////////////////////////////////////
  ////////////////////////////////////////////////////////////////////////////
@@ -621,12 +619,6 @@ real_prec PowerSpectrum::mean_galaxy_number_density(real_prec redshift){
   /* Notes: Units are Mpc, not h^-1 Mpc. */
 real_prec PowerSpectrum ::TFfit_onek(real_prec k, real_prec &tf_baryon, real_prec &tf_cdm)
   {
-    real_prec T_c_ln_beta, T_c_ln_nobeta, T_c_C_alpha, T_c_C_noalpha;
-    real_prec q, xx, xx_tilde, q_eff;
-    real_prec T_c_f, T_c, s_tilde, T_b_T0, T_b, f_baryon, T_full;
-    real_prec T_0_L0, T_0_C0, T_0, gamma_eff;
-    real_prec T_nowiggles_L0, T_nowiggles_C0, T_nowiggles;
-    k = fabs(k);	/* Just define negative k as positive */
     if (k==0.0) 
     {
       if (&tf_baryon!=NULL) tf_baryon = 1.0;
@@ -635,68 +627,29 @@ real_prec PowerSpectrum ::TFfit_onek(real_prec k, real_prec &tf_baryon, real_pre
     }
     else
     {  
-      q = k/13.41/this->k_equality;
-      xx = k*this->sound_horizon;
-      T_c_ln_beta = log(2.718282+1.8*this->beta_c*q);
-      T_c_ln_nobeta = log(2.718282+1.8*q);
-      T_c_C_alpha = 14.2/this->alpha_c + 386.0/(1+69.9*pow(q,1.08));
-      T_c_C_noalpha = 14.2 + 386.0/(1+69.9*pow(q,1.08));
-      T_c_f = 1.0/(1.0+pow(xx/5.4,4));
-      T_c = T_c_f*T_c_ln_beta/(T_c_ln_beta+T_c_C_noalpha*(q*q)) +
-          (1-T_c_f)*T_c_ln_beta/(T_c_ln_beta+T_c_C_alpha*(q*q));
-      s_tilde = this->sound_horizon*pow(1+pow(beta_node/xx,3),-1./3.);
-      xx_tilde = k*s_tilde;
-      T_b_T0 = T_c_ln_nobeta/(T_c_ln_nobeta+T_c_C_noalpha*(q*q));
-      T_b = sin(xx_tilde)/(xx_tilde)*(T_b_T0/(1+pow(xx/5.2,2))+alpha_b*exp(-pow(k/k_silk,1.4)))/(1.+pow(beta_b/xx,3));
-      f_baryon = obhh/omhh;
-      T_full = f_baryon*T_b+ (1.0-f_baryon)*T_c;
-      /* Now to store these transfer functions */
+      real_prec q = k/13.41/this->k_equality;
+      real_prec xx = k*this->sound_horizon;
+      real_prec T_c_ln_beta = log(2.718282+1.8*this->beta_c*q);
+      real_prec T_c_ln_nobeta = log(2.718282+1.8*q);
+      real_prec T_c_C_alpha = 14.2/this->alpha_c + 386.0/(1+69.9*pow(q,1.08));
+      real_prec T_c_C_noalpha = 14.2 + 386.0/(1+69.9*pow(q,1.08));
+      real_prec T_c_f = 1.0/(1.0+pow(xx/5.4,4));
+      real_prec T_c = T_c_f*T_c_ln_beta/(T_c_ln_beta+T_c_C_noalpha*(q*q))+(1-T_c_f)*T_c_ln_beta/(T_c_ln_beta+T_c_C_alpha*(q*q));
+      real_prec s_tilde = this->sound_horizon*pow(1+pow(this->beta_node/xx,3),-1./3.);
+      real_prec xx_tilde = k*s_tilde;
+      real_prec T_b_T0 = T_c_ln_nobeta/(T_c_ln_nobeta+T_c_C_noalpha*(q*q));
+      real_prec T_b = sin(xx_tilde)/(xx_tilde)*(T_b_T0/(1+pow(xx/5.2,2))+this->alpha_b*exp(-pow(k/this->k_silk,1.4)))/(1.+pow(this->beta_b/xx,3));
+      real_prec T_full = this->s_cosmo_pars.f_baryon*T_b+ (1.0-this->s_cosmo_pars.f_baryon)*T_c;
+            /* Now to store these transfer functions */
       if (&tf_baryon!=NULL) tf_baryon = T_b;
       if (&tf_cdm!=NULL) tf_cdm = T_c;
       return T_full;
     }
   }
 ////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-/* ======================= Approximate forms =========================== */
-/* Input: omega0 -- CDM density, in units of critical density
-   f_baryon -- Baryon fraction, the ratio of baryon to CDM density.
-   hubble -- Hubble constant, in units of 100 km/s/Mpc */
-/* Output: The approximate value of the sound horizon, in h^-1 Mpc. */
-/* Note: If you prefer to have the answer in  units of Mpc, use hubble -> 1
-   and omega0 -> omega0*hubble^2. */
-  real_prec PowerSpectrum ::TFsound_horizon_fit(real_prec omega0, real_prec f_baryon, real_prec hubble)
-  {
-      real_prec omhh, sound_horizon_fit_mpc;
-      omhh = omega0*hubble*hubble;
-      sound_horizon_fit_mpc = 44.5*log(9.83/omhh)/sqrt(1.+10.0*pow(omhh*f_baryon,0.75));
-      return sound_horizon_fit_mpc*hubble;
-  }
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-  real_prec PowerSpectrum ::TFk_peak(real_prec omega0, real_prec f_baryon, real_prec hubble)
-  /* Input: omega0 -- CDM density, in units of critical density
-        f_baryon -- Baryon fraction, the ratio of baryon to CDM density.
-        hubble -- Hubble constant, in units of 100 km/s/Mpc*/
-  /* Output: The approximate location of the first baryonic peak, in h Mpc^-1 */
-  /* Note: If you prefer to have the answer in  units of Mpc^-1, use hubble -> 1
-  and omega0 -> omega0*hubble^2. */
-  {
-      real_prec omhh, k_peak_mpc;
-      omhh = omega0*hubble*hubble;
-      k_peak_mpc = 2.5*3.14159*(1+0.217*omhh)/TFsound_horizon_fit(omhh,f_baryon,1.0);
-      return k_peak_mpc/hubble;
-  }
-////////////////////////////////////////////////////////////////////////////
  ////////////////////////////////////////////////////////////////////////////
-  real_prec PowerSpectrum ::TFnowiggles(real_prec omega0, real_prec f_baryon, real_prec hubble,
-          real_prec Tcmb, real_prec k_hmpc)
-  /* Input: omega0 -- CDM density, in units of critical density
-        f_baryon -- Baryon fraction, the ratio of baryon to CDM density.
-        hubble -- Hubble constant, in units of 100 km/s/Mpc
-        Tcmb -- Temperature of the CMB in Kelvin; Tcmb<=0 forces use of
-              COBE FIRAS value of 2.728 K
-        k_hmpc -- Wavenumber in units of (h Mpc^-1). */
+  real_prec PowerSpectrum ::TFnowiggles(real_prec k_hmpc)
+  /* k_hmpc -- Wavenumber in units of (h Mpc^-1). */
   /* Output: The value of an approximate transfer function that captures the
   non-oscillatory part of a partial baryon transfer function.  In other words,
   the baryon oscillations are left out, but the suppression of power below
@@ -704,25 +657,25 @@ real_prec PowerSpectrum ::TFfit_onek(real_prec k, real_prec &tf_baryon, real_pre
   /* Note: If you prefer to use wavenumbers in units of Mpc^-1, use hubble -> 1
   and omega0 -> omega0*hubble^2. */
   {
-      real_prec k, omhh, theta_cmb, k_equality, q, xx, alpha_gamma, gamma_eff;
-      real_prec q_eff, T_nowiggles_L0, T_nowiggles_C0;
-      k = k_hmpc*hubble;	/* Convert to Mpc^-1 */
-      omhh = omega0*hubble*hubble;
-      if (Tcmb<=0.0) Tcmb=2.728;	/* COBE FIRAS */
-      theta_cmb = Tcmb/2.7;
-      k_equality = 0.0746*omhh/pow(theta_cmb,2);
-      q = k/13.41/k_equality;
-      xx = k*TFsound_horizon_fit(omhh, f_baryon, 1.0);
-      alpha_gamma = 1-0.328*log(431.0*omhh)*f_baryon + 0.38*log(22.3*omhh)*pow(f_baryon,2);
-      gamma_eff = omhh*(alpha_gamma+(1-alpha_gamma)/(1+pow(0.43*xx,4)));
-      q_eff = q*omhh/gamma_eff;
-      T_nowiggles_L0 = log(2.0*2.718282+1.8*q_eff);
-      T_nowiggles_C0 = 14.2 + 731.0/(1+62.5*q_eff);
+      Cosmology cf(this->s_cosmo_pars);
+      real_prec k = k_hmpc*this->s_cosmo_pars.hubble;	/* Convert to Mpc^-1 */
+      real_prec omhh = this->s_cosmo_pars.Om_matter*this->s_cosmo_pars.hubble*this->s_cosmo_pars.hubble;
+      if (this->s_cosmo_pars.Tcmb<=0.0) this->s_cosmo_pars.Tcmb=2.728;	/* COBE FIRAS */
+      real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
+      real_prec k_equality = 0.0746*omhh/pow(theta_cmb,2);
+      real_prec q = k/13.41/k_equality;
+      cf.set_f_baryon(1.0); // set fraction of baryons to unity in the s_cosmo_pars structure of Cosmology
+      real_prec xx = k*cf.TFsound_horizon_fit();
+      real_prec alpha_gamma = 1-0.328*log(431.0*omhh)*this->s_cosmo_pars.f_baryon + 0.38*log(22.3*omhh)*pow(this->s_cosmo_pars.f_baryon,2);
+      real_prec gamma_eff = omhh*(alpha_gamma+(1-alpha_gamma)/(1+pow(0.43*xx,4)));
+      real_prec q_eff = q*omhh/gamma_eff;
+      real_prec T_nowiggles_L0 = log(2.0*2.718282+1.8*q_eff);
+      real_prec T_nowiggles_C0 = 14.2 + 731.0/(1+62.5*q_eff);
       return T_nowiggles_L0/(T_nowiggles_L0+T_nowiggles_C0*pow(q_eff,2));
   }
   ////////////////////////////////////////////////////////////////////////////
   // ======================= Zero Baryon Formula ======================
-  real_prec PowerSpectrum ::TFzerobaryon(real_prec omega0, real_prec hubble, real_prec Tcmb, real_prec k_hmpc)
+  real_prec PowerSpectrum ::TFzerobaryon(real_prec k_hmpc)
   /* Input: omega0 -- CDM density, in units of critical density
         hubble -- Hubble constant, in units of 100 km/s/Mpc
         Tcmb -- Temperature of the CMB in Kelvin; Tcmb<=0 forces use of
@@ -732,15 +685,14 @@ real_prec PowerSpectrum ::TFfit_onek(real_prec k, real_prec &tf_baryon, real_pre
   /* Note: If you prefer to use wavenumbers in units of Mpc^-1, use hubble -> 1
   and omega0 -> omega0*hubble^2. */
   {
-      real_prec k, omhh, theta_cmb, k_equality, q, T_0_L0, T_0_C0;
-      k = k_hmpc*hubble;	/* Convert to Mpc^-1 */
-      omhh = omega0*hubble*hubble;
-      if (Tcmb<=0.0) Tcmb=2.728;	/* COBE FIRAS */
-      theta_cmb = Tcmb/2.7;
-      k_equality = 0.0746*omhh/pow(theta_cmb,2);
-      q = k/13.41/k_equality;
-      T_0_L0 = log(2.0*2.718282+1.8*q);
-      T_0_C0 = 14.2 + 731.0/(1+62.5*q);
+      real_prec k = k_hmpc*this->s_cosmo_pars.hubble;	/* Convert to Mpc^-1 */
+      real_prec omhh = this->s_cosmo_pars.Om_matter*this->s_cosmo_pars.hubble*this->s_cosmo_pars.hubble;
+      if (this->s_cosmo_pars.Tcmb<=0.0)this->s_cosmo_pars.Tcmb=2.728;	/* COBE FIRAS */
+      real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
+      real_prec k_equality = 0.0746*omhh/pow(theta_cmb,2);
+      real_prec q = k/13.41/k_equality;
+      real_prec T_0_L0 = log(2.0*2.718282+1.8*q);
+      real_prec T_0_C0 = 14.2 + 731.0/(1+62.5*q);
       return T_0_L0/(T_0_L0+T_0_C0*q*q);
   }
   ////////////////////////////////////////////////////////////////////////////
@@ -822,7 +774,6 @@ real_prec PowerSpectrum ::TFfit_onek(real_prec k, real_prec &tf_baryon, real_pre
     PowerSpectrum ps;
     ps.set_cosmo_pars(*s_cp);
     Cosmology Cf(*s_cp);
-
     real_prec m= sA1->aux_m;
     real_prec M=pow(10,m);
     real_prec z= sA1->aux_z;
