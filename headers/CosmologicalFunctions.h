@@ -295,7 +295,7 @@ class Cosmology{
   //////////////////////////////////////////////////////////
   /** 
    * @public
-   * @brief redshift at equality matter radiation
+   * @brief redshift at equality matter radiation. https://arxiv.org/pdf/astro-ph/9710252
   */
   real_prec redshift_equality();
   //////////////////////////////////////////////////////////
@@ -306,10 +306,24 @@ class Cosmology{
   real_prec k_equality();
   //////////////////////////////////////////////////////////
   /** 
-   * @public
-   * @brief Silk diffusion lenght
+   * @public 
+   * @brief Silk diffusion lenght. https://arxiv.org/pdf/astro-ph/9710252
   */
   real_prec k_Silk();
+  //////////////////////////////////////////////////////////
+  /** 
+   * @public
+   * @brief Fit https://arxiv.org/pdf/astro-ph/9710252
+  * @result  The approximate value of the sound horizon, in h^-1 Mpc. 
+  */
+  real_prec TFsound_horizon_fit();
+  //////////////////////////////////////////////////////////
+  /** 
+   * @public
+   * @brief First peak. EH https://arxiv.org/pdf/astro-ph/9710252
+  * @result  The approximate location of the first baryonic peak, in h Mpc^-1 
+  */
+  real_prec TFk_peak();
   //////////////////////////////////////////////////////////
   /** 
    * @public
@@ -555,6 +569,14 @@ class Cosmology{
    * @brief Object of type CosmologicalFunctions
    */
   void set_cosmo_pars(s_CosmologicalParameters spars){this->s_cosmo_pars=spars;}
+  //////////////////////////////////////////////////////////
+  /**
+   * @public
+   * @brief Object of type CosmologicalFunctions
+   */
+  void set_f_baryon(real_prec newfb){
+    this->s_cosmo_pars.f_baryon=newfb;
+   }
 
 };
 #endif 

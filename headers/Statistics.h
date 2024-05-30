@@ -17,6 +17,10 @@
 # include "Astrophysics.h"
 # include "BiasFunctions.h"
 # include "Hod.h"
+
+////////////////////////////////////////////////////////////////////////////
+#define GSL_INT_SIZE_k 200
+#define GSL_INT_SIZE_M 200
 ////////////////////////////////////////////////////////////////////////////
 
 class Statistics{
@@ -40,7 +44,7 @@ class Statistics{
   /**
    * @brief
   */
-static gsl_real isigma_nu(gsl_real ,void *);
+  static gsl_real isigma_nu(gsl_real ,void *);
   //////////////////////////////////////////////////////////
   /**
    * @brief
@@ -71,7 +75,28 @@ static gsl_real isigma_nu(gsl_real ,void *);
    * @brief
   */
   static gsl_real i_mean_galaxy_number_density(gsl_real, void*);
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief
+  */  
+  gsl_interp_accel *acc_mass_sigma;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief
+  */  
+  gsl_interp_accel *acc_mass_function;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief
+  */  
+   gsl_spline *spline_mass_sigma;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief
+  */  
+   gsl_spline *spline_mass_function;
+ 
+ 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +213,7 @@ public:
   /**
    * @brief
   */
-  void non_linear_scales(real_prec *,real_prec *,real_prec *, real_prec *);
+  void non_linear_scales(real_prec &,real_prec& ,real_prec& , real_prec& );
   //////////////////////////////////////////////////////////
   /**
    * @brief
@@ -255,12 +280,28 @@ public:
     * @brief
    */
    vector<gsl_real> power_external;
-
+   //////////////////////////////////////////////////////////
    void set_cosmo_pars(s_CosmologicalParameters spars)
    {
        this->s_cosmo_pars=spars;
        this->cosmo.set_cosmo_pars(spars);
    }
+  //////////////////////////////////////////////////////////
+  void set_spline_vars_sigma()
+  {
+    acc_mass_sigma = gsl_interp_accel_alloc();
+    spline_mass_sigma = gsl_spline_alloc (gsl_interp_linear, this->s_cosmo_pars.v_mass.size());
+    gsl_spline_init (spline_mass_sigma, &this->s_cosmo_pars.v_mass[0], &this->s_cosmo_pars.v_sigma_mass[0], this->s_cosmo_pars.v_mass.size());
+  }
+//////////////////////////////////////////////////////////
+  void set_spline_vars_mfunction()
+  {
+    acc_mass_function = gsl_interp_accel_alloc();
+    spline_mass_function = gsl_spline_alloc (gsl_interp_linear, this->s_cosmo_pars.v_mass.size());
+    gsl_spline_init (spline_mass_sigma, &this->s_cosmo_pars.v_mass[0], &this->s_cosmo_pars.v_mass_function[0], this->s_cosmo_pars.v_mass.size());
+  }
+
+
 };
 
 

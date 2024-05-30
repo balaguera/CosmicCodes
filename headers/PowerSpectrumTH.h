@@ -7,26 +7,26 @@
  * @date 2007-2023
  */
 //////////////////////////////////////////////////////////
-
 #ifndef __POWER_SPECTRUMTH__
 #define __POWER_SPECTRUMTH__
-
+//////////////////////////////////////////////////////////
 # include <iostream>
 # include <math.h>
 # include <cmath>
 # include <cctype>
 # include <stdio.h>
 # include <fstream>
-
 # include "NumericalMethods.h"
 # include "CosmologicalFunctions.h"
 # include "BiasFunctions.h"
 # include "Hod.h"
 # include "DensityProfiles.h"
 # include "ScreenOutput.h"
-
+//////////////////////////////////////////////////////////
 using namespace std;
-
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 class PowerSpectrum{
  private:
  //////////////////////////////////////////////////////////
@@ -78,7 +78,6 @@ class PowerSpectrum{
   /**
    * @brief
   */
-
   static gsl_real fun_aux_halo_fit_dw(gsl_real , void *);
   //////////////////////////////////////////////////////////
   /**
@@ -130,20 +129,20 @@ class PowerSpectrum{
   /**
    * @brief
   */
-
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief
-  */
   real_prec kmin_int;
   //////////////////////////////////////////////////////////
   /**
    * @brief
   */
   real_prec kmax_int;
-
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////
  public:
-
   //////////////////////////////////////////////////////////
   /**
    * @brief
@@ -153,23 +152,26 @@ class PowerSpectrum{
   /**
    * @brief
   */
-  PowerSpectrum(s_CosmologicalParameters _s_cosmo):s_cosmo_pars(_s_cosmo){}
+  PowerSpectrum(s_CosmologicalParameters _s_cosmo):s_cosmo_pars(_s_cosmo){
+    this->TFset_parameters();
+  }
   //////////////////////////////////////////////////////////
   /**
    * @brief
   */
-
   PowerSpectrum(s_CosmologicalParameters _s_cosmo,real_prec _kmin, real_prec _kmax, int nk, int nm):s_cosmo_pars(_s_cosmo){
     this->kmin_int=_kmin;
     this->kmax_int=_kmax;
     compute_int_table_k_mu(_kmin,_kmax, nk, nm);
+    this->TFset_parameters();
   }
   //////////////////////////////////////////////////////////
   /**
    * @brief
   */
   PowerSpectrum(real_prec M1, real_prec M2, int Np){
-     compute_int_table_mass(M1,M2, Np);
+    compute_int_table_mass(M1,M2, Np);
+    this->TFset_parameters();
   }
   //////////////////////////////////////////////////////////
   /**
@@ -181,22 +183,13 @@ class PowerSpectrum{
     this->s_cosmo_pars=scos;
     compute_int_table_k_mu(_kmin,_kmax, nk, nmu);
     compute_int_table_mass(M1,M2, Nm);
-  }
+    this->TFset_parameters();
+   }
   //////////////////////////////////////////////////////////
   /**
    * @brief
   */
   ~PowerSpectrum(){}
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief
-  */
-  real_prec omhh; /* Omega_matter*h^2 */
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief
-  */
-  real_prec obhh;   /* Omega_baryon*h^2 */
   //////////////////////////////////////////////////////////
   /**
    * @brief
@@ -391,7 +384,7 @@ class PowerSpectrum{
   /* @param Tcmb The temperature of the CMB in Kelvin.  Tcmb<=0 forces use of the COBE value of  2.728 K.
   /* @warning Units are always Mpc, never h^-1 Mpc.
   */
-  void TFset_parameters(real_prec omega0hh , real_prec f_baryon, real_prec Tcmb);
+  void TFset_parameters();
   //////////////////////////////////////////////////////////
   /**
    * @brief
@@ -407,39 +400,28 @@ class PowerSpectrum{
   /**
    * @brief
   */
-  real_prec TFsound_horizon_fit(real_prec, real_prec , real_prec );
+  real_prec TFnowiggles(real_prec wavenumber);
   //////////////////////////////////////////////////////////
   /**
    * @brief
   */
-  real_prec TFk_peak(real_prec , real_prec , real_prec );
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief
-  */
-  real_prec TFnowiggles(real_prec, real_prec, real_prec,
-                     real_prec , real_prec);
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief
-  */
-  real_prec TFzerobaryon(real_prec, real_prec , real_prec, real_prec);
+  real_prec TFzerobaryon(real_prec wavenumber);
   //////////////////////////////////////////////////////////
   /**
    * @brief Halo fit based on the revision by Takahashi
    * @details https://arxiv.org/pdf/1208.2701
   */
-  void halo_fit(real_prec,  real_prec*, real_prec*, real_prec*);
+  void halo_fit(real_prec,  real_prec&, real_prec&, real_prec&);
   //////////////////////////////////////////////////////////
   /**
    * @brief
   */
-  void halo_fit_integrals(real_prec*, real_prec *);
+  void halo_fit_integrals(real_prec&, real_prec &);
   //////////////////////////////////////////////////////////
   /**
    * @brief
   */
-  void halo_fit_z(real_prec, real_prec, real_prec,real_prec, real_prec, real_prec, real_prec *,real_prec *);
+  void halo_fit_z(real_prec, real_prec, real_prec,real_prec, real_prec, real_prec, real_prec &,real_prec &);
   //////////////////////////////////////////////////////////
   /**
    * @brief
@@ -454,17 +436,17 @@ class PowerSpectrum{
   /**
    * @brief
   */
-  void nl_scales_halo_fit(real_prec *, real_prec*, vector<real_prec>&, vector<real_prec>&, bool);
+  void nl_scales_halo_fit(real_prec &, real_prec&, vector<real_prec>&, vector<real_prec>&, bool);
   //////////////////////////////////////////////////////////
   /**
    * @brief
   */
-  void kstar_integral(real_prec*);
+  void kstar_integral(real_prec&);
   //////////////////////////////////////////////////////////
   /**
    * @brief
   */
-  void hf_aux(real_prec, real_prec,real_prec, real_prec, real_prec *, real_prec *, real_prec *, real_prec *,real_prec *,real_prec *,real_prec *, real_prec *);
+  void hf_aux(real_prec, real_prec,real_prec, real_prec, real_prec &, real_prec &, real_prec &, real_prec&,real_prec &,real_prec &,real_prec &, real_prec &);
   //////////////////////////////////////////////////////////
   /**
    * @brief
@@ -571,9 +553,13 @@ class PowerSpectrum{
   /**
    * @brief
   */
-  void set_cosmo_pars(s_CosmologicalParameters spars){this->s_cosmo_pars=spars;}
+  void set_cosmo_pars(s_CosmologicalParameters spars)
+  {
+    this->s_cosmo_pars=spars;
+    this->TFset_parameters(); 
+  }
 };
-
+//////////////////////////////////////////////////////////
 #endif  
   
 

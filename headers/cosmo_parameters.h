@@ -13,10 +13,7 @@
 using namespace std;
 //////////////////////////////////////////////////////////
 #ifndef __COSMO_PARAMETERS__
-
 #define __COSMO_PARAMETERS__
-
-
 //////////////////////////////////////////////////////////
 // These are the params of the Unitsim
 /**
@@ -31,7 +28,7 @@ namespace Cosmo_parameters_PLANCK
   double Om_matter=0.3089;
   double N_eff=3.15;
   double Om_radiation=(1.3157e-5)*(1.+(7./8.)*std::pow(4./11.,4./3.)*N_eff);
-  double Om_baryons=0.04859;
+  double Om_baryons=0.049;
   double wde_eos=-1;
   double Om_vac=0.6911 ; //1.-Om_matter-Om_k-Om_radiation;
   double Om_k=0.0;// 1.-Om_matter-Om_vac-Om_radiation;
