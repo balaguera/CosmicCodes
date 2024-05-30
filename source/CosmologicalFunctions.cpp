@@ -17,7 +17,8 @@ real_prec scale_factor(real_prec z){
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology::comoving_sound_horizon(real_prec redshift)
 {
-  return (Constants::speed_light/sqrt(3.))*static_cast<gsl_real>(gsl_integration(i_rs, (void *)&this->s_cosmo_pars, 0, static_cast<gsl_real>(1./(1.+redshift))));
+  real_prec a_end=static_cast<gsl_real>(1./(1.+redshift));
+  return (Constants::speed_light/sqrt(3.))*static_cast<gsl_real>(gsl_integration(i_rs, (void *)&this->s_cosmo_pars, 0, a_end));
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology::rr(real_prec M, real_prec z){
@@ -182,7 +183,50 @@ real_prec Cosmology:: Distance_Modulus(real_prec redshift){
   // ***************************
   // DISTANCE MODULUS
   // ***************************
-  return 25.+5.0*log10(luminosity_distance(redshift));
+  real_prec dm=(redshift==0 ? 0 : 25.+5.0*log10(luminosity_distance(redshift)));
+  return dm;
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::drag_redshift(){
+  real_prec omega_b  = (this->s_cosmo_pars.Om_baryons)*pow(this->s_cosmo_pars.hubble,2);
+  real_prec omega_m  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
+  real_prec z_drag_a  = 0.0783*pow(omega_b,-0.238)/(1.+39.5*pow(omega_b,0.763));
+  real_prec z_drag_b  = 0.560/(1+21.1*pow(omega_b,1.81));
+  return  1048.0*(1.+0.00124*pow(omega_b,-0.738))*(1.+z_drag_a*pow(omega_m,z_drag_b));
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::R_drag(){
+  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
+  real_prec obhh  = (this->s_cosmo_pars.Om_baryons)*pow(this->s_cosmo_pars.hubble,2);
+  return 31.5*obhh/pow(theta_cmb,4)*(1000.0/(1.+this->drag_redshift()));
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::R_equality(){
+  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
+  real_prec obhh  = (this->s_cosmo_pars.Om_baryons)*pow(this->s_cosmo_pars.hubble,2);
+  return 31.5*obhh/pow(theta_cmb,4)*(1000./this->redshift_equality());
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::redshift_equality(){
+  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
+  real_prec omhh  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
+  return  2.50e4*omhh/pow(theta_cmb,4);
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::k_equality(){
+  real_prec theta_cmb = this->s_cosmo_pars.Tcmb/2.7;
+  real_prec omhh  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
+  return   0.0746*omhh/pow(theta_cmb,2);
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::k_Silk(){
+  real_prec omhh  = (this->s_cosmo_pars.Om_matter)*pow(this->s_cosmo_pars.hubble,2);
+  real_prec obhh  = (this->s_cosmo_pars.Om_baryons)*pow(this->s_cosmo_pars.hubble,2);
+  return  1.6*pow(obhh,0.52)*pow(omhh,0.73)*(1+pow(10.4*omhh,-0.95));
+}
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::sound_horizon(){
+  return 2./3./this->k_equality()*sqrt(6./this->R_equality())*log((sqrt(1+this->R_drag())+sqrt(this->R_drag()+this->R_equality()))/(1+sqrt(this->R_equality())));
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology:: inter_Distance_Modulus(real_prec redshift){
@@ -316,9 +360,11 @@ real_prec Cosmology::gsl_cosmo_integration(gsl_real (*function)(gsl_real, void *
 }    
 ////////////////////////////////////////////////////////////////////////////
 void Cosmology::check_cosmo_pars(){
+/*
    this->s_cosmo_pars.Om_matter = this->s_cosmo_pars.Om_cdm+this->s_cosmo_pars.Om_baryons;
    this->s_cosmo_pars.f_baryon  = this->s_cosmo_pars.Om_baryons/this->s_cosmo_pars.Om_matter;
    this->s_cosmo_pars.Om_vac    = 1.- this->s_cosmo_pars.Om_matter-this->s_cosmo_pars.Om_radiation-this->s_cosmo_pars.Om_k;
+   */
 }
 ////////////////////////////////////////////////////////////////////////////
 void Cosmology::Comoving_distance_tabulated(real_prec z_min, real_prec z_max, vector<gsl_real> & zz, vector<gsl_real> & rc)
@@ -345,11 +391,11 @@ gsl_real gint(gsl_real lscale_factor, void *p){   /*Used to obtain D(redshift)*/
 gsl_real i_rs(gsl_real a, void *p){  /*Used to obtain rs(redshift)*/
   struct s_CosmologicalParameters * s_cp= (struct s_CosmologicalParameters *)p;
   Cosmology cf(*s_cp);
-  real_prec red_shift = 1./a -1.0;
+  real_prec credshift = 1./a -1.0;
   real_prec Om_photons= (s_cp->Om_radiation)/(1.+(7./8.)*pow(4./11.,4./3.)*s_cp->N_eff);
   real_prec Om_baryons= (s_cp->Om_baryons);
   real_prec Rg= (3.*Om_baryons)/(4.*Om_photons);
-  return static_cast<gsl_real>(1./(a*a*cf.Hubble_function(red_shift)*sqrt(1.+Rg*a)));
+  return static_cast<gsl_real>(1./(a*a*cf.Hubble_function(credshift)*sqrt(1.+Rg*a)));
 }
 ////////////////////////////////////////////////////////////////////////////
 gsl_real Hinv(gsl_real redshift, void *p){  /*Used to obtain r(redshift)*/
