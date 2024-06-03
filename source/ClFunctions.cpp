@@ -28,27 +28,21 @@ void Cl_FUNCTIONS::get_Cl_bias()
 // *******************************************************************************************************************************************************
 // *******************************************************************************************************************************************************
 // *******************************************************************************************************************************************************
-
 void Cl_FUNCTIONS::get_angular_power()
-{
-  
+{  
   string temp="lbins";
   string temp_raw="raw";
-  
   this->params.set_output_file(this->params._name_output_dir()+this->params._statistics()+"_"+this->params._type_of_P_estimator()+"_"+this->params._name_catalog()+"_zbtype_"+this->params._define_z_bins()+"_"+temp);
   this->params.set_output_file_raw(this->params._name_output_dir()+this->params._statistics()+"_"+this->params._type_of_P_estimator()+"_"+this->params._name_catalog()+"_zbtype_"+this->params._define_z_bins()+"_"+temp_raw);
-  
   if(this->params._input_catalog_type()!="ascii")
     cout<<"WARNING, catalog not in ascii, "<<endl;
-
   // Read the mask
   this->catalog.read_mask();
   this->catalog.read_catalog();
   this->set_healpix_pars();  // Compute Healpix numbers
   this->set_vectors();      // Allocate memory for used vectors
   // *********************************************************
-  // *********************************************************
-  
+  // *********************************************************  
   if(this->params._n_z_bins()!=-1) // If we have more than one redshift bin, proceed
     {
 
