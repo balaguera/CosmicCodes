@@ -3447,6 +3447,7 @@ void Params::read_pars(string file)
     this->mass_assignment = 3;
   }
 // --------------------------------------------------------------------
+// --------------------------------------------------------------------
 #ifdef _USE_COSMO_PARS_
   this->om_matter = COSMOPARS::Om_matter;
   this->om_radiation = COSMOPARS::Om_radiation;
@@ -3570,11 +3571,9 @@ void Params::read_pars(string file)
       }
     }
 #endif
- 
 #ifndef _USE_V_DISP_VEL
   this->n_vknot_massbin=1;
 #endif
-  
 #ifndef _USE_MASS_KNOTS_
   this->n_sknot_massbin=1;
 #endif
