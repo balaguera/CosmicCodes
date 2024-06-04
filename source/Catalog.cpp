@@ -8927,7 +8927,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=(log10(this->Halo[i].spin_bullock)-Xmean)*(this->Halo[i].local_dm-Ymean);
         }
-
       else if(name_Y=="_PEAK_HEIGHT_")
           {
 #ifdef  _USE_SIMD_OMP_
@@ -8963,21 +8962,18 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
         for(ULONG i=0;i<this->Halo.size();++i)
           corr+=(log10(this->Halo[i].vrms)-Xmean)*(this->Halo[i].virial-Ymean);
         }
-
         else if(name_Y=="_BTOA_")
           {
 #ifdef  _USE_SIMD_OMP_
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -8990,7 +8986,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9003,14 +8998,12 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
         for(ULONG i=0;i<this->Halo.size();++i)
           corr+=(log10(this->Halo[i].vrms)-Xmean)*(this->Halo[i].mach_number-Ymean);
           }
-
         else if(name_Y=="_BIAS_")
           {
 #ifdef  _USE_SIMD_OMP_
@@ -9063,8 +9056,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=(log10(this->Halo[i].vrms)-Xmean)*(this->Halo[i].local_dm-Ymean);
         }
-
-
       else if(name_Y=="_PEAK_HEIGHT_")
           {
 #ifdef  _USE_SIMD_OMP_
@@ -9084,7 +9075,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9213,7 +9203,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=(this->Halo[i].virial-Xmean)*(this->Halo[i].dach_number-Ymean);
         }
-
     }
       // ----------------------------------------
       else if (name_X=="_BTOA_")
@@ -9224,7 +9213,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9237,7 +9225,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9250,7 +9237,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9276,7 +9262,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9289,7 +9274,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9304,13 +9288,11 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
           for(ULONG i=0;i<this->Halo.size();++i)
               corr+=(this->Halo[i].b_to_a-Xmean)*(this->Halo[i].peak_height-Ymean);
-
         }
       else if(name_Y=="_DACH_")
         {
@@ -9318,14 +9300,12 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=(this->Halo[i].b_to_a-Xmean)*(this->Halo[i].dach_number-Ymean);
         }
-
     }
       // ----------------------------------------
       else if (name_X=="_CTOA_")
@@ -9340,7 +9320,7 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
-          for(ULONG i=0;i<this->Halo.size();++i)
+      for(ULONG i=0;i<this->Halo.size();++i)
         corr+=(this->Halo[i].c_to_a-Xmean)*(this->Halo[i].mach_number-Ymean);
         }
       else if(name_Y=="_BIAS_")
@@ -9349,7 +9329,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9362,7 +9341,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9375,11 +9353,10 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
-          for(ULONG i=0;i<this->Halo.size();++i)
+      for(ULONG i=0;i<this->Halo.size();++i)
         corr+=(this->Halo[i].c_to_a-Xmean)*(this->Halo[i].tidal_anisotropy-Ymean);
         }
       else if(name_Y=="_LOCALDM_")
@@ -9392,17 +9369,15 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
-          for(ULONG i=0;i<this->Halo.size();++i)
-        corr+=(this->Halo[i].c_to_a-Xmean)*(this->Halo[i].local_dm-Ymean);
-        }
-
+      for(ULONG i=0;i<this->Halo.size();++i)
+       corr+=(this->Halo[i].c_to_a-Xmean)*(this->Halo[i].local_dm-Ymean);
+      }
       else if(name_Y=="_PEAK_HEIGHT_")
         {
 #ifdef  _USE_SIMD_OMP_
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9415,7 +9390,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9423,8 +9397,8 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
         corr+=(this->Halo[i].c_to_a-Xmean)*(this->Halo[i].dach_number-Ymean);
         }
     }
-      // ----------------------------------------
-      else if (name_X=="_MACH_")
+// ----------------------------------------
+   else if (name_X=="_MACH_")
     {
       if(name_Y=="_BIAS_")
         {
@@ -9432,7 +9406,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9445,7 +9418,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9458,7 +9430,6 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9471,22 +9442,18 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=(this->Halo[i].mach_number-Xmean)*(this->Halo[i].local_dm-Ymean);
         }
-
       else if(name_Y=="_PEAK_HEIGHT_")
-
         {
 #ifdef  _USE_SIMD_OMP_
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -9603,15 +9570,12 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=(this->Halo[i].local_overdensity-Xmean)*(this->Halo[i].local_dm-Ymean);
         }
-
-
       else if(name_Y=="_PEAK_HEIGHT_")
       {
 #ifdef  _USE_SIMD_OMP_
@@ -9684,27 +9648,22 @@ real_prec Catalog::pearson_correlation(string name_X, string name_Y){
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=(this->Halo[i].tidal_anisotropy-Xmean)*(this->Halo[i].dach_number-Ymean);
         }
-
     }
       // ----------------------------------------
       else if (name_X=="_PEAK_HEIGHT_")
     {
-
        if(name_Y=="_LOCALDM_")
             {
     #ifdef  _USE_SIMD_OMP_
     #pragma omp simd reduction(+:corr)
     #else
     #ifdef _USE_OMP_
-
     #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
     #endif
     #endif
               for(ULONG i=0;i<this->Halo.size();++i)
             corr+=(this->Halo[i].peak_height-Xmean)*(this->Halo[i].local_dm-Ymean);
             }
-
-
       else if(name_Y=="_DACH_")
         {
 #ifdef  _USE_SIMD_OMP_
@@ -11167,23 +11126,18 @@ real_prec Catalog::spearman_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=pow(this->Halo_ranked[i].rs-this->Halo_ranked[i].local_dm,2);
         }
-
-
-
       else if(name_Y=="_PEAK_HEIGHT_")
         {
 #ifdef  _USE_SIMD_OMP_
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -11197,7 +11151,6 @@ real_prec Catalog::spearman_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
@@ -12492,7 +12445,6 @@ real_prec Catalog::spearman_correlation(string name_X, string name_Y){
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=pow(this->Halo_ranked[i].bias-this->Halo_ranked[i].dach_number,2);
         }
-
     }
       // ----------------------------------------
       else if (name_X=="_LOCAL_OVERDENSITY_")
@@ -12503,11 +12455,9 @@ real_prec Catalog::spearman_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
-
     for(ULONG i=0;i<this->Halo.size();++i)
           corr+=pow(this->Halo_ranked[i].local_overdensity-this->Halo_ranked[i].tidal_anisotropy,2);
       }
@@ -12517,15 +12467,12 @@ real_prec Catalog::spearman_correlation(string name_X, string name_Y){
 #pragma omp simd reduction(+:corr)
 #else
 #ifdef _USE_OMP_
-
 #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
 #endif
 #endif
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=pow(this->Halo_ranked[i].local_overdensity-this->Halo_ranked[i].local_dm,2);
         }
-
-
       else if(name_Y=="_PEAK_HEIGHT_")
       {
 #ifdef  _USE_SIMD_OMP_
@@ -12552,7 +12499,6 @@ real_prec Catalog::spearman_correlation(string name_X, string name_Y){
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=pow(this->Halo_ranked[i].local_overdensity-this->Halo_ranked[i].dach_number,2);
         }
-
     }
       // ----------------------------------------
       else if (name_X=="_TIDAL_ANISOTROPY_")
@@ -12598,12 +12544,10 @@ real_prec Catalog::spearman_correlation(string name_X, string name_Y){
           for(ULONG i=0;i<this->Halo.size();++i)
         corr+=pow(this->Halo_ranked[i].tidal_anisotropy-this->Halo_ranked[i].dach_number,2);
         }
-
     }
       // ----------------------------------------
       else if (name_X=="_PEAK_HEIGHT_")
     {
-
        if(name_Y=="_LOCALDM_")
             {
     #ifdef  _USE_SIMD_OMP_
@@ -12631,7 +12575,6 @@ real_prec Catalog::spearman_correlation(string name_X, string name_Y){
               corr+=pow(this->Halo_ranked[i].peak_height-this->Halo_ranked[i].dach_number,2);
         }
     }
-
       else if (name_X=="_DACH_")
     {
        if(name_Y=="_LOCALDM_")
@@ -12640,7 +12583,6 @@ real_prec Catalog::spearman_correlation(string name_X, string name_Y){
     #pragma omp simd reduction(+:corr)
     #else
     #ifdef _USE_OMP_
-
     #pragma omp parallel for num_threads(NTHREADS) reduction(+:corr)
     #endif
     #endif
@@ -13386,8 +13328,7 @@ void Catalog::get_scaling_relation_bias()
     for(ULONG ig = 0; ig< this->NOBJS; ++ig)
         tea<<this->Halo[ig].mass<<"  "<<this->Halo[ig].mass_parent<<"  "<<this->Halo[ig].bias<<" "<<this->Halo[ig].bias2<<endl;
     tea.close();
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // **********************************************************************************************
     So.message_screen("Learning Vmax"); //P(Vmax|Masa,Delta5,bias,cwt)
     //Now assign Mass based on BIAS and local dark matter and CWT
     LENGHT_AB_ONE = Nbins*Nbins*Nbins*Nbins*Ncwt;
@@ -13652,11 +13593,9 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
    * returning the same input vector in which the three first columns correspond to
    * to the X,Y,Z coordinates and the mean number density
    */
-
 #ifdef _VERBOSE_POWER_
     So.enter(__PRETTY_FUNCTION__);
 #endif
-
 #ifdef _USE_OMP_
   int NTHREADS = _NTHREADS_;
 #else
@@ -13678,13 +13617,11 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
     }
 #endif
   ULONG nlines = this->NOBJS;
-  vector<gsl_real> zzv =  s_data->zz_v; // redshift vector from nbar(z)
-  vector<gsl_real> dndz = s_data->dndz_v; // nbar vector
- #ifdef _use_simple_nbar_assignment_
-  real_prec delta_z_nbar = s_data->zz_v[1]-s_data->zz_v[0];
+#ifdef _use_simple_nbar_assignment_
+  real_prec delta_z_nbar = 0;
+  if(true==this->params._use_random_catalog())
+    s_data->zz_v[1]-s_data->zz_v[0];
 #endif
-  vector<gsl_real> zz=s_data->zz_c;   // cosmological redshift vector r(z)
-  vector<gsl_real> rc=s_data->rr_c; // comoving distance tabulated
   string angles_units = (this->type_of_object=="RANDOM" ? this->params._angles_units_r() : this->params._angles_units_g());
   int sys_coord = (this->type_of_object=="RANDOM" ? this->params._sys_of_coord_r(): this->params._sys_of_coord_g());
  // Factor to transform deg to rad:
@@ -13699,39 +13636,26 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
   gsl_interp_accel *spline_acc_nbar;
   if(true==this->params._use_random_catalog() && false==this->params._nbar_tabulated() && true==this->params._use_file_nbar())
     {
-      n_zzv = zzv.size();
-      vector<gsl_real>xa (n_zzv,0);
-      vector<gsl_real>ya (n_zzv,0);
-      for(int i = 0; i < n_zzv; i++)
-        {
-          xa[i] = static_cast<gsl_real>(zzv[i]);
-          ya[i] = static_cast<gsl_real>(dndz[i]);
-        }
+      n_zzv = s_data->zz_v.size();
       spline_nbar = gsl_spline_alloc (gsl_interp_linear,n_zzv);
-      gsl_spline_init (spline_nbar, &xa[0], &ya[0], n_zzv);// nbar(z)
+      gsl_spline_init (spline_nbar, &s_data->zz_v[0], &s_data->dndz_v[0], n_zzv);// nbar(z)
     }
   // Preparing for interpolation of the relation r(z):
   gsl_spline *spline_zro;
   gsl_interp_accel *spline_acc_zro;
   if((true==this->params._use_random_catalog() && false==this->params._nbar_tabulated()) || true==this->params._use_file_nbar() || true==this->params._nbar_tabulated())
     {
-      n_rc = rc.size();
-      vector<gsl_real>xa (n_rc,0);
-      vector<gsl_real>ya (n_rc,0);
-      for(int i = 0; i < n_rc; i++)
-        {
-          xa[i] = static_cast<gsl_real>(rc[i]);
-          ya[i] = static_cast<gsl_real>(zz[i]);
-      }
-     spline_zro = gsl_spline_alloc (gsl_interp_linear, n_rc);
-     switch(sys_coord){
-        case(I_EQR): //in this coordinate system, we might need to get z from r and therefrom, nbar from z
-          gsl_spline_init (spline_zro, &xa[0], &ya[0], n_rc); //z(r))
-        break;
-        case(I_EQZ): //in this coordinates we have z, so we just need r(z) and nbar(z)
-          gsl_spline_init (spline_zro, &ya[0], &xa[0], n_rc); //r(z)
-        break;
-       }
+      n_rc = s_data->rr_c.size();
+      spline_zro = gsl_spline_alloc (gsl_interp_linear, n_rc);
+      switch(sys_coord)
+      {
+       case(I_EQR): //in this coordinate system, we might need to get z from r and therefrom, nbar from z
+         gsl_spline_init (spline_zro, &s_data->rr_c[0], &s_data->zz_c[0], n_rc); //z(r))
+       break;
+       case(I_EQZ): //in this coordinates we have z, so we just need r(z) and nbar(z)
+         gsl_spline_init (spline_zro, &s_data->zz_c[0], &s_data->rr_c[0], n_rc); //r(z)
+       break;  
+     }
     }
   switch(sys_coord)
     {
@@ -13739,44 +13663,44 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
 #ifdef _USE_OMP_
 #pragma omp parallel num_threads(NTHREADS)
       {
-    gsl_interp_accel *spline_acc_zro;
-    gsl_interp_accel *spline_acc_nbar;
-    spline_acc_zro = gsl_interp_accel_alloc ();
-    if(true==this->params._use_random_catalog() && false==this->params._nbar_tabulated())
-      spline_acc_nbar = gsl_interp_accel_alloc ();
+        gsl_interp_accel *spline_acc_zro;
+        gsl_interp_accel *spline_acc_nbar;
+        spline_acc_zro = gsl_interp_accel_alloc ();
+        if(true==this->params._use_random_catalog() && false==this->params._nbar_tabulated())
+          spline_acc_nbar = gsl_interp_accel_alloc ();
 #pragma omp for schedule(static, NTHREADS) reduction(min:aXMIN, aYMIN, aZMIN) reduction(max:aXMAX, aYMAX, aZMAX) nowait
 #endif
-    for(ULONG i=0;i<nlines;++i)
-      {
-        real_prec nbar=1.0;
-        real_prec x=this->Halo[i].coord1;
-        real_prec y=this->Halo[i].coord2;
-        real_prec z=this->Halo[i].coord3;
-        //compute nbar:
-        if(true==this->params._use_random_catalog())
-          {
-        if(true==this->params._nbar_tabulated())
-          nbar=this->Halo[i].mean_density;
-        else
-          nbar=1.0;
-          }
-        else
-          this->Halo[i].mean_density=nbar;
-        if(this->params._use_random_catalog())
-          this->Halo[i].mean_density=nbar;
-        if(x > aXMAX)
-          aXMAX = x;
-        if(y > aYMAX)
-          aYMAX = y;
-        if(z > aZMAX)
-          aZMAX = z;
-        if(x < aXMIN)
-          aXMIN = x;
-        if(y < aYMIN)
-          aYMIN = y;
-        if(z < aZMIN)
-          aZMIN = z;
-      } // END parallel loop
+      for(ULONG i=0;i<nlines;++i)
+        {
+          real_prec nbar=1.0;
+          real_prec x=this->Halo[i].coord1;
+          real_prec y=this->Halo[i].coord2;
+          real_prec z=this->Halo[i].coord3;
+          //compute nbar:
+          if(true==this->params._use_random_catalog())
+            {
+            if(true==this->params._nbar_tabulated())
+              nbar=this->Halo[i].mean_density;
+            else
+              nbar=1.0;
+            }
+          else
+            this->Halo[i].mean_density=nbar;
+          if(this->params._use_random_catalog())
+            this->Halo[i].mean_density=nbar;
+          if(x > aXMAX)
+            aXMAX = x;
+          if(y > aYMAX)
+            aYMAX = y;
+          if(z > aZMAX)
+            aZMAX = z;
+          if(x < aXMIN)
+            aXMIN = x;
+          if(y < aYMIN)
+            aYMIN = y;
+          if(z < aZMIN)
+            aZMIN = z;
+        } // END parallel loop
       } // END parallel region
       break;
     case(I_EQR):
@@ -13797,26 +13721,26 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
         equatorial_to_cartesian(ra_s,dec_s,rr,x, y, z); // Transform to cartesian coord:
         if(true==this->params._use_random_catalog()) 	  // Compute the mean number density if not tabulated :
           {
-        if(true==this->params._nbar_tabulated())
-          nbar=this->Halo[i].mean_density;
-        else
-          {
-            if(true==this->params._constant_depth() || true == this->params._use_file_nbar())
-              {
-                zro= gsl_spline_eval(spline_zro, this->Halo[i].coord3, spline_acc_zro);
-                this->Halo[i].redshift=zro;
-                nbar= gsl_spline_eval(spline_nbar, zro, spline_acc_nbar);
-              }
+            if(true==this->params._nbar_tabulated())
+              nbar=this->Halo[i].mean_density;
+           else
+             {
+                if(true==this->params._constant_depth() || true == this->params._use_file_nbar())
+                  {
+                    zro= gsl_spline_eval(spline_zro, this->Halo[i].coord3, spline_acc_zro);
+                    this->Halo[i].redshift=zro;
+                    nbar= gsl_spline_eval(spline_nbar, zro, spline_acc_nbar);
+                  }
             else
-            {
-              zro= gsl_spline_eval(spline_zro, this->Halo[i].coord3, spline_acc_zro); 		      // Interpolate to get redshift
+              {
+                zro= gsl_spline_eval(spline_zro, this->Halo[i].coord3, spline_acc_zro); 		      // Interpolate to get redshift
               // Get ane stimate of the men number density:
 #ifdef HEALPIX
               //	      my_get_mean_density_interpolated(map, this->params._new_n_dndz,this->params._redshift_min_sample, this->params._redshift_max_sample,ra_s, dec_s, zro, dndz_m, &nbar);
 #endif
-            }
-          }
-        }
+                }
+              }
+           }
         // If a random catalog is not used, then use the
         // mean number density obtained from the information of L and Ngal
         // passed through the structure s_data
@@ -13846,21 +13770,22 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
       break;
   case(I_EQZ):
 #pragma omp parallel num_threads(NTHREADS)
-      {
+    {
       spline_acc_zro = gsl_interp_accel_alloc ();
-    if(true==this->params._use_random_catalog() && false==this->params._nbar_tabulated())
-      spline_acc_nbar = gsl_interp_accel_alloc ();
+      if(true==this->params._use_random_catalog() && false==this->params._nbar_tabulated())
+        spline_acc_nbar = gsl_interp_accel_alloc ();
 #pragma omp for schedule(static, NTHREADS) reduction(min:aXMIN, aYMIN, aZMIN) reduction(max:aXMAX, aYMAX, aZMAX) nowait
-    for(ULONG i=0;i<nlines;++i)
-      {
+      for(ULONG i=0;i<nlines;++i)
+       {
         real_prec x=0; real_prec y=0;
-        real_prec z=0; real_prec zro=0; real_prec nbar=0;
+        real_prec z=0; real_prec zro=0; 
         real_prec ra_s=this->Halo[i].coord1/fac;
         real_prec dec_s=this->Halo[i].coord2/fac;
         this->Halo[i].redshift=this->Halo[i].coord3; // just to keep track of the redshift of the tracer
-        real_prec redshift_aux  = this->Halo[i].redshift <zz[0] ? zz[0]: this->Halo[i].redshift;
+        real_prec redshift_aux  = this->Halo[i].redshift < s_data->zz_c[0] ? s_data->zz_c[0]: this->Halo[i].redshift;
         real_prec rr=gsl_spline_eval(spline_zro, redshift_aux, spline_acc_zro); // Transform to comoving distance *
         equatorial_to_cartesian(ra_s, dec_s, rr, x, y, z); 	    // Transform to cartesian coordinates
+        real_prec nbar=mean_density;
         if(true==this->params._use_random_catalog())
           {
            if(false==this->params._nbar_tabulated())
@@ -13869,27 +13794,25 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
                 {
                   zro=this->Halo[i].coord3;
                   nbar=0;
-                  if(zro>=zzv[0] && zro<zzv[zzv.size()-1])
+                  if(zro>=s_data->zz_v[0] && zro< s_data->zz_v.back())
                   {
 #ifdef _use_simple_nbar_assignment_
-                    int zbin=get_bin(zro,zzv[0]-0.5*delta_z_nbar,zzv.size(),delta_z_nbar,false);
-                    nbar=dndz[zbin];
+                    int zbin=get_bin(zro,s_data->zz_v[0]-0.5*delta_z_nbar,s_data->zz_v.size(),delta_z_nbar,false);
+                    nbar=s_data->dndz_v[zbin];
 #else
                       nbar = gsl_spline_eval(spline_nbar, zro, spline_acc_nbar); // Compute the mean number density if not tabulated, either fropm file or from nbar measured from the randoms
 #endif
                   }
                 }
-                 else if(false==this->params._constant_depth() && false == this->params._use_file_nbar())
-                 {
-                  zro=this->Halo[i].coord3;
+              else if(false==this->params._constant_depth() && false == this->params._use_file_nbar())
+               {
+                 zro=this->Halo[i].coord3;
 #ifdef HEALPIX
               //              my_get_mean_density_interpolated(map, this->params._new_n_dndz,this->params._redshift_min_sample, this->params._redshift_max_sample,ra_s, dec_s, zro, dndz_m, &nbar);
 #endif
                 }
-            }
+          }
         }
-        else if(false==this->params._use_random_catalog()) 	    // Compute the mean number density if not tabulated                         *
-          nbar=mean_density;
 #ifdef _USE_REDSHIFT_BINS_
         this->Halo[i].observed=false;
         if(this->Halo[i].coord3<=this->params._redshift_max_sample && this->Halo[i].coord3>=this->params._redshift_min_sample)
@@ -13899,8 +13822,8 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
         this->Halo[i].coord1=x;
         this->Halo[i].coord2=y;
         this->Halo[i].coord3=z;
-        if(false==this->params._use_random_catalog() || false==this->params._nbar_tabulated()) // If we had to compute nbar, assigne it now:
-          this->Halo[i].mean_density=nbar;
+//        if(false==this->params._use_random_catalog() || false==this->params._nbar_tabulated()) // If we had to compute nbar, assigne it now:
+        this->Halo[i].mean_density=nbar;
         // Identify min and max coordinates in order to set size of cube.
         if(x > aXMAX)
           aXMAX = x;
@@ -13934,21 +13857,24 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
         equatorial_to_cartesian(ra_s, dec_s, rr, x, y, z); 	  // Transform to cartesian coord. *
         if(true==this->params._use_random_catalog()) 	  // Compute the mean number density if not tabulated                         *
           {
-        if(true==this->params._nbar_tabulated())
-          nbar=this->Halo[i].mean_density;
-        else{
-          if(true==this->params._constant_depth()  || true == this->params._use_file_nbar()  ){
-            zro=this->Halo[i].coord3;
-            nbar = gsl_spline_eval(spline_nbar, zro, spline_acc_nbar);
-          }
-          else{
-            zro=this->Halo[i].coord3;
+            if(true==this->params._nbar_tabulated())
+              nbar=this->Halo[i].mean_density;
+            else
+             {
+              if(true==this->params._constant_depth()  || true == this->params._use_file_nbar())
+                {
+                  zro=this->Halo[i].coord3;
+                  nbar = gsl_spline_eval(spline_nbar, zro, spline_acc_nbar);
+                }
+              else
+                {
+                  zro=this->Halo[i].coord3;
 #ifdef HEALPIX
             // my_get_mean_density_interpolated(map, this->params._new_n_dndz,this->params._redshift_min_sample, this->params._redshift_max_sample,ra_s, dec_s, zro, dndz_m, &nbar);
 #endif
-          }
-        }
-          }
+                }
+            }
+         }
         else
           nbar=mean_density;
 #ifdef _USE_REDSHIFT_BINS_
@@ -13996,15 +13922,15 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
   // xmin remains the one read in parameter file and xmax is xmin+Lbox,m assuming that we are dealing witha cube.
   if(sys_coord>0)
   {
-  this->params.set_Xoffset(0.5*(aXMAX+aXMIN));
-  this->params.set_Yoffset(0.5*(aYMAX+aYMIN));
-  this->params.set_Zoffset(0.5*(aZMAX+aZMIN));
-  this->params.set_xmin(aXMIN);
-  this->params.set_ymin(aYMIN);
-  this->params.set_zmin(aZMIN);
-  this->params.set_xmax(aXMAX);
-  this->params.set_ymax(aYMAX);
-  this->params.set_zmax(aZMAX);
+    this->params.set_Xoffset(0.5*(aXMAX+aXMIN));
+    this->params.set_Yoffset(0.5*(aYMAX+aYMIN));
+    this->params.set_Zoffset(0.5*(aZMAX+aZMIN));
+    this->params.set_xmin(aXMIN);
+    this->params.set_ymin(aYMIN);
+    this->params.set_zmin(aZMIN);
+    this->params.set_xmax(aXMAX);
+    this->params.set_ymax(aYMAX);
+    this->params.set_zmax(aZMAX);
  }
   real_prec shift_x= this->params._Xoffset() - 0.5*this->params._Lbox();
   real_prec shift_y= this->params._Yoffset() - 0.5*this->params._Lbox();
@@ -14012,20 +13938,20 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
 #ifdef _FULL_VERBOSE_
   cout<<"\t"<<YELLOW<<"Range in x:[" << aXMIN << ":" << aXMAX << "]" << endl;
   cout<<"\t"<<YELLOW<<"Range in y:[" << aYMIN << ":" << aYMAX << "]" << endl;
-      cout<<"\t"<<YELLOW<<"Range in z:[" << aZMIN << ":" << aZMAX << "]" << endl;
-      cout<<"\t"<<YELLOW<<"New Range in x:[" << aXMIN-shift_x << ":" << aXMAX-shift_x << "]" << endl;
-      cout<<"\t"<<YELLOW<<"New Range in y:[" << aYMIN-shift_y << ":" << aYMAX-shift_y << "]" << endl;
-      cout<<"\t"<<YELLOW<<"New Range in z:[" << aZMIN-shift_z << ":" << aZMAX-shift_z << "]" << endl;
-      So.message_screen("Xoffset =",this->params._Xoffset());
-      So.message_screen("Yoffset =",this->params._Yoffset());
-      So.message_screen("Zoffset =",this->params._Zoffset());
-      if(this->type_of_object=="RANDOM" )
-        {
-          if(true==this->params._new_Lbox())
-            So.message_screen("Overwriting value ", this->params._Lbox(), " with ", llz );
-          else
-            So.message_screen("Keeping input box lengh", this->params._Lbox());
-        }
+  cout<<"\t"<<YELLOW<<"Range in z:[" << aZMIN << ":" << aZMAX << "]" << endl;
+  cout<<"\t"<<YELLOW<<"New Range in x:[" << aXMIN-shift_x << ":" << aXMAX-shift_x << "]" << endl;
+  cout<<"\t"<<YELLOW<<"New Range in y:[" << aYMIN-shift_y << ":" << aYMAX-shift_y << "]" << endl;
+  cout<<"\t"<<YELLOW<<"New Range in z:[" << aZMIN-shift_z << ":" << aZMAX-shift_z << "]" << endl;
+  So.message_screen("Xoffset =",this->params._Xoffset());
+  So.message_screen("Yoffset =",this->params._Yoffset());
+  So.message_screen("Zoffset =",this->params._Zoffset());
+  if(this->type_of_object=="RANDOM" )
+    {
+      if(true==this->params._new_Lbox())
+        So.message_screen("Overwriting value ", this->params._Lbox(), " with ", llz );
+      else
+        So.message_screen("Keeping input box lengh", this->params._Lbox());
+    }
 #endif
 #ifdef _USE_SEVERAL_RANDOM_FILES_
   if(true==params._new_Lbox() && ir ==0) // The box is defined with the randoms. If nreading seveal, do it from the first file
@@ -14176,7 +14102,6 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
    double S_r1=0;
    double S_r2=0;
    double normal_bispectrum=0;
-
    real_prec vx=0;
    real_prec vy=0;
    real_prec vz=0;
@@ -14375,11 +14300,9 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
     double S_r2=0;
     double normal_bispectrum=0;
     vector<real_prec>field(this->params._NGRID(),0);
-
   #ifdef _MASS_WEIGHT_POWER_
     vector<real_prec>field_mw(this->params._NGRID(),0);
   #endif
-
   #ifdef _USE_WEIGHTS_IN_POWER_
     vector<real_prec> ow(MAX_NUMBER_WEIGHTS,0);
   #endif
@@ -14442,18 +14365,18 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
    int exp_mas=this->params._mass_assignment();
    // The selection of the MAS is done outside the loop over the tracers, so we change Ntracers ifs for only 4 ifs.
         // Initialize variables used in the estimation of Pk / Bk
-        n_selected=0;
-        S_r_power=0;
-        normal_power=0;
-        W_r=0;
-        S_r1=0;
-        S_r2=0;
-        normal_bispectrum=0;
+    n_selected=0;
+    S_r_power=0;
+    normal_power=0;
+    W_r=0;
+    S_r1=0;
+    S_r2=0;
+    normal_bispectrum=0;
 #ifdef _USE_OMP_
 #pragma omp parallel for reduction(+:n_selected,S_r_power,normal_power,W_r)
 #endif
-        for (ULONG i=0;i< nlines ;++i)
-          {
+     for (ULONG i=0;i< nlines ;++i)
+       {
             real_prec x=this->Halo[i].coord1;
             real_prec y=this->Halo[i].coord2;
             real_prec z=this->Halo[i].coord3;
@@ -14503,7 +14426,6 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
                     S_r2 += ptotal_weight3;
                     normal_bispectrum+= nbar * nbar * ptotal_weight3;
 #endif
-
 #ifdef _MASS_WEIGHT_POWER_
 #ifdef _USE_OMP_
 #pragma atomic
