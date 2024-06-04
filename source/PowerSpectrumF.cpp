@@ -101,7 +101,8 @@ void PowerSpectrumF::write_fftw_parameters()
   if(this->params._use_random_catalog())
       out<<"Shot_noise (window)         "<<this->fftw_functions._shot_noise_window()<<endl;
   out<<"Normalization               "<<this->fftw_functions._normal_power()<<endl;
-  out<<"Mean nbar(from weights)     "<<(this->fftw_functions._n_ran()-this->fftw_functions._w_r())/(this->params._Pest()*this->fftw_functions._w_r())<<" (Mpc h^-1)^(-3)"<<endl;
+  if(this->params._use_random_catalog())
+    out<<"Mean nbar(from weights)     "<<(this->fftw_functions._n_ran()-this->fftw_functions._w_r())/(this->params._Pest()*this->fftw_functions._w_r())<<" (Mpc h^-1)^(-3)"<<endl;
   out<<"Sum nw² galaxies            "<<this->fftw_functions._s_g()<<endl;
   if(this->params._use_random_catalog())
       out<<"Sum nw² randoms             "<<this->fftw_functions._s_r()<<endl;
@@ -113,16 +114,21 @@ void PowerSpectrumF::write_fftw_parameters()
       out<<"Bin size for W(k)           "<<this->params._d_DeltaK_window()<<" h/Mpc"<<endl;
   out<<"Nyquist Frequency           "<<0.5*this->params._Nft()*(this->params._d_deltak_0())<<" h/Mpc"<<endl;
   out<<"******************************************************************************"<<endl;
-  out<<BLUE<<"COSMOLOGICAL PARAMETERS"<<RESET<<endl;
-  out<<"Omega Matter                "<<this->params.s_cosmo_pars.Om_matter<<endl;
-  out<<"Omega Vac                   "<<this->params.s_cosmo_pars.Om_vac<<endl;
-  out<<"Omega baryons               "<<this->params.s_cosmo_pars.Om_baryons<<endl;
-  out<<"Omega curvature             "<<this->params.s_cosmo_pars.Om_k<<endl;
-  out<<"wde_eof                       "<<this->params.s_cosmo_pars.wde_eos<<endl;
-  out<<"Hubble parameter            "<<this->params.s_cosmo_pars.Hubble<<endl;
-  out<<"Sigma_8                     "<<this->params.s_cosmo_pars.sigma8<<endl;
-  out<<"Minimim redshift            "<<this->params._redshift_min_sample()<<endl;
-  out<<"Maximum redshift            "<<this->params._redshift_max_sample()<<endl;
+  if(this->params._sys_of_coord_g()>0)
+  {
+    out<<BLUE<<"COSMOLOGICAL PARAMETERS"<<RESET<<endl;
+    out<<"Omega Matter                "<<this->params.s_cosmo_pars.Om_matter<<endl;
+    out<<"Omega Vac                   "<<this->params.s_cosmo_pars.Om_vac<<endl;
+    out<<"Omega baryons               "<<this->params.s_cosmo_pars.Om_baryons<<endl;
+    out<<"Omega curvature             "<<this->params.s_cosmo_pars.Om_k<<endl;
+    out<<"wde_eof                       "<<this->params.s_cosmo_pars.wde_eos<<endl;
+    out<<"Hubble parameter            "<<this->params.s_cosmo_pars.Hubble<<endl;
+    out<<"Sigma_8                     "<<this->params.s_cosmo_pars.sigma8<<endl;
+    out<<"Minimim redshift            "<<this->params._redshift_min_sample()<<endl;
+    out<<"Maximum redshift            "<<this->params._redshift_max_sample()<<endl;
+  }
+  else
+    out<<"No cosmologial parameters have been used. "<<endl;
   out.close();
   out<<"******************************************************************************"<<endl;
   out<<"******************************************************************************"<<endl;
@@ -772,7 +778,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
           if(this->params._i_mass_g()>0){
             mm=pow(10,this->params._LOGMASSmin());
            }
-            else
+          else
             mm=0;
 #else
             mm=log10(this->params._MASScuts(i));
@@ -804,35 +810,24 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
     //and use the nmbar tabulated in the catalogs or computed in this code
     mean_density=1.0;
     if(false==this->params._use_random_catalog())
-          {
-            So.message_screen("Using particles in a box.");
-            mean_density=static_cast<real_prec>(this->N_galaxy)/pow(this->params._Lbox(),3);
-            So.message_screen("Mean Number density = ",mean_density," (Mpc/h)^(-3)");
-          }
-        So.DONE();
-       So.message_screen("Maximum Nfft allowed by mean density = ",2.*pow(N_galaxy, 1./3.));
-       real_prec Lside=this->params._Lbox();
-        mean_density=this->N_galaxy/pow(Lside,3);  //This is  raw estimate!!
-        if(false==this->params._use_random_catalog())
-          mean_density=this->N_galaxy/pow(Lside,3);
-        else
-          mean_density=1.0;
-        s_data_structure s_data_struct_prop;
-        vector<gsl_real> z_v;
-        vector<gsl_real> dndz_v;
-        bool compute_dndz=false;
-        if(true==this->params._use_random_catalog())
-          {
+        So.message_screen("Using particles in a box.");
+    real_prec Lside=this->params._Lbox();
+    s_data_structure s_data_struct_prop;
+    vector<gsl_real> z_v;
+    vector<gsl_real> dndz_v;
+    bool compute_dndz=false;
+    if(true==this->params._use_random_catalog())
+      {
 #ifdef _USE_SEVERAL_RANDOM_FILES_
-            for(int ir=0;ir<this->params._NRANDOMfiles();++ir)
-            {
-             this->add_catalogues_ran(mm, ir);
+        for(int ir=0;ir<this->params._NRANDOMfiles();++ir)
+        {
+          this->add_catalogues_ran(mm, ir);
 #else
-             this->add_catalogues_ran(mm);
+        this->add_catalogues_ran(mm);
 #endif
            // 2
-           if(this->params._sys_of_coord_r()>0)
-             {
+        if(this->params._sys_of_coord_r()>0)
+          {
             // The new Lbox is updated in this method into the instance params belonging to the class random_cat
             if(false==this->params._nbar_tabulated() && false==this->params._use_file_nbar())// extra security check
               {
@@ -858,7 +853,6 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
                 if(0==ir)// resize only when reading the first file, For the others, we just keep on filling it.
                  {
 #endif
-
           // Read the nbar file provided from the parameter file, done only for the first "ir"
                vector<real_prec> nb;
                ULONG nzl=this->File.read_file(this->params._file_nbar(),nb, 1);
@@ -886,7 +880,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
                 }
 #endif
             }
-                s_data_struct_prop={
+             s_data_struct_prop={
               mean_density,
               compute_dndz,
               z_v,
@@ -900,7 +894,6 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
 #else
             this->random_cat.ang_to_cart_coordinates(&s_data_struct_prop);
 #endif
-
             // 4: Interpolate on the mesh
             if(this->params._statistics()=="Pk_y_ds")
               {
@@ -932,7 +925,6 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
                 //so that we can get Lbox from the first one and define the
                 //mesh onto whcih the rest will be interpolated! This is important
 #endif
-
                 // ############################# This is important ################################################################################################
                 // update even if no new_Lbox is requested, as in any case the offsets are to be computed and used by the fftwfunctions' methods (multipoles mainly)
                this->set_params(this->random_cat.params);                // Update the instance parms in this class from the instance params in random_cat
@@ -954,12 +946,11 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
             this->random_cat.Halo.clear();
             this->random_cat.Halo.shrink_to_fit();
            }// closes if(true==this->params._use_random_catalog() && this->params._sys_of_coord_r()>0)
-
 #ifdef _USE_SEVERAL_RANDOM_FILES_
            this->So.message_screen("\t\tPartial number of randoms = ", get_nobjects(this->random_cat.field_external));
             }
 #endif
-         }
+         } // closes if(true==this->params._use_random_catalog())
 #ifdef _USE_SEVERAL_RANDOM_FILES_
            this->So.message_screen("\tTotal number of randoms = ", get_nobjects(this->random_cat.field_external));
 #endif
@@ -971,47 +962,46 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
         // 5 Update params
         // 6 Release memmory from the catalog if relative bias is not to be computed.
         this->add_catalogues_gal(mm);
-        if(this->params._sys_of_coord_g()>0)
-        {
-            // Read
-            // Convert to cartessian coords
+        // Read
+        // Convert to cartessian coords
 #ifdef _USE_SEVERAL_RANDOM_FILES_
-            this->tracer_cat.ang_to_cart_coordinates(&s_data_struct_prop,0);
+        this->tracer_cat.ang_to_cart_coordinates(&s_data_struct_prop,0);
 #else
-            this->tracer_cat.ang_to_cart_coordinates(&s_data_struct_prop);
+        this->tracer_cat.ang_to_cart_coordinates(&s_data_struct_prop);
 #endif
-            // Do direct sum or interpolate on a mesh to do fftw
-            if(this->params._statistics()=="Pk_y_ds")//will be deprecated
-              {
-                s_data_structure_direct_sum s_data_struct_g_ds={
-                  this->tracer_cat.Halo,
-                  this->tracer_cat._NCOLS(),
-                  this->tracer_cat._type_of_object(),
-                  mean_density,
-                  compute_dndz,
-                  z_v,
-                  dndz_v,
-                  vzz,
-                  vrc
-                };
-                fftw_functions.get_power_moments_fourier_grid_ds_yam(&s_data_struct_g_ds);
-              }
-            else
+          // Do direct sum or interpolate on a mesh to do fftw
+        if(this->params._statistics()=="Pk_y_ds")//will be deprecated
+          {
+            s_data_structure_direct_sum s_data_struct_g_ds={
+              this->tracer_cat.Halo,
+              this->tracer_cat._NCOLS(),
+              this->tracer_cat._type_of_object(),
+              mean_density,
+              compute_dndz,
+              z_v,
+              dndz_v,
+              vzz,
+              vrc
+            };
+            fftw_functions.get_power_moments_fourier_grid_ds_yam(&s_data_struct_g_ds);
+          }
+        else
 #ifdef _USE_SEVERAL_RANDOM_FILES_ // we do not need it explcitely. but as we did not create a method only for randoms, we pass it as needed filling with 0 if several files are used
-              this->tracer_cat.get_interpolated_density_field(false,"any",0); // Interpolate tracer catalog on a mesh
+          this->tracer_cat.get_interpolated_density_field(false,"any",0); // Interpolate tracer catalog on a mesh
 #else
-              this->tracer_cat.get_interpolated_density_field(false,"any"); // Interpolate tracer catalog on a mesh
+          this->tracer_cat.get_interpolated_density_field(false,"any"); // Interpolate tracer catalog on a mesh
 #endif
-            //Update the instance params in  in the class tracer_cat from the instance params in random_cat
-            // such that the offsets , and derived parameters are applying the same to the tracer cat
-            this->tracer_cat.set_params(this->random_cat.params);
-            // Free memmory if necessary. If not, released below
-            if(false==this->params._Get_tracer_relative_bias())
-              {
-                this->tracer_cat.Halo.clear();
-                this->tracer_cat.Halo.shrink_to_fit();
-             }
-        }
+        //Update the instance params in  in the class tracer_cat from the instance params in random_cat
+        // such that the offsets , and derived parameters are applying the same to the tracer cat
+        if(true==this->params._use_random_catalog())
+          this->tracer_cat.set_params(this->random_cat.params);
+        // Free memmory if necessary. If not, released below
+        if(false==this->params._Get_tracer_relative_bias())
+          {
+            this->tracer_cat.Halo.clear();
+            this->tracer_cat.Halo.shrink_to_fit();
+          }
+        
         this->fftw_functions.resize_fftw_vectors();
         if(true==verbose)
           fftw_functions.write_fftw_parameters();
@@ -1021,24 +1011,29 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
         fftw_functions.set_s_g(this->tracer_cat._s_g());
         fftw_functions.set_sg1(this->tracer_cat._sg1());
         fftw_functions.set_sg2(this->tracer_cat._sg2());
-        fftw_functions.set_n_ran(this->random_cat._n_gal());
-        fftw_functions.set_w_r(this->random_cat._w_g());
-        fftw_functions.set_s_r(this->random_cat._s_g());
-        fftw_functions.set_sr1(this->random_cat._sg1());
-        fftw_functions.set_sr2(this->random_cat._sg2());
-        fftw_functions.set_normal_p(this->random_cat._normal_p());
-        fftw_functions.set_normal_b(this->random_cat._normal_b());
-        fftw_functions.get_parameters_estimator(verbose);
-        if(false==this->params._use_random_catalog())
-          this->fftw_functions.raw_sampling(pow(this->params._Lbox(),3));
-        else
+        if(true==this->params._use_random_catalog())
         {
-        // Here we need to pass the fields from catalog to fftw:
+          fftw_functions.set_n_ran(this->random_cat._n_gal());
+          fftw_functions.set_w_r(this->random_cat._w_g());
+          fftw_functions.set_s_r(this->random_cat._s_g());
+          fftw_functions.set_sr1(this->random_cat._sg1());
+          fftw_functions.set_sr2(this->random_cat._sg2());
+          fftw_functions.set_normal_p(this->random_cat._normal_p());
+          fftw_functions.set_normal_b(this->random_cat._normal_b());
+        }
+        fftw_functions.get_parameters_estimator(verbose);
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
         for(ULONG i=0;i<this->params._NGRID();++i)
            this->fftw_functions.set_data_g(i,this->tracer_cat.field_external[i]);// Set rho_r to its container in fftw_functions
+        if(false==this->params._use_random_catalog())
+        {
+          this->fftw_functions.raw_sampling(pow(this->params._Lbox(),3));// jut to set some numbers
+        }
+        else  if(true==this->params._use_random_catalog())
+          {
+        // Here we need to pass the fields from catalog to fftw:
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
@@ -1047,7 +1042,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
         }
        // If relative bias is to be computed, do it  and release memmory
         if(true==this->params._Get_tracer_relative_bias())
-            {
+          {
                 // Vamos a generar uan muestra pequeña aleatoria y a esa muestra le asignamos el bias
               this->tracer_cat.select_random_subsample_v(0.001); // Esto generara un .observed=1 si lo tomamos o 0 si no
               this->object_by_object_rbias(); // Assign and print downsampled catalog
@@ -1061,7 +1056,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
           this->random_cat.field_external.shrink_to_fit();
           this->fftw_functions.get_fluctuation(); // The container fftw_functions.delta_h is generated
       } // CLOSES if this is catalog or field
-        else if (this->params._input_type()=="delta_grid" || this->params._input_type()=="density_grid"  ) // Else, we read the delta from this input file.
+    else if (this->params._input_type()=="delta_grid" || this->params._input_type()=="density_grid"  ) // Else, we read the delta from this input file.
          {
            So.message_screen("Starting with density field on a grid");
            real_prec ngal_new;
@@ -4082,15 +4077,11 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, vector<s_Halo>& tracer
 					     So.DONE();
 					     blssc.close();
 					   }
-					 
-					 
 					 // *****************************************************************************************
                                          if(Nbb !=Number_of_properties) //this means, free memory except the last pass, for it will be done directly by the destructor and it compaints if it finds nothing to free
                                            fftw_functions.free_fftw_vectors();
-
-
 					 // *****************************************************************************************
-                                         // *****************************************************************************************
+            // *****************************************************************************************
                                          // here we need to cpmpute kmax as Min(this->params._kmax_tracer_bias() and k such that P=0.1Pshot)
 					 
                                          real_prec shot_noise=pow(this->params._Lbox(),3)/static_cast<real_prec>(in_new); // Poisson Shot noise
