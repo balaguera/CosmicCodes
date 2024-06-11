@@ -446,19 +446,19 @@ void PowerSpectrumF::compute_marked_correlation_function()
     real_prec conversion_factor=1.;
     if(this->params._redshift_space_coords_g() == false)
       {
-    if("kmps"==this->params._vel_units_g())
-      conversion_factor=(1.+this->params.s_cosmo_pars.cosmological_redshift)/(this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift, (void *)&this->params.s_cosmo_pars));
-    else if("alpt"==this->params._vel_units_g())
-      conversion_factor= cgs_Mpc/(this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift, (void *)&this->params.s_cosmo_pars));
-    else if("Mpcph"==this->params._vel_units_g())
-      conversion_factor=1;
-#ifdef _FULL_VERBOSE_
-    So.message_screen("Current redshift =",this->params.s_cosmo_pars.cosmological_redshift);
-    So.message_screen("Hubble function at current redshift =",this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift, (void *)&this->params.s_cosmo_pars));
-    So.message_screen("Conversion factor =",conversion_factor);
-#endif
-    So.message_screen("Hubble function at current redshift =",this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift, (void *)&this->params.s_cosmo_pars));
-      }
+        if("kmps"==this->params._vel_units_g())
+          conversion_factor=(1.+this->params.s_cosmo_pars.cosmological_redshift)/(this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift));
+        else if("alpt"==this->params._vel_units_g())
+          conversion_factor= cgs_Mpc/(this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift));
+        else if("Mpcph"==this->params._vel_units_g())
+          conversion_factor=1;
+    #ifdef _FULL_VERBOSE_
+        So.message_screen("Current redshift =",this->params.s_cosmo_pars.cosmological_redshift);
+        So.message_screen("Hubble function at current redshift =",this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift));
+        So.message_screen("Conversion factor =",conversion_factor);
+    #endif
+        So.message_screen("Hubble function at current redshift =",this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift));
+          }
 #endif
     real_prec lrmin= this->params._rbin_type() == "linear" ? this->params._rmin_cf():  log10(this->params._rmin_cf());
     vector<ULONG> count_priv(this->params._Nbins_cf()*NTHREADS,0);
@@ -739,71 +739,70 @@ void PowerSpectrumF::compute_cross_power_spectrum_grid(bool dm,string file_X, st
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
-    So.enter(__PRETTY_FUNCTION__);
-    this->So.welcome_message();
+  So.enter(__PRETTY_FUNCTION__);
+  this->So.welcome_message();
 #ifdef _USE_OMP_
-    int NTHREADS=_NTHREADS_;
-    omp_set_num_threads(NTHREADS);
+  int NTHREADS=_NTHREADS_;
+  omp_set_num_threads(NTHREADS);
 #endif
     // Output file, keep roor in case intervals are used
-    string file_pow=this->file_power;
+  string file_pow=this->file_power;
     // Initizalize number of intervals
-    int N_intervals=1;
+  int N_intervals=1;
 #ifdef  _JPAS_BINS_POWER_
 #ifdef _USE_MASS_AS_OBSERVABLE_POWER_ //deprec
-    N_intervals=this->params._NMASSbins_power(); //deprec
+  N_intervals=this->params._NMASSbins_power(); //deprec
 #elif defined _USE_VMAX_AS_PRIMARY_OBSERVABLE_POWER_ //deprec
-    N_intervals=this->params._NVMAXbins_power(); //deprec
+  N_intervals=this->params._NVMAXbins_power(); //deprec
 #endif
 #endif
 #ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_POWER_ //deprec
-        for(int i=0;i<N_intervals;++i)cout<<"Bin "<<i<<"  :"<<this->params._VMAXbins_min(i)<<"  "<<this->params._VMAXbins_max(i)<<endl;
+  for(int i=0;i<N_intervals;++i)cout<<"Bin "<<i<<"  :"<<this->params._VMAXbins_min(i)<<"  "<<this->params._VMAXbins_max(i)<<endl;
 #elif defined _USE_MASS_AS_PRIMARY_OBSERVABLE_POWER_  //deprec
-        for(int i=0;i<N_intervals;++i)cout<<"Bin "<<i<<"  :"<<pow(10,this->params._MASSbins_min(i))<<"  "<<pow(10,this->params._MASSbins_max(i))<<endl;
+  for(int i=0;i<N_intervals;++i)cout<<"Bin "<<i<<"  :"<<pow(10,this->params._MASSbins_min(i))<<"  "<<pow(10,this->params._MASSbins_max(i))<<endl;
 #endif
-      if(I_EQZ==this->params._sys_of_coord_g())
-          So.write_cosmo_parameters((void *)&this->params.s_cosmo_pars);
-        // ***********************************************************
-     // Define some structures here
-      s_data_structure s_data_struct_r; // this is defiend here for the fkp error bars need the info from the randoms. So far at this point it is only defiend but not filled
-      s_data_structure_direct_sum s_data_struct_r_ds; // this is defiend here for the fkp error bars need the info from the randoms. So far at this point it is only defiend but not filled
-     // ***********************************************************
-     this->File.input_type=this->params._input_type();
+  if(I_EQZ==this->params._sys_of_coord_g())
+    So.write_cosmo_parameters((void *)&this->params.s_cosmo_pars);
+// ***********************************************************
+// Define some structures here
+  s_data_structure s_data_struct_r; // this is defiend here for the fkp error bars need the info from the randoms. So far at this point it is only defiend but not filled
+  s_data_structure_direct_sum s_data_struct_r_ds; // this is defiend here for the fkp error bars need the info from the randoms. So far at this point it is only defiend but not filled
+// ***********************************************************
+  this->File.input_type=this->params._input_type();
 #if defined (_USE_MASS_CUTS_PK_) ||  defined (_USE_ALL_PK_)
-      if(this->params._input_type()!="catalog")
-        So.message_warning("Warning: expecting catalog to perform mass cuts when density field is provided");
-      real_prec mm=0;
-      if("catalog"==this->params._input_type())
+  if(this->params._input_type()!="catalog")
+    So.message_warning("Warning: expecting catalog to perform mass cuts when density field is provided");
+  real_prec mm=0;
+  if("catalog"==this->params._input_type())
 #ifdef _USE_ALL_PK_
-          if(this->params._i_mass_g()>0){
-            mm=pow(10,this->params._LOGMASSmin());
-           }
-          else
-            mm=0;
+    if(this->params._i_mass_g()>0)
+      mm=pow(10,this->params._LOGMASSmin());
+    else
+      mm=0;
 #else
-            mm=log10(this->params._MASScuts(i));
+    mm=log10(this->params._MASScuts(i));
 #endif
-     if(this->params._input_type()=="catalog")
-      {
+  if(this->params._input_type()=="catalog")// This is a long if
+    {
            // Tabulate r-z relation if radial coordinate is redshift
-        vector<gsl_real>vzz;
-        vector<gsl_real>vrc;
-        if(I_EQR==this->params._sys_of_coord_g() || I_EQZ==this->params._sys_of_coord_g())
-          {
-             So.message_screen("Computing comoving distances in the range",this->params._redshift_min_sample(),"<z<", this->params._redshift_max_sample());
-             vzz.resize(params._Nbins_redshift(),0);
-             vrc.resize(params._Nbins_redshift(),0);
-             cosmology.Comoving_distance_tabulated(this->params._redshift_min_sample(),this->params._redshift_max_sample(), vzz,vrc);
-             So.DONE();
-          }
+      vector<gsl_real>vzz;
+      vector<gsl_real>vrc;
+      if(I_EQR==this->params._sys_of_coord_g() || I_EQZ==this->params._sys_of_coord_g())
+        {
+          So.message_screen("Computing comoving distances in the range",this->params._redshift_min_sample(),"<z<", this->params._redshift_max_sample());
+          vzz.resize(params._Nbins_redshift(),0);
+          vrc.resize(params._Nbins_redshift(),0);
+          this->cosmology.Comoving_distance_tabulated(this->params._redshift_min_sample(),this->params._redshift_max_sample(), vzz,vrc);
+          So.DONE();
+        }
         // Now read the galaxy and random catalog
-    #elif defined (_USE_MASS_BINS_PK_)
-    #ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_POWER_
+#elif defined (_USE_MASS_BINS_PK_)
+#ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_POWER_
                 this->add_catalogues(this->params._VMAXbins_min(im),this->params._VMAXbins_max(im));
-    #elif defined _USE_MASS_AS_OBSERVABLE_POWER_
+#elif defined _USE_MASS_AS_OBSERVABLE_POWER_
                 this->add_catalogues(pow(10,this->params._MASSbins_min(im)),pow(10,this->params._MASSbins_max(im)));
-    #endif
-    #endif
+#endif
+#endif
     // If applies, give a first estimate of mean number density from a box
     // in case we do not use random catalog                                                    *
     //If a random catalog is used, set this numer to 1
@@ -811,7 +810,6 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
     mean_density=1.0;
     if(false==this->params._use_random_catalog())
         So.message_screen("Using particles in a box.");
-    real_prec Lside=this->params._Lbox();
     s_data_structure s_data_struct_prop;
     vector<gsl_real> z_v;
     vector<gsl_real> dndz_v;
@@ -825,14 +823,13 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
 #else
         this->add_catalogues_ran(mm);
 #endif
-           // 2
+// 2
         if(this->params._sys_of_coord_r()>0)
           {
             // The new Lbox is updated in this method into the instance params belonging to the class random_cat
             if(false==this->params._nbar_tabulated() && false==this->params._use_file_nbar())// extra security check
               {
                  compute_dndz=true;
-
 #ifdef _USE_SEVERAL_RANDOM_FILES_
                 if(0==ir)// resize only when reading the first file, For the others, we just keep on filling it.
                  {
@@ -848,7 +845,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
                  this->So.message_warning("In PowerSpectrumF.cpp, variable alpha has been set to one. Must be Ngal/Nran. Line ",__LINE__);
               }
             else if(false==this->params._nbar_tabulated() && true==this->params._use_file_nbar())
-            {
+              {
 #ifdef _USE_SEVERAL_RANDOM_FILES_
                 if(0==ir)// resize only when reading the first file, For the others, we just keep on filling it.
                  {
@@ -859,10 +856,13 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
                ULONG ncols_nb=(static_cast<ULONG>(nb.size()/nzl));
                z_v.resize(nzl,0);
                dndz_v.resize(nzl,0);
+               real_prec fsky=this->params._area_survey()*pow(M_PI/180.0,2)/(4.0*M_PI);
+               So.message_screen("Computed f_sky", fsky);
                for(ULONG i=0;i<nzl;++i)
                 {
-                  z_v[i]=nb[i*ncols_nb];  // redshift, assumed to be in the first column of the dNdz file
-                  dndz_v[i]=nb[1+i*ncols_nb]; // mean number density
+                  z_v[i]=nb[i*ncols_nb];  // central redshift, assumed to be in the first column of the dNdz file
+                  dndz_v[i]=27.62*nb[1+i*ncols_nb];///fsky;//  /(fsky*nb[2+i*ncols_nb]); // mean number density being read here, column 2 is bin volume (area included?)
+                // 27.3 es lo que neceisto par allegar al dndz anterior, puede ser el area?, 
                 }
                nb.clear(); nb.shrink_to_fit();
 #ifdef _USE_SEVERAL_RANDOM_FILES_
@@ -880,7 +880,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
                 }
 #endif
             }
-             s_data_struct_prop={
+           s_data_struct_prop={
               mean_density,
               compute_dndz,
               z_v,
@@ -1001,37 +1001,35 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
             this->tracer_cat.Halo.clear();
             this->tracer_cat.Halo.shrink_to_fit();
           }
-        
         this->fftw_functions.resize_fftw_vectors();
         if(true==verbose)
           fftw_functions.write_fftw_parameters();
         // PASS parameter computed in the class Catalog when interpolating to the fftwFunction class
-        fftw_functions.set_n_gal(this->tracer_cat._n_gal());
-        fftw_functions.set_w_g(this->tracer_cat._w_g());
-        fftw_functions.set_s_g(this->tracer_cat._s_g());
-        fftw_functions.set_sg1(this->tracer_cat._sg1());
-        fftw_functions.set_sg2(this->tracer_cat._sg2());
+        this->fftw_functions.set_n_gal(this->tracer_cat._n_gal());
+        this->fftw_functions.set_w_g(this->tracer_cat._w_g());
+        this->fftw_functions.set_s_g(this->tracer_cat._s_g());
+        this->fftw_functions.set_sg1(this->tracer_cat._sg1());
+        this->fftw_functions.set_sg2(this->tracer_cat._sg2());
         if(true==this->params._use_random_catalog())
-        {
-          fftw_functions.set_n_ran(this->random_cat._n_gal());
-          fftw_functions.set_w_r(this->random_cat._w_g());
-          fftw_functions.set_s_r(this->random_cat._s_g());
-          fftw_functions.set_sr1(this->random_cat._sg1());
-          fftw_functions.set_sr2(this->random_cat._sg2());
-          fftw_functions.set_normal_p(this->random_cat._normal_p());
-          fftw_functions.set_normal_b(this->random_cat._normal_b());
-        }
-        fftw_functions.get_parameters_estimator(verbose);
+          {
+            this->fftw_functions.set_n_ran(this->random_cat._n_gal());
+            this->fftw_functions.set_w_r(this->random_cat._w_g());
+            this->fftw_functions.set_s_r(this->random_cat._s_g());
+            this->fftw_functions.set_sr1(this->random_cat._sg1());
+            this->fftw_functions.set_sr2(this->random_cat._sg2());
+            this->fftw_functions.set_normal_p(this->random_cat._normal_p());
+            this->fftw_functions.set_normal_b(this->random_cat._normal_b());
+          }
+        this->fftw_functions.get_parameters_estimator(verbose);
 #ifdef _USE_OMP_
-#pragma omp parallel for
+#pragma omp parallel for 
 #endif
         for(ULONG i=0;i<this->params._NGRID();++i)
            this->fftw_functions.set_data_g(i,this->tracer_cat.field_external[i]);// Set rho_r to its container in fftw_functions
+
         if(false==this->params._use_random_catalog())
-        {
-          this->fftw_functions.raw_sampling(pow(this->params._Lbox(),3));// jut to set some numbers
-        }
-        else  if(true==this->params._use_random_catalog())
+          this->fftw_functions.raw_sampling(pow(this->params._Lbox(),3));//This set normalization and SN for box
+        else  
           {
         // Here we need to pass the fields from catalog to fftw:
 #ifdef _USE_OMP_
@@ -1039,22 +1037,25 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
 #endif
           for(ULONG i=0;i<this->params._NGRID();++i)
             this->fftw_functions.set_data_r(i,this->random_cat.field_external[i]); // Set rho_r to its container in fftw_functions
-        }
+          }
        // If relative bias is to be computed, do it  and release memmory
         if(true==this->params._Get_tracer_relative_bias())
           {
                 // Vamos a generar uan muestra pequeña aleatoria y a esa muestra le asignamos el bias
-              this->tracer_cat.select_random_subsample_v(0.001); // Esto generara un .observed=1 si lo tomamos o 0 si no
-              this->object_by_object_rbias(); // Assign and print downsampled catalog
-              this->tracer_cat.Halo.clear();
-              this->tracer_cat.Halo.shrink_to_fit();
+            this->tracer_cat.select_random_subsample_v(0.001); // Esto generara un .observed=1 si lo tomamos o 0 si no
+            this->object_by_object_rbias(); // Assign and print downsampled catalog
+            this->tracer_cat.Halo.clear();
+            this->tracer_cat.Halo.shrink_to_fit();
           }
           // Free the memmory used for the interpolation of tracer and randoms
-          this->tracer_cat.field_external.clear();
-          this->tracer_cat.field_external.shrink_to_fit();
-          this->random_cat.field_external.clear();
-          this->random_cat.field_external.shrink_to_fit();
-          this->fftw_functions.get_fluctuation(); // The container fftw_functions.delta_h is generated
+        this->tracer_cat.field_external.clear();
+        this->tracer_cat.field_external.shrink_to_fit();
+        if(true==this->params._use_random_catalog())
+          {
+            this->random_cat.field_external.clear();
+            this->random_cat.field_external.shrink_to_fit();
+          }
+        this->fftw_functions.get_fluctuation(); // The container fftw_functions.delta_h is generated
       } // CLOSES if this is catalog or field
     else if (this->params._input_type()=="delta_grid" || this->params._input_type()=="density_grid"  ) // Else, we read the delta from this input file.
          {

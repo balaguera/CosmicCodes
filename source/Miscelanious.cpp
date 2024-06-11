@@ -132,7 +132,6 @@ void getDensity_NGP(ULONG N1, ULONG N2, ULONG N3,real_prec L1, real_prec L2, rea
     }
   }
 #endif
-  
 #ifndef  _GET_INTERPOLATED_FIELDS_FROM_BIN_FILES_
   if(false==weightmass)
     {
@@ -140,7 +139,6 @@ void getDensity_NGP(ULONG N1, ULONG N2, ULONG N3,real_prec L1, real_prec L2, rea
       So.message_screen("Number of objects assigned to grid =",NTOT);
 #endif
 #endif
-      
 #ifdef _FULL_VERBOSE_
       if(NLOSS!=0)
 	if(NLOSS!=0) So.message_screen("mass assignment found",NLOSS," particles outside mesh boundary");
@@ -626,9 +624,9 @@ void getDensity_CIC(s_params_box_mas *params,const vector<s_Halo>&Halo, vector<r
         if((xpos>=0 && xpos<L1) && (ypos>=0 && ypos<L2) && (zpos>0 && zpos<L3))
 	  {	
 	    NTOT++;
-            ULONG i = static_cast<ULONG>(floor((xpos)/d1+BIN_SHIFT)); // indices of the cell of the particle
-            ULONG j = static_cast<ULONG>(floor((ypos)/d2+BIN_SHIFT));
-            ULONG k = static_cast<ULONG>(floor((zpos)/d3+BIN_SHIFT));
+      ULONG i = static_cast<ULONG>(floor((xpos)/d1+BIN_SHIFT)); // indices of the cell of the particle
+      ULONG j = static_cast<ULONG>(floor((ypos)/d2+BIN_SHIFT));
+      ULONG k = static_cast<ULONG>(floor((zpos)/d3+BIN_SHIFT));
 	    i = static_cast<ULONG>(fmod(real_prec(i),real_prec(N1)));
 	    j = static_cast<ULONG>(fmod(real_prec(j),real_prec(N2)));
 	    k = static_cast<ULONG>(fmod(real_prec(k),real_prec(N3)));
@@ -638,9 +636,9 @@ void getDensity_CIC(s_params_box_mas *params,const vector<s_Halo>&Halo, vector<r
 	    real_prec xc = static_cast<real_prec>(i); 
 	    real_prec yc = static_cast<real_prec>(j);
 	    real_prec zc = static_cast<real_prec>(k);
-            real_prec dx = (xpos)/d1 - xc; // distance of particle to center of the cell
-            real_prec dy = (ypos)/d2 - yc;
-            real_prec dz = (zpos)/d3 - zc;
+      real_prec dx = (xpos)/d1 - xc; // distance of particle to center of the cell
+      real_prec dy = (ypos)/d2 - yc;
+      real_prec dz = (zpos)/d3 - zc;
 	    real_prec tx = num_1 - dx;
 	    real_prec ty = num_1 - dy;
 	    real_prec tz = num_1 - dz;
@@ -2676,32 +2674,32 @@ void grid_assignment_CIC(Params *params,real_prec x, real_prec y, real_prec z,re
   ULONG k_idx[] = {Zb-1, zc, Zf+1};
   vector<real_prec> MAS_xx =
     {
-      MAS_CIC((xxb  - x)/params->_d_delta_x()),
-      MAS_CIC((xx   - x)/params->_d_delta_x()),
-      MAS_CIC((xxf  - x)/params->_d_delta_x()),
+      MAS_CIC((xxb  - x)/static_cast<double>(params->_d_delta_x())),
+      MAS_CIC((xx   - x)/static_cast<double>(params->_d_delta_x())),
+      MAS_CIC((xxf  - x)/static_cast<double>(params->_d_delta_x())),
     };
   vector<real_prec> MAS_yy =
     {
-      MAS_CIC((yyb  - y)/params->_d_delta_y()),
-      MAS_CIC((yy   - y)/params->_d_delta_y()),
-      MAS_CIC((yyf  - y)/params->_d_delta_y()),
+      MAS_CIC((yyb  - y)/static_cast<double>(params->_d_delta_y())),
+      MAS_CIC((yy   - y)/static_cast<double>(params->_d_delta_y())),
+      MAS_CIC((yyf  - y)/static_cast<double>(params->_d_delta_y())),
     };
   vector<real_prec> MAS_zz =
     {
-      MAS_CIC((zzb  - z)/params->_d_delta_z()),
-      MAS_CIC((zz   - z)/params->_d_delta_z()),
-      MAS_CIC((zzf  - z)/params->_d_delta_z()),
+      MAS_CIC((zzb  - z)/static_cast<double>(params->_d_delta_z())),
+      MAS_CIC((zz   - z)/static_cast<double>(params->_d_delta_z())),
+      MAS_CIC((zzf  - z)/static_cast<double>(params->_d_delta_z())),
     };
   for(int ih=0;ih<MAS_xx.size();++ih)
     for(int jh=0;jh<MAS_yy.size();++jh)
       for(int kh=0;kh<MAS_zz.size();++kh)
-	{
-	  ULONG index_aux = index_3d(i_idx[ih], j_idx[jh], k_idx[kh],params->_Nft(),params->_Nft());
-	  field[index_aux]+=  weight*MAS_xx[ih]*MAS_yy[jh]*MAS_zz[kh];
+      	{
+          ULONG index_aux = index_3d(i_idx[ih], j_idx[jh], k_idx[kh],params->_Nft(),params->_Nft());
+          field[index_aux]+=  weight*MAS_xx[ih]*MAS_yy[jh]*MAS_zz[kh];
 #ifdef _MASS_WEIGHT_POWER_
-	  field_mw[index_aux] +=weight_aux*weight_mass;
+      	  field_mw[index_aux] +=weight_aux*weight_mass;
 #endif
-	}
+	      }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2742,21 +2740,21 @@ void grid_assignment_TSC(Params *params,real_prec x, real_prec y, real_prec z,re
   ULONG k_idx[] = {Zb-1, zc, Zf+1};
   vector<real_prec> MAS_xx =
     {
-      MAS_TSC((xxb  - x)/params->_d_delta_x()),
-      MAS_TSC((xx   - x)/params->_d_delta_x()),
-      MAS_TSC((xxf  - x)/params->_d_delta_x()),
+      MAS_TSC((xxb  - x)/static_cast<double>(params->_d_delta_x())),
+      MAS_TSC((xx   - x)/static_cast<double>(params->_d_delta_x())),
+      MAS_TSC((xxf  - x)/static_cast<double>(params->_d_delta_x())),
     };
   vector<real_prec> MAS_yy =
     {
-      MAS_TSC((yyb  - y)/params->_d_delta_y()),
-      MAS_TSC((yy   - y)/params->_d_delta_y()),
-      MAS_TSC((yyf  - y)/params->_d_delta_y()),
+      MAS_TSC((yyb  - y)/static_cast<double>(params->_d_delta_y())),
+      MAS_TSC((yy   - y)/static_cast<double>(params->_d_delta_y())),
+      MAS_TSC((yyf  - y)/static_cast<double>(params->_d_delta_y())),
     };
   vector<real_prec> MAS_zz =
     {
-      MAS_TSC((zzb  - z)/params->_d_delta_z()),
-      MAS_TSC((zz   - z)/params->_d_delta_z()),
-      MAS_TSC((zzf  - z)/params->_d_delta_z()),
+      MAS_TSC((zzb  - z)/static_cast<double>(params->_d_delta_z())),
+      MAS_TSC((zz   - z)/static_cast<double>(params->_d_delta_z())),
+      MAS_TSC((zzf  - z)/static_cast<double>(params->_d_delta_z())),
     };
   for(int ih=0;ih<MAS_xx.size();++ih)
     for(int jh=0;jh<MAS_yy.size();++jh)
@@ -2788,28 +2786,28 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
   if(xc==params->_Nft())xc=params->_Nft()-1;
   if(yc==params->_Nft())yc=params->_Nft()-1;
   if(zc==params->_Nft())zc=params->_Nft()-1;
-  real_prec xx  = params->_d_delta_x()*(static_cast<real_prec>(xc)+0.5);
+  real_prec xx  = params->_d_delta_x()*(static_cast<real_prec>(xc)+0.5);//central cell
   real_prec yy  = params->_d_delta_y()*(static_cast<real_prec>(yc)+0.5);
   real_prec zz  = params->_d_delta_z()*(static_cast<real_prec>(zc)+0.5);
-  real_prec xxf = params->_d_delta_x()*(static_cast<real_prec>(xc)+1.5);
+  real_prec xxf = params->_d_delta_x()*(static_cast<real_prec>(xc)+1.5);//one cell forward
   real_prec yyf = params->_d_delta_y()*(static_cast<real_prec>(yc)+1.5);
   real_prec zzf = params->_d_delta_z()*(static_cast<real_prec>(zc)+1.5);
-  real_prec xxff = params->_d_delta_x()*(static_cast<real_prec>(xc)+2.5);
+  real_prec xxff = params->_d_delta_x()*(static_cast<real_prec>(xc)+2.5);//two cells forward
   real_prec yyff = params->_d_delta_y()*(static_cast<real_prec>(yc)+2.5);
   real_prec zzff = params->_d_delta_z()*(static_cast<real_prec>(zc)+2.5);
-  real_prec xxb = params->_d_delta_x()*(static_cast<real_prec>(xc)-0.5);
+  real_prec xxb = params->_d_delta_x()*(static_cast<real_prec>(xc)-0.5);//once cell backward
   real_prec yyb = params->_d_delta_y()*(static_cast<real_prec>(yc)-0.5);
   real_prec zzb = params->_d_delta_z()*(static_cast<real_prec>(zc)-0.5);
-  real_prec xxbb = params->_d_delta_x()*(static_cast<real_prec>(xc)-1.5);
+  real_prec xxbb = params->_d_delta_x()*(static_cast<real_prec>(xc)-1.5);//two
   real_prec yybb = params->_d_delta_y()*(static_cast<real_prec>(yc)-1.5);
   real_prec zzbb = params->_d_delta_z()*(static_cast<real_prec>(zc)-1.5);
-  long Xb=(xc==0 ? params->_Nft(): xc);
+  long Xb=(xc==0 ? params->_Nft(): xc);// if at 0, when movng backward 1 cell, it ends at Nft-1
   long Yb=(yc==0 ? params->_Nft(): yc);
   long Zb=(zc==0 ? params->_Nft(): zc);
-  long Xf=(xc==params->_Nft()-1 ? -1: xc);
+  long Xf=(xc==params->_Nft()-1 ? -1: xc); // if at Nft-1, when moving forward 1 cell, it ends at 0
   long Yf=(yc==params->_Nft()-1 ? -1: yc);
   long Zf=(zc==params->_Nft()-1 ? -1: zc);
-  long Xbb=(xc==0 ? params->_Nft(): xc); // if at 0, when subtracting 2, it goes to Nft-2
+  long Xbb=(xc==0 ? params->_Nft(): xc); // if at 0, when movnig backwards 2 cells, it goes to Nft-2
   long Ybb=(yc==0 ? params->_Nft(): yc);
   long Zbb=(zc==0 ? params->_Nft(): zc);
   if(xc!=0)
@@ -2832,40 +2830,40 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
   long k_idx[MAX_MAS_DEG] = {Zbb-2, Zb-1, zc, Zf+1, Zff+2};
   vector<real_prec> MAS_xx=
     {
-      MAS_PCS((xxbb - x)/params->_d_delta_x()),
-      MAS_PCS((xxb  - x)/params->_d_delta_x()),
-      MAS_PCS((xx   - x)/params->_d_delta_x()),
-      MAS_PCS((xxf  - x)/params->_d_delta_x()),
-      MAS_PCS((xxff - x)/params->_d_delta_x())
+      MAS_PCS((xxbb - x)/static_cast<double>(params->_d_delta_x())),
+      MAS_PCS((xxb  - x)/static_cast<double>(params->_d_delta_x())),
+      MAS_PCS((xx   - x)/static_cast<double>(params->_d_delta_x())),
+      MAS_PCS((xxf  - x)/static_cast<double>(params->_d_delta_x())),
+      MAS_PCS((xxff - x)/static_cast<double>(params->_d_delta_x()))
     };
   vector<real_prec> MAS_yy=
     {
-      MAS_PCS((yybb - y)/params->_d_delta_y()),
-      MAS_PCS((yyb  - y)/params->_d_delta_y()),
-      MAS_PCS((yy   - y)/params->_d_delta_y()),
-      MAS_PCS((yyf  - y)/params->_d_delta_y()),
-      MAS_PCS((yyff - y)/params->_d_delta_y())
+      MAS_PCS((yybb - y)/static_cast<double>(params->_d_delta_y())),
+      MAS_PCS((yyb  - y)/static_cast<double>(params->_d_delta_y())),
+      MAS_PCS((yy   - y)/static_cast<double>(params->_d_delta_y())),
+      MAS_PCS((yyf  - y)/static_cast<double>(params->_d_delta_y())),
+      MAS_PCS((yyff - y)/static_cast<double>(params->_d_delta_y()))
     };
   vector<real_prec> MAS_zz=
     {
-      MAS_PCS((zzbb - z)/params->_d_delta_z()),
-      MAS_PCS((zzb  - z)/params->_d_delta_z()),
-      MAS_PCS((zz   - z)/params->_d_delta_z()),
-      MAS_PCS((zzf  - z)/params->_d_delta_z()),
-      MAS_PCS((zzff - z)/params->_d_delta_z())
+      MAS_PCS((zzbb - z)/static_cast<double>(params->_d_delta_z())),
+      MAS_PCS((zzb  - z)/static_cast<double>(params->_d_delta_z())),
+      MAS_PCS((zz   - z)/static_cast<double>(params->_d_delta_z())),
+      MAS_PCS((zzf  - z)/static_cast<double>(params->_d_delta_z())),
+      MAS_PCS((zzff - z)/static_cast<double>(params->_d_delta_z()))
     };
   for(int ih=0;ih<MAS_xx.size();++ih)
     for(int jh=0;jh<MAS_yy.size();++jh)
       for(int kh=0;kh<MAS_zz.size();++kh)
-	{
-	  real_prec weight_aux=weight*MAS_xx[ih]*MAS_yy[jh]*MAS_zz[kh];
-	  ULONG index_aux = index_3d(i_idx[ih], j_idx[jh], k_idx[kh],params->_Nft(),params->_Nft());
-	  field[index_aux] +=weight_aux;
+        {
+          real_prec weight_aux=weight*MAS_xx[ih]*MAS_yy[jh]*MAS_zz[kh];
+          ULONG index_aux = index_3d(i_idx[ih], j_idx[jh], k_idx[kh],params->_Nft(),params->_Nft());
+          field[index_aux] +=weight_aux;
 #ifdef _MASS_WEIGHT_POWER_
 #ifdef _USE_OMP_
 #pragma omp atomic update
 #endif
-	  field_mw[index_aux] +=weight_aux*weight_mass;
+      	  field_mw[index_aux] +=weight_aux*weight_mass;
 #endif
-	}
+      	}
 }

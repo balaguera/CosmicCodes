@@ -1219,16 +1219,12 @@ void gradfindif(ULONG N1,ULONG N2,ULONG N3,real_prec L1,real_prec L2,real_prec L
 ////////////////////////////////////////////////////////////////////////////
 void low_pass_filter(ULONG Nft_HR, ULONG Nft_LR, int imas, bool correct, vector<real_prec>&HR_field, vector<real_prec>&LR_field, real_prec Lbox)
 {
-
 #ifdef _USE_OMP_
     int NTHREADS = _NTHREADS_;
     omp_set_num_threads(NTHREADS);
 #endif
-
-
   ULONG NTT_HR=static_cast<ULONG>(Nft_HR*Nft_HR*(Nft_HR/2+1));
   ULONG NTT_LR=static_cast<ULONG>(Nft_LR*Nft_LR*(Nft_LR/2+1));
-
   if(NTT_HR<NTT_LR)
     {
       cout<<RED<<"Error. High resolution mesh must have larger number of Nft cells than low resolution."<<endl;
@@ -1258,7 +1254,6 @@ void low_pass_filter(ULONG Nft_HR, ULONG Nft_LR, int imas, bool correct, vector<
       real_prec kernel= sin(xx)/static_cast<real_prec>(xx);
       correction[i]= true==correct ? pow(kernel,imas+1) : 1.0 ;
     }
-
 #ifdef _DOUBLE_PREC_
   complex_prec *LR_FOURIER= (complex_prec *)fftw_malloc(2*NTT_LR*sizeof(real_prec));
 #else
@@ -1283,13 +1278,11 @@ void low_pass_filter(ULONG Nft_HR, ULONG Nft_LR, int imas, bool correct, vector<
    // Get the FT of the Low-res density field
 real_prec delta_box_hr= Lbox/static_cast<real_prec>(Nft_HR);
 real_prec alpha=static_cast<double>(Nft_HR)/static_cast<double>(Nft_LR);
-
 #ifdef _ABACUS_
 real_prec delta_shift= 0;// Abacus uses lattice-like descriptions which do not require any shift at a low-pass filter
 #else
 real_prec delta_shift= 0.5*(alpha-1.0)*delta_box_hr; //Yu
 #endif
-
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
@@ -1318,56 +1311,48 @@ real_prec delta_shift= 0.5*(alpha-1.0)*delta_box_hr; //Yu
   ULONG ii=0, jj=0, kk=0;
   ULONG ind=0;
   real_prec fac=1.0;
-
   ii=0; jj=0; kk=0;
   ind = index_3d(ii,jj,kk, Nft_LR, Nft_LR/2+1);
   a  =  LR_FOURIER[ind][REAL];
   b  =  fac*LR_FOURIER[ind][IMAG];
   LR_FOURIER[ind][REAL]=sqrt(a*a+b*b);
   LR_FOURIER[ind][IMAG]=0.0;
-
   ii=0; jj=0; kk=Nft_LR/2;
   ind = index_3d(ii,jj,kk, Nft_LR, Nft_LR/2+1);
   a  =  LR_FOURIER[ind][REAL];
   b  =  fac*LR_FOURIER[ind][IMAG];
   LR_FOURIER[ind][REAL]=sqrt(a*a+b*b);
   LR_FOURIER[ind][IMAG]=0.0;
-
   ii=0; jj=Nft_LR/2; kk=0;
   ind = index_3d(ii,jj,kk, Nft_LR, Nft_LR/2+1);
   a  =  LR_FOURIER[ind][REAL];
   b  =  fac*LR_FOURIER[ind][IMAG];
   LR_FOURIER[ind][REAL]=sqrt(a*a+b*b);
   LR_FOURIER[ind][IMAG]=0.0;
-
   ii=0; jj=Nft_LR/2; kk=Nft_LR/2;
   ind = index_3d(ii,jj,kk, Nft_LR, Nft_LR/2+1);
   a  =  LR_FOURIER[ind][REAL];
   b  =  fac*LR_FOURIER[ind][IMAG];
   LR_FOURIER[ind][REAL]=sqrt(a*a+b*b);
   LR_FOURIER[ind][IMAG]=0.0;
-
   ii=Nft_LR/2; jj=0; kk=0;
   ind = index_3d(ii,jj,kk, Nft_LR, Nft_LR/2+1);
   a  =  LR_FOURIER[ind][REAL];
   b  =  fac*LR_FOURIER[ind][IMAG];
   LR_FOURIER[ind][REAL]=sqrt(a*a+b*b);
   LR_FOURIER[ind][IMAG]=0.0;
-
   ii=Nft_LR/2; jj=0; kk=Nft_LR/2;
   ind = index_3d(ii,jj,kk, Nft_LR, Nft_LR/2+1);
   a  =  LR_FOURIER[ind][REAL];
   b  =  fac*LR_FOURIER[ind][IMAG];
   LR_FOURIER[ind][REAL]=sqrt(a*a+b*b);
   LR_FOURIER[ind][IMAG]=0.0;
-
   ii=Nft_LR/2; jj=Nft_LR/2; kk=0;
   ind = index_3d(ii,jj,kk, Nft_LR, Nft_LR/2+1);
   a  =  LR_FOURIER[ind][REAL];
   b  =  fac*LR_FOURIER[ind][IMAG];
   LR_FOURIER[ind][REAL]=sqrt(a*a+b*b);
   LR_FOURIER[ind][IMAG]=0.0;
-
   ii=Nft_LR/2; jj=Nft_LR/2; kk=Nft_LR/2;
   ind = index_3d(ii,jj,kk, Nft_LR, Nft_LR/2+1);
   a  =  LR_FOURIER[ind][REAL];
@@ -3184,125 +3169,97 @@ void calc_LapPhiv(ULONG N1,ULONG N2,ULONG N3,real_prec L1,real_prec L2,real_prec
 #ifdef _USE_LPT_
  void calc_Det(ULONG N1, ULONG N2, ULONG N3, real_prec L1, real_prec L2, real_prec L3, const vector<real_prec>&in, vector<real_prec> &out)
  {  
-
 #ifdef _USE_OMP_
   int NTHREADS = _NTHREADS_;
   omp_set_num_threads(NTHREADS);
 #endif
-
-
   ULONG N=N1*N2*N3;
-
   string fname;
   vector<real_prec> dummy(N,0), dummy2(N,0);
-
   //phi,11
   gradfindif(N1,N2,N3,L1,L2,L3,in,dummy,1);
   gradfindif(N1,N2,N3,L1,L2,L3,dummy,dummy2,1);
   fname=string("aux1");
   //  dump_scalar(dummy2,N1,N2,N3,9,fname);
-	
   //phi,22
   gradfindif(N1,N2,N3,L1,L2,L3,in,dummy,2);
   gradfindif(N1,N2,N3,L1,L2,L3,dummy,dummy2,2);
-	
   //phi,33
   gradfindif(N1,N2,N3,L1,L2,L3,in,dummy,3);
   gradfindif(N1,N2,N3,L1,L2,L3,dummy,out,3);
- 
   //phi,22*phi,33
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]*=out[i];
- 
   fname=string("aux1");
   get_scalar(fname,out,N1,N2,N3);
   //phi,11*phi,22*phi,33
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]*=out[i];
-  
   fname=string("auxs");
   //  dump_scalar(dummy2,N1,N2,N3,9,fname);
-  
-  //phi,23
+   //phi,23
   gradfindif(N1,N2,N3,L1,L2,L3,in,dummy,2);
   gradfindif(N1,N2,N3,L1,L2,L3,dummy,dummy2,3);
-  
-  //phi,23*phi,23
+   //phi,23*phi,23
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]*=dummy2[i];
- 
-  fname=string("aux1");
+   fname=string("aux1");
   get_scalar(fname,out,N1,N2,N3);
   //phi,11*phi,23*phi,23
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]*=out[i];
-  
-  fname=string("auxs");
+   fname=string("auxs");
   get_scalar(fname,out,N1,N2,N3);
   //phi,11*phi,22*phi,33-phi,11*phi,23*phi,23
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     out[i]-=dummy2[i];
   //  dump_scalar(out,N1,N2,N3,9,fname);
-  
-  ////
-  
-  //phi,12
+   ////
+   //phi,12
   gradfindif(N1,N2,N3,L1,L2,L3,in,dummy,1);
   gradfindif(N1,N2,N3,L1,L2,L3,dummy,dummy2,2);
   fname=string("aux1");
   //  dump_scalar(dummy2,N1,N2,N3,9,fname);
-  
-  //phi,12*phi,12
+   //phi,12*phi,12
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]*=dummy2[i];
-  
-  //phi,33
+   //phi,33
   gradfindif(N1,N2,N3,L1,L2,L3,in,dummy,3);
   gradfindif(N1,N2,N3,L1,L2,L3,dummy,out,3);
-  
-  //phi,12*phi,12*phi,33
+   //phi,12*phi,12*phi,33
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]*=out[i];
- 
   fname=string("aux2");
   //  dump_scalar(dummy2,N1,N2,N3,9,fname);
-
-  //phi,23
+ //phi,23
   gradfindif(N1,N2,N3,L1,L2,L3,in,dummy,2);
   gradfindif(N1,N2,N3,L1,L2,L3,dummy,dummy2,3);
-
   //phi,13
   gradfindif(N1,N2,N3,L1,L2,L3,in,dummy,1);
   gradfindif(N1,N2,N3,L1,L2,L3,dummy,out,3);
-
   //phi,23*phi,13
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]*=out[i];
-
   fname=string("aux1");
   get_scalar(fname,out,N1,N2,N3);
-
   //phi,12*phi,23*phi,13
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]*=num_2*out[i];//this term appears twice in the determinant
- 
-
   fname=string("aux2");
   get_scalar(fname,out,N1,N2,N3);
   //-phi,12*phi,12*phi,33+phi,12*phi,23*phi,13//sign must be changed below
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]-=out[i];
-
   fname=string("auxs");
   get_scalar(fname,dummy2,N1,N2,N3);
   //    phi,11*phi,22*phi,33-phi,11*phi,23*phi,23
@@ -3311,30 +3268,23 @@ void calc_LapPhiv(ULONG N1,ULONG N2,ULONG N3,real_prec L1,real_prec L2,real_prec
   for(ULONG i=0;i<N;i++)    
     dummy2[i]+=out[i];//here comes a plus sign see above
   //  dump_scalar(dummy2,N1,N2,N3,9,fname);
-
-
   ////
-
   //phi,13
   gradfindif(N1,N2,N3,L1,L2,L3,in,dummy,1);
   gradfindif(N1,N2,N3,L1,L2,L3,dummy,dummy2,3);
   fname=string("aux1");
   //  dump_scalar(dummy2,N1,N2,N3,9,fname);
-
   //phi,13*phi,13
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]*=dummy2[i];
-
   //phi,22
   gradfindif(N1,N2,N3,L1,L2,L3,in,dummy,2);
   gradfindif(N1,N2,N3,L1,L2,L3,dummy,out,2);
-
   //phi,13*phi,13*phi,22
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy2[i]*=out[i]; 
-
   fname=string("auxs");
   get_scalar(fname,out,N1,N2,N3);
   //  phi,11*phi,22*phi,33-phi,11*phi,23*phi,23
@@ -3342,7 +3292,6 @@ void calc_LapPhiv(ULONG N1,ULONG N2,ULONG N3,real_prec L1,real_prec L2,real_prec
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     out[i]-=dummy2[i];
-
 }
 #endif
 ////////////////////////////////////////////////////////////////////////////
@@ -3628,14 +3577,12 @@ cout<<YELLOW<<"\tConvolution"<<RESET<<endl;
  ////////////////////////////////////////////////////////////////////////////
  real_prec linInterpol(ULONG N, real_prec L, real_prec delta, real_prec xpos, real_prec ypos, real_prec zpos, const vector<real_prec>&tab)
  {
-
 #ifndef CELLBOUND
    //* If ABACUS is enabled, num_0_5 -BIN_SHIFT =0 * //
    // * and there is no need to redefine particle posistions, as these already come referred to the corners*/
    xpos-=num_0_5*delta;
    ypos-=num_0_5*delta;
    zpos-=num_0_5*delta;
-
    {
      real_prec xnew=xpos;
      real_prec ynew=ypos;
@@ -3672,7 +3619,6 @@ cout<<YELLOW<<"\tConvolution"<<RESET<<endl;
   long ixs=ix+shiftx;
   long iys=iy+shifty;
   long izs=iz+shiftz;
-
   if (ixs>=N)
     ixs-=N;
   if (iys>=N)
@@ -3694,25 +3640,20 @@ cout<<YELLOW<<"\tConvolution"<<RESET<<endl;
  ////////////////////////////////////////////////////////////////////////////
 void getDensity_NGP(ULONG Nft, ULONG Nft_HR, real_prec L1, real_prec d1, real_prec delta_hr, const vector<real_prec>&we, vector<real_prec>&delta)
 {
-
 #ifdef _USE_OMP_
   int NTHREADS = _NTHREADS_;
   omp_set_num_threads(NTHREADS);
 #endif
-
-
 #ifndef _GET_INTERPOLATED_FIELDS_FROM_SEVERAL_BIN_FILES_
 #pragma omp parallel for
   for (ULONG i=0;i<delta.size(); i++)
     delta[i]= 0.;  //-1 if we want to calculate overdensity
 #endif
-
   ULONG count_previous=0;
 #pragma omp parallel for reduction(+:count_previous)
   for(ULONG ip=0;ip<delta.size();++ip)
     count_previous+=delta[ip];
   ULONG counter_a=0;
-
 #pragma omp parallel for reduction(+:counter_a)
   for (ULONG ig=0; ig<we.size(); ++ig)
     {
@@ -3805,3 +3746,5 @@ void smooth_distribution(vector<real_prec>&x, vector<real_prec>&F,vector<real_pr
     for(int i=0;i<za_original.size();i++)
         Fs[i]=gsl_spline_eval (spline, za_original[i], acc);
 }
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////

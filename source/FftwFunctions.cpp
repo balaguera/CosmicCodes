@@ -180,7 +180,7 @@ void FftwFunctions::get_parameters_estimator(bool verbose)
   if(true==this->params._use_random_catalog())
     {
       this->alpha= static_cast<double>(this->w_g)/static_cast<double>(this->w_r);
-      this->normal_power= alpha* this->normal_p;
+      this->normal_power= this->alpha*this->normal_p;
       this->shot_noise= (alpha+1)*(s_r/normal_p);  // originally is alpha*(alpha+1)*(s_r/ normal_power);
       // this->shot_noise= s_g/ normal_power + pow( alpha,2)*( s_r/ normal_power);
       this->normal_window= normal_power/pow(alpha,2);
@@ -277,8 +277,8 @@ void FftwFunctions::get_fluctuation()
 #ifdef _USE_OMP_
 #pragma omp for nowait
 #endif
-          for(ULONG i=0;i<this->params._NGRID();++i)
-               this->data_g[i] -= this->alpha*this->data_r[i];  /// <----- FLUCTUATION
+        for(ULONG i=0;i<this->params._NGRID();++i)
+          this->data_g[i] -= this->alpha*this->data_r[i];  /// <----- FLUCTUATION
       }
     else
       {
@@ -361,12 +361,47 @@ void FftwFunctions::get_fluctuation()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void FftwFunctions::get_power_spectrum_fkp(vector<real_prec> &power_g0, vector<real_prec> &power_g2,vector<real_prec> &power_g4,vector<real_prec> &power_r,  vector< vector<real_prec> >&power2d_cart,vector< vector<real_prec> >&power2d_spher,vector<int> &mod_g)
 {
+//#define ICONST
   So.enter(__PRETTY_FUNCTION__);
   do_fftw_r2c(this->params._Nft(),this->data_g, this->data_out_g);
   if(true==this->params._measure_cross())
+    if(true==this->params._use_random_catalog())
     do_fftw_r2c(this->params._Nft(),this->data_gp, this->data_out_gp);
+  
   if(true==this->params._use_random_catalog())
+  {
     do_fftw_r2c(this->params._Nft(),this->data_r, this->data_out_r);
+#ifdef ICONST
+    real_prec norm_ic=sqrt(pow(this->data_out_r[0][REAL],2)+pow(this->data_out_r[0][IMAG],2));
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+    for(ULONG i=0;i<this->params._NGRID_h();++i)
+    {
+      this->data_out_r[i][REAL]/=norm_ic;
+      this->data_out_r[i][IMAG]/=norm_ic;
+    }
+#endif
+  }
+
+//#define EUTEST
+#ifdef EUTEST
+  ULONG NTT=this->params._Nft()*this->params._Nft()*(this->params._Nft()/2+1);
+  this->So.message_screen("Reading densiy field for EUCLID test");
+  vector<real_prec> field(2*NTT,0);
+  this->File.read_array("/home/balaguera/data/Numerics/Euclid/Tests/data.dat",field);  
+  vector<real_prec> field_r(2*NTT,0);
+  this->File.read_array("/home/balaguera/data/Numerics/Euclid/Tests/random.dat",field_r);
+  cout<<this->alpha<<endl;
+#pragma omp parallel for
+  for(ULONG i=0; i<NTT;++i)
+  { 
+    this->data_out_g[i][REAL]=static_cast<real_prec>(field[2*i]-this->alpha*field_r[2*i]);
+    this->data_out_g[i][IMAG]=static_cast<real_prec>(field[2*i+1]-this->alpha*field_r[2*i+1]);
+    this->data_out_r[i][REAL]=static_cast<real_prec>(field_r[2*i]);
+    this->data_out_r[i][IMAG]=static_cast<real_prec>(field_r[2*i+1]);
+  }
+#endif
   this->power_spectrum_fkp(power_g0,power_g2,power_g4,power_r,power2d_cart,power2d_spher,mod_g);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -930,6 +965,7 @@ void FftwFunctions::power_spectrum_fkp(vector<real_prec> & powerk_g0,
 {
     this->So.enter(__PRETTY_FUNCTION__);
     int NTHREADS = _NTHREADS_;
+
 #ifdef _WRITE_2DPOWER_
   vector < vector<int> > mod_cart(power2d_cart.size(), vector<int>(power2d_cart[0].size(),0));
   vector < vector<int> > mod_spher(power2d_spher.size(), vector<int>(power2d_spher[0].size(),0));
@@ -4931,10 +4967,10 @@ void FftwFunctions::write_fftw_parameters(void *p, string fname)
   out<<"Shot_noise (power) = "<<this->shot_noise<<"  (Mpc h^-1)^3"<<endl;
   if(this->params._use_random_catalog())
     out<<"Shot_noise (window) = "<<this->shot_noise_window<<endl;
-  if(this->params._use_random_catalog())
+  if(true==this->params._use_random_catalog())
     out<<"Mean number density (from weights) = "<<(this->n_ran-this->w_r)/(this->params._Pest()*this->w_r)<<" (Mpc h^-1)^(-3)"<<endl;
   out<<"Weighted number of objects = "<<this->w_g<<endl;
-  if(this->params._use_random_catalog())
+  if(true==this->params._use_random_catalog())
       out<<"Weighted number of random objects = "<<this->w_r<<endl;
   out<<"alpha = "<<this->alpha<<endl;
   out<<"Sum nw² galaxies = "<<this->s_g<<endl;

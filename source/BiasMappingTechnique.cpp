@@ -3951,7 +3951,7 @@ void BiasMT::get_scaling_relations_secondary_property(string h_property)
      aux_a+=ABUNDANCE[ih];
   if(aux_a<this->tracer_ref._NOBJS())
     {
-      So.message_warning_ini(__LINE__, __PRETTY_FUNCTION__, __FILE__,"The number of tracers counted in ABUNDANCE(Y,X) is smaller than the input. Perhaps the range for some of the DMF properties *must* be increased to include all cells. CosmiCatlas stops here");
+      So.message_warning_ini(__LINE__, __PRETTY_FUNCTION__, __FILE__,"The number of tracers counted in ABUNDANCE(Y,X) is smaller than the input. Perhaps the range for some of the DMF properties *must* be increased to include all cells. CosmiCode stops here");
       std::cout<<aux_a<<"  "<<this->tracer_ref._NOBJS()<<endl;
       exit(0);
     }
@@ -4028,7 +4028,7 @@ void BiasMT::get_scaling_relations_secondary_property(string h_property)
     if(aux_h<=0 || aux_j>0)
       {
         So.message_screen("Negative/zero value not tollerated : ", aux_h);
-        So.message_warning_ini(__LINE__, __PRETTY_FUNCTION__, __FILE__,"Normalized Joint probability for number counts ill-defined. CosmicAtlas stops here.");
+        So.message_warning_ini(__LINE__, __PRETTY_FUNCTION__, __FILE__,"Normalized Joint probability for number counts ill-defined. CosmicCode stops here.");
         exit(0);
       }
     else

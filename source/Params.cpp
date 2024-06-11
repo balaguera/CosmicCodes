@@ -4107,5 +4107,17 @@ void Params::warnings()
       throw std::invalid_argument("Wrong input in parameter file");
     }
 #endif
+
+#ifdef _REDSHIFT_SPACE_
+  if(this->i_v1_g<0  || this->i_v2_g<0 || this->i_v3_g<0)
+  {
+      cout<<RED<<endl;
+      cout<<"The opreproc directive _REDSHIFT_SPACE_ enabled but there is no info on velocities available"<<endl;
+      cout<<RESET<<endl;
+      throw std::invalid_argument("Wrong input in parameter file");
+  }
+#endif
+
+
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
