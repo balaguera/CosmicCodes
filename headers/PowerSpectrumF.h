@@ -378,7 +378,11 @@ class PowerSpectrumF{
     this->gp_pdf<<"set ytics textcolor '"<<FG_COLOR<<"' \n";
     this->gp_pdf<<"set key textcolor rgb '"<<FG_COLOR<<"'\n";
     this->gp_pdf<<"set title textcolor rgb '"<<FG_COLOR<<"' \n";
+    this->tracer_cat.set_params(this->params);
+    this->random_cat.set_params(this->params);
     this->cosmology.set_cosmo_pars(this->params.s_cosmo_pars);
+    this->tracer_cat.set_params(this->params);
+    this->random_cat.set_params(this->params);
   }
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   PowerSpectrumF (Params &_params, bool resize): params(_params),N_random(0),mean_density(0),Nbins_r(0),rmin(0),rmax(0)

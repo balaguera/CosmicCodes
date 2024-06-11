@@ -74,7 +74,7 @@
 /**
  * @brief To show plots live
 */
-//#define _USE_GNUPLOT_
+#define _USE_GNUPLOT_
 //#define FG_COLOR "white"
 #define FG_COLOR "black"
 // ****************************************************************************************
@@ -209,11 +209,9 @@
  * @details If below _USE_CURVATURE_ is dTNGefined, the eigenvalues are taken from the curvture
 */
 //#define _USE_TIWEB_
-
 #ifdef _USE_TIWEB_
 #define MODEL_THETA "TIWEB"
 #endif
-
 // ****************************************************************************************
 /**
  * @brief  IWEB uses the invariants of the tidal field I2 and I3. This can be used together with TEB,CWEB and PWEB
@@ -309,40 +307,28 @@
 #ifdef _ABACUS_
 #define _USE_ABACUS_COSMOLOGY_
 #endif
-
-#if !defined _USE_ABACUS_COSMOLOGY_ || !defined _USE_SLICS_COSMOLOGY_ || !defined _USE_MG_COSMOLOGY_ || !defined _USE_UNITSIM_COSMOLOGY_
+#if !defined _USE_ABACUS_COSMOLOGY_ && !defined _USE_SLICS_COSMOLOGY_ && !defined _USE_MG_COSMOLOGY_ && !defined _FLAGSHIP_
 #define _USE_PLANCK_COSMOLOGY_
 #endif
-// ****************************************************************************************
+
 #ifdef _USE_SLICS_COSMOLOGY_
 #define COSMOPARS Cosmo_parameters_SLICS
 #endif
 #if defined (_USE_PLANCK_COSMOLOGY_) || defined (_USE_UNITSIM_COSMOLOGY_)
 #define COSMOPARS Cosmo_parameters_PLANCK
 #endif
-
 #ifdef _USE_MINERVA_COMSOLOGY_
 #define COSMOPARS Cosmo_parameters_Minerva
 #endif
-
 #ifdef _USE_MG_COSMOLOGY_
 #define COSMOPARS Cosmo_parameters_MG
 #endif
-
 #ifdef _USE_ABACUS_COSMOLOGY_
 #define COSMOPARS Cosmo_parameters_abacus
 #endif
-
 #ifdef _FLAGSHIP_
 #define COSMOPARS Cosmo_parameters_Flagship
 #endif
-
-// ****************************************************************************************
-// ****************************************************************************************
-// ****************************************************************************************
-// ****************************************************************************************
-// ****************************************************************************************
-// ****************************************************************************************
 // ****************************************************************************************
 // ****************************************************************************************
 // ****************************************************************************************
@@ -567,7 +553,7 @@
 #define num_0_1 static_cast<double>(0.1)
 #define num_0_5 static_cast<double>(0.5)
 // ********************************************
-#define VEL_BIAS_POWER static_cast<real_prec>(1.0805)  // THis number is used in the power spectrum to multiply the velocitiys and compute P(k) in redshift space, used in FFTwfunctions
+#define VEL_BIAS_POWER static_cast<real_prec>(1.000)  // THis number is used in the power spectrum to multiply the velocitiys and compute P(k) in redshift space, used in FFTwfunctions
 // ********************************************
 // Number of mdoes used to get an estimate of the average bias on large
 #define N_MODES static_cast<int>(30)
@@ -910,13 +896,13 @@ since we should not initialize the delta arrays there, as they are being filled 
 /**
 *@brief This option allows the get the dist. of min separations in reference
 */
-#define _GET_DIST_MIN_SEP_REF_
+//#define _GET_DIST_MIN_SEP_REF_
 // ***********************************************
 // ***********************************************
 /**
 *@brief This option allows the get the dist. of min separations in mock.
 */
-#define  _GET_DIST_MIN_SEP_MOCK_
+//#define  _GET_DIST_MIN_SEP_MOCK_
 // ***********************************************
 // ***********************************************
 /**
@@ -1042,12 +1028,8 @@ since we should not initialize the delta arrays there, as they are being filled 
 */
 //#define _USE_BIAS_OBJECT_TO_OBJECT_ 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-//#define _USE_MACH_NUMBER_
-#ifdef _USE_MACH_NUMBER_
+#define _USE_MACH_NUMBER_
 #define _USE_LOCAL_OVERDENSITY_
-#endif
-// ********************************
-
 // ************************************************************************************************************************************
 // ************************************************************************************************************************************
 // ************************************************************************************************************************************
@@ -1616,7 +1598,7 @@ since we should not initialize the delta arrays there, as they are being filled 
 * @detail Define also when building mocks. BiasMT will measure real and redshift space
 */
 #ifndef _ONLY_LPT_
-//#define _REDSHIFT_SPACE_
+#define _REDSHIFT_SPACE_
 #endif
 // *******************************************************************************************************************************************
 /**
@@ -1748,14 +1730,11 @@ since we should not initialize the delta arrays there, as they are being filled 
 // field using a particular halo bias, given by bias_test
 //#define _RUN_TEST_
 #endif
-
 // ********************************************************************************************************************************************
 /**
 * @brief 
 **/
 //#define _UNDER_BIASED_
-
-
 // ********************************************************************************************************************************************
 /**
 	@brief  Do rank ordering of the DM field to the new_ref identified in parameter file
@@ -1773,7 +1752,6 @@ since we should not initialize the delta arrays there, as they are being filled 
 #define _RO_WITH_DELTA_
 #endif
 // ********************************************************************************************************************************************
-
 /**
 * @brief 
 **/
@@ -1782,11 +1760,7 @@ since we should not initialize the delta arrays there, as they are being filled 
 * @b/rief 
 **/
   //#define _RO_WITH_DELTA_MOCK_GEN_  // not working
-
-
-
 // ********************************************************************************************************************************************
-
 #ifdef _ONLY_POST_PROC_
 // This option was meant to avoid the convolution at the post_proc step.
 // However the code collapse, even when assigning to the calibration, 
@@ -1796,25 +1770,13 @@ since we should not initialize the delta arrays there, as they are being filled 
 // What if you use the ref with the original dm and the mock_number count with the convolved one? Wrong.
 //	#define _DO_NOT_CONVOLVE_
 #endif
-
-
-
 //IF this is defined, the calibration of the Y tracer is done with the delta_x and the delta_complement, where
 // the complement is passed from the input parameter file
 //#define _USE_X_COMPLEMENT_I_
-
-
-// ********************************************************************************************************************************************
-// ********************************************************************************************************************************************
 // ********************************************************************************************************************************************
 //#define file_one_cell this->params._Output_directory()+"nmax_cell.txt"
-
 #ifdef MOCK_MODE
 // ************************************************************************************************************************************
-// ************************************************************************************************************************************
-// ************************************************************************************************************************************
-
-
 // ************************************************************************************************************************************
 #ifdef _GET_BiasMT_REALIZATIONS_
 #ifndef file_one_cell
@@ -1823,10 +1785,6 @@ since we should not initialize the delta arrays there, as they are being filled 
 #else
 #define file_one_cell this->params._Output_directory()+"nmax_cell.txt"
 #endif  // end of ifdef _GET_BiasMT_REALIZATIONS_
-
-// ************************************************************************************************************************************
-// ************************************************************************************************************************************
-// ************************************************************************************************************************************
 // ************************************************************************************************************************************
 // ************************************************************************************************************************************
 // ************************************************************************************************************************************
@@ -1867,7 +1825,6 @@ since we should not initialize the delta arrays there, as they are being filled 
 // ***********************************************************************************************************************************
 // ************************************************************************************************************************************
 // ******************************************** COSMIC WEB ****************************************************************************
-
 /**
 * @brief Cosmic-Web classification
   @details Define this if the CWC is to be used as variable to characterize the bias.
@@ -1903,7 +1860,6 @@ since we should not initialize the delta arrays there, as they are being filled 
 #define _USE_CWC_HALO_ANALYSIS_
 #define _ASSEMBLY_BIAS_MASS_ONLY_
 // ********************************************
-
 // ***********************************************************************************************************************************
 /**
 * @brief Cosmic-Web classification inside iterations
@@ -1939,7 +1895,6 @@ since we should not initialize the delta arrays there, as they are being filled 
 * @details This number cchanges with the definition of lambda threshold.
 * @details For lambda <0, more regions are classified as knots and hence MKMAX MUST BE INCRESAED e.g. to 1e7
 */
-
 #ifdef _hydro_
 #define _DM_NEW_UNITS_   //define this if youn have dm with cgs units. If a DM is done with counts, undef
 #define MKMAX 1e-27
@@ -1954,28 +1909,21 @@ since we should not initialize the delta arrays there, as they are being filled 
 #define MKMAX static_cast<real_prec>(2e5)  // I used 1e3 for UNITSIM (lambda=0) and 2e7 for lambda=-0.3, 1e7 for -0.1
 #endif
 #endif
-
 #if defined _UNITSIM_ || defined _ABACUS_ || defined _TNG_ || defined _TNG_GAL_ || defined _FLAGSHIP_
 #define MKMIN static_cast<real_prec>(0.)
 #elif defined _MG_
 #define MKMIN static_cast<real_prec>(1.)
 #endif
-
 #endif
 // -----------------------------------------------------------
 /**
 * @brief  MIN for the log of the mass of SuperKnots found by the FoF
 */
 // -----------------------------------------------------------
-
-
-
-
 /**
 * @brief This is meant in case we have CIC DM fields and we want to transform it to NGP
 */
 //#define _CONVERT_CIC_TO_NGP_
-
 // ***********************************************************************************************************************************
 // ***********************************************************************************************************************************
 // ********************************************INVARIANTS OF TIDAL FIELD

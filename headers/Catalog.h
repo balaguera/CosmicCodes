@@ -1600,6 +1600,7 @@ public:
     this->box_JK.min2=this->params._ymin();
     this->box_JK.min3=this->params._zmin();
 
+    this->Cosmo.set_cosmo_pars(this->params.s_cosmo_pars);
 
 #ifdef _USE_MULTISCALE_LEVEL_4_
     this->box_low.masskernel=this->params._masskernel();
