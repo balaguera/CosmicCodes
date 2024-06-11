@@ -13620,7 +13620,7 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
 #ifdef _use_simple_nbar_assignment_
   real_prec delta_z_nbar = 0;
   if(true==this->params._use_random_catalog())
-    s_data->zz_v[1]-s_data->zz_v[0];
+    delta_z_nbar= s_data->zz_v[1]-s_data->zz_v[0];
 #endif
   string angles_units = (this->type_of_object=="RANDOM" ? this->params._angles_units_r() : this->params._angles_units_g());
   int sys_coord = (this->type_of_object=="RANDOM" ? this->params._sys_of_coord_r(): this->params._sys_of_coord_g());
@@ -13630,17 +13630,18 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
     fac=180.0/M_PI;
   int n_rc=0;
   int n_zzv=0;
-  // if needed initialize gsl structure to interpolate Comoving distance as a function of redshift:
+#ifndef _use_simple_nbar_assignment_
   // Preparing for interpolation of the relation nbar(z)
   gsl_spline *spline_nbar;
   gsl_interp_accel *spline_acc_nbar;
   if(true==this->params._use_random_catalog() && false==this->params._nbar_tabulated() && true==this->params._use_file_nbar())
     {
-      n_zzv = s_data->zz_v.size();
-      spline_nbar = gsl_spline_alloc (gsl_interp_linear,n_zzv);
-      gsl_spline_init (spline_nbar, &s_data->zz_v[0], &s_data->dndz_v[0], n_zzv);// nbar(z)
+      spline_nbar = gsl_spline_alloc (gsl_interp_linear,s_data->zz_v.size());
+      gsl_spline_init (spline_nbar, &s_data->zz_v[0], &s_data->dndz_v[0], s_data->zz_v.size());// nbar(z)
     }
+#endif
   // Preparing for interpolation of the relation r(z):
+  // if needed initialize gsl structure to interpolate Comoving distance as a function of redshift:
   gsl_spline *spline_zro;
   gsl_interp_accel *spline_acc_zro;
   if((true==this->params._use_random_catalog() && false==this->params._nbar_tabulated()) || true==this->params._use_file_nbar() || true==this->params._nbar_tabulated())
@@ -13664,10 +13665,12 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
 #pragma omp parallel num_threads(NTHREADS)
       {
         gsl_interp_accel *spline_acc_zro;
-        gsl_interp_accel *spline_acc_nbar;
         spline_acc_zro = gsl_interp_accel_alloc ();
+#ifndef _use_simple_nbar_assignment_
+        gsl_interp_accel *spline_acc_nbar;
         if(true==this->params._use_random_catalog() && false==this->params._nbar_tabulated())
-          spline_acc_nbar = gsl_interp_accel_alloc ();
+          spline_acc_nbar = gsl_interp_accel_alloc ();// useless
+#endif
 #pragma omp for schedule(static, NTHREADS) reduction(min:aXMIN, aYMIN, aZMIN) reduction(max:aXMAX, aYMAX, aZMAX) nowait
 #endif
       for(ULONG i=0;i<nlines;++i)
@@ -13677,16 +13680,11 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
           real_prec y=this->Halo[i].coord2;
           real_prec z=this->Halo[i].coord3;
           //compute nbar:
-          if(true==this->params._use_random_catalog())
-            {
-            if(true==this->params._nbar_tabulated())
+          if(true==this->params._use_random_catalog() && true==this->params._nbar_tabulated())
               nbar=this->Halo[i].mean_density;
-            else
-              nbar=1.0;
-            }
           else
             this->Halo[i].mean_density=nbar;
-          if(this->params._use_random_catalog())
+          if(true==this->params._use_random_catalog())
             this->Halo[i].mean_density=nbar;
           if(x > aXMAX)
             aXMAX = x;
@@ -13729,7 +13727,12 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
                   {
                     zro= gsl_spline_eval(spline_zro, this->Halo[i].coord3, spline_acc_zro);
                     this->Halo[i].redshift=zro;
-                    nbar= gsl_spline_eval(spline_nbar, zro, spline_acc_nbar);
+#ifdef _use_simple_nbar_assignment_
+                  ULONG zbin=get_bin(zro ,s_data->zz_v[0],s_data->zz_v.size(),delta_z_nbar,false);
+                  nbar=s_data->dndz_v[zbin];
+#else
+                      nbar = gsl_spline_eval(spline_nbar, zro, spline_acc_nbar); // Compute the mean number density if not tabulated, either fropm file or from nbar measured from the randoms
+#endif
                   }
             else
               {
@@ -13772,8 +13775,10 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
 #pragma omp parallel num_threads(NTHREADS)
     {
       spline_acc_zro = gsl_interp_accel_alloc ();
+#ifndef _use_simple_nbar_assignment_
       if(true==this->params._use_random_catalog() && false==this->params._nbar_tabulated())
         spline_acc_nbar = gsl_interp_accel_alloc ();
+#endif
 #pragma omp for schedule(static, NTHREADS) reduction(min:aXMIN, aYMIN, aZMIN) reduction(max:aXMAX, aYMAX, aZMAX) nowait
       for(ULONG i=0;i<nlines;++i)
        {
@@ -13784,35 +13789,23 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
         this->Halo[i].redshift=this->Halo[i].coord3; // just to keep track of the redshift of the tracer
         real_prec redshift_aux  = this->Halo[i].redshift < s_data->zz_c[0] ? s_data->zz_c[0]: this->Halo[i].redshift;
         real_prec rr=gsl_spline_eval(spline_zro, redshift_aux, spline_acc_zro); // Transform to comoving distance *
-        equatorial_to_cartesian(ra_s, dec_s, rr, x, y, z); 	    // Transform to cartesian coordinates
         real_prec nbar=mean_density;
+        equatorial_to_cartesian(ra_s, dec_s, rr, x, y, z); 	    // Transform to cartesian coordinates
         if(true==this->params._use_random_catalog())
-          {
-           if(false==this->params._nbar_tabulated())
-           {
+          if(false==this->params._nbar_tabulated())
               if(true==this->params._constant_depth() || true == this->params._use_file_nbar() )
                 {
-                  zro=this->Halo[i].coord3;
-                  nbar=0;
-                  if(zro>=s_data->zz_v[0] && zro< s_data->zz_v.back())
-                  {
 #ifdef _use_simple_nbar_assignment_
-                    int zbin=get_bin(zro,s_data->zz_v[0]-0.5*delta_z_nbar,s_data->zz_v.size(),delta_z_nbar,false);
-                    nbar=s_data->dndz_v[zbin];
+                  ULONG zbin=get_bin(redshift_aux ,s_data->zz_v[0],s_data->zz_v.size(),delta_z_nbar,false);
+                  nbar=s_data->dndz_v[zbin];
 #else
                       nbar = gsl_spline_eval(spline_nbar, zro, spline_acc_nbar); // Compute the mean number density if not tabulated, either fropm file or from nbar measured from the randoms
 #endif
-                  }
                 }
-              else if(false==this->params._constant_depth() && false == this->params._use_file_nbar())
-               {
-                 zro=this->Halo[i].coord3;
 #ifdef HEALPIX
-              //              my_get_mean_density_interpolated(map, this->params._new_n_dndz,this->params._redshift_min_sample, this->params._redshift_max_sample,ra_s, dec_s, zro, dndz_m, &nbar);
+              else if(false==this->params._constant_depth() && false == this->params._use_file_nbar())
+                 my_get_mean_density_interpolated(map, this->params._new_n_dndz,this->params._redshift_min_sample, this->params._redshift_max_sample,ra_s, dec_s, redshift_aux, dndz_m, &nbar);
 #endif
-                }
-          }
-        }
 #ifdef _USE_REDSHIFT_BINS_
         this->Halo[i].observed=false;
         if(this->Halo[i].coord3<=this->params._redshift_max_sample && this->Halo[i].coord3>=this->params._redshift_min_sample)
@@ -13822,8 +13815,8 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
         this->Halo[i].coord1=x;
         this->Halo[i].coord2=y;
         this->Halo[i].coord3=z;
-//        if(false==this->params._use_random_catalog() || false==this->params._nbar_tabulated()) // If we had to compute nbar, assigne it now:
-        this->Halo[i].mean_density=nbar;
+        if(false==this->params._use_random_catalog() || false==this->params._nbar_tabulated()) // If we had to compute nbar, assigne it now:
+          this->Halo[i].mean_density=nbar;
         // Identify min and max coordinates in order to set size of cube.
         if(x > aXMAX)
           aXMAX = x;
@@ -13844,9 +13837,10 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
 #pragma omp parallel num_threads(NTHREADS)
       {
     spline_acc_zro = gsl_interp_accel_alloc ();
+#ifndef _use_simple_nbar_assignment_
     if(true==this->params._use_random_catalog() && false==this->params._nbar_tabulated())
       spline_acc_nbar = gsl_interp_accel_alloc ();
-
+#endif
 #pragma omp for schedule(static, NTHREADS) reduction(min:aXMIN, aYMIN, aZMIN) reduction(max:aXMAX, aYMAX, aZMAX) nowait
     for(ULONG i=0;i<nlines;++i)
       {
@@ -13864,15 +13858,20 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
               if(true==this->params._constant_depth()  || true == this->params._use_file_nbar())
                 {
                   zro=this->Halo[i].coord3;
+#ifdef _use_simple_nbar_assignment_
+                  ULONG zbin=get_bin(zro ,s_data->zz_v[0],s_data->zz_v.size(),delta_z_nbar,false);
+                  nbar=s_data->dndz_v[zbin];
+#else
                   nbar = gsl_spline_eval(spline_nbar, zro, spline_acc_nbar);
+#endif
                 }
+#ifdef HEALPIX
               else
                 {
                   zro=this->Halo[i].coord3;
-#ifdef HEALPIX
             // my_get_mean_density_interpolated(map, this->params._new_n_dndz,this->params._redshift_min_sample, this->params._redshift_max_sample,ra_s, dec_s, zro, dndz_m, &nbar);
-#endif
                 }
+#endif
             }
          }
         else
@@ -14079,17 +14078,15 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
    if(this->params._redshift_space_coords_g() == false)
      {
        if("kmps"==this->params._vel_units_g())
-     conversion_factor=(1.+this->params.s_cosmo_pars.cosmological_redshift)/(this->Cosmo.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift));
+         conversion_factor=(1.+this->params._redshift())/(this->Cosmo.Hubble_function(this->params._redshift()));
        else if("alpt"==this->params._vel_units_g())
-     conversion_factor= cgs_Mpc/(this->Cosmo.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift));
+         conversion_factor= cgs_Mpc/(this->Cosmo.Hubble_function(this->params._redshift()));
        else if("Mpcph"==this->params._vel_units_g())
-     conversion_factor=1;
+        conversion_factor=1;
      conversion_factor*=(VEL_BIAS_POWER);
-#ifdef _FULL_VERBOSE_POWER_
-       So.message_screen("Current redshift =",this->params.s_cosmo_pars.cosmological_redshift);
-       So.message_screen("Hubble function at current redshift =",this->Cosmo.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift, (void *)&this->params.s_cosmo_pars));
-       So.message_screen("Conversion factor =",conversion_factor);
-#endif
+      So.message_screen("Current redshift =",this->params._redshift());
+      So.message_screen("Hubble function at current redshift =",this->Cosmo.Hubble_function(this->params._redshift()));
+      So.message_screen("Conversion factor =",conversion_factor);
      }
 #endif
    int exp_mas=this->params._mass_assignment();
@@ -14215,6 +14212,8 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
    // If a simulation with no random is used,
    // the values below are computed in the function
    // raw sampling.
+
+
 #ifdef  _USE_SEVERAL_RANDOM_FILES_
    this->n_gal+=n_selected;
    this->w_g+=W_r;
@@ -14256,7 +14255,9 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
       this->field_external=field;
     }
 #endif
-   So.message_screen("\t\t Weighted number of tracers in mesh", get_nobjects(field));
+  So.message_screen("\t\t Weighted number of tracers in mesh", get_nobjects(field));
+
+
    field.clear();
    field.shrink_to_fit(); // we liberate memme
 #ifdef _MASS_WEIGHT_POWER_
