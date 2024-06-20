@@ -905,6 +905,9 @@ struct s_Halo
   /**
      @brief  Analogous to mach number, for distances to tracer: mean/var of the separations around the tracer in a sphere on a scale given in parameter file */
   real_prec dach_number;
+  /**
+     @brief  Analogous to mach number, for distances to tracer: mean/var of the separations around the tracer in a sphere on a scale given in parameter file */
+  real_prec number_of_neighbours;
   // -----------------------------------
   /**
      @brief  Tidal anisotropy evaluated at the tracer position */

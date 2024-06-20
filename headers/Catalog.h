@@ -1602,18 +1602,17 @@ public:
 
     this->Cosmo.set_cosmo_pars(this->params.s_cosmo_pars);
 
-#ifdef _USE_MULTISCALE_LEVEL_4_
-    this->box_low.masskernel=this->params._masskernel();
-    this->box_low.Lbox=this->params._Lbox();
-    this->box_low.Nft=this->params._Nft_low_l4();
-    this->box_low.d1=this->params._d1_low();
-    this->box_low.d2=this->params._d2_low();
-    this->box_low.d3=this->params._d3_low();
-    this->box_low.min1=this->params._xmin();
-    this->box_low.min2=this->params._ymin();
-    this->box_low.min3=this->params._zmin();
-#endif
 
+    this->box_n.masskernel=this->params._masskernel();
+    this->box_n.Lbox=this->params._Lbox();
+    this->box_n.Nft=this->params._Nft_low();
+    this->box_n.NGRID=this->params._NGRID_low();
+    this->box_n.d1=this->params._d1_low();
+    this->box_n.d2=this->params._d2_low();
+    this->box_n.d3=this->params._d3_low();
+    this->box_n.min1=this->params._xmin();
+    this->box_n.min2=this->params._ymin();
+    this->box_n.min3=this->params._zmin();
   }
 
   //////////////////////////////////////////////////////////
@@ -1811,6 +1810,10 @@ public:
    * @brief
    */
   real_prec _min_vmax(){return this->min_vmax;}
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief
+   */
   real_prec _max_vmax(){return this->max_vmax;}
   //////////////////////////////////////////////////////////
   /**
@@ -1822,6 +1825,16 @@ public:
    * @brief
    */
   real_prec _max_spin_bullock(){return this->max_spin_bullock;}
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief
+   */
+  real_prec _max_tidal_anisotropy(){return this->max_tidal_anisotropy;}
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief
+   */
+  real_prec _min_tidal_anisotropy(){return this->min_tidal_anisotropy;}
 
 };
 

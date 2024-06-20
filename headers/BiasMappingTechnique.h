@@ -35,6 +35,7 @@
 #ifdef _USE_LPT_
 # include "LPT.h"
 #endif
+#include "def.h"
 #include "def_bmt.h"
 ////////////////////////////////////////////////////////////////////////////
 using namespace std;

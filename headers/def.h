@@ -15,17 +15,21 @@
 *@brief Use OMP parallelization
 */
 #define _USE_OMP_
+// ****************************************************************************************
 /**
 *@brief Use vectorization with OMP parallelization
 */
 //#define _USE_SIMD_OMP_
 //#define _USE_SIMD_OMP_mas_
+// ****************************************************************************************
+/**
+*@brief Number of threads to use with OMP
+*/
 #define _NTHREADS_ static_cast<int>(10)
 // ****************************************************************************************
 // ****************************************************************************************
 #define NEGATIVE_INT static_cast<int>(-1)
 #define POSITIVE_INT static_cast<int>(1)
-// ****************************************************************************************
 // ****************************************************************************************
 /**
  * @brief Mock Mode
@@ -54,12 +58,10 @@
 #define _WRITE_AVERAGE_KERNEL_AND_BIAS_
 #endif
 // ****************************************************************************************
-// ****************************************************************************************
 /**
  * @brief Mock Mode
 */
 #define _FULL_VERBOSE_
-
 // ****************************************************************************************
 #ifdef _FULL_VERBOSE_
 //#define _VERBOSE_FREEMEM_
@@ -69,12 +71,10 @@
 #define _VERBOSE_CAT_
 #endif
 // ****************************************************************************************
-// ****************************************************************************************
-// ****************************************************************************************
 /**
  * @brief To show plots live
 */
-#define _USE_GNUPLOT_
+//#define _USE_GNUPLOT_
 //#define FG_COLOR "white"
 #define FG_COLOR "black"
 // ****************************************************************************************
@@ -174,7 +174,7 @@
 /**
  * @brief  MKNOTS uses ONLY the mass of collapsing regions (knots)
 */
-#define _USE_MKNOTS_
+//#define _USE_MKNOTS_
 
 // ****************************************************************************************
 /**
@@ -193,6 +193,7 @@
 #ifdef _USE_TWEB_
 #define MODEL_THETA "TWEB"
 //#define _USE_TIDAL_ANISOTROPY_
+//#define _USE_TIDAL_ANISOTROPY_SEC_PROP_
 #endif
 
 
@@ -1019,17 +1020,12 @@ since we should not initialize the delta arrays there, as they are being filled 
 * @details Called from BiasMT methods. Implemented as a PowerSpectrumF method.
 * @details This uses the slot used also by  INVARIANT_SHEAR_VFIELD_III_, _USE_S3_. Used when no hybrid is useful
 */
+#define _READ_BIAS_
+//#define _WRITE_BIAS_
 //#define _USE_BIAS_OBJECT_TO_OBJECT_ 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-/**
-* @brief Compute the bias object to object.
-* @details Called from BiasMT methods. Implemented as a PowerSpectrumF method.
-* @details This uses the slot used also by  INVARIANT_SHEAR_VFIELD_III_, _USE_S3_. Used when no hybrid is useful
-*/
-//#define _USE_BIAS_OBJECT_TO_OBJECT_ 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-#define _USE_MACH_NUMBER_
-#define _USE_LOCAL_OVERDENSITY_
+//#define _USE_MACH_NUMBER_
+//#define _USE_LOCAL_OVERDENSITY_
 // ************************************************************************************************************************************
 // ************************************************************************************************************************************
 // ************************************************************************************************************************************
@@ -1042,8 +1038,32 @@ since we should not initialize the delta arrays there, as they are being filled 
   These are three option are to be used disjointly.
 */
 //#define _USE_NEIGHBOURS_
-// ***********************************************
-// ***********************************************
+
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\'
+/**
+* @brief Number of bins in bias. Mins and max are computed from the reference catalog.
+*/
+#define N_BINS_BIAS static_cast<ULONG>(15)
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef _USE_MACH_NUMBER_
+/**
+* @brief Compute the local overdenisty
+*/
+#define N_BINS_MACH static_cast<int>(10)
+#else
+#define N_BINS_MACH static_cast<int>(1)
+#endif
+
+#ifdef _USE_LOCAL_OVERDENSITY_
+#define N_BINS_LO static_cast<int>(10)
+#else
+#define N_BINS_LO static_cast<int>(1)
+#endif
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 /**
 * @brief This number controls how far from the current cell the code must search for neighbours
 * @details This is also used outside the realms of the directive _USE_NEIGHBOURS_
@@ -1488,9 +1508,9 @@ since we should not initialize the delta arrays there, as they are being filled 
 #define TOLERANCE_FACTOR_L0b static_cast<real_prec>(1.0)
 #define TOLERANCE_FACTOR_L0 static_cast<real_prec>(0.97)
 #else
-#define TOLERANCE_FACTOR_L0 static_cast<real_prec>(0.93)
+#define TOLERANCE_FACTOR_L0 static_cast<real_prec>(0.7)
 // This tolerance facor is applied to the multilevel approach level 0 (particle randomly selected)
-#define TOLERANCE_FACTOR_L0b static_cast<int>(0.98)
+#define TOLERANCE_FACTOR_L0b static_cast<real_prec>(0.7)
 #endif
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Define this if the glocbal mass funciton is to be used in the assignment of mass
@@ -1530,7 +1550,7 @@ since we should not initialize the delta arrays there, as they are being filled 
 #define _POWER_  
 #endif
 // ******************************************************************************************
-// ******************************************************************************************
+// ********************************a**********************************************************
 // These three disjoint options are to be used with the -p compilling flag.
 #ifdef mode_b
 #define _USE_ALL_PK_
@@ -1598,7 +1618,7 @@ since we should not initialize the delta arrays there, as they are being filled 
 * @detail Define also when building mocks. BiasMT will measure real and redshift space
 */
 #ifndef _ONLY_LPT_
-#define _REDSHIFT_SPACE_
+//#define _REDSHIFT_SPACE_
 #endif
 // *******************************************************************************************************************************************
 /**
@@ -2354,17 +2374,21 @@ since we should not initialize the delta arrays there, as they are being filled 
 #endif
 // ********************************************
 // This slot is dedicaqtd for the tital anisotropy
-#if defined (_USE_TIDAL_ANISOTROPY_)  || defined (_USE_S2_) || defined (_USE_INVARIANT_TIDAL_FIELD_IV_)
-#define N_C_BIN3 static_cast<ULONG>(100)
+#if defined (_USE_TIDAL_ANISOTROPY_) || defined (_USE_TIDAL_ANISOTROPY_SEC_PROP_)  || defined (_USE_S2_) || defined (_USE_INVARIANT_TIDAL_FIELD_IV_)
+#define N_C_BIN3 static_cast<ULONG>(10)
+#define N_BINS_TA static_cast<ULONG>(10)
 #define C3_MIN  static_cast<real_prec>(-1.0)
 #define C3_MAX  static_cast<real_prec>(1.0)
 #define DELTA_C3 (C3_MAX-C3_MIN)/(static_cast<double>(N_C_BIN3))
 #else
 #define N_C_BIN3 static_cast<ULONG>(1)
+#define N_BINS_TA static_cast<ULONG>(1)
 #define C3_MIN -200
 #define C3_MAX  200
 #define DELTA_C3 static_cast<real_prec>(1.)
 #endif
+
+
 
 // ********************************************
 // This slot is dedicaqtd for the invariant odf the vshear field OR the Nabla² delta term

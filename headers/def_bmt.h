@@ -89,23 +89,6 @@
 #define _CORRECT_VEL_DENSITY_
 #endif
 #endif
-//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\'
-/**
-* @brief Number of bins in bias. Mins and max are computed from the reference catalog.
-*/
-#define N_BINS_BIAS static_cast<ULONG>(15)
-///////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef _USE_MACH_NUMBER_
-/**
-* @brief Compute the local overdenisty
-*/
-#define N_BINS_LO static_cast<int>(10)
-#define N_BINS_MACH static_cast<int>(10)
-#else
-#define N_BINS_LO static_cast<int>(1)
-#define N_BINS_MACH static_cast<int>(1)
-#endif
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 /**
 * @brief Define to get power in bins of properties from the mock and the reference
