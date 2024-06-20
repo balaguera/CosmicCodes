@@ -12,6 +12,103 @@
 #include "../headers/cosmo_parameters.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define NOT_USED -1
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// This should be independent of reading the parameter file.
+
+
+void Params::explain_pars(string par_name)
+{
+  s_message_pars message_pars;
+  message_pars.set_par_name(par_name);
+  bool v_string=false;
+  if(par_name=="N_X"){
+    message_pars.set_par_description("Number of bins for dark matter");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(this->NX);
+    v_string=false;// if parameter is a string, false. if a number, true
+  }
+  if(par_name=="N_Y")
+  {
+    message_pars.set_par_description("Number of bins for dark matter halos. ");
+    message_pars.set_par_option("Integer > 0. If the interpolation is NGP, this value is overriden and transformed to maximum occupation number in cells");
+    v_string=false;
+  }
+  if(par_name=="Redshift" || par_name=="redshift")
+  {
+    message_pars.set_par_description("Cosmological redshift");
+    message_pars.set_par_option("A number > 0 identifiying");
+    message_pars.set_par_default(this->redshift);
+    v_string=false;
+  }
+  if(par_name=="IC_index")
+  {
+    message_pars.set_par_description("Index to characterize the IC of some procedures. ");
+    message_pars.set_par_option("Integer");
+    v_string=false;
+  }
+  if(par_name=="Nlambdath")
+  {
+    message_pars.set_par_description("Number of thersholds used to define cosmic-web types. Used only if test with cwc are available");
+    message_pars.set_par_option("Integer > 0");
+    v_string=false;
+  }
+  if(par_name=="lambdath")
+  {
+    message_pars.set_par_description("Threshold used to define cosmic-web types.");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(this->lambdath);
+    v_string=false;
+  }
+  if(par_name=="realization")
+  {
+    message_pars.set_par_description("Index to characterize realizations when producing mocks");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(this->realization);
+    v_string=false;
+  }
+  if(par_name=="delta_X_min")
+  {
+    message_pars.set_par_description("Minimum vaue of overdensity for histogram (in linear scale)");
+    message_pars.set_par_option("Number > 0");
+    message_pars.set_par_default(this->delta_X_min);
+    v_string=false;
+  }
+  if(par_name=="delta_X_max")
+  {
+    message_pars.set_par_description("Maximum vaue of overdensity for histogram (in linear scale)");
+    message_pars.set_par_option("Number > 0");
+    message_pars.set_par_default(this->delta_X_max);
+    v_string=false;
+  }
+  if(par_name=="ldelta_X_max")
+  {
+    message_pars.set_par_description("Maximum vaue of overdensity for histogram (in log(1+delta))");
+    message_pars.set_par_option("Number > 0");
+    message_pars.set_par_default(this->ldelta_X_max);
+    v_string=false;
+  }
+  if(par_name=="ldelta_X_min")
+  {
+    message_pars.set_par_description("Minimum vaue of overdensity for histogram (in log(1+delta))");
+    message_pars.set_par_option("Number > 0");
+    message_pars.set_par_default(this->ldelta_X_min);
+    v_string=false;
+  }
+  if(par_name=="Statistics")
+  {
+    message_pars.set_par_description("Statistics to measure from input catalog");
+    message_pars.set_par_option("For power spectrum: Pk_fkp (FKP estimator), Pk_yb (Yamamoto-Bianchi), Pk_ys(Yamamoto-Scoccimarro)");
+    v_string=true;
+  }
+
+
+
+  message_pars.show(v_string);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Params::init_pars()
 {
   this->NX = 200;
@@ -328,6 +425,7 @@ void Params::init_pars()
   this->zmax = 0;
   // ************************************************************************
   // cosmological parameters
+  this->Get_SO_from_BN = false;
   this->om_matter = COSMOPARS::Om_matter;
   this->om_radiation = COSMOPARS::Om_radiation;
   this->om_baryons = COSMOPARS::Om_baryons;
@@ -353,7 +451,6 @@ void Params::init_pars()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Params::read_pars(string file)
 {
-  cout<<__PRETTY_FUNCTION__<<endl;
   ifstream fin_parameters (file.c_str());
   if (fin_parameters.fail()) 
   { 
@@ -367,7 +464,6 @@ void Params::read_pars(string file)
   string par_name;
   string equality;
   string par_value;
-
   while (getline(fin_parameters,line_in_file))
     {
       if (line_in_file[0] != '#' && line_in_file.empty()==0)      // ignore lines starting with hashtag
@@ -386,7 +482,6 @@ void Params::read_pars(string file)
             exit(1);
 	        }
         line_string >> par_value; 	  // read parameter value
-//        cout<<par_name<<"  "<<par_value<<endl;
 	 	    if (true==par_value.empty())
           {
             cerr << "Warning from parameter file: " <<endl;
@@ -394,7 +489,6 @@ void Params::read_pars(string file)
             cerr << "Assuming a default value for " << par_name << endl;
             continue;
           }
-	 	  // Parameters for BAM
         else if (par_name == "NX")
           {
             this->NX = atoi(par_value.c_str());
@@ -4065,7 +4159,6 @@ void Params::show_params()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Params::warnings()
 {
-
 #ifdef USE_GALAXY_TOOLS
     cout<<RED<<endl;
     cout<<"USE_GALAXY_TOOLS is defined"<endl;
@@ -4073,8 +4166,6 @@ void Params::warnings()
     cout<<RESET<<endl;
     throw std::invalid_argument("Wrong set up. Fix and recompile");
 #endif
-
-
     if(this->type_of_object!="TRACER" && this->type_of_object!="TRACER_REF" && this->type_of_object!="TRACER_MOCK" && this->type_of_object!="TRACER_MOCK_ONLY_COORDS" && this->type_of_object!="TRACER_REF_ONLY_COORDS")
      {
         cout<<RED<<endl;
@@ -4088,7 +4179,6 @@ void Params::warnings()
         cout<<RESET<<endl;
         throw std::invalid_argument("Wrong input in parameter file");
     }
-
     if(this->use_file_nbar==true && this->nbar_tabulated ==true)
     {
         cout<<RED<<endl;
@@ -4097,26 +4187,34 @@ void Params::warnings()
         cout<<RESET<<endl;
         throw std::invalid_argument("Wrong input in parameter file");
     }
-#ifdef  _USE_BIAS_OBJECT_TO_OBJECT_
    if(this->Get_tracer_bias ==false)
     {
-      cout<<RED<<endl;
+#ifdef  _USE_BIAS_OBJECT_TO_OBJECT_
+      cout<<CYAN<<endl;
       cout<<"Parameter Get_tracer_bias  = "<<this->use_file_nbar<<endl;
       cout<<"is in conflict with parameter request from preproc directive _USE_BIAS_OBJECT_TO_OBJECT_ "<<endl;
-      cout<<RESET<<endl;
-      throw std::invalid_argument("Wrong input in parameter file");
-    }
+      string ans;
+      cout<<"Do you wish to continue? (y/n)"<<endl; cin>>ans;
+      if(ans=="Y" || ans == "y" || ans=="yes")      
+        cout<<RESET<<endl;
+      else
+        throw std::invalid_argument("Conflict between parameters not resolved.");
 #endif
+    }
 
-#ifdef _REDSHIFT_SPACE_
   if(this->i_v1_g<0  || this->i_v2_g<0 || this->i_v3_g<0)
   {
+#ifdef _REDSHIFT_SPACE_
       cout<<RED<<endl;
       cout<<"The opreproc directive _REDSHIFT_SPACE_ enabled but there is no info on velocities available"<<endl;
-      cout<<RESET<<endl;
-      throw std::invalid_argument("Wrong input in parameter file");
-  }
+      string ans;
+      cout<<"Do you wish to continue? (y/n)"<<endl; cin>>ans;
+      if(ans=="Y" || ans == "y" || ans=="yes")      
+        cout<<RESET<<endl;
+      else
+        throw std::invalid_argument("Conflict between parameters not resolved.");
 #endif
+  }
 
 
 }

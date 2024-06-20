@@ -8,6 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 #include "../headers/BiasMappingTechnique.h"
+#include "../headers/def.h"
 using namespace std;
 #ifdef _USE_PYTHON_
 void py_plot(vector<real_prec>& field)
@@ -3005,11 +3006,13 @@ void BiasMT::get_scaling_relations_primary_property()
    // ******************************************************************************
 // Get min and max of the differnet properties invovled
   this->get_new_min_max_properties();
+  this->tracer_ref.set_params(this->params);
   this->tracer_ref.set_type_of_object("TRACER_REF");
   string newcat=this->params._Input_dir_cat()+this->params._file_catalogue();
   //read catalog passing as argument the file and the mininum mass requested
 #if defined (_USE_MASS_CUTS_PK_) || defined (_USE_ALL_PK_)
 #ifdef _SET_CAT_WITH_MASS_CUT_
+      // Read catalog: if multilevel is enabled, this object updates params, so we must bring that params to bmt again below, at update_params
      this->tracer_ref.read_catalog(newcat,pow(10,this->params._LOGMASSmin())*this->params._MASS_units());   // READ INPUT CATALOG //
 #elif defined (_SET_CAT_WITH_VMAX_CUT_)
   this->tracer_ref.read_catalog(newcat,params._VMAXmin());
@@ -3024,6 +3027,7 @@ void BiasMT::get_scaling_relations_primary_property()
 #endif
 #endif
  // *********************************************************************************************
+update_params:
 #ifdef _USE_FIXED_MULTISCALE_LEVELS_
   this->params=this->tracer_ref.params; // Update params
 #endif
@@ -3049,7 +3053,8 @@ void BiasMT::get_scaling_relations_primary_property()
   this->tracer_aux.read_catalog(newcat_aux,params._VMAXmin(),static_cast<real_prec>(BIG_NUMBER));
 #endif
 #endif
-     this->tracer.Halo.resize(this->tracer_aux._NOBJS());
+    this->tracer.set_params(this->params);
+    this->tracer.Halo.resize(this->tracer_aux._NOBJS());
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
@@ -3062,6 +3067,7 @@ void BiasMT::get_scaling_relations_primary_property()
          this->tracer.Halo[i].vel2=this->tracer_aux.Halo[i].vel2;
          this->tracer.Halo[i].vel3=this->tracer_aux.Halo[i].vel3;
          this->tracer.Halo[i].GridID=this->tracer_aux.Halo[i].GridID;
+         this->tracer.Halo[i].GridID_n=this->tracer_aux.Halo[i].GridID_n;
        }
     this->tracer.set_NOBJS(this->tracer_aux._NOBJS());
 #else  // end of assign_to_new_ref. iF assign to the refernece directly
@@ -3079,6 +3085,7 @@ void BiasMT::get_scaling_relations_primary_property()
          this->tracer.Halo[i].vel2=this->tracer_ref.Halo[i].vel2;
          this->tracer.Halo[i].vel3=this->tracer_ref.Halo[i].vel3;
          this->tracer.Halo[i].GridID=this->tracer_ref.Halo[i].GridID;
+         this->tracer.Halo[i].GridID_n=this->tracer_ref.Halo[i].GridID_n;
          this->tracer.Halo[i].mass=0;
          this->tracer.Halo[i].vmax=0;
        }
@@ -3086,6 +3093,7 @@ void BiasMT::get_scaling_relations_primary_property()
     this->tracer.set_type_of_object("TRACER_MOCK");
 #endif
 #endif
+  this->tracer_aux.Halo.clear();  this->tracer_aux.Halo.shrink_to_fit();
   this->tracer_ref.get_property_function(this->params._Output_directory()+"tracer_ref_abundance.txt");
 #if defined _USE_NEIGHBOURS_ || defined _GET_DIST_MIN_SEP_REF_ || defined _GET_DIST_MIN_SEP_MOCK_
   So.message_screen("Identifying Neighbouring Cells (this is done once)");
@@ -3113,102 +3121,97 @@ void BiasMT::get_scaling_relations_primary_property()
   this->delta_dm_aux_mem.shrink_to_fit();
   this->delta_dm_aux_mem.resize( this->params._NGRID(),0);  //Keep this untouched, will be used along the iterations
   File.read_array(this->params._Input_Directory_X()+this->params._Name_Catalog_X(),this->delta_dm_aux_mem);
+     // ********************************************************************************
 #ifdef _USE_CROSS_CORRELATION_CONF_SPACE_ // we need below the dm, so we save it before trnasforming to delta and then to log
- vector<real_prec> REF_DM( this->params._NGRID(),0);
- REF_DM=delta_dm_aux_mem;
+   vector<real_prec> REF_DM( this->params._NGRID(),0);
+   REF_DM=delta_dm_aux_mem;
 #endif
+    // ********************************************************************************
+bias_pr:
    if(this->params._Get_tracer_bias())
     { // WE leave the param question separated from the prerpc, as we would want to use bias to plot but not to assign props
+#ifndef _READ_BIAS_
      PowerSpectrumF power_new(this->params, true);
      power_new.object_by_object_bias(this->tracer_ref.Halo,this->delta_dm_aux_mem);
-#ifdef _ASSIGN_PROPERTIES_TO_REFERENCE_
+#else
+    string out_bias=params._Output_directory()+"individual_bias.txt";
+    ifstream bout; bout.open(out_bias.c_str());
+    this->So.message_screen("Reading bias from  file ", out_bias);
+    for(ULONG i=0;i<this->tracer_ref.Halo.size();++i)
+      bout>>this->tracer_ref.Halo[i].bias>>this->tracer_ref.Halo[i].mach_number>>this->tracer_ref.Halo[i].local_overdensity>>this->tracer_ref.Halo[i].number_of_neighbours;
+    bout.close();
+#endif
+#ifndef _ASSIGN_PROPERTIES_TO_NEW_REFERENCE_
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
      for(ULONG i=0; i<this->tracer_ref._NOBJS(); ++i)//Copy the bias from the "ref" to the "new" catalog. Since the bias is computed from the coords, both can have the same unless coords change
          this->tracer.Halo[i].bias=this->tracer_ref.Halo[i].bias;
-     this->tracer_ref.set_min_bias(this->tracer.get_min("_BIAS_"));
-     this->tracer_ref.set_max_bias(this->tracer.get_max("_BIAS_"));
+#endif
+     this->tracer_ref.set_min_bias(this->tracer_ref.get_min("_BIAS_"));
+     this->tracer_ref.set_max_bias(this->tracer_ref.get_max("_BIAS_"));
      So.message_screen("Minimum bias",this->tracer_ref._min_bias());
      So.message_screen("Maximum bias",this->tracer_ref._max_bias());
-#endif
    }
+     // ********************************************************************************
 #ifdef _USE_MACH_NUMBER_
-    this->tracer_ref.get_local_mach_number_chuncks(this->params._Scale_mach_number());
-#ifdef _ASSIGN_PROPERTIES_TO_REFERENCE_
+#ifndef _READ_BIAS_
+#ifdef _USE_CHUNCKS_NC_
+    this->tracer_ref.get_local_mach_number_chuncks(this->params._Scale_mach_number());//here get mach and delta5
+#else
+    this->tracer_ref.get_local_mach_number(this->params._Scale_mach_number());//here get mach and delta5
+#endif
+#endif
+#ifndef _ASSIGN_PROPERTIES_TO_NEW_REFERENCE_ // if this is not defined, measn that we might be assigning to the same reference so we just replicate it
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
      for(ULONG i=0; i<this->tracer_ref._NOBJS(); ++i)//Copy the mach_number from the "ref" to the "new" catalog. Since mach is computed from the phase-space coords, both can have the same unless coords change
          this->tracer.Halo[i].mach_number=this->tracer_ref.Halo[i].mach_number ;
-     this->tracer_ref.set_min_mach(this->tracer.get_min("_MACH_"));
-     this->tracer_ref.set_max_mach(this->tracer.get_max("_MACH_"));
+#endif
+     this->tracer_ref.set_min_mach(this->tracer_ref.get_min("_MACH_"));
+     this->tracer_ref.set_max_mach(this->tracer_ref.get_max("_MACH_"));
      So.message_screen("Minimum mach",this->tracer_ref._min_mach());
      So.message_screen("Maximum mach",this->tracer_ref._max_mach());
+#endif
      // ********************************************************************************
 #ifdef _USE_LOCAL_OVERDENSITY_
+#ifndef _ASSIGN_PROPERTIES_TO_NEW_REFERENCE_
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
      for(ULONG i=0; i<this->tracer_ref._NOBJS(); ++i)//Copy the local_delta from the "ref" to the "new" catalog. Since local_delta is computed from the phase-space coords, both can have the same unless coords change
          this->tracer.Halo[i].local_overdensity=this->tracer_ref.Halo[i].local_overdensity;
-     this->tracer_ref.set_min_local_overdensity(this->tracer.get_min("_LOCAL_OVERDENSITY_"));
-     this->tracer_ref.set_max_local_overdensity(this->tracer.get_max("_LOCAL_OVERDENSITY_"));
+#endif
+     this->tracer_ref.set_min_local_overdensity(this->tracer_ref.get_min("_LOCAL_OVERDENSITY_"));
+     this->tracer_ref.set_max_local_overdensity(this->tracer_ref.get_max("_LOCAL_OVERDENSITY_"));
      So.message_screen("Minimum local-overd",this->tracer_ref._min_local_overdensity());
      So.message_screen("Maximum local-overd",this->tracer_ref._max_local_overdensity());
+#ifdef _WRITE_BIAS_
+    string out_bias=params._Output_directory()+"individual_bias.txt";
+    ofstream bout; bout.open(out_bias.c_str());
+    this->So.message_screen("Writing bias in  file ", out_bias);
+    for(ULONG i=0;i<this->tracer_ref.Halo.size();++i)
+      bout<<this->tracer_ref.Halo[i].bias<<"\t"<<this->tracer_ref.Halo[i].mach_number<<"\t"<<this->tracer_ref.Halo[i].local_overdensity<<"\t"<<this->tracer_ref.Halo[i].number_of_neighbours<<endl;
+    bout.close();
 #endif
 #endif
-#endif
-     this->mean_aux=get_mean(this->delta_dm_aux_mem);
-     get_overdens(this->delta_dm_aux_mem,this->mean_aux, this->delta_dm_aux_mem);
      // ********************************************************************************
-#ifdef _RANK_ORDERING_MOCK_GEN_ // to be deprecated
-  ULONG NXn=600;// This is as NX but higher to make pdf
-#ifdef _FULL_VERBOSE_
-       So.message_screen("Executing rank ordering from DM to DM-target");
-#endif
-   this->delta_X_REF_PDF.resize( this->params._NGRID(),0);
-   string file_X_ref_pdf=this->params._Input_Directory_X_REF()+this->params._Name_Catalog_X_REF_PDF(); // TBDep
-   this->File.read_array_t<PrecType_X>(file_X_ref_pdf, this->delta_X_REF_PDF); // Read target DM field for RO
-#ifdef _RO_WITH_DELTA_MOCK_GEN_
-   get_overdens(this->delta_X_REF_PDF, this->delta_X_REF_PDF); //a better bispect is found if the rank ordering is done to the CIC of number counts, not the delta thereof
-#endif
-   vector<real_prec>xbaux(NXn, 0);
-   vector<real_prec>pdf_in(NXn, 0);
+#if defined _USE_TIDAL_ANISOTROPY_ || defined _USE_TIDAL_ANISOTROPY_SEC_PROP_
+       vector<real_prec>tidal(this->params._NGRID(),0);
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
-   for(int i=0;i<xbaux.size(); ++i)
-     xbaux[i]=this->Xmin+static_cast<real_prec>(i+0.5)*(this->Xmax-this->Xmin)/(static_cast<real_prec>(NXn));
-   this->pdf_ref.resize(this->params._NX(), 0);
-   calc_pdf("log",  this->params._NGRID(),NXn, this->Xmax, this->Xmin, delta_dm_aux_mem, pdf_in);
-   calc_pdf("log",  this->params._NGRID(),NXn, this->Xmax, this->Xmin, this->delta_X_REF_PDF, this->pdf_ref);
-   rankorder(ZERO, xbaux, NXn,  this->Xmax, this->Xmin, delta_dm_aux_mem, pdf_in, this->pdf_ref);
-   this->delta_X_REF_PDF.clear();
-   this->delta_X_REF_PDF.shrink_to_fit();
-   xbaux.clear();xbaux.shrink_to_fit();
-   pdf_in.clear();pdf_in.shrink_to_fit();
-#endif   // end for _RANK_ORDERING_MOCK_GEN_
-#ifdef _KONVOLVE_PASSIGN_
-#ifdef _USE_TWO_REFS_MOCKS_
-  this->Kernel.clear();this->Kernel.resize(this->NTT,0);
-  int n_refs=this->params._Number_of_references();
-  for(int j=0; j<n_refs; ++j)  // Loop over nrefs-1 refereces. The first reference will be counted here, hence the function get_new_dm field is not used when this function is called
-  {
-    vector<real_prec>kernel_ghost(this->NTT,0);
-    this->File.read_array(this->params._files_kernel_references(j), kernel_ghost); // FIX NAME OF GHOST DM, I have used one of the calibration
-    for(ULONG i=0; i<this->NTT; ++i)
-       this->Kernel[i]+=kernel_ghost[i]/static_cast<real_prec>(n_refs);
-  }
-  So.DONE();
-#else
-    this->File.read_array(this->params._Input_Directory_BIAS_KERNEL()+"Bam_Kernel.dat", this->Kernel);
+      for(ULONG i=0;i<this->params._NGRID() ;++i)
+        tidal[i]=tidal_anisotropy(this->cwclass.lambda1[i], this->cwclass.lambda2[i], this->cwclass.lambda3[i]);
+      this->tracer_ref.get_tracer_tidal_anisotropy(tidal);
+      So.message_screen("\tMin TA :",this->tracer_ref._min_tidal_anisotropy());
+      So.message_screen("\tMax TA :",this->tracer_ref._max_tidal_anisotropy());
+      tidal.clear();tidal.shrink_to_fit();
 #endif
-  this->Konvolve(this->delta_dm_aux_mem,this->delta_dm_aux_mem);  // COnvolve with BAM Kernel
-//  File.write_array(this->params._Output_directory()+"DM_field",dm_ref);
-  this->Kernel.clear();
-  this->Kernel.shrink_to_fit();
-#endif   // NO NEED OF ELSE FOR THIS IF, FOR THE NAME NAME OF THE DELTAS BEFORE AND AFTER KONV HAS BEEN SET TO THE SAME STRING
+     // ********************************************************************************
+     this->mean_aux=get_mean(this->delta_dm_aux_mem);
+     get_overdens(this->delta_dm_aux_mem,this->mean_aux, this->delta_dm_aux_mem);
 // **********************************************************************************
 #if defined _USE_CWC_ || defined _USE_CWC_mass_
       this->cwclass_ref.get_CWC(this->delta_dm_aux_mem);   //get the CW info
@@ -3830,6 +3833,11 @@ void BiasMT::get_scaling_relations_secondary_property(string h_property)
   Ntot*=N_BINS_LO;
 #endif
   //-----------------------
+  // For X6:
+#ifdef _USE_TIDAL_ANISOTROPY_SEC_PROP_
+    Ntot*=N_BINS_TA;
+#endif
+  //-----------------------
   ULONG Ntot_partial=Ntot;
   //-----------------------
   Ntot*=this->params._NPROPbins_bam(); // For the variable Y, done separately because elow we need explicitely to split (for noimalization)
@@ -3841,6 +3849,10 @@ void BiasMT::get_scaling_relations_secondary_property(string h_property)
   vector<real_prec> REF_MASS_FIELD( this->params._NGRID(),0);
   this->tracer_ref.get_density_field_grid(_MASS_, REF_MASS_FIELD);
 #endif
+
+warning:  
+  So.message_warning("Using Vmax instead of M to assign Cvir and Rs");
+
 #ifdef _USE_OMP_
 #pragma omp parallel
   {
@@ -3879,6 +3891,8 @@ void BiasMT::get_scaling_relations_secondary_property(string h_property)
       // IF we neeed to assign RS, CVIR, or Spin, put Mass in the X1 slot
       if(h_property==_RS_ || h_property == _CONCENTRATION_ || h_property==_SPIN_  ||  h_property==_SPIN_BULLOCK_ ) // Using DELTA only allowed so far when assigning mass. FOr Rs and Spin we use so far P(Rs|M,Vmax) or P(S|M,Vmax)
         I_X1 =  get_bin(log10(this->tracer_ref.Halo[ig].mass),this->params._LOGMASSmin(),this->params._NPROPbins_bam(), (this->params._LOGMASSmax()-this->params._LOGMASSmin())/static_cast<double>(this->params._NPROPbins_bam())  ,this->bin_accumulate_borders);
+        // Use this if we want to use Vmax (even if primary) to assign seconday, passing over Mvir assigned
+//        I_X1 =  get_bin(log10(this->tracer_ref.Halo[ig].vmax),log10(this->params._VMAXmin()),this->params._NPROPbins_bam(), (log10(this->params._VMAXmax())-log10(this->params._VMAXmin()))/static_cast<double>(this->params._NPROPbins_bam())  ,this->bin_accumulate_borders);
 #endif
       else{ // Unless we want to assign M(or Vmax) in which case we put Vmax (or M)
 #ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_  // Here this means that Vmax is already available and we can learn from it
@@ -3920,11 +3934,18 @@ void BiasMT::get_scaling_relations_secondary_property(string h_property)
 #ifdef _USE_LOCAL_OVERDENSITY_
       I_X5= get_bin(this->tracer_ref.Halo[ig].local_overdensity, this->tracer_ref._min_local_overdensity(), N_BINS_LO,  (this->tracer_ref._max_local_overdensity()-this->tracer_ref._min_local_overdensity())/static_cast<real_prec>(N_BINS_LO) ,this->bin_accumulate_borders);
 #endif
+      ULONG index_dm=0;
+      ULONG I_X6=0;     
+#ifdef _USE_TIDAL_ANISOTROPY_SEC_PROP_ 
+      I_X6= get_bin(this->tracer_ref.Halo[ig].tidal_anisotropy, this->tracer_ref._min_tidal_anisotropy(), N_BINS_TA,  (this->tracer_ref._max_tidal_anisotropy()-this->tracer_ref._min_tidal_anisotropy())/static_cast<real_prec>(N_BINS_TA) ,this->bin_accumulate_borders);
+      index_dm=index_6d(I_X1,I_X2,I_X3,I_X4,I_X5,I_X6, NbinsX2,n_cwt,N_BINS_MACH,N_BINS_LO,N_BINS_TA);
+#else
+      index_dm=index_5d(I_X1,I_X2,I_X3,I_X4,I_X5,NbinsX2,n_cwt,N_BINS_MACH,N_BINS_LO);
+#endif
 #ifndef _BIN_ACCUMULATE_
        if(xdm <=this->s_maxs.prop1 && xdm >=this->s_mins.prop1)
           {
 #endif
-            ULONG index_dm=index_5d(I_X1,I_X2,I_X3,I_X4,I_X5, NbinsX2,n_cwt,N_BINS_MACH,N_BINS_LO);
             ULONG index_prop_b=index_2d(I_Y,index_dm,Ntot_partial); // I_Y is the bin of mass
 #ifdef _USE_OMP_
             abundance_parallel[index_prop_b]++;
@@ -7240,20 +7261,20 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
     }
   vector<real_prec> CROSS_CORR;
 #ifdef _USE_CROSS_CORRELATION_CONF_SPACE_
-if(true==initial_assignment)
-{  // only applies for the asignment of first primary property
+  if(true==initial_assignment)
+  {  // only applies for the asignment of first primary property
     Params params_new=this->params;
     vector<real_prec> NEW_DM( this->params._NGRID(),0);
     this->File.read_array(this->params._Input_Directory_X_REF()+this->params._Name_Catalog_X(), NEW_DM);
     CROSS_CORR.resize(this->params._NGRID(),0);
     PowerSpectrumF cpower(params_new);
 #ifndef  _USE_TRACERS_IN_CELLS_
-  vector<real_prec> MOCK_DEN_FIELD( this->params._NGRID(),0);
-  this->File.read_array(this->params._Input_Directory_Y()+this->params._Name_Catalog_Y(),MOCK_DEN_FIELD);
+    vector<real_prec> MOCK_DEN_FIELD( this->params._NGRID(),0);
+    this->File.read_array(this->params._Input_Directory_Y()+this->params._Name_Catalog_Y(),MOCK_DEN_FIELD);
 #endif
-  cpower.get_cross_correlation_config_space(NEW_DM,MOCK_DEN_FIELD,CROSS_CORR);
-  NEW_DM.clear(); NEW_DM.shrink_to_fit();
-}
+    cpower.get_cross_correlation_config_space(NEW_DM,MOCK_DEN_FIELD,CROSS_CORR);
+    NEW_DM.clear(); NEW_DM.shrink_to_fit();
+  }
 #endif
    ULONG N_x=1;
     if(true==initial_assignment)
@@ -7264,16 +7285,14 @@ if(true==initial_assignment)
 #ifdef _ASSIGN_MASS_POST_
   N_x=1;
   if(false==initial_assignment) // if initial_assignem t is false, we proceed to assign mass/vmax once the vmax/mass is already assigned. This will be false upon a second call of this function.
-    {
-      N_x=this->params._NPROPbins_bam();
-    }
+    N_x=this->params._NPROPbins_bam();
   else if(true==initial_assignment)
     {
-    N_x=1;
+      N_x=1;
 #ifdef _USE_LOCAL_OVERDENSITY_
-    N_x=N_BINS_LO;
+      N_x=N_BINS_LO;
 #endif
-  }
+    }
 #elif defined _ASSIGN_VMAX_POST_
   if(false==initial_assignment) // if initial_assignem t is false, we proceed to assign mass/vmax once the vmax/mass is already assigned. This will be false upon a second call of this function.
     N_x = this->params._NPROPbins_bam();
@@ -7337,26 +7356,60 @@ if(true==initial_assignment)
     Trn = gsl_rng_mt19937;//_default;
     randa= gsl_rng_alloc (Trn);
 #endif
-#if defined _ASSIGN_PROPERTIES_TO_REFERENCE_ || defined _ASSIGN_PROPERTIES_TO_NEW_REFERENCE_
-    //If we are assigning properties to the same reference catalog, we use the same bias previously computed so we do not need to compute here agan
+     // ********************************************************************************
+#ifdef _ASSIGN_PROPERTIES_TO_NEW_REFERENCE_
+    //If we are assigning properties to the same reference catalog, we use the same bias previously computed in label bias_pr, so we do not need to compute here agan
     // Or, if we are to assign coords to a new reference, we proceed to compute properties from that new target reference
-#ifdef _USE_BIAS_OBJECT_TO_OBJECT_
-         vector<real_prec> DM_DEN_FIELD( this->params._NGRID(),0);// Read the reference DM field
-         this->File.read_array(this->params._Input_Directory_X_new_ref()+this->params._Name_Catalog_X_new_ref(),DM_DEN_FIELD);
-         So.message_screen("\tMin DM field:",get_min_nm(DM_DEN_FIELD));
-         So.message_screen("\tMax DM field:",get_max_nm(DM_DEN_FIELD));
-         So.message_screen("\tMean DM field:",get_mean(DM_DEN_FIELD));
-         PowerSpectrumF Psb(this->params, true);
-         Psb.object_by_object_bias(this->tracer.Halo,DM_DEN_FIELD);
-         DM_DEN_FIELD.clear();DM_DEN_FIELD.shrink_to_fit();
-#endif
+#ifndef _READ_BIAS_
+      if(true==this->params._Get_tracer_bias())
+      {
+        vector<real_prec> DM_DEN_FIELD( this->params._NGRID(),0);// Read the reference DM field
+        this->File.read_array(this->params._Input_Directory_X_new_ref()+this->params._Name_Catalog_X_new_ref(),DM_DEN_FIELD);
+        So.message_screen("\tMin DM field:",get_min_nm(DM_DEN_FIELD));
+        So.message_screen("\tMax DM field:",get_max_nm(DM_DEN_FIELD));
+        So.message_screen("\tMean DM field:",get_mean(DM_DEN_FIELD));
+        PowerSpectrumF Psb(this->params, true);
+        Psb.object_by_object_bias(this->tracer.Halo,DM_DEN_FIELD);
+        DM_DEN_FIELD.clear();DM_DEN_FIELD.shrink_to_fit();
+      }
 #ifdef _USE_MACH_NUMBER_
-        this->tracer.get_local_mach_number_chuncks(this->params._Scale_mach_number());
+      this->tracer.get_local_mach_number_chuncks(this->params._Scale_mach_number());
 #endif
-#endif // endf of
+#ifdef _WRITE_BIAS_
+      string out_bias=params._Output_directory()+"individual_bias_invPhase.txt";
+      ofstream bout; bout.open(out_bias.c_str());
+      this->So.message_screen("Writing bias in  file ", out_bias);
+      for(ULONG i=0;i<this->tracer.Halo.size();++i)
+        bout<<this->tracer.Halo[i].bias<<"\t"<<this->tracer.Halo[i].mach_number<<"\t"<<this->tracer.Halo[i].local_overdensity<<endl;
+      bout.close();
+#endif
+#endif
+#ifdef _READ_BIAS_
+      string out_bias=params._Output_directory()+"individual_bias_invPhase.txt";
+      ifstream bout; bout.open(out_bias.c_str());
+      this->So.message_screen("Reading bias from  file ", out_bias);
+      for(ULONG i=0;i<this->tracer.Halo.size();++i)
+        bout>>this->tracer.Halo[i].bias>>this->tracer.Halo[i].mach_number>>this->tracer.Halo[i].local_overdensity;
+      bout.close();
+#endif 
+#ifdef _USE_TIDAL_ANISOTROPY_SEC_PROP_
+      vector<real_prec>tidal(this->params._NGRID(),0);
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+      for(ULONG i=0;i<this->params._NGRID() ;++i)
+        tidal[i]=tidal_anisotropy(this->cwclass.lambda1[i], this->cwclass.lambda2[i], this->cwclass.lambda3[i]);
+      this->tracer.get_tracer_tidal_anisotropy(tidal);
+      So.message_screen("\tMin TA :",this->tracer._min_tidal_anisotropy());
+      So.message_screen("\tMax TA :",this->tracer._max_tidal_anisotropy());
+      tidal.clear();tidal.shrink_to_fit();
+#endif
+#endif // endf of _ASSIGN_PROPERTIES_TO_NEW_REFERENCE_
+     // ********************************************************************************
 #ifdef _USE_HYBRID_ASSIGNMENT_NEW_
     this->dm_properties_bins_mock.resize(this->dm_properties_bins.size());
 #endif
+     // ********************************************************************************
 #ifdef _MULTISCALE_
 #ifdef _USE_OMP_TEST_
 #pragma omp for reduction(+:count_dm)
@@ -7367,7 +7420,6 @@ if(true==initial_assignment)
     for(ULONG id=0; id <  this->params._NGRID();++id)
 #endif
 #else   //else for ifdef _MULTISCALE_
-
 #ifdef _USE_OMP_TEST_
 #pragma omp for reduction(+:counter_fmf, count_dm)
 #endif
@@ -7379,11 +7431,11 @@ if(true==initial_assignment)
          ULONG I_X=0;
        // Get the bin in the delta dark matter (or log 1+delta) in each cell
 #ifdef _USE_DM_DENSITY_AT_HALO_POSITION_
-      real_prec xdm=linInterpol(this->params._Nft(),this->params._Lbox(),this->params._d1(),this->tracer.Halo[ig].coord1,this->tracer.Halo[ig].coord2,this->tracer.Halo[ig].coord3,this->delta_X);
-      I_X  = get_bin(xdm,this->s_mins.prop1,this->params._NX(),this->s_deltas.prop1,this->bin_accumulate_borders);
+        real_prec xdm=linInterpol(this->params._Nft(),this->params._Lbox(),this->params._d1(),this->tracer.Halo[ig].coord1,this->tracer.Halo[ig].coord2,this->tracer.Halo[ig].coord3,this->delta_X);
+        I_X  = get_bin(xdm,this->s_mins.prop1,this->params._NX(),this->s_deltas.prop1,this->bin_accumulate_borders);
 #else
-     real_prec xdm = static_cast<real_prec>(this->delta_X[id]);
-     I_X  = get_bin(xdm,this->s_mins.prop1,this->params._NX(),this->s_deltas.prop1,this->bin_accumulate_borders);
+        real_prec xdm = static_cast<real_prec>(this->delta_X[id]);
+        I_X  = get_bin(xdm,this->s_mins.prop1,this->params._NX(),this->s_deltas.prop1,this->bin_accumulate_borders);
 #endif
 #if defined (_MULTISCALE_) || defined (_SET_THRESHOLD_FOR_PROP_RANDOM_TRACERS_)
          real_prec xdm_b = static_cast<real_prec>(this->delta_X[id]);
@@ -7397,27 +7449,27 @@ if(true==initial_assignment)
 #endif
 #endif
 // Get the corresponding bin on Knot-mass. The current cell is in a cluster with a given mass falling in that particular bin
-       ULONG I_MK=0;
+         ULONG I_MK=0;
 #ifdef _USE_MASS_KNOTS_
-       I_MK= (this->cwclass.cwt_used[I_CWT]== I_KNOT ? this->cwclass.SKNOT_M_info[id]: 0);
+         I_MK= (this->cwclass.cwt_used[I_CWT]== I_KNOT ? this->cwclass.SKNOT_M_info[id]: 0);
 #endif
-       ULONG I_CWV=0;
+         ULONG I_CWV=0;
 #ifdef _USE_CWC_V_
-       I_CWV=this->cwclass.get_Vclassification(id);
+         I_CWV=this->cwclass.get_Vclassification(id);
 #endif
        // Get the corresponding bin on Knot-mass. The current cell is in a cluster with a given mass falling in that particular bin
-       ULONG I_VK=0;
+        ULONG I_VK=0;
 #ifdef _USE_VEL_KNOTS_V_
-       I_VK= (this->cwclass.cwt_used[I_CWV]== I_KNOT ? this->cwclass.VDISP_KNOT_info[id]: 0);
+         I_VK= (this->cwclass.cwt_used[I_CWV]== I_KNOT ? this->cwclass.VDISP_KNOT_info[id]: 0);
 #endif
        // Get the corresponding bin in the two invariants of the shear of the tidal field
-       ULONG I_C1=0;
+        ULONG I_C1=0;
 #ifdef _USE_TOTAL_MASS_IN_CELL_
-       if(true==initial_assignment)
-         I_C1=get_bin(log10(MOCK_MASS_FIELD[id]),this->params._LOGMASSmin(),N_BINS_TOTAL_MAS  S_IN_CELL,(log10(MAX_TOTAL_MASS_IN_CELL)-this->params._LOGMASSmin())/static_cast<double>(N_BINS_TOTAL_MASS_IN_CELL), true);
+        if(true==initial_assignment)
+          I_C1=get_bin(log10(MOCK_MASS_FIELD[id]),this->params._LOGMASSmin(),N_BINS_TOTAL_MAS  S_IN_CELL,(log10(MAX_TOTAL_MASS_IN_CELL)-this->params._LOGMASSmin())/static_cast<double>(N_BINS_TOTAL_MASS_IN_CELL), true);
 #elif defined _USE_INVARIANT_TIDAL_FIELD_II_
-       real_prec C1 = this->cwclass.Invariant_TF_II[id];
-       I_C1= get_bin(C1, this->s_mins.prop4, N_C_BIN1, s_deltas.prop4,this->bin_accumulate_borders);
+        real_prec C1 = this->cwclass.Invariant_TF_II[id];
+        I_C1= get_bin(C1, this->s_mins.prop4, N_C_BIN1, s_deltas.prop4,this->bin_accumulate_borders);
 #elif defined _USE_DELTA2_
        real_prec C1 = this->cwclass.DELTA2[id];
        I_C1= get_bin(C1, this->s_mins.prop4, N_C_BIN1, s_deltas.prop4,this->bin_accumulate_borders);
@@ -7476,7 +7528,6 @@ if(true==initial_assignment)
 #ifdef _USE_TRACERS_IN_CELLS_
           if(true==initial_assignment)
               I_CV1=get_bin(static_cast<int>(MOCK_DEN_FIELD[id]),0,N_BINS_TRACERS_IN_CELLS,DELTA_TRACERS_IN_CELLS,true);
-
 #elif defined (_USE_INVARIANT_SHEAR_VFIELD_I_)
           real_prec CV1 = invariant_field_I(this->cwclass.lambda1_vs[id],this->cwclass.lambda2_vs[id],this->cwclass.lambda3_vs[id]); // Not yet assigned to container
           I_CV1= get_bin(CV1, CV1_MIN, N_CV_BIN1,DELTA_CV1, this->bin_accumulate_borders);
@@ -8460,16 +8511,6 @@ if(true==initial_assignment)
       So.message_screen("Total Assigned at Level 0 = ", counter_masses_0);
 #endif
       cumulative_counter+=counter_masses_left;
-#ifdef _FULL_VERBOSE_
-     So.message_screen("Total Number of Properties Assigned = ",cumulative_counter);
-#endif
-#ifdef _VERBOSE_FREEMEM_
-     std::cout<<endl;
-      So.message_screen("Freeing memory in line", __LINE__);
-#endif
-      left_overs_properties.clear();
-      left_overs_properties.shrink_to_fit();
-      left_overs_properties_used.clear();
       left_overs_properties_used.shrink_to_fit();
       So.DONE();
      }// close if(true==initial_assignment)
@@ -8523,7 +8564,13 @@ if(true==initial_assignment)
 #ifdef _USE_LOCAL_OVERDENSITY_
       Ntot*=N_BINS_LO;
 #endif
-      ULONG Ntot_partial=Ntot;
+#ifdef _USE_TIDAL_ANISOTROPY_SEC_PROP_
+  Ntot*=N_BINS_TA;
+#endif
+//*****************************************
+      ULONG Ntot_partial=Ntot;// This must be after the last property advocated
+//*****************************************
+
       Ntot*=this->params._NPROPbins_bam(); // Assign the space for the variable Y
 // The following loops are meant to inizialize the tracer containers
 #ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_
@@ -8597,7 +8644,6 @@ if(true==initial_assignment)
 #pragma omp atomic
 #endif
          aux_cond[i]+=static_cast<double>(this->ABUNDANCE_normalized[index_2d(j,i,Ntot_partial)]);
-
     counter_masses_0=0;
     ULONG Ng_k=0;
     ULONG Ng_s=0;
@@ -8615,20 +8661,22 @@ if(true==initial_assignment)
      gsl_rng *randa;
 #pragma omp parallel private(jthread, randa, Trn)
     {
-         jthread=omp_get_thread_num();
-         gsl_rng_default_seed=vseeds[jthread];
-         Trn = gsl_rng_default;
-         randa = gsl_rng_alloc (Trn);
+      jthread=omp_get_thread_num();
+      gsl_rng_default_seed=vseeds[jthread];
+      Trn = gsl_rng_default;
+      randa = gsl_rng_alloc (Trn);
 #pragma omp parallel for reduction(+:counter_masses_0, counter_masses_or, counter_masses_global,Ng_k,Ng_f,Ng_s,Ng_v, counter_masses_test)
 #endif
-   for(ULONG ig=0; ig < this->tracer._NOBJS();++ig)
+      for(ULONG ig=0; ig < this->tracer._NOBJS();++ig)
        {
          ULONG id=this->tracer.Halo[ig].GridID;
          ULONG I_X1=0;
 #if defined  _USE_RS_AS_DERIVED_OBSERVABLE_ || defined _USE_SPIN_AS_DERIVED_OBSERVABLE_  || defined _USE_CONCENTRATION_AS_DERIVED_OBSERVABLE_
       // IF we neeed to assign RS, CVIR, Spin, put Mass in the X1 slot
-        if(h_property==_RS_ || h_property == _CONCENTRATION_ || h_property==_SPIN_  ||  h_property==_SPIN_BULLOCK_ ) // Using DELTA only allowed so far when assigning mass. FOr Rs and Spin we use so far P(Rs|M,Vmax) or P(S|M,Vmax)
-          I_X1 =  get_bin(log10(this->tracer.Halo[ig].mass),this->params._LOGMASSmin(),this->params._NPROPbins_bam(), (this->params._LOGMASSmax()-this->params._LOGMASSmin())/static_cast<double>(this->params._NPROPbins_bam())  ,this->bin_accumulate_borders);
+         if(h_property==_RS_ || h_property == _CONCENTRATION_ || h_property==_SPIN_  ||  h_property==_SPIN_BULLOCK_ ) // Using DELTA only allowed so far when assigning mass. FOr Rs and Spin we use so far P(Rs|M,Vmax) or P(S|M,Vmax)
+            I_X1 =  get_bin(log10(this->tracer.Halo[ig].mass),this->params._LOGMASSmin(),this->params._NPROPbins_bam(), (this->params._LOGMASSmax()-this->params._LOGMASSmin())/static_cast<double>(this->params._NPROPbins_bam())  ,this->bin_accumulate_borders);
+        // Use this if we want to use Vmax (even if primary) to assign seconday, passing over Mvir assigned
+//        I_X1 =  get_bin(log10(this->tracer.Halo[ig].vmax),log10(this->params._VMAXmin()),this->params._NPROPbins_bam(), (log10(this->params._VMAXmax())-log10(this->params._VMAXmin()))/static_cast<double>(this->params._NPROPbins_bam())  ,this->bin_accumulate_borders);
 #endif
         else
          { // Unless we want to assign M(or Vmax) in which case we put Vmax (or M)
@@ -8640,7 +8688,7 @@ if(true==initial_assignment)
 #endif
          }
         ULONG I_X2=0;
-        ULONG NbinsX2=0;
+        ULONG NbinsX2=1;
         if(h_property==_MASS_ || h_property==_VMAX_ || h_property==_CONCENTRATION_ || h_property==_RS_)
            {
              real_prec xdm = static_cast<real_prec>(this->delta_X[id]); // this has been read and kept from get_new_dm(): there the CWC has been performed allcoated in cwclass
@@ -8681,9 +8729,16 @@ if(true==initial_assignment)
 #ifdef _USE_LOCAL_OVERDENSITY_
           I_X5= get_bin(this->tracer.Halo[ig].local_overdensity, this->tracer_ref._min_local_overdensity(), N_BINS_LO,  (this->tracer_ref._max_local_overdensity()-this->tracer._min_local_overdensity())/static_cast<real_prec>(N_BINS_LO) ,this->bin_accumulate_borders);
 #endif
-          ULONG index_dm=index_5d(I_X1,I_X2,I_X3,I_X4,I_X5, NbinsX2,n_cwt,N_BINS_MACH,N_BINS_LO);//Here I_X takles the place of DM
-          real_prec aux_h=aux_cond[index_dm];
-          if(aux_h>0)//if all bins in abundance_normalized are zero, means no availability of props.
+         ULONG index_dm=0; 
+         ULONG I_X6=0;
+#ifdef _USE_TIDAL_ANISOTROPY_SEC_PROP_ // if defined, onlyu applies to cvir, spin,. not to mass
+         I_X6= get_bin(this->tracer.Halo[ig].tidal_anisotropy, this->tracer_ref._min_tidal_anisotropy(), N_BINS_TA,  (this->tracer_ref._max_tidal_anisotropy()-this->tracer_ref._min_tidal_anisotropy())/static_cast<real_prec>(N_BINS_TA) ,this->bin_accumulate_borders);
+         index_dm=index_6d(I_X1,I_X2,I_X3,I_X4,I_X5,I_X6, NbinsX2,n_cwt,N_BINS_MACH,N_BINS_LO,N_BINS_TA);
+#else
+          index_dm=index_5d(I_X1,I_X2,I_X3,I_X4,I_X5,NbinsX2,n_cwt,N_BINS_MACH,N_BINS_LO);
+#endif
+        real_prec aux_h=aux_cond[index_dm];
+         if(aux_h>0)//if all bins in abundance_normalized are zero, means no availability of props.
               {
                 counter_masses_test++;
                 real_prec prob=-10.0;
@@ -9244,9 +9299,8 @@ if(true==initial_assignment)
 #endif
       }
 #endif  // closes _USE_SPIN_AS_DERIVED_OBSERVABLE_
-  
-  string rfile=this->params._Output_directory()+"ref_ncat.txt";
-  this->tracer_ref.select_random_subsample(0.2, rfile);
+//  string rfile=this->params._Output_directory()+"ref_ncat.txt";
+//  this->tracer_ref.select_random_subsample(0.2, rfile);
   string bfile=this->params._Output_directory()+"new_cat_with_dm_";
 #ifdef  _USE_CWC_
      bfile+="cwc_";
@@ -9260,11 +9314,15 @@ if(true==initial_assignment)
 #ifdef  _USE_LOCAL_OVERDENSITY_
      bfile+="delta5_";
 #endif
+#ifdef  _USE_TIDAL_ANISOTROPY_SEC_PROP_
+    bfile+="ta_";
+#endif
 #ifdef _MULTISCALE_
      bfile+="MS_";
 #endif
     bfile+=".txt";
-    this->tracer.select_random_subsample(0.2, bfile);
+   if(h_property==_SPIN_BULLOCK_) // es la última
+      this->tracer.select_random_subsample(0.2, bfile);
 
     } // closes else if(false==initial_assignment)
 }
@@ -13671,6 +13729,9 @@ void BiasMT::get_mean_scaling_relation_assignment_bias(string prop){  //esto hay
 #ifdef  _USE_LOCAL_OVERDENSITY_
   bfile+="delta5_";
 #endif
+#ifdef  _USE_TIDAL_ANISOTROPY_SEC_PROP_
+  bfile+="ta_";
+#endif
 #ifdef _MULTISCALE_
   bfile+="MS_";
 #endif
@@ -13763,6 +13824,9 @@ void BiasMT::get_mean_scaling_relation_assignment_secondary_bias(string primary_
 #endif
 #ifdef  _USE_LOCAL_OVERDENSITY_
   bfile+="delta5_";
+#endif
+#ifdef  _USE_TIDAL_ANISOTROPY_SEC_PROP_
+  bfile+="ta_";
 #endif
 #ifdef _MULTISCALE_
   bfile+="MS_";

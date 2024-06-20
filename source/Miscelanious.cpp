@@ -2377,7 +2377,7 @@ void get_neighbour_cells_cat_analyze_chuncks(int Nchunck, int Nft, int N_cells_b
 #pragma omp parallel for collapse(3)
 #endif
       // The loop over ic
-      for(int ic=0; ic<chunck_factor ;++ic) // this loop is not necessary if chunck_factor=1
+ for(int ic=0; ic<chunck_factor ;++ic) // this loop is not necessary if chunck_factor=1
 	for(int j=0;j<Nft ;++j)
 	  for(int k=0;k<Nft ;++k)
 	    {
@@ -2448,65 +2448,64 @@ void get_neighbour_cells_cat_analyze_chuncks(int Nchunck, int Nft, int N_cells_b
 #ifdef _USE_OMP_
 #pragma omp parallel for collapse(3)
 #endif
-      for(int ic=0; ic<chunck_factor ;++ic)
-	for(int j=0;j<Nft ;++j)
-	  for(int k=0;k<Nft ;++k)
-	    {
-	      ULONG ID=index_3d(ic,j,k,Nft,Nft);//get ID of cell
-
-	      int i=chunck_factor*Nchunck + ic;// if chunck_factor is 2, this is 0,2,4,6,8...254
-	      for(int idx =0; idx < max_neigh_per_dim; ++idx)  // loop in the x-direction
-		{
-		  int new_ni = i - index_cells_dime[idx];
-		  int aux_bc_x=0;
-		  if(new_ni<0)
-		    {
-		      new_ni+= Nft;
-		      aux_bc_x=-1;
-		    }
-		  if(new_ni>= Nft)
-		    {
-		      new_ni-=Nft;
-		      aux_bc_x=1;
-		    }
-		  for(int idy =0; idy < max_neigh_per_dim; ++idy) // loop in the y-direction
-		    {
-		      int new_nj = j - index_cells_dime[idy];
-		      int aux_bc_y=0;
-		      if(new_nj<0)
-			{
-			  new_nj+=Nft;
-			  aux_bc_y=-1;
-			}//si la celda esta por detrñas, ponga -1
-		      if(new_nj>= Nft)
-			{
-			  new_nj-=Nft;
-			  aux_bc_y=1;
-			}
-		      for(int idz =0; idz < max_neigh_per_dim; ++idz) // loop in the z-direction
-			{
-			  int new_nk = k - index_cells_dime[idz];
-			  int aux_bc_z=0;
-			  if(new_nk<0)
-			    {
-			      new_nk+=Nft;
-			      aux_bc_z=-1;
-			    }
-			  if(new_nk>=Nft)
-			    {
-			      new_nk-=Nft;
-			      aux_bc_z=1;
-			    }
-			  ULONG new_id=index_3d(new_ni,new_nj,new_nk,Nft,Nft); // Get the ID of the neighbouring cells;
-			  nearest_cells_to_cell[ID].close_cell.push_back(new_id);
-			  nearest_cells_to_cell[ID].bc_x.push_back(aux_bc_x);
-			  nearest_cells_to_cell[ID].bc_y.push_back(aux_bc_y);
-			  nearest_cells_to_cell[ID].bc_z.push_back(aux_bc_z);
-			}
-		    }
-		}
-	    }
-    }
+  for(int ic=0; ic<chunck_factor ;++ic)
+  	for(int j=0;j<Nft ;++j)
+	    for(int k=0;k<Nft ;++k)
+	      {
+          ULONG ID=index_3d(ic,j,k,Nft,Nft);//get ID of cell
+          int i=chunck_factor*Nchunck + ic;// if chunck_factor is 2, this is 0,2,4,6,8...254
+          for(int idx =0; idx < max_neigh_per_dim; ++idx)  // loop in the x-direction
+          {
+            int new_ni = i - index_cells_dime[idx];
+            int aux_bc_x=0;
+            if(new_ni<0)
+              {
+                new_ni+= Nft;
+                aux_bc_x=-1;
+              }
+            if(new_ni>= Nft)
+              {
+                new_ni-=Nft;
+                aux_bc_x=1;
+              }
+              for(int idy =0; idy < max_neigh_per_dim; ++idy) // loop in the y-direction
+                {
+                  int new_nj = j - index_cells_dime[idy];
+                  int aux_bc_y=0;
+                  if(new_nj<0)
+                    {
+                      new_nj+=Nft;
+                      aux_bc_y=-1;
+                    }//si la celda esta por detrñas, ponga -1
+                 if(new_nj>= Nft)
+                  {
+                    new_nj-=Nft;
+                  aux_bc_y=1;
+                  }
+                  for(int idz =0; idz < max_neigh_per_dim; ++idz) // loop in the z-direction
+                  {
+                    int new_nk = k - index_cells_dime[idz];
+                    int aux_bc_z=0;
+                    if(new_nk<0)
+                      {
+                        new_nk+=Nft;
+                        aux_bc_z=-1;
+                      }
+                    if(new_nk>=Nft)
+                      {
+                        new_nk-=Nft;
+                        aux_bc_z=1;
+                      }
+                    ULONG new_id=index_3d(new_ni,new_nj,new_nk,Nft,Nft); // Get the ID of the neighbouring cells;
+                    nearest_cells_to_cell[ID].close_cell.push_back(new_id);
+                    nearest_cells_to_cell[ID].bc_x.push_back(aux_bc_x);
+                    nearest_cells_to_cell[ID].bc_y.push_back(aux_bc_y);
+                    nearest_cells_to_cell[ID].bc_z.push_back(aux_bc_z);
+                  }
+		           }
+		        }
+	      }
+   }
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////

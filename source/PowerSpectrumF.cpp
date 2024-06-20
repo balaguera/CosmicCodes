@@ -447,17 +447,17 @@ void PowerSpectrumF::compute_marked_correlation_function()
     if(this->params._redshift_space_coords_g() == false)
       {
         if("kmps"==this->params._vel_units_g())
-          conversion_factor=(1.+this->params.s_cosmo_pars.cosmological_redshift)/(this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift));
+          conversion_factor=(1.+this->params._redshift())/(this->cosmology.Hubble_function(this->params._redshift()));
         else if("alpt"==this->params._vel_units_g())
-          conversion_factor= cgs_Mpc/(this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift));
+          conversion_factor= cgs_Mpc/(this->cosmology.Hubble_function(this->params._redshift()));
         else if("Mpcph"==this->params._vel_units_g())
           conversion_factor=1;
     #ifdef _FULL_VERBOSE_
-        So.message_screen("Current redshift =",this->params.s_cosmo_pars.cosmological_redshift);
-        So.message_screen("Hubble function at current redshift =",this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift));
+        So.message_screen("Current redshift =",this->params._redshift());
+        So.message_screen("Hubble function at current redshift =",this->cosmology.Hubble_function(this->params._redshift()));
         So.message_screen("Conversion factor =",conversion_factor);
     #endif
-        So.message_screen("Hubble function at current redshift =",this->cosmology.Hubble_function(this->params.s_cosmo_pars.cosmological_redshift));
+        So.message_screen("Hubble function at current redshift =",this->cosmology.Hubble_function(this->params._redshift()));
           }
 #endif
     real_prec lrmin= this->params._rbin_type() == "linear" ? this->params._rmin_cf():  log10(this->params._rmin_cf());
@@ -4507,7 +4507,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
    this->So.message_screen("Getting object-to-object bias");
 #endif
      kvector_data.clear();
-#if defined _TNG_ || defined _TNG_GAL_
+#if defined _TNG_ || defined _TNG_GAL_ || defined _UNITSIM_
      kvector_data.shrink_to_fit();
      for(int i=0;i<this->params._d_Nnp_data();i++)
        kvector_data.push_back(this->params._d_kmin()+this->params._d_DeltaK_data()*(i+0.5));

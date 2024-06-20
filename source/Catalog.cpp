@@ -103,8 +103,8 @@ void Catalog::analyze_cat(bool read){
   if(true==this->params._Get_tracer_mass_field())
     if(this->params._i_mass_g()>0 && this->params._i_mass_g()<this->NCOLS)
       {
-	string file=this->params._Output_directory()+this->params._Name_survey()+"_MASS_Nft"+to_string(this->params._Nft())+"_"+this->params._Name_survey();
-	this->get_density_field_grid(_MASS_,file);
+        string file=this->params._Output_directory()+this->params._Name_survey()+"_MASS_Nft"+to_string(this->params._Nft())+"_"+this->params._Name_survey();
+        this->get_density_field_grid(_MASS_,file);
       }
   // ---------------------------------------------------------------------------- //
   //* COMPUTE VMAX WEIGHTED FIELD
@@ -122,7 +122,7 @@ void Catalog::analyze_cat(bool read){
         string file=this->params._Output_directory()+this->params._Name_survey()+"_SPIN_Nft"+to_string(this->params._Nft())+"_"+this->params._Name_survey();
         this->get_density_field_grid(_SPIN_,file);
       }
-  // these are wainting for an input parameter
+  // these are waiting for an input parameter
   /*
     if(this->params._i_rs_g()>0 && this->params._i_rs_g()<this->NCOLS)
     {
@@ -7372,18 +7372,21 @@ void Catalog::get_local_mach_number(real_prec scale)
                           vard+=pow(sqrt(dist)-meand,2);
                          }
                      }
-                }
+              }
             varv/=static_cast<real_prec>(counter_gal);
             vard/=static_cast<real_prec>(counter_gal);
             this->Halo[i].mach_number=meanv/sqrt(varv);
             this->Halo[i].dach_number=meand/sqrt(vard);
             this->Halo[i].local_overdensity=(static_cast<real_prec>(counter_gal)-Nbar)/Nbar ;//meand/sqrt(vard);
+            this->Halo[i].number_of_neighbours=counter_gal;
+
          }
          else
          {
            this->Halo[i].mach_number=0.;
            this->Halo[i].dach_number=0.;
            this->Halo[i].local_overdensity=0.;
+           this->Halo[i].number_of_neighbours=0;
          }
      }
   nearest_cells_to_cell.clear();nearest_cells_to_cell.shrink_to_fit();
@@ -7401,7 +7404,7 @@ void Catalog::get_local_mach_number_chuncks(real_prec scale)
   So.message_screen("\tNumber of cells back and forth used =", ncells_back_forth);
   So.message_screen("\tIdentifying neighbouring cells: ");
 #endif
-  int max_neigh_per_dim = 1+2*ncells_back_forth; // Number of neighbouring cells pr dimension, including the same itself;
+  int max_neigh_per_dim = 1+2*ncells_back_forth; // Number of neighbouring cells pr dimension, including the current cell;
   int N_Neigh_cells=pow(max_neigh_per_dim,3); // total number of cells to explore around a cell, including the cell
 #ifdef _VERBOSE_CAT_
   So.message_screen("\tNft used =",  this->params._Nft_low());
@@ -7418,7 +7421,7 @@ void Catalog::get_local_mach_number_chuncks(real_prec scale)
   // This vector structures contains the coords of the tracers in each of the N_slice slices.
   vector<s_cell_info_reduced> cell_info_tr_slice(N_slices);
 
-  for(ULONG i=0;i<this->NOBJS ;++i) //loop over the "observed obejcts", i.e, with cuts already set
+  for(ULONG i=0;i<this->Halo.size() ;++i) //loop over the "observed obejcts", i.e, with cuts already set
     {
       ULONG ID=this->Halo[i].GridID_n;
       cell_info_tr[ID].gal_index.push_back(i);//allocate the index of each tracer in that cell
@@ -7446,141 +7449,150 @@ void Catalog::get_local_mach_number_chuncks(real_prec scale)
   for(int icc=0;icc< N_slices ;++icc)
     {
       So.message_screen_flush("\t\tSlices completed: ",icc*100/static_cast<real_prec>(N_slices));
+      //****************************************************************************************************
       // This structures contains the ID (3D) of the neighbouring cells beloinging the the y-z plane
       // abd hence has dimensions Nft² \times the number of planes to add (NC_factor)
       vector<s_nearest_cells>nearest_cells_to_cell(chunck_factor*this->params._Nft_low()*this->params._Nft_low());// 2D + CHUNCKSIZE
       get_neighbour_cells_cat_analyze_chuncks(icc,this->params._Nft_low(),ncells_back_forth,nearest_cells_to_cell, false);
+      //****************************************************************************************************
       if(cell_info_tr_slice[icc].gal_index.size()>0)
         {
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
-      for(ULONG i=0;i<cell_info_tr_slice[icc].gal_index.size() ;++i) //loop over the "observed obejcts in the slice"
-        {
+        for(ULONG i=0;i<cell_info_tr_slice[icc].gal_index.size() ;++i) //loop over the "observed obejcts in the slice"
+          {
           ULONG index_gal_slice=cell_info_tr_slice[icc].gal_index[i];
           real_prec x_coord=this->Halo[index_gal_slice].coord1;
           real_prec y_coord=this->Halo[index_gal_slice].coord2;
           real_prec z_coord=this->Halo[index_gal_slice].coord3;
           // This is the x-bin (e.g., 0 or 1 for chunck_factor=2) for each super/slice
-          int xbin=get_bin(x_coord, icc*delta*chunck_factor,  chunck_factor, delta,false);
+          int xbinS=get_bin(x_coord, icc*delta*chunck_factor,  chunck_factor, delta,false);
           int ybin=get_bin(y_coord,0,this->params._Nft_low(),delta,false); // normal y-bin
           int zbin=get_bin(z_coord,0,this->params._Nft_low(),delta,false); // normal z-bin
-          ULONG ID_slice=index_3d(xbin,ybin,zbin,this->params._Nft_low(),this->params._Nft_low());
+          ULONG ID_slice=index_3d(xbinS,ybin,zbin,this->params._Nft_low(),this->params._Nft_low());
           double meanv=0; // variable used to compute mach number per each tracer
           ULONG counter_gal=0;// number of tracers in the sphere of radius scale around the current tracer
           double meand=0; // variable used to compute dach number per each tracer
           // Get the mean vel of tracers in a sphere of radii scale around the current tracer
           for(int j=0;j< N_Neigh_cells; ++j) // loop sobre las celdas cercanas incluida la celda donde esta la particula i
             {
-          ULONG ID_NEIGH = nearest_cells_to_cell[ID_slice].close_cell[j];
-          real_prec factor_bc_x=nearest_cells_to_cell[ID_slice].bc_x[j]*this->params._Lbox();
-          real_prec factor_bc_y=nearest_cells_to_cell[ID_slice].bc_y[j]*this->params._Lbox();
-          real_prec factor_bc_z=nearest_cells_to_cell[ID_slice].bc_z[j]*this->params._Lbox();
-          vector<real_prec>mass_n;
-          vector<real_prec>dist_n;
-          vector<real_prec>spin_n;
-          vector<real_prec>concentration_n;
-          vector<ULONG>id_n;
-          for(int k=0; k< cell_info_tr[ID_NEIGH].gal_index.size(); ++k) //loop sobre las particulas en las celdas cercanas
-            {
-              ULONG index_gal=cell_info_tr[ID_NEIGH].gal_index[k];
-              real_prec distx = x_coord - (this->Halo[index_gal].coord1+factor_bc_x);
-              real_prec disty = y_coord - (this->Halo[index_gal].coord2+factor_bc_y);
-              real_prec distz = z_coord - (this->Halo[index_gal].coord3+factor_bc_z);
-              real_prec dist  = _get_modulo_squared_n(distx, disty,distz);
-              real_prec vx=this->Halo[index_gal].vel1;
-              real_prec vy=this->Halo[index_gal].vel2;
-              real_prec vz=this->Halo[index_gal].vel3;
-#ifdef relative_mach
-              vx-=this->Halo[index_gal_slice].vel1;
-              vx-=this->Halo[index_gal_slice].vel2;
-              vx-=this->Halo[index_gal_slice].vel3;
-#endif
-              if(dist<=scale)
-               {
-                 meanv+=static_cast<double>(_get_modulo(vx,vy,vz));
-                 meand+=sqrt(dist);
-                 counter_gal++;
-                 mass_n.push_back(this->Halo[index_gal].mass);
-                 dist_n.push_back(sqrt(dist));
-                 spin_n.push_back(this->Halo[index_gal].spin);
-                 id_n.push_back(index_gal);
-                 concentration_n.push_back(this->Halo[index_gal].concentration);
-               }
-            }
-            if(mass_n.size()>0)
-            {
-              ULONG idmin_m, idmax_m;
-              ULONG idmin_d, idmax_d;
-              // Get the id of the minimum and maximum mass
-              min_max_vector(mass_n, idmin_m,idmax_m);
-              // Get the id of the minimum and maximum separation
-              min_max_vector(dist_n, idmin_d,idmax_d);
-              this->Halo[index_gal_slice].most_massive_neighbour=this->Halo[id_n[idmax_m]].mass;
-              this->Halo[index_gal_slice].distance_closest_neighbour=dist_n[idmin_d];
-              // Get the distance to the most massive neighbour
-              this->Halo[index_gal_slice].distance_to_most_massive_neighbour=dist_n[idmax_m];
-              this->Halo[index_gal_slice].mass_closest_neighbour=this->Halo[id_n[idmin_d]].mass;
-              this->Halo[index_gal_slice].spin_closest_neighbour=this->Halo[id_n[idmin_d]].spin;
-              this->Halo[index_gal_slice].concentration_closest_neighbour=this->Halo[id_n[idmin_d]].concentration;
-          }
-          else{
-              this->Halo[index_gal_slice].most_massive_neighbour=0;
-              this->Halo[index_gal_slice].distance_closest_neighbour=0;
-              this->Halo[index_gal_slice].distance_to_most_massive_neighbour=0;
-              this->Halo[index_gal_slice].mass_closest_neighbour=0;
-              this->Halo[index_gal_slice].spin_closest_neighbour=0;
-              this->Halo[index_gal_slice].concentration_closest_neighbour=0;
-          }
-        }
-      // Either we set an if for only mach number or we use lambda/sigma lambda for separations. Open issue
-       if(counter_gal>1)// IF we have only one tracer (the ith), we can have a non-well defined variance.
-        {
-          meanv/=static_cast<double>(counter_gal);
-          meand/=static_cast<double>(counter_gal);
-          // Get the variance vel of tracers in a sphere of radii Rscale around the current tracer
-          double varv=0;
-          double vard=0;
-          for(int j=0;j<N_Neigh_cells; j++) // loop sobre las celdas cercanas incluida la celda donde esta la particula i
-            {
               ULONG ID_NEIGH = nearest_cells_to_cell[ID_slice].close_cell[j];
               real_prec factor_bc_x=nearest_cells_to_cell[ID_slice].bc_x[j]*this->params._Lbox();
               real_prec factor_bc_y=nearest_cells_to_cell[ID_slice].bc_y[j]*this->params._Lbox();
               real_prec factor_bc_z=nearest_cells_to_cell[ID_slice].bc_z[j]*this->params._Lbox();
-              for(int k=0;k< cell_info_tr[ID_NEIGH].gal_index.size(); ++k) //loop sobre las particulas en las celdas cercanas
-            {
-              ULONG index_gal=cell_info_tr[ID_NEIGH].gal_index[k];
-              real_prec distx = x_coord - (this->Halo[index_gal].coord1+factor_bc_x);
-              real_prec disty = y_coord - (this->Halo[index_gal].coord2+factor_bc_y);
-              real_prec distz = z_coord - (this->Halo[index_gal].coord3+factor_bc_z);
-              real_prec dist  = _get_modulo_squared_n(distx, disty,distz);
-              real_prec vx=this->Halo[index_gal].vel1;
-              real_prec vy=this->Halo[index_gal].vel2;
-              real_prec vz=this->Halo[index_gal].vel3;
+              vector<real_prec>mass_n;
+              vector<real_prec>dist_n;
+              vector<real_prec>spin_n;
+              vector<real_prec>concentration_n;
+              vector<ULONG>id_n;
+              for(int k=0; k< cell_info_tr[ID_NEIGH].gal_index.size(); ++k) //loop sobre las particulas en las celdas cercanas
+                {
+                  ULONG index_gal=cell_info_tr[ID_NEIGH].gal_index[k];
+                  real_prec distx = x_coord - (this->Halo[index_gal].coord1+factor_bc_x);
+                  real_prec disty = y_coord - (this->Halo[index_gal].coord2+factor_bc_y);
+                  real_prec distz = z_coord - (this->Halo[index_gal].coord3+factor_bc_z);
+                  
+//                  cout<<index_gal_slice<<"  "<<distx<<"  "<<x_coord<<"  "<<this->Halo[index_gal].coord1<<"  "<<factor_bc_x<<"  "<<scale<<endl;
+   //               cout<<index_gal<<"   "<<this->Halo[index_gal].GridID_n<<"  "<<factor_bc_x<<"  "<<scale<<endl;
+                  
+                  real_prec dist  = distx*distx+ disty*disty + distz*distz;
+                  real_prec vx=this->Halo[index_gal].vel1;
+                  real_prec vy=this->Halo[index_gal].vel2;
+                  real_prec vz=this->Halo[index_gal].vel3;
 #ifdef relative_mach
-              vx-=this->Halo[index_gal_slice].vel1;
-              vy-=this->Halo[index_gal_slice].vel2;
-              vz-=this->Halo[index_gal_slice].vel3;
+                  vx-=this->Halo[index_gal_slice].vel1;
+                  vx-=this->Halo[index_gal_slice].vel2;
+                  vx-=this->Halo[index_gal_slice].vel3;
 #endif
-              if(dist<=scale){
-                varv+=static_cast<double>(pow(_get_modulo(vx,vy,vz)-meanv,2));
-                vard+=static_cast<double>(pow(sqrt(dist)-meand,2));
+                  if(dist<=scale)
+                  {
+                    meanv+=static_cast<double>(sqrt(vx*vx+vy*vy+vz*vz));
+                    meand+=sqrt(dist);
+                    counter_gal++;
+                    mass_n.push_back(this->Halo[index_gal].mass);
+                    dist_n.push_back(sqrt(dist));
+                    spin_n.push_back(this->Halo[index_gal].spin);
+                    id_n.push_back(index_gal);
+                    concentration_n.push_back(this->Halo[index_gal].concentration);
+                  }
+                }
+                if(mass_n.size()>0)
+                 {
+                    ULONG idmin_m, idmax_m;
+                    ULONG idmin_d, idmax_d;
+                    // Get the id of the minimum and maximum mass
+                    min_max_vector(mass_n, idmin_m,idmax_m);
+                    // Get the id of the minimum and maximum separation
+                    min_max_vector(dist_n, idmin_d,idmax_d);
+                    this->Halo[index_gal_slice].most_massive_neighbour=this->Halo[id_n[idmax_m]].mass;
+                    this->Halo[index_gal_slice].distance_closest_neighbour=dist_n[idmin_d];
+                    // Get the distance to the most massive neighbour
+                    this->Halo[index_gal_slice].distance_to_most_massive_neighbour=dist_n[idmax_m];
+                    this->Halo[index_gal_slice].mass_closest_neighbour=this->Halo[id_n[idmin_d]].mass;
+                    this->Halo[index_gal_slice].spin_closest_neighbour=this->Halo[id_n[idmin_d]].spin;
+                    this->Halo[index_gal_slice].concentration_closest_neighbour=this->Halo[id_n[idmin_d]].concentration;
+                 }
+               else
+                {
+                  this->Halo[index_gal_slice].most_massive_neighbour=0;
+                  this->Halo[index_gal_slice].distance_closest_neighbour=0;
+                  this->Halo[index_gal_slice].distance_to_most_massive_neighbour=0;
+                  this->Halo[index_gal_slice].mass_closest_neighbour=0;
+                  this->Halo[index_gal_slice].spin_closest_neighbour=0;
+                  this->Halo[index_gal_slice].concentration_closest_neighbour=0;
+                }
+            }
+      // Either we set an if for only mach number or we use lambda/sigma lambda for separations. Open issue
+          if(counter_gal>1)// IF we have only one tracer (the ith), we can have a non-well defined variance.
+          {
+            meanv/=static_cast<double>(counter_gal);
+            meand/=static_cast<double>(counter_gal);
+            // Get the variance vel of tracers in a sphere of radii Rscale around the current tracer
+            double varv=0;
+            double vard=0;
+            for(int j=0;j<N_Neigh_cells; j++) // loop sobre las celdas cercanas incluida la celda donde esta la particula i
+              {
+                ULONG ID_NEIGH = nearest_cells_to_cell[ID_slice].close_cell[j];
+                real_prec factor_bc_x=nearest_cells_to_cell[ID_slice].bc_x[j]*this->params._Lbox();
+                real_prec factor_bc_y=nearest_cells_to_cell[ID_slice].bc_y[j]*this->params._Lbox();
+                real_prec factor_bc_z=nearest_cells_to_cell[ID_slice].bc_z[j]*this->params._Lbox();
+                for(int k=0;k< cell_info_tr[ID_NEIGH].gal_index.size(); ++k) //loop sobre las particulas en las celdas cercanas
+              {
+                ULONG index_gal=cell_info_tr[ID_NEIGH].gal_index[k];
+                real_prec distx = x_coord - (this->Halo[index_gal].coord1+factor_bc_x);
+                real_prec disty = y_coord - (this->Halo[index_gal].coord2+factor_bc_y);
+                real_prec distz = z_coord - (this->Halo[index_gal].coord3+factor_bc_z);
+                real_prec dist  = distx*distx+ disty*disty + distz*distz;
+                real_prec vx=this->Halo[index_gal].vel1;
+                real_prec vy=this->Halo[index_gal].vel2;
+                real_prec vz=this->Halo[index_gal].vel3;
+    #ifdef relative_mach
+                vx-=this->Halo[index_gal_slice].vel1;
+                vy-=this->Halo[index_gal_slice].vel2;
+                vz-=this->Halo[index_gal_slice].vel3;
+    #endif
+                if(dist<=scale){
+                  varv+=static_cast<double>(pow(sqrt(vx*vx+vy*vy+vz*vz)-meanv,2));
+                  vard+=static_cast<double>(pow(sqrt(dist)-meand,2));
+                }
               }
             }
-            }
-          varv/=static_cast<real_prec>(counter_gal);
-          vard/=static_cast<real_prec>(counter_gal);
-          this->Halo[index_gal_slice].mach_number= varv ==0? 0.: meanv/sqrt(varv);
-          this->Halo[index_gal_slice].dach_number= vard==0? 0.:  meand/sqrt(vard);
-          this->Halo[index_gal_slice].local_overdensity=(static_cast<real_prec>(counter_gal)-Nbar)/Nbar;//meand/sqrt(vard);
-        }
+            varv/=static_cast<real_prec>(counter_gal);
+            vard/=static_cast<real_prec>(counter_gal);
+            this->Halo[index_gal_slice].mach_number= varv ==0? 0.: meanv/sqrt(varv);
+            this->Halo[index_gal_slice].dach_number= vard==0? 0.:  meand/sqrt(vard);
+            this->Halo[index_gal_slice].local_overdensity=(static_cast<real_prec>(counter_gal)-Nbar)/Nbar;//meand/sqrt(vard);
+            this->Halo[index_gal_slice].number_of_neighbours=counter_gal;
+          }
           else
-        {
-          this->Halo[index_gal_slice].mach_number=0.;
-          this->Halo[index_gal_slice].dach_number=0.;
-          this->Halo[index_gal_slice].local_overdensity=0.;
+          {
+            this->Halo[index_gal_slice].mach_number=0.;
+            this->Halo[index_gal_slice].dach_number=0.;
+            this->Halo[index_gal_slice].local_overdensity=0.;
+            this->Halo[index_gal_slice].number_of_neighbours=0;
         }
-        }
+      }
     } // closes if (.gal.size()>0)
       nearest_cells_to_cell.clear();nearest_cells_to_cell.shrink_to_fit();
     }// closes loop over ic
@@ -7590,9 +7602,7 @@ void Catalog::get_local_mach_number_chuncks(real_prec scale)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Catalog::get_tracer_tidal_anisotropy(vector<real_prec>&tidal){
-
     So.message_screen("Computing tidal anisotropy at halo position");
-
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
@@ -7600,6 +7610,8 @@ void Catalog::get_tracer_tidal_anisotropy(vector<real_prec>&tidal){
 //     this->Halo[i].tidal_anisotropy = linInterpol(this->params._Nft(),this->params._Lbox(), this->params._d1(),this->Halo[i].coord1,this->Halo[i].coord2,this->Halo[i].coord3,tidal);
    this->Halo[i].tidal_anisotropy =tidal[this->Halo[i].GridID];
      So.DONE();
+  this->min_tidal_anisotropy=this->get_min("_TIDAL_ANISOTROPY_");
+  this->max_tidal_anisotropy=this->get_max("_TIDAL_ANISOTROPY_");
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
