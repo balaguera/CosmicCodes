@@ -91,10 +91,10 @@
  * @brief Define to show power spectrum of IC
 */
 //#define _USE_GNUPLOT_SREL_
-#define _USE_GNUPLOT_POWER_
-#define _USE_GNUPLOT_POWER_PLOT_
-//#define _USE_GNUPLOT_ABUNDANCE_PLOT_
-//#define _USE_GNUPLOT_ABUNDANCE_V_PLOT_
+//#define _USE_GNUPLOT_POWER_
+//#define _USE_GNUPLOT_POWER_PLOT_
+#define _USE_GNUPLOT_ABUNDANCE_PLOT_
+#define _USE_GNUPLOT_ABUNDANCE_V_PLOT_
 //#define _USE_GNUPLOT_ABUNDANCE_RS_PLOT_
 //#define _USE_GNUPLOT_ABUNDANCE_SPIN_PLOT_
 #endif // endif use_gnuplot
@@ -103,9 +103,9 @@
 // ****************************************************************************************
 //#define _MG_
 //#define _SLICS_
-#define _UNITSIM_
+//#define _UNITSIM_
 //#define _TNG_
-//#define _TNG_GAL_
+#define _TNG_GAL_
 //#define _FLAGSHIP_
 // ****************************************************************************************
 #ifdef _UNITSIM_
@@ -1022,10 +1022,15 @@ since we should not initialize the delta arrays there, as they are being filled 
 */
 #define _READ_BIAS_
 //#define _WRITE_BIAS_
-//#define _USE_BIAS_OBJECT_TO_OBJECT_ 
+#define _USE_BIAS_OBJECT_TO_OBJECT_ 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //#define _USE_MACH_NUMBER_
 //#define _USE_LOCAL_OVERDENSITY_
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Define if mass_assign and mass_original are to be written in a file
+#define _CHECK_ASSIGN_
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 // ************************************************************************************************************************************
 // ************************************************************************************************************************************
 // ************************************************************************************************************************************
@@ -1442,7 +1447,7 @@ since we should not initialize the delta arrays there, as they are being filled 
  * the algoritm to assing properties, even if it assigns to the same reference catalog.
  * Hence, even in that ideal case, some tolerance threshold is advised, both from the parameter file as from preproc-directives
 */
-#define _MULTISCALE_
+//#define _MULTISCALE_
 #endif
 // ************************************************************************************************************************************
 // ************************************************************************************************************************************

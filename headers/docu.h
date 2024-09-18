@@ -3,7 +3,7 @@
 * @mainpage
 *
 * @section intro_sec Introduction
- CosmiCalc++: A C++ library for calculations in cosmology with general and detailed applications.<br>
+ CosmiCCodes++: A C++ library for calculations in cosmology with general and detailed applications.<br>
 
 *@subsection Applications
 The cosmicatlass code is aimed to perform general as well as very specific tasks in the context of large scale structure of the Universe. Among the detailed taks we can identify:<br>
@@ -28,46 +28,45 @@ The cosmicatlass code is aimed to perform general as well as very specific tasks
 <a href="https://ui.adsabs.harvard.edu/abs/2020MNRAS.493..586P/abstract">Comparison with other methods</a><br>
 <a href="http://adsabs.harvard.edu/abs/2019arXiv190606109B">One simulation to have them all</a><br>
 <a href="http://adsabs.harvard.edu/abs/2019MNRAS.483L..58B">The bias Assigment Method</a><br>
-
+<a href="https://ui.adsabs.harvard.edu/abs/2012hcxa.confE..71B/abstract">Power Spectrum analysis</a><br>
 
 
 *@section dw Download the code
-The code will be soon made available 
+The code will be soon made available. It is temporarly a private directory at  <a href="https://github.com/balaguera/CosmicCodes">GitHub</a> <br>
 @note: Code will be subject to GNU-type licence.
 
 
 *@section ex Executing the Code 
 
 * @subsection rr Running CosmicAtlas
-This file is compiled with several options
-*@code
-make clean;
-make bam
-./cosmicatlass.exe -option parameter_bam.ini
-*@endcode
-
-The main function is in the file 
+This file is compiled with several options. The main function is in the file 
 \verbatim Main/cosmicatlass.cpp \endverbatim
 The different options supported at the current version are summarized by the otion -h:
 *@code
 Options:         
-             -a for information on the author, no argument
-	         -b parameter_file.ini: runs BAM
-	         -c parameter_file.ini: analyzes tracer catalog
-	         -d parameter_file.ini: shows preprocessor directives
-	         -f parameter_file.ini: reads binarys form IC and ocmpute density field IC
-	         -g parameter_file.ini: generates galaxy catalog from halo catalog using HOD
-	         -h parameter_file.ini: help
-	         -i parameter_file.ini: shows input parameters
-	         -m parameter_file.ini: measures marked power spectrum
-	         -p parameter_file.ini: measures power spectrum
-	         -q parameter_file.ini: compute rings of bias
-	         -s parameter_file.ini: applies a low-pass filter to input density field
-	         -t parameter_file.ini: runs LPT (to be deprecated)
-	         -u parameter_file.ini: analyzes input halo catalog and measurements of secondary bias
-	         -w parameter_file.ini: computes window functions
-	         -v parameter_file.ini: warnings 
-	         -z parameter_file.ini: assignment of individual tracer bias
+CosmiCalc compiling options
+		-make bmt: creates executable for the Bias Mapping Technique
+			execute with ./bmt.exe -b parameter_file to run bmt tasks.
+			execute with ./bmt.exe -d to check preprocessor directives.
+			execute with ./bmt.exe -i parameter_file to check input parameters directives.
+		-make power: creates executable for the power spectrum and related operations
+			execute with ./power.exe -p parameter_file to measure power (see documentation)
+			execute with ./power.exe -w parameter_file to measure window matrix
+			execute with ./power.exe -g parameter_file to obtain GRF.
+			execute with ./power.exe -s parameter_file for low pass filter.
+			execute with ./power.exe -m parameter_file for marked correlation function
+		-make secbias: creates executable for the analysis of secondary bias
+			execute with ./secbias.exe -s parameter_file 
+		-make gtools: creates executable for the analysis of galaxy samples 
+			execute with ./gtools.exe parameter_file (this is different from otopns 1-4). This is still under merging stages: merged with class::Catalog
+		-make htools: creates executable for the analysis of halo catalogs 
+			execute with ./htools.exe -c parameter_file to analyze catalog
+			execute with ./htools.exe -b parameter_file to assign individual bias to input catalog
+			execute with ./htools.exe -s parameter_file to measure bias as a function of properteis
+			execute with ./htools.exe -h parameter_file to get galaxy catalogs using hod
+		-make cosmolib: Cosmology functions and statistical tools (bias, mass function, power spectrum)
+			execute with ./cosmolib.exe -s parameter_file. to get theoretical outputs for different cosmological functions at fixed redshift
+			execute with ./cosmolib.exe -z parameter_file. to get theoretical outputs for HOD predictions (under constuction)
 *@endcode
 
 
@@ -85,8 +84,6 @@ Non linear matter power spectrum<br>
 Linear and non-liner galaxy power spectrum based on HOD<br>
 Galaxy and dark matter correlation function<br>
 Angular power spectrum <br>
-
-
 
 *@subsubsection ssex Execution
 code has its one parameter file. 
@@ -108,36 +105,18 @@ Healpix<br>
 
 
  * @section _doc Documentation
-A detailed documentation of the code can be found <a href ="https://www.overleaf.com/read/kpyrhbyxdbmj#89834c">at this Overleaf link </a>. Check <a href = "../Headers/TalkBam.pdf">here</a> for a talk on BAM (Innsbrück 2020).
-
-
-
+A detailed documentation of the code can be found <a href="https://abalant.wixsite.com/abalan">Here</a> <br>
 
 
  * @section _author Author
  <a href="https://abalant.wixsite.com/abalan"> Andrés Balaguera-Antolínez</a> <br>
-This code has been developed during working periods at <br>
+This code has been developed during working periods at different institutions:<br>
 Instituto de Astrofísica de Canarias <br>
 Univesita degli Studi Roma 3 <br>
 Argelander Institut for Astronomy <br>
 Max Planck Institute for Extraterrestrial Physics <br>
-With the collaboration of <br>
-Ariel Sanchez<br>
-Federico Marulli<br>
-Daniele Tavagnacco<br>
-Luca Tornatore<br>
-Jeniffer Pollack<br>
-Francisco Kitaura<br>
-Carlos Hernandez-Monteagudo<br>
-Marcos Pellejero<br>
-Francesco Sinigaglia<br>
-
-
-
-
+With the collaboration of many collabortors (co-authors) <br>
 */
-
-
 
  <td>
  <div class="column"></div>
