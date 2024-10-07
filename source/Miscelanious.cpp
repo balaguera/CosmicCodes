@@ -228,6 +228,14 @@ void getDensity_NGP(s_params_box_mas *params, vector<s_Halo>&Halo, vector<real_p
       for (ULONG n=0; n<N_OBJ; n++)
 	pwe[n]=Halo[n].spin;
     }
+  else if (weight_prop==_BIAS_)
+    {
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+      for (ULONG n=0; n<N_OBJ; n++)
+	pwe[n]=Halo[n].bias;
+    }
   ULONG NLOSS=0;
   ULONG NTOT=0;
 #ifdef  parallel_ngp_b
@@ -655,7 +663,7 @@ void getDensity_CIC(s_params_box_mas *params,const vector<s_Halo>&Halo, vector<r
 	      tracer_weight=Halo[n].virial;
 	    else if (weight_prop==_SPIN_)
 	      tracer_weight=Halo[n].spin;
-	    else if (weight_prop=="_BIAS_")
+	    else if (weight_prop==_BIAS_)
 	      tracer_weight=Halo[n].bias;
 	    DELTAcc(i,j,k)   += tracer_weight*tx*ty*tz;
 	    DELTAcc(ii,j,k)  += tracer_weight*dx*ty*tz;
@@ -907,7 +915,9 @@ void getDensity_TSC(s_params_box_mas *params, const vector<s_Halo>&Halo, vector<
 	    real_prec mass=num_1;
 	    if (weight_prop==_MASS_)
 	      mass=Halo[n].mass;
-	    else if (weight_prop==_SAT_FRACTION_)
+      else if (weight_prop==_BIAS_)
+    	  mass=Halo[n].bias;
+      else if (weight_prop==_SAT_FRACTION_)
 	      mass=Halo[n].number_sub_structures;
 	    DELTAtt(i,j,k)    	+= mass*hx0*hy0*hz0;
 	    DELTAtt(ii,jj,kk) 	+= mass*hxp1*hyp1*hzp1;
@@ -2866,3 +2876,171 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
 #endif
       	}
 }
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ // Assignment of individual bias. Halo catalog is in the vector tracer_cat. Dark matter field in the dm_field
+ void object_by_object_bias(Params params, vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field){
+     vector<real_prec>kvector_data;
+     for(int i=0;i<params._d_Nnp_data();i++)
+       kvector_data.push_back(params._d_kmin()+params._d_DeltaK_data()*(i+0.5));
+#ifdef _USE_OMP_
+   int NTHREADS=_NTHREADS_;
+   omp_set_num_threads(NTHREADS);
+#endif
+   // Given kmax, determine the maximum number of bins requested
+   ULONG Kmin_bin=static_cast<ULONG>(floor((params._kmin_tracer_bias()-params._d_kmin())/params._d_DeltaK_data()));
+   ULONG Kmax_bin=static_cast<ULONG>(floor((params._kmax_tracer_bias()-params._d_kmin())/params._d_DeltaK_data()));//get the bin to go only up to Kmax in the loops
+   ULONG new_Nft=2*Kmax_bin;  // Define the new Nft=2*Kmax_bin
+   ULONG new_ngrid_h =new_Nft*new_Nft*(new_Nft/2+1);
+#ifdef DOUBLE_PREC
+   complex_prec * Delta_dm = (complex_prec *)fftw_malloc(2*new_ngrid_h*sizeof(real_prec));
+#else
+//    complex_prec * Delta_dm =(complex_prec *)fftwf_malloc(2*new_ngrid_h*sizeof(real_prec));
+    complex_prec * Delta_dm =(complex_prec *)fftwf_malloc(2*params._NGRID_h()*sizeof(real_prec));
+#endif
+    real_prec mean_field=get_mean(dm_field);
+    cout<<"\tMean of field: "<<mean_field<<endl;
+    vector<real_prec> over_dm_field(dm_field.size(),0);
+    get_overdens(dm_field,mean_field,over_dm_field);
+    cout<<"\tFourier transforming"<<endl;
+    do_fftw_r2c(params._Nft(),over_dm_field,Delta_dm);
+    over_dm_field.clear(); over_dm_field.shrink_to_fit();
+   vector<real_prec> kcoords(new_Nft,0);// Build k-coordinates
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+   for(int i=0;i<kcoords.size() ;++i)
+    kcoords[i]=(i<=new_Nft/2? static_cast<real_prec>(i): -static_cast<real_prec>(new_Nft-i));
+
+   real_prec use_imag=0;
+  // This is the normalization of the halo power spectrum, which being computed object-by object, is just the volume
+   // FOr the full sample it would be the volume/Ntracer, = nbar. But Ntracer =1 for each object!
+   real_prec dk_x=params._d_deltak_x();
+   real_prec dk_y=params._d_deltak_y();
+   real_prec dk_z=params._d_deltak_z();
+   cout<<"\tGetting power dark matter"<<endl;
+  // This is done once for all tracers
+   vector<real_prec>power_dmat(Kmax_bin,0);
+#ifdef _USE_OMP_
+#pragma omp parallel for collapse(3)
+#endif
+   for(ULONG i=Kmin_bin; i< new_Nft/2;++i)
+     for(ULONG j=Kmin_bin; j< new_Nft/2;++j)
+         for(ULONG k=Kmin_bin; k< new_Nft/2+1;++k)
+         {
+           ULONG lp=index_3d(i,j,k,params._Nft(),params._Nft()/2+1);
+           real_prec  kv=sqrt(pow(dk_x*kcoords[i],2)+pow(dk_y*kcoords[j],2)+pow(dk_z*kcoords[k],2));
+           ULONG kbin=static_cast<ULONG>(floor((kv-params._d_kmin())/params._d_DeltaK_data()));
+           if(lp!=0)
+             if(kbin<Kmax_bin)
+#ifdef _USE_OMP_
+#pragma omp atomic
+#endif
+                 power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+           if(j>0  && k>0)
+             {
+               lp=index_3d(i,params._Nft()-j,k,params._Nft(),params._Nft()/2+1);
+               if(kbin<Kmax_bin)
+#ifdef _USE_OMP_
+#pragma omp atomic
+#endif
+                 power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+            }
+           if(i>0  && (j>0 || k>0))
+             {
+               lp=index_3d(params._Nft()-i,j,k,params._Nft(),params._Nft()/2+1);
+               if(kbin<Kmax_bin)
+#ifdef _USE_OMP_object_b
+#pragma omp atomic
+#endif
+                   power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+             }
+             if(i>0  && j>0  && k>0)
+             {
+               lp=index_3d(params._Nft()-i,params._Nft()-j,k,params._Nft(),params._Nft()/2+1);
+               if(kbin<Kmax_bin)
+#ifdef _USE_OMP_
+#pragma omp atomic
+#endif
+                   power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+             }
+         }
+
+    real_prec lss_bias_halo=0;
+#ifdef _USE_OMP_
+#pragma omp parallel for reduction(+:lss_bias_halo)
+#endif
+   for(ULONG itr=0;itr<tracer_cat.size();++itr)
+     {
+        real_prec xtracer=tracer_cat[itr].coord1;
+        real_prec ytracer=tracer_cat[itr].coord2;
+        real_prec ztracer=tracer_cat[itr].coord3;
+        vector<real_prec>power_cross(Kmax_bin,0);
+       //*******   The cross power spectrum has real and imaginary parts. C=A+iB.If the fieidsl are not properly correlated, the imaginary parts will be non-zero
+       //*******   I.e, for perfectly correlated fields, B== and the cross power is C=A.
+       //*******   Now, for bias. we compare the bias b_1 fro the one measured with power spectrum b²=Phh/Pmm.
+       //*******   while here, with the cross, we compute b = Phm/Pmm. This is chosen such that Phm is decomposed in delta_dm * exp(-ikr)
+       // Loop over the Fourier box up to the maximum k (bin) used to get bias
+       for(ULONG i=Kmin_bin; i< new_Nft/2;++i)
+         for(ULONG j=Kmin_bin; j< new_Nft/2;++j)
+             for(ULONG k=Kmin_bin; k< new_Nft/2+1;++k)
+             {
+               ULONG lp=index_3d(i,j,k,params._Nft(),params._Nft()/2+1);
+               real_prec k_dot_r=0;
+               real_prec  kv=sqrt(pow(dk_x*kcoords[i],2)+pow(dk_y*kcoords[j],2)+pow(dk_z*kcoords[k],2));
+               ULONG kbin=static_cast<ULONG>(floor((kv-params._d_kmin())/params._d_DeltaK_data()));
+               /****************************************************************/
+               if(lp!=0)
+               {
+                 k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;  // vec k dot vec r
+                 if(kbin<Kmax_bin){
+                     power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]-sin(k_dot_r)*Delta_dm[lp][IMAG]);
+                 }
+               }
+               /****************************************************************/
+               if(j>0  && k>0)
+                 {
+                   lp=index_3d(i,params._Nft()-j,k,params._Nft(),params._Nft()/2+1);
+                   k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
+                   if(kbin<Kmax_bin){
+                     power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]-sin(k_dot_r)*Delta_dm[lp][IMAG]);
+                   }
+                   }
+               if(i>0  && (j>0 || k>0))
+                 {
+                   lp=index_3d(params._Nft()-i,j,k,params._Nft(),params._Nft()/2+1);
+                   k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
+                   if(kbin<Kmax_bin){
+                       power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]-sin(k_dot_r)*Delta_dm[lp][IMAG]);
+                   }
+               }
+                 if(i>0  && j>0  && k>0)
+                 {
+                   lp=index_3d(params._Nft()-i,params._Nft()-j,k,params._Nft(),params._Nft()/2+1);
+                   k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer+dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
+                   if(kbin<Kmax_bin)
+                   {
+                       power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]-sin(k_dot_r)*Delta_dm[lp][IMAG]);
+                  }
+               }
+          }
+        real_prec power_hm=0;
+        real_prec p_dm=0;
+        for(ULONG i=Kmin_bin; i< power_cross.size();++i)
+          {
+            power_hm+=power_cross[i]; // *** here it must be nmodes*(<power>_av)= nmodes*(power/nmodes)=power. That's why I do not need nmodes
+            p_dm+=power_dmat[i];
+
+        }
+        real_prec hb=(power_hm/p_dm)*params._NGRID();
+        tracer_cat[itr].bias=hb;
+        lss_bias_halo+=hb;
+   }
+   lss_bias_halo/=static_cast<real_prec>(tracer_cat.size());
+   cout<<"\tMean large-scale bias from individual bias = "<<lss_bias_halo<<endl;
+
+ }
+

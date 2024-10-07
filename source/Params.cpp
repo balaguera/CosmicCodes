@@ -21,84 +21,88 @@ void Params::explain_pars(string par_name)
   s_message_pars message_pars;
   message_pars.set_par_name(par_name);
   bool v_string=false;
-  if(par_name=="N_X"){
+  if(par_name=="NX"){
     message_pars.set_par_description("Number of bins for dark matter");
     message_pars.set_par_option("Integer > 0");
     message_pars.set_par_default(this->NX);
     v_string=false;// if parameter is a string, false. if a number, true
   }
-  if(par_name=="N_Y")
+  if(par_name=="NY")
   {
     message_pars.set_par_description("Number of bins for dark matter halos. ");
     message_pars.set_par_option("Integer > 0. If the interpolation is NGP, this value is overriden and transformed to maximum occupation number in cells");
     v_string=false;
   }
-  if(par_name=="Redshift" || par_name=="redshift")
+  else if(par_name=="Redshift" || par_name=="redshift")
   {
     message_pars.set_par_description("Cosmological redshift");
     message_pars.set_par_option("A number > 0 identifiying");
     message_pars.set_par_default(this->redshift);
     v_string=false;
   }
-  if(par_name=="IC_index")
+  else if(par_name=="IC_index")
   {
     message_pars.set_par_description("Index to characterize the IC of some procedures. ");
     message_pars.set_par_option("Integer");
     v_string=false;
   }
-  if(par_name=="Nlambdath")
+  else if(par_name=="Nlambdath")
   {
     message_pars.set_par_description("Number of thersholds used to define cosmic-web types. Used only if test with cwc are available");
     message_pars.set_par_option("Integer > 0");
     v_string=false;
   }
-  if(par_name=="lambdath")
+  else if(par_name=="lambdath")
   {
     message_pars.set_par_description("Threshold used to define cosmic-web types.");
     message_pars.set_par_option("Integer > 0");
     message_pars.set_par_default(this->lambdath);
     v_string=false;
   }
-  if(par_name=="realization")
+  else if(par_name=="realization")
   {
     message_pars.set_par_description("Index to characterize realizations when producing mocks");
     message_pars.set_par_option("Integer > 0");
     message_pars.set_par_default(this->realization);
     v_string=false;
   }
-  if(par_name=="delta_X_min")
+  else if(par_name=="delta_X_min")
   {
     message_pars.set_par_description("Minimum vaue of overdensity for histogram (in linear scale)");
     message_pars.set_par_option("Number > 0");
     message_pars.set_par_default(this->delta_X_min);
     v_string=false;
   }
-  if(par_name=="delta_X_max")
+  else  if(par_name=="delta_X_max")
   {
     message_pars.set_par_description("Maximum vaue of overdensity for histogram (in linear scale)");
     message_pars.set_par_option("Number > 0");
     message_pars.set_par_default(this->delta_X_max);
     v_string=false;
   }
-  if(par_name=="ldelta_X_max")
+  else  if(par_name=="ldelta_X_max")
   {
     message_pars.set_par_description("Maximum vaue of overdensity for histogram (in log(1+delta))");
     message_pars.set_par_option("Number > 0");
     message_pars.set_par_default(this->ldelta_X_max);
     v_string=false;
   }
-  if(par_name=="ldelta_X_min")
+  else if(par_name=="ldelta_X_min")
   {
     message_pars.set_par_description("Minimum vaue of overdensity for histogram (in log(1+delta))");
     message_pars.set_par_option("Number > 0");
     message_pars.set_par_default(this->ldelta_X_min);
     v_string=false;
   }
-  if(par_name=="Statistics")
+  else if(par_name=="Statistics")
   {
     message_pars.set_par_description("Statistics to measure from input catalog");
     message_pars.set_par_option("For power spectrum: Pk_fkp (FKP estimator), Pk_yb (Yamamoto-Bianchi), Pk_ys(Yamamoto-Scoccimarro)");
     v_string=true;
+  }
+  else
+  {
+    message_pars.set_par_description("Parameter not found");
   }
 
 
@@ -1070,6 +1074,13 @@ void Params::read_pars(string file)
             else this->Get_tracer_mass_field = false;
             this->parameter_boolean.push_back(make_pair(par_name, this->Get_tracer_mass_field)); 
           }
+          else if (par_name == "Get_tracer_bias_field")
+          {
+            if (par_value=="true")this->Get_tracer_bias_field= true;
+            else this->Get_tracer_bias_field = false;
+            this->parameter_boolean.push_back(make_pair(par_name, this->Get_tracer_bias_field)); 
+          }
+
         else if (par_name == "Get_tracer_vmax_field")
           {
             if (par_value=="true")this->Get_tracer_vmax_field= true;

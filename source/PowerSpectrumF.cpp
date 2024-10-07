@@ -4760,6 +4760,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
         xaux[i]=tracer_cat[i].coord1;
         yaux[i]=tracer_cat[i].coord2;
         zaux[i]=tracer_cat[i].coord3;
+        cout<<baux[i]<<endl;
     }
     string file_bias=this->params._Output_directory()+"Bias_gal1";
     this->File.write_array(file_bias, baux);
@@ -4796,10 +4797,11 @@ void PowerSpectrumF::get_window_matrix_multipole()
  }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// this method is likely to be called from another method in this class, once the catalog has been alloacated in a member-type object Catalog
  void PowerSpectrumF::object_by_object_rbias(){
    this->So.enter(__PRETTY_FUNCTION__);
 #ifdef _FULL_VERBOSE_
-   this->So.message_screen("Getting object-to-object relative bias");
+   this->So.message_screen("Getting object-to-object relative bias from a galaxy redshift sample and random catalog");
 #endif
 #ifdef _USE_OMP_
    int NTHREADS=_NTHREADS_;
@@ -4818,7 +4820,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
     complex_prec * Delta_W =(complex_prec *)fftwf_malloc(2*this->params._NGRID_h()*sizeof(real_prec));
 #endif
    // ---------------------------------------------------
-   // Get the Fourier transform of the dm filed alreay filtered
+   // Get the Fourier transform of the tracer filed alreay filtered
     vector<real_prec> over_field(this->params._NGRID(),0);
 #ifdef _USE_OMP_
 #pragma omp for nowait

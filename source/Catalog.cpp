@@ -122,6 +122,18 @@ void Catalog::analyze_cat(bool read){
         string file=this->params._Output_directory()+this->params._Name_survey()+"_SPIN_Nft"+to_string(this->params._Nft())+"_"+this->params._Name_survey();
         this->get_density_field_grid(_SPIN_,file);
       }
+  // ---------------------------------------------------------------------------- //
+  if(true==this->params._Get_tracer_bias_field())
+    {
+      vector<real_prec> DM_DEN_FIELD( this->params._NGRID(),0);
+      this->File.read_array(this->params._Input_Directory_X()+this->params._Name_Catalog_X(),DM_DEN_FIELD);
+      object_by_object_bias(this->params, this->tracer, DM_DEN_FIELD);      
+      string file=this->params._Output_directory()+this->params._Name_survey()+"_BIAS_Nft"+to_string(this->params._Nft())+"_"+this->params._Name_survey();
+      this->get_density_field_grid(_BIAS_,file);
+    }
+
+  // ---------------------------------------------------------------------------- //
+
   // these are waiting for an input parameter
   /*
     if(this->params._i_rs_g()>0 && this->params._i_rs_g()<this->NCOLS)
@@ -2927,7 +2939,7 @@ void Catalog::get_density_field_grid(string prop, string output_file)
     {
       deltaTR.resize(this->box.NGRID,0);
       MAS_NEW(&box,this->Halo, prop, deltaTR);
-      if(_MASS_ == prop || _RS_== prop || _VIRIAL_== prop || _SPIN_== prop || _VMAX_== prop)
+      if(_MASS_ == prop || _RS_== prop || _VIRIAL_== prop || _SPIN_== prop || _VMAX_== prop || _BIAS_ == prop)
         {
       So.message_screen("Interpolating tracer on a grid weighting by", prop);
 #ifdef _USE_OMP_
@@ -15270,6 +15282,7 @@ void Catalog::get_mean_secondary_bias_relation(vector<s_info_in_bins> &sec_bias_
 // ----------------------------------------------------------
 // Get min and max of primeary proeprty, read fom parameter file:
   real_prec min_p, max_p, min_s, max_s;
+// ----------------------------------------------------------
   if(primary_prop==_VMAX_)
    {
      min_p=log10(this->params._VMAXmin());
@@ -15341,6 +15354,7 @@ void Catalog::get_mean_secondary_bias_relation(vector<s_info_in_bins> &sec_bias_
       min_s=log10(this->params._CONCENTRATIONbins_min(quart));
       max_s=log10(this->params._CONCENTRATIONbins_max(quart));
     } 
+
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
@@ -15349,7 +15363,8 @@ void Catalog::get_mean_secondary_bias_relation(vector<s_info_in_bins> &sec_bias_
        if(s_prop[i]<max_s && s_prop[i]>= min_s)
         {
           int bin=get_bin(p_prop[i],min_p,Nbins,delta,true);
-          ibin[i]=bin;
+          ibin[i]=bin;      
+
 #ifdef _USE_OMP_
 #pragma omp atomic
 #endif
@@ -15390,6 +15405,38 @@ void Catalog::get_mean_secondary_bias_relation(vector<s_info_in_bins> &sec_bias_
       for (int i=0;i<Nbins;++i) // error in the mean
         if(sec_bias_info[quart].i_ncbin[i]>0)  
           sec_bias_info[quart].vq3[i]=sec_bias_info[quart].vq2[i]/sqrt(static_cast<real_prec>(sec_bias_info[quart].i_ncbin[i]));
- }
+ }//closing for(int iq=1;iq<quartiles.size();++iq)
 So.leaving(__PRETTY_FUNCTION__);
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// This metods takes a box and converts it int a mock, although with no evolution
+void Catalog::snap_to_mock(){
+
+// convert equatorial to cartessian
+// Assume a cosmological model and transform distance to redshift
+// Use the infomration of the pculiar velocities along the line of sight and add pecular redshift
+// Define a redshift distribution and select objects accordinly
+
+real_prec ra, dec, r;
+for(ULONG i=0;i<this->NOBJS;++i)
+{
+  real_prec x=this->tracer[i].coord1-0.5*this->params._Lbox();
+  real_prec y=this->tracer[i].coord2-0.5*this->params._Lbox();
+  real_prec z=this->tracer[i].coord3-0.5*this->params._Lbox();
+  cartesian_to_equatorial(x,y,z,ra, dec, r);
+  this->tracer[i].coord1=ra;
+  this->tracer[i].coord2=dec;
+  this->tracer[i].coord3=r;
+
+}
+
+
+
+
+
+}
+
+
+

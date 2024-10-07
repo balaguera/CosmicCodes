@@ -3068,6 +3068,9 @@ update_params:
          this->tracer.Halo[i].vel3=this->tracer_aux.Halo[i].vel3;
          this->tracer.Halo[i].GridID=this->tracer_aux.Halo[i].GridID;
          this->tracer.Halo[i].GridID_n=this->tracer_aux.Halo[i].GridID_n;
+#ifdef _CHECK_ASSIGN_
+         this->tracer.Halo[i].mass=this->tracer_aux.Halo[i].mass;
+#endif
        }
     this->tracer.set_NOBJS(this->tracer_aux._NOBJS());
 #else  // end of assign_to_new_ref. iF assign to the refernece directly
@@ -3094,6 +3097,7 @@ update_params:
 #endif
 #endif
   this->tracer_aux.Halo.clear();  this->tracer_aux.Halo.shrink_to_fit();
+// ************************************************************************************
   this->tracer_ref.get_property_function(this->params._Output_directory()+"tracer_ref_abundance.txt");
 #if defined _USE_NEIGHBOURS_ || defined _GET_DIST_MIN_SEP_REF_ || defined _GET_DIST_MIN_SEP_MOCK_
   So.message_screen("Identifying Neighbouring Cells (this is done once)");
@@ -6836,6 +6840,12 @@ void BiasMT::get_mock_grid_two(string property)
 void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
 {
     So.enter(__PRETTY_FUNCTION__);
+
+#ifdef _CHECK_ASSIGN_ 
+   vector<real_prec>Halo_mass_original;
+#endif
+
+
 #ifdef _FULL_VERBOSE_
   if(initial_assignment==true)
   {
@@ -6848,6 +6858,8 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
   So.message_screen("Number of tracers in reference = ", this->tracer_ref._NOBJS());
   So.message_screen("Number of tracers in mock      = ", this->tracer._NOBJS());
 #endif
+
+
   ULONG cumulative_counter=0; // this counts all
   // *********************************************OMP stuff***********************************************************************
   int NTHREADS=_NTHREADS_;
@@ -7385,9 +7397,10 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
 #endif
 #endif
 #ifdef _READ_BIAS_
-      string out_bias=params._Output_directory()+"individual_bias_invPhase.txt";
+      string out_bias=params._Output_directory()+"individual_bias_invPhase.txt"; // if assignining to new ref
+//      string out_bias=params._Output_directory()+"individual_bias.txt"; // if assining to the same reference
       ifstream bout; bout.open(out_bias.c_str());
-      this->So.message_screen("Reading bias from  file ", out_bias);
+      this->So.message_screen("Reading bias from file ", out_bias);
       for(ULONG i=0;i<this->tracer.Halo.size();++i)
         bout>>this->tracer.Halo[i].bias>>this->tracer.Halo[i].mach_number>>this->tracer.Halo[i].local_overdensity;
       bout.close();
@@ -8570,13 +8583,29 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
 //*****************************************
       ULONG Ntot_partial=Ntot;// This must be after the last property advocated
 //*****************************************
-
       Ntot*=this->params._NPROPbins_bam(); // Assign the space for the variable Y
+//*****************************************
+
+  
+//*****************************************
+
 // The following loops are meant to inizialize the tracer containers
 #ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_
 #ifndef _ASSIGN_MASS_LINKED_TO_V_FROM_REF_ //If this is on, mases have been laready assigned
       if(h_property==_MASS_)
       {
+
+
+#ifdef _CHECK_ASSIGN_
+      Halo_mass_original.resize(this->tracer._NOBJS(),0);
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+       for(ULONG ig=0; ig < this->tracer._NOBJS();++ig)
+       Halo_mass_original[ig]=this->tracer.Halo[ig].mass;
+#endif
+
+
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
@@ -8875,21 +8904,18 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
                     counter_masses_0++;
                    }// closs else
 #endif   //end of ifndef  _ASSIGN_PROPERTIES_TO_REFERENCE_
-#ifndef test_vmax_mass
-            }
-#endif
 #ifdef _FULL_VERBOSE_
 #ifndef _USE_OMP_TEST2_
-          //andres commented when no parallel is on
+          //andres commented when no parallel is ons
           So.message_screen_flush("Number of properties assigned   = ",static_cast<int>(counter_masses_0));
 #endif
 #endif
-     } // end loop over tracers
+     } // end loop over tracers for(ULONG ig=0; ig < this->tracer._NOBJS();++ig)
 #ifdef _USE_OMP_TEST2_
      gsl_rng_free(randa);
     } // closes parallel region
 #endif
-        So.message_screen("Number of properties assigned (test) = ",static_cast<ULONG>(counter_masses_test));
+      So.message_screen("Number of properties assigned (test) = ",static_cast<ULONG>(counter_masses_test));
 
 
 #ifdef _FULL_VERBOSE_
@@ -9042,7 +9068,9 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
   omp_set_num_threads(NTHREADS);
   string fname_mass_function_Y_ref = this->params._Output_directory()+"tracer_ref_abundance.txt";
   string fname_mass_function_Y = this->params._Output_directory()+"tracer_mock_abundance_R"+to_string(this->params._realization())+".txt";
+
   this->tracer.aux_flag=false;
+
   if(true==initial_assignment)
     {
 #ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_
@@ -9095,7 +9123,7 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
 #elif defined  _USE_MASS_AS_PRIMARY_OBSERVABLE_
           residuals+= fabs(this->tracer_ref.mass_function[i]/this->tracer.mass_function[i] -1.0 );
 #endif
-        }
+        }//closes if(this->tracer.mass_function[i]>0)
         residuals/=static_cast<real_prec>(count_b)/100.0;
 #ifdef _FULL_VERBOSE_
 #ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_
@@ -9136,6 +9164,7 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
       this->gp_abundance<<"set ylabel 'log n(M) ' font 'Times-Roman,15' textcolor rgb '"<<FG_COLOR<<"' \n";
 #endif
         vector<pair<real_prec, real_prec> > xy_pts_v;
+        vector<pair<real_prec, real_prec> > xy_pts_ref_v;
         xy_pts_ref_v.clear();xy_pts_ref_v.shrink_to_fit();
 #ifdef _USE_MASS_AS_PRIMARY_OBSERVABLE_
         for(int i=0; i<this->tracer.vmax_function.size(); ++i)
@@ -9160,16 +9189,16 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
 #ifdef _USE_MASS_AS_PRIMARY_OBSERVABLE_
           if(this->tracer.vmax_function[i]>0)
 #elif defined  _USE_VMAX_AS_PRIMARY_OBSERVABLE_
-            if(this->tracer.mass_function[i]>0)
+          if(this->tracer.mass_function[i]>0)
 #endif
-                {
-                  count_b++;
+            {
+              count_b++;
 #ifdef _USE_MASS_AS_PRIMARY_OBSERVABLE_
               residuals+= fabs(this->tracer_ref.vmax_function[i]/this->tracer.vmax_function[i]-1.0);
 #elif defined  _USE_VMAX_AS_PRIMARY_OBSERVABLE_
               residuals+= fabs(this->tracer_ref.mass_function[i]/this->tracer.mass_function[i]-1.0);
 #endif
-            }
+            } // closes if(this->tracer.mass_function[i]>0)
           residuals/=static_cast<real_prec>(count_b)/100.0;
 #ifdef _FULL_VERBOSE_
 #ifdef _USE_MASS_AS_PRIMARY_OBSERVABLE_
@@ -9178,7 +9207,7 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
           So.message_screen("Residuals from mass-function = ", residuals, "%");
 #endif
 #endif
-      }
+      } // closes if(h_property==_VMAX_) or if(h_property==_MASS_)
 #ifdef _USE_RS_AS_DERIVED_OBSERVABLE_
     else if(h_property==_RS_)
       {
@@ -9216,7 +9245,7 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
         So.message_screen("Residuals from Rs-function = ", residuals, "%");
         std::cout<<endl;
 #endif 
-      }
+      } // closes else if(h_property==_RS_)
 #endif //closes _USE_RS_AS_DERIVED_OBSERVABLE_
 #ifdef _USE_CONCENTRATION_AS_DERIVED_OBSERVABLE_
     else if(h_property==_CONCENTRATION_)
@@ -9255,7 +9284,7 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
         So.message_screen("Residuals from Cvir-function = ", residuals, "%");
         std::cout<<endl;
 #endif 
-      }
+      }// closes else if(h_property==_CONCENTRATION_)
 #endif //closes _USE_RS_AS_DERIVED_OBSERVABLE_
 #ifdef _USE_SPIN_AS_DERIVED_OBSERVABLE_
       else if(h_property==_SPIN_ || h_property==_SPIN_BULLOCK_)
@@ -9279,54 +9308,103 @@ void BiasMT::assign_tracer_property(bool initial_assignment, string h_property)
           xy_pts_v.push_back(std::make_pair(this->tracer.SPINBmin[i]+(i+0.5)*(this->tracer.SPINBmax[i]-this->tracer.SPINBmin[i])/static_cast<double>(this->params._NMASSbins_mf()), log10(this->tracer.s_function[i])));
         for(ULONG i=0; i<this->tracer_ref.s_function.size(); ++i)
           xy_pts_ref_v.push_back(std::make_pair(this->tracer_ref.SPINBmin[i]+(i+0.5)*(this->tracer_ref.SPINBmax[i]-this->tracer_ref.SPINBmin[i])/static_cast<double>(this->params._NMASSbins_mf()), log10(this->tracer_ref.s_function[i])));
-        this->gp_abundance_spin<<"plot"<<this->gp_abundance_spin.file1d(xy_pts_ref_v) << "w l lw 3 lt 2 title 'Reference', "<<this->gp_abundance_spin.file1d(xy_pts_v) << "w l lw 3 lt 3 title 'Mock'"<<endl;
-        xy_pts_v.clear(); xy_pts_v.shrink_to_fit();
-        xy_pts_ref_v.clear(); xy_pts_ref_v.shrink_to_fit();
-#endif
+#endif            
+
         real_prec residuals=0;
         int count_b=0;
 #pragma omp parallel for reduction(+:count_b,residuals)
-        for(int i=0;i<this->params._NMASSbins_mf() ;++i)
+        for(ULONG i=0;i<this->params._NMASSbins_mf() ;++i)
           if(this->tracer.s_function[i]>0)
             {
               count_b++;
               residuals+= fabs(this->tracer_ref.s_function[i]/this->tracer.s_function[i]-1.0);
             }
         residuals/=static_cast<real_prec>(count_b)/100.0;
+
 #ifdef _FULL_VERBOSE_
         So.message_screen("Residuals from Spin-function = ", residuals, "%");
         std::cout<<endl;
 #endif
-      }
+      }// closes   else if(h_property==_SPIN_ || h_property==_SPIN_BULLOCK_)
 #endif  // closes _USE_SPIN_AS_DERIVED_OBSERVABLE_
+
+
 //  string rfile=this->params._Output_directory()+"ref_ncat.txt";
 //  this->tracer_ref.select_random_subsample(0.2, rfile);
   string bfile=this->params._Output_directory()+"new_cat_with_dm_";
+  string bfile_c=this->params._Output_directory()+"comp_with_dm_";
+
+
+
 #ifdef  _USE_CWC_
      bfile+="cwc_";
+     bfile_c+="cwc_";
 #endif
 #ifdef _USE_BIAS_OBJECT_TO_OBJECT_
      bfile+="indiv_bias_";
+     bfile_c+="indiv_bias_";
 #endif
 #ifdef _USE_MACH_NUMBER_
      bfile+="mach5_";
+     bfile_c+="mach5_";
 #endif
 #ifdef  _USE_LOCAL_OVERDENSITY_
      bfile+="delta5_";
+     bfile_c+="delta5_";
 #endif
 #ifdef  _USE_TIDAL_ANISOTROPY_SEC_PROP_
     bfile+="ta_";
+    bfile_c+="ta_";
 #endif
 #ifdef _MULTISCALE_
      bfile+="MS_";
+     bfile_c+="MS_";
 #endif
-    bfile+=".txt";
-   if(h_property==_SPIN_BULLOCK_) // es la última
-      this->tracer.select_random_subsample(0.2, bfile);
+   bfile+=".txt";
+   bfile_c+=".txt";
+//   if(h_property==_SPIN_BULLOCK_) // es la última propiedad asignada, por eso preguntamos para escribir
+//      this->tracer.select_random_subsample(0.2, bfile);
 
-    } // closes else if(false==initial_assignment)
-}
+
+#ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_
+   if(h_property==_MASS_) 
+     {
+//      this->tracer.select_random_subsample(0.2, bfile);
+  // aca nos toca hacer un ranomd selection para escribir las masas originales y las asignadas en el caso en que estemos asignando al mismo catalogo
+    // copio esto de la clase cataalog y lo hago directamente aca, donde tengo acceso a tracer_ref y a tracer
+ #ifdef _CHECK_ASSIGN_   
+      real_prec fraction = 0.4;
+      const gsl_rng_type * rng_t;
+      gsl_rng * gBaseRando;
+      gsl_rng_env_setup();
+      gsl_rng_default_seed=35;
+      rng_t = gsl_rng_mt19937;//_default;
+      gBaseRando = gsl_rng_alloc (rng_t);
+      ULONG Nobjs_fraction=static_cast<ULONG>(floor(fraction*this->tracer._NOBJS()));
+      ofstream rcat;
+      rcat.open(bfile_c.c_str());
+      rcat.precision(4);
+      rcat.setf(ios::showpoint);
+      rcat.setf(ios::scientific);
+      ULONG counter=0;
+      So.message_screen("\tSelecting a fraction: ",100*fraction, "%");
+        do
+       {
+        int i= gsl_rng_uniform_int(gBaseRando,this->tracer.Halo.size());
+        rcat<<log10(Halo_mass_original[i])<<"\t"<<log10(this->tracer.Halo[i].mass)<<endl;
+        counter++;
+       } while(counter<Nobjs_fraction);
+      rcat.close();
+      Halo_mass_original.clear(); Halo_mass_original.shrink_to_fit();
 #endif
+     }// closes else if(h_property==_MASS_) 
+#endif // closes  _USE_VMAX_AS_PRIMARY_OBSERVABLE_
+
+
+  } // closes else if(false==initial_assignment)
+
+}
+#endif  // closes  _GET_BiasMT_CAT_
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void BiasMT::sample_mock()

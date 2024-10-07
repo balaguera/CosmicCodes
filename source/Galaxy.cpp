@@ -82,32 +82,22 @@ void GALAXY::read_pars(string &file){
       else if (par_name == "hemisphere")this->hemisphere = par_value;
 
       else if (par_name == "type_of_K_correction")this->type_of_K_correction = par_value;
-
-      
       else if (par_name == "Redefine_MKminmax"){
-	if(par_value=="true")this->Redefine_MKminmax=true;
+    	if(par_value=="true")this->Redefine_MKminmax=true;
         else if(par_value=="false") this->Redefine_MKminmax=false;
       }
-
-
-      
-
       else if (par_name == "Get_new_catalog"){
         if(par_value=="true")this->Get_new_catalog=true;
         else if(par_value=="false") this->Get_new_catalog=false;
       }
-      
       else if (par_name == "Measure_LF"){
         if(par_value=="true")this->Measure_LF =true;
         else if(par_value=="false") this->Measure_LF=false;
       }
-
       else if (par_name == "use_K_correction"){
         if(par_value=="true")this->use_K_correction =true;
         else if(par_value=="false") this->use_K_correction=false;
       }
-
-
       else if (par_name == "use_e_correction"){
         if(par_value=="true")this->use_e_correction =true;
         else if(par_value=="false") this->use_e_correction=false;
@@ -116,44 +106,31 @@ void GALAXY::read_pars(string &file){
         if(par_value=="true")this->Measure_M_pdf =true;
         else if(par_value=="false")this->Measure_M_pdf=false;
       }
-
       else if (par_name == "observed_pixels_in_mask")this->observed_pixels_in_mask  = atoi(par_value.c_str());
-      
       else if (par_name == "i_mask_pixel")i_mask_pixel = atoi(par_value.c_str());
       else if (par_name == "i_lpix")i_lpix = atoi(par_value.c_str());
       else if (par_name == "i_bpix")i_bpix = atoi(par_value.c_str());
       else if (par_name == "i_mask_flag")i_mask_flag = atoi(par_value.c_str());
       else if (par_name == "Healpix_resolution")Healpix_resolution = atoi(par_value.c_str());
       else if (par_name == "N_iterations")N_iterations = atoi(par_value.c_str());
-
       else if (par_name == "N_bin_color")N_bin_color = atoi(par_value.c_str());
       else if (par_name == "N_bin_lmass")N_bin_lmass = atoi(par_value.c_str());
       else if (par_name == "N_bin_lmass_lowres")N_bin_lmass_lowres = atoi(par_value.c_str());
       else if (par_name == "lmass_min")lmass_min = atoi(par_value.c_str());
       else if (par_name == "lmass_max")lmass_max = atoi(par_value.c_str());
-
       else if (par_name == "N_bin_Mag")N_bin_Mag = atoi(par_value.c_str());
       else if (par_name == "N_bin_Mag_low_res")N_bin_Mag_low_res = atoi(par_value.c_str());
-
       else if (par_name == "N_bin_mag")N_bin_mag = atoi(par_value.c_str());
-
       else if (par_name == "LF_estimator")this->LF_estimator= par_value;
-
-
       else if (par_name == "N_bin_z")N_bin_z = atoi(par_value.c_str());
       else if (par_name == "N_bin_z_low_res")N_bin_z_low_res = atoi(par_value.c_str());
       else if (par_name == "z_min")z_min = static_cast<real_prec>(atof(par_value.c_str()));
       else if (par_name == "z_max")z_max = static_cast<real_prec>(atof(par_value.c_str()));
-      
       else if (par_name == "z_min_low_res")z_min_low_res = static_cast<real_prec>(atof(par_value.c_str()));
       else if (par_name == "z_max_low_res")z_max_low_res = static_cast<real_prec>(atof(par_value.c_str()));
-
       else if (par_name == "kcorr_index")this->kcorr_index= static_cast<real_prec>(atof(par_value.c_str()));
-      
-      
       else if (par_name == "mK_min")mK_min = static_cast<real_prec>(atof(par_value.c_str()));
       else if (par_name == "mK_max")mK_max = static_cast<real_prec>(atof(par_value.c_str()));
-
       else if (par_name == "MK_min")MK_min = static_cast<real_prec>(atof(par_value.c_str()));
       else if (par_name == "MK_max")MK_max = static_cast<real_prec>(atof(par_value.c_str()));
       else if (par_name == "color_min")color_min = static_cast<real_prec>(atof(par_value.c_str()));
@@ -2765,24 +2742,11 @@ void GALAXY::get_new_cat(){
 
 
 
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #define _USE_OMP_rangen_
-  
 void GALAXY::get_random_cat(string file, long n_random){
-  
-
-
-
-
   real_prec  lka=-100.;
   real_prec  lkb=0.;
   for(int i=0;i<this->nbar.size();++i)
@@ -2865,12 +2829,8 @@ void GALAXY::get_random_cat(string file, long n_random){
  rng_t = gsl_rng_ranlux;
  gBaseRand = gsl_rng_alloc (rng_t);
 #endif
-
-
  int Nran_files=10;
  std::cout<<"Generating random catalog with "<<n_random*Nran_files<<" objects in chuncks of"<<Nran_files<<" files"<<endl;
-
-
 #ifdef _USE_OMP_rangen_
  int jthread;
 
@@ -2989,16 +2949,10 @@ void GALAXY::get_random_cat(string file, long n_random){
 
      }// closes loop over files
 
-
-
 #ifdef _USE_OMP_rangen_
    }
 #endif
-
-
   this->So.DONE();
-
-
 #ifdef _USE_MASSa_
   vector<real_prec>mass_aux(N_bin_lmass,0);
 #ifdef _USE_OMP_
@@ -3022,16 +2976,10 @@ void GALAXY::get_random_cat(string file, long n_random){
   gsl_interp_accel_free(acc_zn);
 
 
-  gsl_rng_free (gBaseRand);
-
-  
+  gsl_rng_free (gBaseRand);  
 }
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void GALAXY::bspline(int u,int n){
   std::cout<<CYAN<<"Smoothing dNdz and nbar  ... "<<RESET<<endl;
@@ -3089,21 +3037,12 @@ void GALAXY::bspline(int u,int n){
     }
 }
 
-
-
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void GALAXY::get_nbar(){
-
-
   this->nbar.clear();
   this->nbar.shrink_to_fit();
-
   this->deltaz=this->zn_new[1]-this->zn_new[0];
-
   this->nbar.resize(dNdz_new.size(),0);
   So.message_screen("Computing Mean number density");
   for(int i=0;i<dNdz_new.size();i++)
@@ -3128,20 +3067,13 @@ void GALAXY::get_nbar(){
 
 
 }
-
-
-// ######################################################################
-// ######################################################################
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void GALAXY::bspline(string input_file,int nfactor){
   std::cout<<CYAN<<"Smoothing dNdz and nbar  ... "<<RESET<<endl;
-
-
   const gsl_rng_type * rng_t;
   gsl_rng * gBaseRand;
   gsl_rng_env_setup();
-
-
   int nlines=0;
   ifstream infile;
   infile.open(input_file.c_str());
@@ -3338,36 +3270,25 @@ void GALAXY::bspline(string input_file,int nfactor){
     this->N_bin_z=this->dNdz_new.size();
 
 */
-
 }
- 
-// ######################################################################
-// ######################################################################
+ ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void GALAXY::get_jacknife_mask(){
-
   // REDEFINE THE WY YOU COUNT PIXELS IN THE CREATION OF MASKED PIXELS. NO ES NECESARIO CREAR MASCARA GRANDE
   // SIMPLEMENTE DECIR CUANDTOS PIXELSES ORIGINALES QUEREMOS QUITAR Y DARLE. NO NECESITAOS SER INDEPENDEIDNTES
-  
-  std::cout<<CYAN<<"Creating Jacknife masks"<<RESET<<std::endl;
+    std::cout<<CYAN<<"Creating Jacknife masks"<<RESET<<std::endl;
   /// Create Nres masks, eacsh with resolution Nres and subtracting one pixel.
   /// The mask should follow 2MPZ mask.
   ofstream sal;
-  
-  
   //In the low resolution mask, each pixel contains Nside_new**2 / nside**2 pixels in the high res mask.
-  
-  
   /*
     const gsl_rng_type * T;
     gsl_rng * r;
     gsl_rng_env_setup();
-    
-    Healpix_Map<real_prec>mask_aux2(log2(this->nside), RING);
+        Healpix_Map<real_prec>mask_aux2(log2(this->nside), RING);
     int count=0;
-    
-    
+  
     for(int count_regions=1;count_regions<=1000;++count_regions){ // loop over the low res mask
-    
     vector<int>mask_pix(this->n_pixels, 0);
     for(int i=0;i<this->n_pixels;i++)mask_pix[i]=this->mask[i][this->i_mask_flag];
     
@@ -3403,42 +3324,25 @@ void GALAXY::get_jacknife_mask(){
     
     }
   */
-  
-  
-  
   int Nside_new=4;
   Healpix_Map<real_prec>mask_aux_low(log2(Nside_new), RING);
-  
   int n_pixels_new=12*Nside_new*Nside_new;
   real_prec  Npp=pow(this->nside,2)/pow(Nside_new,2);
   std::cout<<RED<<"In the low resolution mask, each pixel contains "<< Npp<<" pixels in the high res mask."<<RESET<<std::endl;
-  
   int count_regions=0;
-  
-  
   string apix_file="../MASK/area_low_res_mask_jacknife_Nside_"+to_string(Nside_new)+".txt";
   ofstream apix;
   apix.open(apix_file.c_str());
-
-
   string low_res_file="../MASK/low_res_mask_Nside_"+to_string(Nside_new)+".txt";
   ofstream lres(low_res_file.c_str());
-
-  
   vector<vector<int> > ihh;
   ihh.resize(this->n_pixels);
-
-
   vector<int> ihh_new;
   ihh_new.resize(n_pixels_new,1-observed_pixels_in_mask);
-
   vector<int> ihh_count;
   ihh_count.resize(n_pixels_new,-999);
-  
- 
   for(int il=0;il<n_pixels_new;++il) // loop over the low res mask
     { 
-      
       vector<int>index(this->n_pixels,0);
       int count=0;//Counter on the number of pixels that are going to me masked
       int count_ori=0;  //Counter on the pixels in the original mask that are masked
@@ -3466,53 +3370,31 @@ void GALAXY::get_jacknife_mask(){
 	  else
 	    index[ih]=this->mask[this->i_mask_flag+ih*NCOLS_MASK]; // If this pixel is in other low res pixel, then assign the original value of the mask
 	}
-      
-      
-      
       int Npx_masked=count-count_ori;//number of pixels that are effectively masked from the low_res pixel il
-      
       //205 256 for Nside_new = 4
       //814 1024 for Nside_new = 2
       if(Npx_masked>= 205 && Npx_masked<=256) // 10 percent variation in the area
 	{
 	  //if(Npx_masked>=205 && Npx_masked<=Npp){
 	  //          if(Npx_masked>=0 && Npx_masked<=5555556){
-	  
-  
 	  ihh_new[il]=this->observed_pixels_in_mask;
-      
 	  count_regions++;
 	  ihh_count[il]=count_regions;
-	  
-	  
 	  string new_mask="../MASK/new_mask_jacknife_Nside_"+to_string(Nside_new)+"_d1_"+to_string(count_regions)+".txt";
 	  //     string new_mask="../MASK/new_mask_jacknife_all_regions_"+to_string(count_regions)+".txt";
-	  
 	  sal.open(new_mask);
-	  
 	  for(int ih=0;ih<this->n_pixels;++ih)
 	    sal<<ih<<"\t"<<this->mask[this->i_lpix+ih*NCOLS_MASK]<<"\t"<<this->mask[this->i_bpix+ih*NCOLS_MASK]<<"\t"<<index[ih]<<endl;
-
 	  for(int ih=0;ih<this->n_pixels;++ih)
 	    ihh[ih].push_back(index[ih]);
-	  
 	  std::cout<<"Low res pixel "<<il<<CYAN<<":  "<<count_ori<<" originally masked pixels.    ";
 	  std::cout<<count<<" High res pixels in the pixel "<<il <<RESET<<BLUE<<"  "<<Npx_masked<<" extra-masked pixels in region "<<count_regions<<RESET<<std::endl;
 	  sal.close();
-	  
-	  
 	  apix<<count_regions<<"\t"<<Npx_masked*this->area_pixel<<endl;
-	  
-	  
-	  
 	  // string new_fjn="../MASK/cat_low_res_mask_jacknife_Nside_"+to_string(Nside_new)+"_"+to_string(count_regions)+".txt"; // here I only write few columns, meant to be plot
 	  // sal.open(new_fjn);
-	  
 	  // string new_fjn2="../MASK/cat_low_res_mask_jacknife_Nside_"+to_string(Nside_new)+"_"+to_string(count_regions)+"_fullinfo.txt"; // Here I write the same catalog in different low res pixels
 	  // ofstream sal2; sal2.open(new_fjn2);
-
-
-
 	  for(int i=0;i<this->NGAL;++i)
 	    {
 	      point.phi=prop[this->i_lgal+i*this->NCOLS]*fac;
@@ -3535,17 +3417,8 @@ void GALAXY::get_jacknife_mask(){
 	  // sal.close();
 	  // sal2.close();
 
-
-	
 	}
-
-
-  
-
-
     }
-
-
   int cc=0;
   for(int i=0;i<n_pixels_new; ++i)
     {
@@ -3554,11 +3427,6 @@ void GALAXY::get_jacknife_mask(){
     }
   cout<<RED<<cc<<endl;
   apix.close();
-
-
-
-
-
   /*
 
     for(int i=0;i<count_regions;++i){
@@ -3573,10 +3441,7 @@ void GALAXY::get_jacknife_mask(){
     }
     }
     }
-
-
     int nmk=0;
-
     for(int i=0;i<count_regions;++i){
     for(int j=i+1;j<count_regions;++j){
     if(i!j){
@@ -3591,12 +3456,8 @@ void GALAXY::get_jacknife_mask(){
     }
     }
     }
-
     cout<<nmk<<endl;
   */
-
-
-
   /*
     int nmk=0;
 
@@ -3618,12 +3479,10 @@ void GALAXY::get_jacknife_mask(){
     }
     }
     }
-
   */
-
-
-
 }
-// ######################################################################
-// ######################################################################
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 

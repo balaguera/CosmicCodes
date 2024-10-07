@@ -17,6 +17,15 @@ void equatorial_to_cartesian(real_prec ra, real_prec dec, real_prec r, real_prec
   z  =r*cos(0.5*M_PI-dec*fac);
 }
 //////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+void cartesian_to_equatorial(real_prec x, real_prec y, real_prec z, real_prec &ra, real_prec &dec, real_prec &r)
+{
+  ra  =0;
+  dec =0;
+  r   =sqrt(x*x+y*y+z*z);
+}
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 void new_equatorial_to_cartesian(real_prec ra, real_prec dec, real_prec r, real_prec m_ra, real_prec m_dec, real_prec &x, real_prec &y, real_prec &z){
   real_prec xx, yy, zz;
   real_prec new_dec,new_ra;
@@ -49,7 +58,7 @@ void equatorial_to_equatorial(real_prec old_ra, real_prec old_dec, real_prec m_r
   *new_ra =aux2/fac;
 }
 //////////////////////////////////////////////////////////
-void galactoc_to_equatorial(real_prec  b, real_prec  l, real_prec  &ra, real_prec  &dec){
+void galactic_to_equatorial(real_prec  b, real_prec  l, real_prec  &ra, real_prec  &dec){
   real_prec fac = M_PI/180.0;                         /* Convierte grados a radianes*/
   real_prec  alpha_p=fac*192.859508;                        /*Right ascention of galactic north pole in radians*/
   real_prec  delta_p=fac*27.128336;                         /*Declination of galactic north pole in radians*/
