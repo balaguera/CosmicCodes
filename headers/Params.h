@@ -2692,6 +2692,11 @@ private :
   /*
    * @brief 
    */  
+  bool Get_tracer_bias_field;
+  //////////////////////////////////////////////////////////
+  /*
+   * @brief 
+   */  
   bool Get_tracer_vmax_field;
   //////////////////////////////////////////////////////////
   /*
@@ -6403,6 +6408,11 @@ public:
    *  @brief 
    */
   bool _Get_tracer_mass_field(){return this->Get_tracer_mass_field;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  bool _Get_tracer_bias_field(){return this->Get_tracer_bias_field;}
   //////////////////////////////////////////////////////////
   /**
    *  @brief 

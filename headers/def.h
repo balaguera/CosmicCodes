@@ -953,6 +953,7 @@ since we should not initialize the delta arrays there, as they are being filled 
 #define _VRMS_ "_VRSM_"
 // ---------------------------------
 #define _VIRIAL_ "_VIRIAL_"
+#define _BIAS_ "_BIAS_"
 
 // If we waant to reconstruct another property, we have to set in params files min and max of that propert. Define mins and max in Params.h,cpp
 // and add ifs in BiasMT. in function get_X_function_complement.
@@ -1022,7 +1023,7 @@ since we should not initialize the delta arrays there, as they are being filled 
 */
 #define _READ_BIAS_
 //#define _WRITE_BIAS_
-#define _USE_BIAS_OBJECT_TO_OBJECT_ 
+//#define _USE_BIAS_OBJECT_TO_OBJECT_ 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //#define _USE_MACH_NUMBER_
 //#define _USE_LOCAL_OVERDENSITY_

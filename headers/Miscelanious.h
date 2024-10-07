@@ -614,6 +614,14 @@ real_prec SN_correction_MAS(int e,real_prec xx,real_prec yy,real_prec zz);
  * @author ABA
  */
 real_prec correction_MAS(int exp,real_prec xx,real_prec yy,real_prec z);
+
+////////////////////////////////////////////////////////////////////////////
+/**
+* @brief Assignmet of individual bias, 
+* @details This funciton is meant to be used in Catlog, since there is a conflict defining the class PowerSpectrumF in the Catalog class.
+*/
+void object_by_object_bias(Params, vector<s_Halo>&, vector<real_prec>&);
+
 ////////////////////////////////////////////////////////////////////////////
 /**
 

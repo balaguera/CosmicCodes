@@ -29,15 +29,18 @@ using namespace std;
    * the output is in the units of r       
    */
   void equatorial_to_cartesian(real_prec, real_prec, real_prec, real_prec &, real_prec &, real_prec &);
+//////////////////////////////////////////////////////////
+ /**
+   * @brief Convert equatorial coordinates, i.e, right ascension, declination and distance  
+   * to cartessian coordinates. 
+   * @details Input values of RA and Dec are in degrees,          
+   * the output is in the units of r       
+   */
+  void cartesian_to_equatorial(real_prec, real_prec, real_prec, real_prec &, real_prec &, real_prec &);
 ///////////////////////////////////////////////////////
    /**
-   * @brief Convert equatorial coordinates, i.e, right ascension, declination and distance  
+   * @brief Convert cartesian coordinates into equatorial RA, DEC, r  
    * to a new spherical coordinate system 
-   * @details with the z-axis points towards          
-   * the point identified with m_ra and m_dec, that is,  the new e z-direction          
-   * points towards the sample baricenter.
-   * Input values of RA and Dec are in degrees,                                      
-   * the output has the units of r         
   */
   void new_equatorial_to_cartesian(real_prec, real_prec, real_prec , real_prec, real_prec, real_prec &, real_prec &, real_prec &);
 ///////////////////////////////////////////////////////

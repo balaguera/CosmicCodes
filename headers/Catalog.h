@@ -912,7 +912,7 @@ public:
   void define_property_bins();
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Thi method defines the bins in properties
    */
   void define_property_bins(ULONG Nbins, string prop);
   //////////////////////////////////////////////////////////
@@ -933,6 +933,12 @@ public:
    */
   void get_stats_separation_in_cell();
 
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief This method converts a snapshot into a mock catalog
+   * @details Converts cartesian positions into RA, dec, and Z using cosmological and pecular redshifts.
+   */
+  void snap_to_mock();
   //////////////////////////////////////////////////////////
   /**
    * @brief Determine the ID of the neighbour tracers to each tracer
