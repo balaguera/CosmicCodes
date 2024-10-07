@@ -131,19 +131,18 @@ int main(int argc, char *argv[]){
           ParamsCl params(par_file);
           Cl_FUNCTIONS cCl(params);
           cCl.get_angular_power();
- 	      message_time(start_all);
+	  message_time(start_all);
       }
     else if(temp=='k')
       {
       	message_mock();
-	      par_file = argv[2];
-          ParamsCl params(par_file);
-          Cl_FUNCTIONS cCl(params);
-          cCl.get_cross_Cl();
-	      message_time(start_all);
+	par_file = argv[2];
+	ParamsCl params(par_file);
+	Cl_FUNCTIONS cCl(params);
+	cCl.get_cross_Cl();
+	message_time(start_all);
       	break;
       }
-
     else if(temp=='d')
       {
         message_mock();
@@ -153,7 +152,6 @@ int main(int argc, char *argv[]){
         message_time(start_all);
         break;
       }
-
   }
   return 0;
 }

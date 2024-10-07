@@ -8,7 +8,6 @@
 ////////////////////////////////////////////////////////////////////////////
 using namespace std;
 ////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[]){
 //  system("clear");
   time_t start_all;
@@ -24,35 +23,23 @@ int main(int argc, char *argv[]){
     So.usage(argv[0]);
     exit(1);
   }
-
-  while((temp =  getopt(argc, argv, "hadi:b:")) != -1)
+  while((temp =  getopt(argc, argv, "n:s:")) != -1)
     {
       if(temp=='h')
         So.usage(argv[0]);
 
-      else if (temp=='a')  // Show authors
-        So.author();
-
-      else if(temp=='i') // displays input parameters
+      else if(temp=='n') // displays input parameters
         {
-          par_file_BiasMT = argv[2];
-          Params params(par_file_BiasMT);
+          string par_name = argv[2];
+          Params params;
+          params.explain_pars(par_name);
+        }
+      else if(temp=='s') // displays input parameters
+        {
+          string par_name = argv[2];
+          Params params(par_name);
           params.show_params();
         }
-      else if(temp=='d') // displays input parameters
-        {
-          So.show_preproc();
-        }
-      else if(temp=='b') // Run BiasMT
-        {
-          par_file_BiasMT = argv[2];
-          Params Par(par_file_BiasMT);
-          cout<<"here "<<par_file_BiasMT<<endl;
-          So.set_params(Par);
-          BiasMT BiasMT(Par,true);
-          BiasMT.set_So(So);
-          BiasMT.execute();
-       }
     }
   exit(0);
   return 0;

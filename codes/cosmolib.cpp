@@ -24,13 +24,17 @@ int main(int argc, char *argv[]){
     So.usage(argv[0]);
     exit(1);
   }
-  while((temp =  getopt(argc, argv, "h:z:")) != -1)
+  while((temp =  getopt(argc, argv, "c:z:h:")) != -1)
     {
-      if(temp=='h') // Run BiasMT
+      if(temp=='c') // Run BiasMT
         {
           Clib.get_cosmolib();
        }
-      else if(temp=='z') // Run BiasMT
+      else if(temp=='h') // Run BiasMT
+        {
+          Clib.get_dndz_gal();// partially developerd
+       }
+      else if(temp=='z') // Get cosmology functions as as funtion f redshift
         {
           Clib.get_dndz_gal();// partially developerd
        }

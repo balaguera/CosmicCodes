@@ -132,6 +132,14 @@ int main(int argc, char *argv[]){
           PowerSpectrumF cPSF(params);
           cPSF.get_GaussianRandomField();
         }
+      else if('m'==temp)  // toCOmput Marked correlation function
+        {
+          So.message(start_all);
+          string par_file = argv[2];
+          Params params(par_file);
+          PowerSpectrumF cPSF(params);
+          cPSF.compute_marked_correlation_function();
+        }
 
       else if('?'==temp)
        {
