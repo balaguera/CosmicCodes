@@ -303,6 +303,11 @@ void CosmoLib::get_cosmolib(){
       this->s_cosmo_par.Delta_SO=density_contrast_top_hat;
       So.message_screen("Using density contrast top hat as SO");
   }
+  else{
+      this->s_cosmo_par.Delta_SO=this->params._Delta_SO();
+      density_contrast_top_hat=this->params._Delta_SO();
+  }
+
   this->Cf.set_cosmo_pars(this->s_cosmo_par);// update
   this->Ps.set_cosmo_pars(this->s_cosmo_par);// update
   real_prec Hubble_function=Cf.Hubble_function(redshift);
