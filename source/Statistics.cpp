@@ -110,7 +110,7 @@ gsl_real Statistics::isigma(gsl_real lk,void *p){  /* Integrand for sigma^2 */
   real_prec z= s_cp->aux_var2;
   real_prec M=pow(10,m);
   real_prec power=0;
-  real_prec rr=cf.rr_lag(M,z);
+  real_prec rr=cf.rr(M,z);
  // if(true==s_cp->use_external_power)
  //     power= pow(s_cp->growth_factor,2)*gsl_inter_new(s_cp->kvector_external, s_cp->power_external, k);
  //  else
@@ -130,7 +130,7 @@ gsl_real Statistics::isigma_nu(gsl_real lk,void *p){  /* Integrand for sigma^2 *
   real_prec m= s_cp->aux_var1;
   real_prec z= s_cp->aux_var2;
   real_prec M=pow(10,m);
-  real_prec rr=cf.rr_lag(M,z);
+  real_prec rr=cf.rr(M,z);
   real_prec ans=(log(10.0)*k)*pow(k,2)*(ps.Linear_Matter_Power_Spectrum(k))*pow(window(k,rr),2);
   return static_cast<gsl_real>(ans);
 }
@@ -155,11 +155,12 @@ real_prec Statistics::mass_function_D(real_prec m, real_prec z)
   real_prec M=pow(10,m);
   real_prec Smasa=sigma_masa(m,z);
   real_prec nu=pow(deltac/Smasa,2);
-  real_prec com_density= this->cosmo.mean_matter_density(z); //  (this->s_cosmo_pars.mean_matter_density)*pow(1+z,-3.0);
+  real_prec com_density= this->cosmo.mean_matter_density(z)*pow(1+z,-3.0); //  (this->s_cosmo_pars.mean_matter_density)*pow(1+z,-3.0);
   this->s_cosmo_pars.aux_var1 = m;
   this->s_cosmo_pars.aux_var2 = z;
+  real_prec rr = this->cosmo.rr_lag(M,z);
   real_prec dsdr=gsl_integration(dsigma_dR,(void *)&this->s_cosmo_pars,this->XX_K,this->WW_K, false);
-  return (com_density/static_cast<double>(M))*(mb.mass_function(nu,z, (void *)&this->s_cosmo_pars))*pow(Smasa,-2)*(this->cosmo.rr_lag(M,z)/(3.*static_cast<double>(M)))*dsdr;
+  return (com_density/static_cast<double>(M))*(mb.mass_function(nu,z, (void *)&this->s_cosmo_pars))*pow(Smasa,-2)*(rr/(3.*static_cast<double>(M)))*dsdr;
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -170,11 +171,12 @@ real_prec Statistics::mass_function_D(real_prec m, real_prec z,vector<gsl_real>&
   real_prec Smasa=gsl_inter_new(this->s_cosmo_pars.v_mass, this->s_cosmo_pars.v_sigma_mass,static_cast<gsl_real>(m));    //     sigma_masa(M,z,scp);
   real_prec M=pow(10,m);
   real_prec nu=pow(deltac/Smasa,2);
-  real_prec com_density =  this->cosmo.mean_matter_density(z);// (this->s_cosmo_pars.mean_matter_density)*pow(1+z,(real_prec)-3.0);
+  real_prec com_density =  this->cosmo.mean_matter_density(z)*pow(1+z,-3.0);// (this->s_cosmo_pars.mean_matter_density)*pow(1+z,(real_prec)-3.0);
   this->s_cosmo_pars.aux_var1 = m;
   this->s_cosmo_pars.aux_var2 = z;
+  real_prec rr=this->cosmo.rr_lag(M,z);
   real_prec dsdr=gsl_integration(dsigma_dR,(void *)&this->s_cosmo_pars,XX,WW,false);
-  return (com_density/M)*(mb.mass_function(nu,z, (void *)&this->s_cosmo_pars))*pow(Smasa,-2)*(this->cosmo.rr_lag(M,z)/(3.*M))*dsdr;
+  return (com_density/static_cast<double>(M))*(mb.mass_function(nu,z, (void *)&this->s_cosmo_pars))*pow(Smasa,-2)*(rr/(3.*M))*dsdr;
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -188,14 +190,14 @@ gsl_real Statistics::dsigma_dR(gsl_real lk, void *p){  /* integrand to calculate
   real_prec M=pow(10,m);
   real_prec z= s_cp->aux_var2;
   real_prec k=pow(10,lk);
-  real_prec r =cf.rr_lag(M,z);
-  real_prec y=r*k;
+  real_prec rr =cf.rr_lag(M,z);
+  real_prec y=rr*k;
   real_prec power=1.0;
   if(true==s_cp->use_external_power)
       power= pow(s_cp->growth_factor,2)*gsl_inter_new(s_cp->kvector_external, s_cp->power_external, k);
    else
       power=ps.Linear_Matter_Power_Spectrum(k);
-  return  (log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*power*2.0*fabs(window(k,r))*k*fabs(((3.*pow(y,-2))*sin(y)-9.*pow(y,-4)*(sin(y)-y*cos(y))));
+  return  (log(10.0)*k)*(1./(2.*pow(M_PI,2)))*pow(k,2)*power*2.0*fabs(window(k,rr))*k*fabs(((3.*pow(y,-2))*sin(y)-9.*pow(y,-4)*(sin(y)-y*cos(y))));
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -257,11 +259,12 @@ void Statistics::non_linear_scales(real_prec &knl,real_prec &Mnl,real_prec &rnl,
   }
   int nr=10;
   real_prec init_mass=this->s_cosmo_pars.v_mass[0];
+  real_prec rr =this->cosmo.rr(pow(10,ms2)*M_reference,z);
   for(int i=0;i<nr;i++)
   {
     this->s_cosmo_pars.aux_var1 = log10(pow(10,ms2)*M_reference);
     df2=-gsl_integration(dsigma_dR,(void *)&this->s_cosmo_pars,log10(this->s_cosmo_pars.kmin_int),log10(this->s_cosmo_pars.kmax_int));
-    fac2=(4.*M_PI*den*pow(this->cosmo.rr(pow(10,ms2)*M_reference,z),2))/(log(10.0)*(M_reference)*pow(10,ms2));
+    fac2=(4.*M_PI*den*pow(rr,2))/(log(10.0)*(M_reference)*pow(10,ms2));
     if(log10(pow(10,ms2)*M_reference)>init_mass)
     {
       sig2= gsl_spline_eval (spline_mass_sigma, log10(pow(10,ms2)*M_reference), acc_mass_sigma);

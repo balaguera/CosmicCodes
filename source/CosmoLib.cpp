@@ -297,19 +297,20 @@ void CosmoLib::get_cosmolib(){
   // *********************************************************
   this->Cf.set_cosmo_pars(this->s_cosmo_par);
   real_prec critical_density=Cf.critical_overdensity(redshift);
-  real_prec density_contrast_top_hat=Cf.density_contrast_top_hat(redshift);
-  if(this->params._Get_SO_from_BN()==true)
+
+  this->s_cosmo_par.Delta_SO=this->params._Delta_SO();
+  real_prec density_contrast_top_hat=this->params._Delta_SO();
+ // If SO is not to be used, modifiy it here now:
+  if(true==this->params._Get_SO_from_BN())
     {
-      this->s_cosmo_par.Delta_SO=density_contrast_top_hat;
+      density_contrast_top_hat=Cf.density_contrast_top_hat(redshift);
       So.message_screen("Using density contrast top hat as SO");
-  }
-  else{
-      this->s_cosmo_par.Delta_SO=this->params._Delta_SO();
-      density_contrast_top_hat=this->params._Delta_SO();
+      this->params.set_Delta_SO(density_contrast_top_hat);
+      this->s_cosmo_par.Delta_SO=density_contrast_top_hat;
   }
 
-  this->Cf.set_cosmo_pars(this->s_cosmo_par);// update
-  this->Ps.set_cosmo_pars(this->s_cosmo_par);// update
+  this->Cf.set_cosmo_pars(this->s_cosmo_par);// update in Cosmology
+  this->Ps.set_cosmo_pars(this->s_cosmo_par);// update in PowerSpectrum
   real_prec Hubble_function=Cf.Hubble_function(redshift);
   real_prec comoving_distance=this->Cf.comoving_distance(redshift);
   real_prec comoving_angular_diameter_distance=Cf.comoving_angular_diameter_distance(redshift);

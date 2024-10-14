@@ -428,8 +428,9 @@ void Params::init_pars()
   this->ymax = 0;
   this->zmax = 0;
   // ************************************************************************
-  // cosmological parameters
+  // INitialize cosmological parameters 
   this->Get_SO_from_BN = false;
+  this->Delta_SO = COSMOPARS::Delta_SO; 
   this->om_matter = COSMOPARS::Om_matter;
   this->om_radiation = COSMOPARS::Om_radiation;
   this->om_baryons = COSMOPARS::Om_baryons;
@@ -3249,13 +3250,7 @@ void Params::read_pars(string file)
 	      this->RR = static_cast<real_prec>(atof(par_value.c_str()));
 	      this->parameter_number.push_back(make_pair(par_name, this->RR));
 	    }
-      else if (par_name == "Delta_SO")
-      {
-        this->Delta_SO = static_cast<real_prec>(atof(par_value.c_str()));
-	      this->parameter_number.push_back(make_pair(par_name, this->Delta_SO));
-      }
 #endif
- 
           //here now read the aprams from LPT
 	  else if (par_name == "inputmode")
 	    {
@@ -3415,14 +3410,20 @@ void Params::read_pars(string file)
         if(par_value=="true")this->fixed_redshift=true;
         else if(par_value=="false")this->fixed_redshift=false;
       }
-            else if (par_name == "use_wiggles")
+      else if (par_name == "use_wiggles")
       {
         if(par_value=="true")this->use_wiggles=true;
         else if(par_value=="false")this->use_wiggles =false;
       }
-      else if (par_name == "Get_SO_from_BN"){
-        if(par_value=="true")this->Get_SO_from_BN=true;
-        else if(par_value=="false")this->Get_SO_from_BN=false;
+      else if (par_name == "Delta_SO")
+      {
+        this->Delta_SO = static_cast<real_prec>(atof(par_value.c_str()));
+	      this->parameter_number.push_back(make_pair(par_name, this->Delta_SO));
+      }
+      else if (par_name == "Get_SO_from_BN")
+      {
+        if(par_value== "true")this->Get_SO_from_BN=true;
+        else if(par_value== "false")this->Get_SO_from_BN=false;
       }
       else if (par_name == "file_power_th") 
         this->file_power_th =par_value;
@@ -3570,8 +3571,9 @@ void Params::read_pars(string file)
   this->use_wiggles = COSMOPARS::use_wiggles;
   this->RR = COSMOPARS::RR;
   this->alpha_s=COSMOPARS::alpha_s;
-  this->Delta_SO=COSMOPARS::Delta_SO;
   this->f_baryon=COSMOPARS::f_baryon;
+  if(true ==this->Get_SO_from_BN)
+    this->Delta_SO=COSMOPARS::Delta_SO;
 #endif
   this->s_cosmo_pars.cosmological_redshift=this->redshift;
   this->s_cosmo_pars.Hubble=this->Hubble;
@@ -3601,6 +3603,7 @@ void Params::read_pars(string file)
   this->s_cosmo_pars.kmin_int=this->kmin_integration;
   this->s_cosmo_pars.kmax_int=this->kmax_integration;
   this->s_cosmo_pars.mass_function_fit=this->mass_function_fit;
+
   this->s_cosmo_pars.halo_mass_bias_fit=this->halo_mass_bias_fit;
   this->s_cosmo_pars.density_profile=this->density_profile;
   this->s_cosmo_pars.coef_concentration_amp=this->coef_concentration_amp;
