@@ -7212,6 +7212,11 @@ public:
   /**
    *  @name input/output
    */
+  void set_Delta_SO(real_prec new_delta) {this->Delta_SO=new_delta;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
   real_prec _Mstep_hod() {return this->Mstep_hod;}
   //////////////////////////////////////////////////////////
   /**
