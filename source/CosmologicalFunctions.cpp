@@ -22,7 +22,7 @@ real_prec Cosmology::comoving_sound_horizon(real_prec redshift)
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology::rr(real_prec M, real_prec z){
-  return (1+z)*pow((real_prec)3.*M/(4.*M_PI*this->mean_matter_density(z)),(real_prec)1./3.);
+  return (1+z)*pow(3.*M/(4.*M_PI*this->mean_matter_density(z)),1./3.);
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology::rr_lag(real_prec M, real_prec z){
