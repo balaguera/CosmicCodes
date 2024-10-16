@@ -77,12 +77,12 @@ real_prec Cosmology::inter_transverse_comoving_distance(real_prec redshift)
   if(this->s_cosmo_pars.Om_k<0){
     ans= Constants::speed_light*sin(fac*cd/Constants::speed_light)/fac;
   }
-  if(this->s_cosmo_pars.Om_k==0){
-    ans=cd;
-  }
-  if(this->s_cosmo_pars.Om_k>0){
+  else if(this->s_cosmo_pars.Om_k>0){
     ans= Constants::speed_light*sinh(fac*cd/Constants::speed_light)/fac;
   }
+  else
+    ans=cd;
+  
   return ans;
 }
 ////////////////////////////////////////////////////////////////////////////
