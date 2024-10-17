@@ -611,6 +611,10 @@ struct s_Halo
   // -----------------------------------
   /**
    *@brief   Redshift (Z or theta, ) params._sys_of_coords_g/r() */
+  real_prec cosmological_redshift;
+  // -----------------------------------
+  /**
+   *@brief   Redshift (Z or theta, ) params._sys_of_coords_g/r() */
   real_prec redshift;
   // -----------------------------------
   /**
