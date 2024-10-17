@@ -379,7 +379,7 @@ void Params::init_pars()
   this->velbias_dm=0;
   this->velbias_random=0;
   this->dilute_dm_sample = false;
-  this->fraction_dilute=1.0;
+  this->fraction_dilute=0.1;
   this->masskernel_vel=0;
   this->iteration_ini = 0;
   this->get_distribution_min_separations=false;
@@ -3572,6 +3572,8 @@ void Params::read_pars(string file)
   this->RR = COSMOPARS::RR;
   this->alpha_s=COSMOPARS::alpha_s;
   this->f_baryon=COSMOPARS::f_baryon;
+  this->kmin_integration=0.0001;
+  this->kmax_integration=200.000;
   if(true ==this->Get_SO_from_BN)
     this->Delta_SO=COSMOPARS::Delta_SO;
 #endif
@@ -3588,12 +3590,10 @@ void Params::read_pars(string file)
   this->s_cosmo_pars.wde_eos =this->wde_eos;
   this->s_cosmo_pars.N_eff =this->N_eff;
   this->s_cosmo_pars.sigma8 =this->sigma8;
-  this->s_cosmo_pars.f_baryon =this->om_baryons/this->om_matter;
+  this->s_cosmo_pars.f_baryon = this->f_baryon;// this->om_baryons/this->om_matter;
   this->s_cosmo_pars.use_wiggles =this->use_wiggles;
   this->s_cosmo_pars.RR =this->RR;
   this->s_cosmo_pars.Tcmb =this->Tcmb;
-  this->s_cosmo_pars.kmin_int = 0.00001;
-  this->s_cosmo_pars.kmax_int = 100.0;
   this->s_cosmo_pars.use_external_power=false;
   this->s_cosmo_pars.GAL_BIAS=this->GAL_BIAS;
   this->s_cosmo_pars.Amc=this->Amc;

@@ -1864,6 +1864,7 @@ if(type_of_object=="TRACER_REF")
 #endif
       // *********************************************************************
       // ALLOCATE CONCENTRATION
+     
 #ifdef _USE_CONCENTRATION_
       if((this->type_of_object!="TRACER_MOCK_ONLY_COORDS" || this->type_of_object!="TRACER_REF_ONLY_COORDS" || this->type_of_object!="RANDOM" )&& (i_rvir>0 && i_rvir<NCOLS) && (i_rs>0 && i_rs<NCOLS) )
        {
@@ -5366,8 +5367,9 @@ void Catalog::select_random_subsample(real_prec fraction, string file){
     do
      {
       int i= gsl_rng_uniform_int(gBaseRando,this->Halo.size());
-      rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<endl;
+//      rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<endl;
 //      rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].rs)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<log10(this->Halo[i].vrms)<<"\t"<<this->Halo[i].virial<<"\t"<<this->Halo[i].b_to_a<<"\t"<<this->Halo[i].c_to_a<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<this->Halo[i].qbias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<"\t"<<this->Halo[i].dach_number<<"\t"<<this->Halo[i].tidal_anisotropy<<"\t"<<this->Halo[i].peak_height<<"\t"<<this->Halo[i].gal_cwt<<"\t"<<this->Halo[i].relative_bias<<"\t"<<this->Halo[i].bias_rs<<"\t"<<this->Halo[i].rs_factor<<"\t"<<this->Halo[i].local_dm<<"\t"<<this->Halo[i].lambda1<<"\t"<<this->Halo[i].lambda2<<"\t"<<this->Halo[i].lambda3<<"\t"<<log10(this->Halo[i].mass_closest_neighbour)<<"\t"<<this->Halo[i].distance_closest_neighbour<<"\t"<<log10(this->Halo[i].spin_closest_neighbour)<<"\t"<<log10(this->Halo[i].concentration_closest_neighbour)<<"\t"<<log10(this->Halo[i].most_massive_neighbour)<<"\t"<<this->Halo[i].distance_to_most_massive_neighbour<<endl;
+      rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].rs)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<log10(this->Halo[i].vrms)<<"\t"<<this->Halo[i].virial<<"\t"<<this->Halo[i].b_to_a<<"\t"<<this->Halo[i].c_to_a<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<this->Halo[i].qbias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<"\t"<<this->Halo[i].dach_number<<"\t"<<this->Halo[i].tidal_anisotropy<<"\t"<<this->Halo[i].peak_height<<"\t"<<this->Halo[i].gal_cwt<<"\t"<<this->Halo[i].relative_bias<<"\t"<<this->Halo[i].bias_rs<<"\t"<<this->Halo[i].rs_factor<<"\t"<<this->Halo[i].local_dm<<"\t"<<this->Halo[i].lambda1<<"\t"<<this->Halo[i].lambda2<<"\t"<<this->Halo[i].lambda3<<"\t"<<log10(this->Halo[i].mass_closest_neighbour)<<"\t"<<this->Halo[i].distance_closest_neighbour<<"\t"<<log10(this->Halo[i].spin_closest_neighbour)<<"\t"<<log10(this->Halo[i].concentration_closest_neighbour)<<"\t"<<log10(this->Halo[i].most_massive_neighbour)<<"\t"<<this->Halo[i].distance_to_most_massive_neighbour<<endl;
       counter++;
     }while(counter<Nobjs_fraction);
     rcat.close();
@@ -7636,16 +7638,20 @@ void Catalog:: get_peak_height_at_tracer(){
     this->s_cosmo_pars.pk_normalization=ps.normalization();
     this->Cosmo.set_cosmo_pars(this->s_cosmo_pars); // update s_cosmo
     this->ps.set_cosmo_pars(this->s_cosmo_pars); // update s_cosmo
+    this->stats.set_cosmo_pars(this->s_cosmo_pars); // update stats
+    this->stats.compute_int_table_wavenumber(this->s_cosmo_pars.kmin_int,this->s_cosmo_pars.kmax_int,200);
     So.message_screen("        Normalization of power =",this->s_cosmo_pars.pk_normalization);
+    So.message_screen("        Growth at current z    =",this->s_cosmo_pars.growth_factor);
      // ******************************************************************************
-     int Nbinsm=300;
+     int Nbinsm=200;
      vector<gsl_real>masses(Nbinsm,0);
      vector<gsl_real>nus(Nbinsm,0);
      for(ULONG i=0;i< masses.size();++i)
      {
          masses[i]=log10(1e11)+(i+0.5)*log10(7e15/1e11)/static_cast<real_prec>(Nbinsm);
-         nus[i]=this->stats.peak_height(masses[i], this->params._redshift(), &this->s_cosmo_pars);//
-     }
+         nus[i]=this->stats.peak_height(masses[i], this->params._redshift(), &this->s_cosmo_pars);
+//         cout<<masses[i]<<"  "<<nus[i]<<endl;
+    }
      gsl_interp_accel *acc = gsl_interp_accel_alloc();
      gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear,masses.size());
      gsl_spline_init(spline,&masses[0],&nus[0],masses.size());
@@ -15419,17 +15425,40 @@ void Catalog::snap_to_mock(){
 // Use the infomration of the pculiar velocities along the line of sight and add pecular redshift
 // Define a redshift distribution and select objects accordinly
 
+int Nz=100;
+vector<gsl_real>rrc(Nz,0);
+vector<gsl_real>zzc(Nz,0);
+this->Cosmo.set_cosmo_pars(this->s_cosmo_pars);
+for(ULONG i=0;i<rrc.size();++i)
+{
+  zzc[i]=0.5*(i+0.5)/static_cast<real_prec>(Nz);
+  rrc[i]=this->Cosmo.comoving_distance(zzc[i]);
+}
+
+gsl_interp_accel *acc = gsl_interp_accel_alloc();
+gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear,rrc.size());
+gsl_spline_init(spline,&rrc[0],&zzc[0],rrc.size());
+
+
+// Asignar coordenadas esféricas y redshift cosmológico
 real_prec ra, dec, r;
 for(ULONG i=0;i<this->NOBJS;++i)
 {
   real_prec x=this->tracer[i].coord1-0.5*this->params._Lbox();
   real_prec y=this->tracer[i].coord2-0.5*this->params._Lbox();
   real_prec z=this->tracer[i].coord3-0.5*this->params._Lbox();
+  real_prec vx=this->tracer[i].vel1;
+  real_prec vy=this->tracer[i].vel2;
+  real_prec vz=this->tracer[i].vel3;
   cartesian_to_equatorial(x,y,z,ra, dec, r);
   this->tracer[i].coord1=ra;
   this->tracer[i].coord2=dec;
   this->tracer[i].coord3=r;
-
+  real_prec zc=gsl_spline_eval(spline,r, acc);
+  real_prec r_pec=r+(1+zc)*(x*vx+y*vy+z*vz)/this->Cosmo.Hubble_function(zc);
+  real_prec zp= gsl_spline_eval(spline,r_pec, acc);
+  this->tracer[i].cosmological_redshift = zc;
+  this->tracer[i].redshift = zp;
 }
 
 

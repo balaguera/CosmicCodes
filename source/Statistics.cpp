@@ -37,6 +37,7 @@ void Statistics::compute_int_table_wavenumber(real_prec k_min_integration, real_
   this->WW_K.resize(nss_k);
   this->XX_K.resize(nss_k);
   gsl_get_GL_weights(static_cast<gsl_real>(log10(k_min_integration)),static_cast<gsl_real>(log10(k_max_integration)),this->wfd,this->XX_K,this->WW_K);
+//  for(int i=0;i<XX_K.size();++i)cout<<k_min_integration<<"  "<<k_max_integration<<"  "<<XX_K[i]<<endl;
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -83,6 +84,7 @@ real_prec Statistics::peak_height(real_prec m, real_prec z, s_CosmologicalParame
   real_prec lkmax=log10(scp->kmax_int);
   scp->aux_var1 = m;  //log10M
   scp->aux_var2 = z;
+//  real_prec ans=gsl_integration(isigma_nu,(void *)&this->s_cosmo_pars,this->XX_K,this->WW_K,false);
   real_prec ans=gsl_integration(200,isigma_nu,(void *)scp,lkmin,lkmax);
   ans=sqrt(ans/(2.*M_PI*M_PI));
   real_prec delta_c=this->cosmo.critical_overdensity(z);
@@ -122,16 +124,20 @@ gsl_real Statistics::isigma(gsl_real lk,void *p){  /* Integrand for sigma^2 */
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 gsl_real Statistics::isigma_nu(gsl_real lk,void *p){  /* Integrand for sigma^2 */
-  real_prec k=pow(10,lk);
   s_CosmologicalParameters * s_cp= (struct s_CosmologicalParameters *)p;
   PowerSpectrum ps;
   ps.set_cosmo_pars(*s_cp);
+  ps.TFset_parameters();
+
   Cosmology cf(*s_cp);
   real_prec m= s_cp->aux_var1;
   real_prec z= s_cp->aux_var2;
+  real_prec k=pow(10,lk);
   real_prec M=pow(10,m);
   real_prec rr=cf.rr_lag(M,z);
-  real_prec ans=(log(10.0)*k)*pow(k,2)*(ps.Linear_Matter_Power_Spectrum(k))*pow(window(k,rr),2);
+  real_prec power=ps.Linear_Matter_Power_Spectrum(k);
+  real_prec win=window(k,rr);  
+  real_prec ans= (log(10.0)*k)*pow(k,2)*power*pow(win,2);
   return static_cast<gsl_real>(ans);
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -259,7 +265,7 @@ void Statistics::non_linear_scales(real_prec &knl,real_prec &Mnl,real_prec &rnl,
   }
   int nr=10;
   real_prec init_mass=this->s_cosmo_pars.v_mass[0];
-  real_prec rr =this->cosmo.rr(pow(10,ms2)*M_reference,z);
+  real_prec rr =this->cosmo.rr_lag(pow(10,ms2)*M_reference,z);
   for(int i=0;i<nr;i++)
   {
     this->s_cosmo_pars.aux_var1 = log10(pow(10,ms2)*M_reference);
