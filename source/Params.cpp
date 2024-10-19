@@ -296,6 +296,7 @@ void Params::init_pars()
   this->Get_tracer_mass_field=false;
   this->Get_tracer_vmax_field=false;
   this->Get_tracer_spin_field=false;
+  this->Get_tracer_spin_bullock_field=false;
   this->Get_tracer_local_mach_number=false;
   this->Get_tracer_local_dach_number=false;
   this->Get_tracer_local_dm_density=false;
@@ -1093,6 +1094,12 @@ void Params::read_pars(string file)
             if (par_value=="true")this->Get_tracer_spin_field= true;
             else this->Get_tracer_spin_field = false;
             this->parameter_boolean.push_back(make_pair(par_name, this->Get_tracer_spin_field)); 
+          }
+        else if (par_name == "Get_tracer_spin_bullock_field")
+          {
+            if (par_value=="true")this->Get_tracer_spin_bullock_field= true;
+            else this->Get_tracer_spin_bullock_field = false;
+            this->parameter_boolean.push_back(make_pair(par_name, this->Get_tracer_spin_bullock_field)); 
           }
               else if (par_name == "Get_tracer_local_mach_number")
                 {
@@ -3572,8 +3579,8 @@ void Params::read_pars(string file)
   this->RR = COSMOPARS::RR;
   this->alpha_s=COSMOPARS::alpha_s;
   this->f_baryon=COSMOPARS::f_baryon;
-  this->kmin_integration=0.0001;
-  this->kmax_integration=200.000;
+  this->kmin_integration=0.00001;
+  this->kmax_integration=500.000;
   if(true ==this->Get_SO_from_BN)
     this->Delta_SO=COSMOPARS::Delta_SO;
 #endif

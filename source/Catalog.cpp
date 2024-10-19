@@ -7650,7 +7650,6 @@ void Catalog:: get_peak_height_at_tracer(){
      {
          masses[i]=log10(1e11)+(i+0.5)*log10(7e15/1e11)/static_cast<real_prec>(Nbinsm);
          nus[i]=this->stats.peak_height(masses[i], this->params._redshift(), &this->s_cosmo_pars);
-//         cout<<masses[i]<<"  "<<nus[i]<<endl;
     }
      gsl_interp_accel *acc = gsl_interp_accel_alloc();
      gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear,masses.size());
