@@ -2705,6 +2705,11 @@ private :
   bool Get_tracer_spin_field;
   //////////////////////////////////////////////////////////
   /*
+   * @brief 
+   */  
+  bool Get_tracer_spin_bullock_field;
+  //////////////////////////////////////////////////////////
+  /*
    * @brief
    */
   bool Get_tracer_local_mach_number;
@@ -6423,6 +6428,11 @@ public:
    *  @brief 
    */
   bool _Get_tracer_spin_field(){return this->Get_tracer_spin_field;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  bool _Get_tracer_spin_bullock_field(){return this->Get_tracer_spin_bullock_field;}
   //////////////////////////////////////////////////////////
   /**
    *  @brief
