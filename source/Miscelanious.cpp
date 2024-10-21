@@ -228,13 +228,21 @@ void getDensity_NGP(s_params_box_mas *params, vector<s_Halo>&Halo, vector<real_p
       for (ULONG n=0; n<N_OBJ; n++)
 	pwe[n]=Halo[n].spin;
     }
+      else if (weight_prop==_SPIN_BULLOCK_)
+    {
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+      for (ULONG n=0; n<N_OBJ; n++)
+	pwe[n]=Halo[n].spin_bullock;
+    }
   else if (weight_prop==_BIAS_)
     {
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
       for (ULONG n=0; n<N_OBJ; n++)
-	pwe[n]=Halo[n].bias;
+  	pwe[n]=Halo[n].bias;
     }
   ULONG NLOSS=0;
   ULONG NTOT=0;
@@ -663,6 +671,8 @@ void getDensity_CIC(s_params_box_mas *params,const vector<s_Halo>&Halo, vector<r
 	      tracer_weight=Halo[n].virial;
 	    else if (weight_prop==_SPIN_)
 	      tracer_weight=Halo[n].spin;
+	    else if (weight_prop==_SPIN_BULLOCK_)
+	      tracer_weight=Halo[n].spin_bullock;
 	    else if (weight_prop==_BIAS_)
 	      tracer_weight=Halo[n].bias;
 	    DELTAcc(i,j,k)   += tracer_weight*tx*ty*tz;
@@ -919,6 +929,13 @@ void getDensity_TSC(s_params_box_mas *params, const vector<s_Halo>&Halo, vector<
     	  mass=Halo[n].bias;
       else if (weight_prop==_SAT_FRACTION_)
 	      mass=Halo[n].number_sub_structures;
+      else if (weight_prop==_SPIN_)
+	      mass=Halo[n].spin;
+      else if (weight_prop==_SPIN_BULLOCK_)
+	      mass=Halo[n].spin_bullock;
+      else if (weight_prop==_CONCENTRATION_)
+	      mass=Halo[n].concentration;
+
 	    DELTAtt(i,j,k)    	+= mass*hx0*hy0*hz0;
 	    DELTAtt(ii,jj,kk) 	+= mass*hxp1*hyp1*hzp1;
 	    DELTAtt(iii,jjj,kkk) 	+= mass*hxm1*hym1*hzm1;
@@ -2886,10 +2903,8 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
      vector<real_prec>kvector_data;
      for(int i=0;i<params._d_Nnp_data();i++)
        kvector_data.push_back(params._d_kmin()+params._d_DeltaK_data()*(i+0.5));
-#ifdef _USE_OMP_
    int NTHREADS=_NTHREADS_;
    omp_set_num_threads(NTHREADS);
-#endif
    // Given kmax, determine the maximum number of bins requested
    ULONG Kmin_bin=static_cast<ULONG>(floor((params._kmin_tracer_bias()-params._d_kmin())/params._d_DeltaK_data()));
    ULONG Kmax_bin=static_cast<ULONG>(floor((params._kmax_tracer_bias()-params._d_kmin())/params._d_DeltaK_data()));//get the bin to go only up to Kmax in the loops
@@ -2909,9 +2924,7 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
     do_fftw_r2c(params._Nft(),over_dm_field,Delta_dm);
     over_dm_field.clear(); over_dm_field.shrink_to_fit();
    vector<real_prec> kcoords(new_Nft,0);// Build k-coordinates
-#ifdef _USE_OMP_
 #pragma omp parallel for
-#endif
    for(int i=0;i<kcoords.size() ;++i)
     kcoords[i]=(i<=new_Nft/2? static_cast<real_prec>(i): -static_cast<real_prec>(new_Nft-i));
 
@@ -2921,12 +2934,10 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
    real_prec dk_x=params._d_deltak_x();
    real_prec dk_y=params._d_deltak_y();
    real_prec dk_z=params._d_deltak_z();
-   cout<<"\tGetting power dark matter"<<endl;
+   cout<<"\tGetting power dark matter. New Nft = "<<new_Nft<<endl;
   // This is done once for all tracers
    vector<real_prec>power_dmat(Kmax_bin,0);
-#ifdef _USE_OMP_
 #pragma omp parallel for collapse(3)
-#endif
    for(ULONG i=Kmin_bin; i< new_Nft/2;++i)
      for(ULONG j=Kmin_bin; j< new_Nft/2;++j)
          for(ULONG k=Kmin_bin; k< new_Nft/2+1;++k)
@@ -2936,43 +2947,34 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
            ULONG kbin=static_cast<ULONG>(floor((kv-params._d_kmin())/params._d_DeltaK_data()));
            if(lp!=0)
              if(kbin<Kmax_bin)
-#ifdef _USE_OMP_
 #pragma omp atomic
-#endif
                  power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
            if(j>0  && k>0)
              {
                lp=index_3d(i,params._Nft()-j,k,params._Nft(),params._Nft()/2+1);
                if(kbin<Kmax_bin)
-#ifdef _USE_OMP_
 #pragma omp atomic
-#endif
                  power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
             }
            if(i>0  && (j>0 || k>0))
              {
                lp=index_3d(params._Nft()-i,j,k,params._Nft(),params._Nft()/2+1);
                if(kbin<Kmax_bin)
-#ifdef _USE_OMP_object_b
 #pragma omp atomic
-#endif
                    power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
              }
              if(i>0  && j>0  && k>0)
              {
                lp=index_3d(params._Nft()-i,params._Nft()-j,k,params._Nft(),params._Nft()/2+1);
                if(kbin<Kmax_bin)
-#ifdef _USE_OMP_
 #pragma omp atomic
-#endif
                    power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
              }
          }
 
     real_prec lss_bias_halo=0;
-#ifdef _USE_OMP_
+   cout<<"\tAssining individual bias from Miscelaious.cpp for Nobs = "<<tracer_cat.size()<<endl;
 #pragma omp parallel for reduction(+:lss_bias_halo)
-#endif
    for(ULONG itr=0;itr<tracer_cat.size();++itr)
      {
         real_prec xtracer=tracer_cat[itr].coord1;

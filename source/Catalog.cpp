@@ -127,7 +127,7 @@ void Catalog::analyze_cat(bool read){
     {
       vector<real_prec> DM_DEN_FIELD( this->params._NGRID(),0);
       this->File.read_array(this->params._Input_Directory_X()+this->params._Name_Catalog_X(),DM_DEN_FIELD);
-      object_by_object_bias(this->params, this->tracer, DM_DEN_FIELD);      
+      object_by_object_bias(this->params, this->Halo, DM_DEN_FIELD);      
       string file=this->params._Output_directory()+this->params._Name_survey()+"_BIAS_Nft"+to_string(this->params._Nft())+"_"+this->params._Name_survey();
       this->get_density_field_grid(_BIAS_,file);
     }
@@ -4154,6 +4154,7 @@ void Catalog::get_property_function_cosmic_web_types(string file)
 #pragma omp parallel for reduction(+:naux)
 #endif
       for(ULONG i=0;i< this->params._NMASSbins_mf();++i)
+
     naux+=rs_counts[i];
 
 #ifdef _VERBOSE_CAT_
