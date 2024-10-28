@@ -1119,11 +1119,17 @@ void Params::read_pars(string file)
                   else this->Get_cell_local_mach_number = false;
             this->parameter_boolean.push_back(make_pair(par_name, this->Get_cell_local_mach_number)); 
                 }
-              else if (par_name == "Get_tracer_bias")
+            else if (par_name == "Get_tracer_bias")
             {
               if (par_value=="true")this->Get_tracer_bias= true;
               else this->Get_tracer_bias = false;
               this->parameter_boolean.push_back(make_pair(par_name, this->Get_tracer_bias));
+            }
+           else if (par_name == "Get_tracer_mean_number_density")
+            {
+              if (par_value=="true")this->Get_tracer_mean_number_density= true;
+              else this->Get_tracer_mean_number_density = false;
+              this->parameter_boolean.push_back(make_pair(par_name, this->Get_tracer_mean_number_density));
             }
           else if (par_name == "Get_tracer_quadratic_bias")
             {

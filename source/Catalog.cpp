@@ -66,11 +66,34 @@ void Catalog::analyze_cat(bool read){
   //* COMPUTE ABUNDANCE:
   // We must set sos ifs in order to aks what are we going to analyze from the catalog
   string fname_mass_function_Y = this->Output_directory+this->type_of_object+this->params._Name_survey()+"_abundance_R"+to_string(this->params._realization())+".txt";
-  if(true==this->params._Get_prop_function_tracer())
+  if(true==this->params._Get_prop_function_tracer() || true == this->params._Get_tracer_mean_number_density())
     this->get_property_function(fname_mass_function_Y);
   //* COMPUTE ABUNDANCE IN CWT:
   if(true==this->params._Get_prop_function_tracer_cwt())
     this->get_property_function_cosmic_web_types(fname_mass_function_Y);
+ 
+  // ---------------------------------------------------------------------------- //
+  // If requested, we assign an interpolation of the mean number density for each tracer given its mass.
+  if(true == this->params._Get_tracer_mean_number_density())
+  {
+    gsl_interp_accel *acc;
+    gsl_spline *spline ;
+    vector<double> mfunc(this->mass_function.size(),0);
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+    for(int i=0; i< mfunc.size(); ++i)
+      mfunc[i]=this->mass_function[i]*pow(this->params._Lbox(),3);
+  
+    spline    = gsl_spline_alloc (gsl_interp_linear, mfunc.size());
+    gsl_spline_init (spline, &(MBin[0]), &(mfunc[0]), this->mass_function.size());
+    real_prec lm_min=this->params._LOGMASSmin();
+    real_prec lm_max=this->params._LOGMASSmax();
+    for(ULONG i=0; i< this->NOBJS; ++i)
+      this->Halo[i].mean_number_density = static_cast<real_prec>(gsl_spline_eval (spline, log10(this->Halo[i].mass), acc));
+  }
+ 
+ 
   // ---------------------------------------------------------------------------- //
   // these are wainting for an input parameter
   /*
@@ -127,7 +150,7 @@ void Catalog::analyze_cat(bool read){
     {
       vector<real_prec> DM_DEN_FIELD( this->params._NGRID(),0);
       this->File.read_array(this->params._Input_Directory_X()+this->params._Name_Catalog_X(),DM_DEN_FIELD);
-      object_by_object_bias(this->params, this->Halo, DM_DEN_FIELD);      
+      object_by_object_bias(this->params, this->Halo, DM_DEN_FIELD);      // Esto es en Miscelanious.cpp
       string file=this->params._Output_directory()+this->params._Name_survey()+"_BIAS_Nft"+to_string(this->params._Nft())+"_"+this->params._Name_survey();
       this->get_density_field_grid(_BIAS_,file);
     }
@@ -3530,7 +3553,7 @@ void Catalog::get_property_function(string file)
          {
           real_prec mint=(this->MBmax[i]-this->MBmin[i]);
           this->mass_function[i]=static_cast<real_prec>(mf_counts[i])/(pow(this->params._Lbox(),3)*mint);
-           mout<<this->MBin[i]<<"\t"<<this->mass_function[i]<<"   "<<mf_counts[i]<<endl;
+           mout<<this->MBin[i]<<"\t"<<this->mass_function[i]<<"\t"<<mf_counts[i]<<endl;
          }
       mout.close();
 #ifdef _VERBOSE_CAT_
@@ -5370,7 +5393,7 @@ void Catalog::select_random_subsample(real_prec fraction, string file){
       int i= gsl_rng_uniform_int(gBaseRando,this->Halo.size());
 //      rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<endl;
 //      rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].rs)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<log10(this->Halo[i].vrms)<<"\t"<<this->Halo[i].virial<<"\t"<<this->Halo[i].b_to_a<<"\t"<<this->Halo[i].c_to_a<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<this->Halo[i].qbias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<"\t"<<this->Halo[i].dach_number<<"\t"<<this->Halo[i].tidal_anisotropy<<"\t"<<this->Halo[i].peak_height<<"\t"<<this->Halo[i].gal_cwt<<"\t"<<this->Halo[i].relative_bias<<"\t"<<this->Halo[i].bias_rs<<"\t"<<this->Halo[i].rs_factor<<"\t"<<this->Halo[i].local_dm<<"\t"<<this->Halo[i].lambda1<<"\t"<<this->Halo[i].lambda2<<"\t"<<this->Halo[i].lambda3<<"\t"<<log10(this->Halo[i].mass_closest_neighbour)<<"\t"<<this->Halo[i].distance_closest_neighbour<<"\t"<<log10(this->Halo[i].spin_closest_neighbour)<<"\t"<<log10(this->Halo[i].concentration_closest_neighbour)<<"\t"<<log10(this->Halo[i].most_massive_neighbour)<<"\t"<<this->Halo[i].distance_to_most_massive_neighbour<<endl;
-      rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].rs)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<log10(this->Halo[i].vrms)<<"\t"<<this->Halo[i].virial<<"\t"<<this->Halo[i].b_to_a<<"\t"<<this->Halo[i].c_to_a<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<this->Halo[i].qbias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<"\t"<<this->Halo[i].dach_number<<"\t"<<this->Halo[i].tidal_anisotropy<<"\t"<<this->Halo[i].peak_height<<"\t"<<this->Halo[i].gal_cwt<<"\t"<<this->Halo[i].relative_bias<<"\t"<<this->Halo[i].bias_rs<<"\t"<<this->Halo[i].rs_factor<<"\t"<<this->Halo[i].local_dm<<"\t"<<this->Halo[i].lambda1<<"\t"<<this->Halo[i].lambda2<<"\t"<<this->Halo[i].lambda3<<"\t"<<log10(this->Halo[i].mass_closest_neighbour)<<"\t"<<this->Halo[i].distance_closest_neighbour<<"\t"<<log10(this->Halo[i].spin_closest_neighbour)<<"\t"<<log10(this->Halo[i].concentration_closest_neighbour)<<"\t"<<log10(this->Halo[i].most_massive_neighbour)<<"\t"<<this->Halo[i].distance_to_most_massive_neighbour<<endl;
+      rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].mean_number_density)<<"t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].rs)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<log10(this->Halo[i].vrms)<<"\t"<<this->Halo[i].virial<<"\t"<<this->Halo[i].b_to_a<<"\t"<<this->Halo[i].c_to_a<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<this->Halo[i].qbias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<"\t"<<this->Halo[i].dach_number<<"\t"<<this->Halo[i].tidal_anisotropy<<"\t"<<this->Halo[i].peak_height<<"\t"<<this->Halo[i].gal_cwt<<"\t"<<this->Halo[i].relative_bias<<"\t"<<this->Halo[i].bias_rs<<"\t"<<this->Halo[i].rs_factor<<"\t"<<this->Halo[i].local_dm<<"\t"<<this->Halo[i].lambda1<<"\t"<<this->Halo[i].lambda2<<"\t"<<this->Halo[i].lambda3<<"\t"<<log10(this->Halo[i].mass_closest_neighbour)<<"\t"<<this->Halo[i].distance_closest_neighbour<<"\t"<<log10(this->Halo[i].spin_closest_neighbour)<<"\t"<<log10(this->Halo[i].concentration_closest_neighbour)<<"\t"<<log10(this->Halo[i].most_massive_neighbour)<<"\t"<<this->Halo[i].distance_to_most_massive_neighbour<<endl;
       counter++;
     }while(counter<Nobjs_fraction);
     rcat.close();
