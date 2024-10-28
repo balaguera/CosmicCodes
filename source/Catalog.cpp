@@ -9951,7 +9951,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
     standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=((this->Halo[i].peak_height)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\NU$");
+      names_used.push_back("$\nu$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
