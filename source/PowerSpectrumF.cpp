@@ -2196,8 +2196,10 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, vector<s_Halo>& tracer
  }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define _use_two_quartiles_
- void PowerSpectrumF::halo_bias_analysis(string space_p)
+void PowerSpectrumF::halo_bias_analysis(string space_p)
  {
      time_t time_POWER;
      time(&time_POWER);
@@ -2635,6 +2637,27 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, vector<s_Halo>& tracer
      }
 #endif
 
+// **************************************************************************************************
+  // If requested, we assign an interpolation of the mean number density for each tracer given its mass.
+  if(true == this->params._Get_tracer_mean_number_density())
+  {
+    string fname_mass_function_Y = this->params._Output_directory()+this->params._type_of_object()+this->params._Name_survey()+"_abundance_R"+to_string(this->params._realization())+".txt";
+    tracer.get_property_function(fname_mass_function_Y);
+    vector<double> mfunc(tracer.mass_function.size(),0);
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+    for(int i=0; i< mfunc.size(); ++i)
+      mfunc[i]=tracer.mass_function[i]*pow(this->params._Lbox(),3);
+    gsl_interp_accel *acc = gsl_interp_accel_alloc ();
+    gsl_spline *spline    = gsl_spline_alloc (gsl_interp_linear, mfunc.size());
+    gsl_spline_init (spline, &(tracer.MBin[0]), &(mfunc[0]), tracer.mass_function.size());
+    real_prec lm_min=this->params._LOGMASSmin();
+    real_prec lm_max=this->params._LOGMASSmax();
+    for(ULONG i=0; i< tracer._NOBJS(); ++i)
+      tracer.Halo[i].mean_number_density = static_cast<real_prec>(gsl_spline_eval (spline, tracer.Halo[i].mass, acc));
+  }
+
     // **************************************************************************************************
     if(true==this->params._Get_tracer_local_dm_density())
     {
@@ -2691,10 +2714,12 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, vector<s_Halo>& tracer
     Nprimary_bins=Nbins_ph;
 #endif
 
-    string rcatalog=this->params._Output_directory()+"catalog_reduced.txt";
+   string rcatalog=this->params._Output_directory()+"catalog_reduced.txt";
+   if(false==this->params._Get_PCA())
     tracer.select_random_subsample(this->params._fraction_dilute(), rcatalog); // DONE IN PCA NOW
 
     // **************************************************************************************************
+    //THESE COMMENTED LINES ARE MEANT TO GENERATE SUBSAMES OF REASSIGNED PROPERTIES FOR PAPER I
     // WE can write a random sub-sample of the total catalogs to be read in python and do 2d historgrams.
 //    string rcatalog=this->params._Output_directory()+"catalog_reduced.txt";
 //    tracer.select_random_subsample(0.2, rcatalog); // DONE IN PCA NOW
@@ -2723,7 +2748,6 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, vector<s_Halo>& tracer
     rcatalog=this->params._Output_directory()+"catalog_reduced_randomized_twopr_mach_cwt.txt";
     tracer_randomize.select_random_subsample(0.3,rcatalog);
 
-
     tracer_randomize.Halo.clear();
     tracer_randomize.Halo.shrink_to_fit() ;
     tracer_randomize.Halo.resize(tracer._NOBJS());
@@ -2733,7 +2757,6 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, vector<s_Halo>& tracer
     tracer_randomize.get_scaling_relation_primary_property("_SPIN_BULLOCK_", "_DACH_");
     rcatalog=this->params._Output_directory()+"catalog_reduced_randomized_twopr_dach_cwt.txt";
     tracer_randomize.select_random_subsample(0.3,rcatalog);
-
 
     tracer_randomize.Halo.clear();
     tracer_randomize.Halo.shrink_to_fit() ;
@@ -4620,7 +4643,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
         real_prec vx=tracer_cat[itr].vel1*conversion_factor;
 #endif
         vector<real_prec>power_cross(Kmax_bin,0);
-#ifndef _TNG_GAL_
+#ifndef _TNG_GAL_xº
        vector<real_prec>power_cross_s(Kmax_bin,0);
        vector<real_prec>Gamma_num(Kmax_bin,0);
 #endif
