@@ -89,7 +89,7 @@ void Catalog::analyze_cat(bool read){
     real_prec lm_min=this->params._LOGMASSmin();
     real_prec lm_max=this->params._LOGMASSmax();
     for(ULONG i=0; i< this->NOBJS; ++i)
-      this->Halo[i].mean_number_density = static_cast<real_prec>(gsl_spline_eval (spline, log10(this->Halo[i].mass), acc));
+      this->Halo[i].mean_number_density = static_cast<real_prec>(gsl_spline_eval (spline, this->Halo[i].mass, acc));
   }
  
  
