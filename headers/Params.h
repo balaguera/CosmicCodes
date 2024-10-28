@@ -2732,6 +2732,11 @@ private :
   /*
    * @brief
    */
+  bool Get_tracer_mean_number_density;
+  //////////////////////////////////////////////////////////
+  /*
+   * @brief
+   */
   bool Get_tracer_relative_bias;
   //////////////////////////////////////////////////////////
   /*
@@ -6453,6 +6458,12 @@ public:
    *  @brief
    */
   bool _Get_tracer_bias(){return this->Get_tracer_bias;}
+
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief
+   */
+  bool _Get_tracer_mean_number_density(){return this->Get_tracer_mean_number_density;}
   //////////////////////////////////////////////////////////
   /**
    *  @brief

@@ -773,9 +773,15 @@ struct s_Halo
   /**
    *@brief  Tracer b_to_a ratio   */
   real_prec c_to_a;
+  // -----------------------------------
   /**
    *@brief  Bin in c_to_a ratio   */
   int ctoa_bin_tracer;
+
+  /**
+   *@brief  mean number density at current tracer mass  */
+  real_prec mean_number_density;
+
   // -----------------------------------
   /**
    *@brief  Color (for galaxies)   */
