@@ -76,8 +76,6 @@ void Catalog::analyze_cat(bool read){
   // If requested, we assign an interpolation of the mean number density for each tracer given its mass.
   if(true == this->params._Get_tracer_mean_number_density())
   {
-    gsl_interp_accel *acc;
-    gsl_spline *spline ;
     vector<double> mfunc(this->mass_function.size(),0);
 #ifdef _USE_OMP_
 #pragma omp parallel for
@@ -85,7 +83,8 @@ void Catalog::analyze_cat(bool read){
     for(int i=0; i< mfunc.size(); ++i)
       mfunc[i]=this->mass_function[i]*pow(this->params._Lbox(),3);
   
-    spline    = gsl_spline_alloc (gsl_interp_linear, mfunc.size());
+    gsl_interp_accel *acc = gsl_interp_accel_alloc ();
+    gsl_spline *spline    = gsl_spline_alloc (gsl_interp_linear, mfunc.size());
     gsl_spline_init (spline, &(MBin[0]), &(mfunc[0]), this->mass_function.size());
     real_prec lm_min=this->params._LOGMASSmin();
     real_prec lm_max=this->params._LOGMASSmax();
