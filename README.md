@@ -1,6 +1,8 @@
 Library in C++ to perform calculations in Cosmology (theoretical and observational). 
+Theoretical comsology: prediction ofr 1 and 2 point statistics (abundance, power spectrum in 2D and 3D).
+Observational: measurements of abundance (e.g. luminosity functions, power spectrum, correlation function), marked statistics, halo properties.
 
-Documentation is available in dOxygen and pdd. For the time being it can be requested via e-mail to abalant@gmail.com.
+Documentation is available in dOxygen and pdf. It can be requested via e-mail to abalant@gmail.com.
 
 The maike file in /main/ will react under the command make help as
 CosmiCalc compiling options
