@@ -74,7 +74,7 @@
 /**
  * @brief To show plots live
 */
-//#define _USE_GNUPLOT_
+#define _USE_GNUPLOT_
 //#define FG_COLOR "white"
 #define FG_COLOR "black"
 // ****************************************************************************************
@@ -102,12 +102,22 @@
 #undef _USE_PYTHON_
 // ****************************************************************************************
 //#define _MG_
-//#define _SLICS_
-//#define _UNITSIM_
+//#define _SLICS_  
+#define _UNITSIM_
 //#define _TNG_
-#define _TNG_GAL_
+//#define _TNG_GAL_ //como para la tng no tenemos vels, entonces prevenimos el uso del v info en el calculo del bias. Cuando llguen, redefinimos cosas.
 //#define _FLAGSHIP_
+
+#ifdef _TNG_GAL_
+#define _GET_TIDAL_ANISOTROPY_
+#endif
+
 // ****************************************************************************************
+
+
+
+
+
 #ifdef _UNITSIM_
 /**
  * @brief This factor corrects th growth computed in BiasMT agains the growth from FastPM. The difference in the two growthds is of about 2 percent.
@@ -283,6 +293,15 @@
 //#define _USE_HALO_ELLIPTICITY_
 #define _USE_CONCENTRATION_
 #endif
+// ======================================================================================================================================
+// ======================================================================================================================================
+#ifdef _MG_
+#define _USE_CONCENTRATION_
+#endif
+// ======================================================================================================================================
+// ======================================================================================================================================
+
+
 // ****************************************************************************************
 // ****************************************************************************************
 // ************************COSMOLOGICAL PARAMETERS*****************************************
@@ -954,6 +973,10 @@ since we should not initialize the delta arrays there, as they are being filled 
 // ---------------------------------
 #define _VIRIAL_ "_VIRIAL_"
 #define _BIAS_ "_BIAS_"
+#define _iBIAS_ "_iBIAS_"
+
+#define _MACH_ "_MACH_"
+
 
 // If we waant to reconstruct another property, we have to set in params files min and max of that propert. Define mins and max in Params.h,cpp
 // and add ifs in BiasMT. in function get_X_function_complement.
@@ -2576,12 +2599,13 @@ since we should not initialize the delta arrays there, as they are being filled 
 #else
 #define N_REDSHIFT_BINS 1
 #endif
+
 #define __use_new_loops_bias_
 //#define _use_random_kernel_  //derpecated
 //#define _SHOW_EMPTY_CELLS_
 #define DENSITY "density"
 #define OVERDENSITY "overdensity"
-#define _PERIODIC_BC_MAS_
+//#define _PERIODIC_BC_MAS_
 // The values are used to get cosmological functions to interpolate upon when using the power spectrum code,
 #define Z_MAX static_cast<real_prec>(1.5)
 #define Z_MIN static_cast<real_prec>(0)

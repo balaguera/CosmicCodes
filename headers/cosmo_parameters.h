@@ -25,16 +25,16 @@ namespace Cosmo_parameters_PLANCK
 /**
     * @brief Total matter energy density parameter UNITSIM
     */
-  double Om_matter=0.3089;
+  double Om_matter=0.3089;// este ultimo es el bueno;
   double N_eff=3.15;
   double Om_radiation=(1.3157e-5)*(1.+(7./8.)*std::pow(4./11.,4./3.)*N_eff);
-  double Om_baryons=0.049;
+  double Om_baryons=  0.049;
   double wde_eos=-1;
   double Om_vac=0.6911 ; //1.-Om_matter-Om_k-Om_radiation;
   double Om_k=0.0;// 1.-Om_matter-Om_vac-Om_radiation;
   double Om_cdm=1-Om_matter-Om_baryons-Om_radiation;
   // hubble constant H/100km/s/Mpc
-  double hubble=0.6774;
+  double hubble=0.6766; //0.6774;
   double Hubble=100.0;
   // fraction of baryonic energy density to matter
   double f_baryon = Om_baryons/Om_matter;
