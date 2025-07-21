@@ -2979,6 +2979,8 @@ void Catalog::get_density_field_grid(string prop, string output_file)
       this->File.write_array(output_file, deltaTR);
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Catalog::get_density_field_grid(string prop, vector<real_prec>&out)
@@ -2993,21 +2995,35 @@ void Catalog::get_density_field_grid(string prop, vector<real_prec>&out)
     {
       deltaTR.resize(this->box.NGRID,0);
       MAS_NEW(&box,this->Halo, prop, deltaTR);
-   if(_MASS_ == prop)
+   if (_SAT_FRACTION_==prop)
     {
-      So.message_screen("Interpolating tracer on a grid weighting by mass");
+      So.message_screen("Interpolating Number of satellites in a grid");
+      out=deltaTR;
+    }
+     else{
+      So.message_screen("Interpolating tracer on a grid weighting by ", prop);
       for(ULONG i=0 ; i< this->box.NGRID; ++i)
         if(deltaTR_counts[i]!=0)
           out[i]=static_cast<double>(deltaTR[i])/static_cast<double>(deltaTR_counts[i]); // Mean mass in cells
         else
           out[i]=0;
-    }
-    else if (_SAT_FRACTION_==prop)
-    {
-      So.message_screen("Interpolating Number of satellites in a grid");
-      out=deltaTR;
-    }
-  }
+     }
+        }
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Catalog::get_density_field_grid(string prop, vector<real_prec>&deltaTR_counts,vector<real_prec>&out)
+{
+  vector<real_prec> deltaTR;
+  deltaTR.resize(this->box.NGRID,0);
+  So.message_screen("Interpolating tracer on a grid weighting");
+  MAS_NEW(&box,this->Halo, prop, deltaTR);
+  for(ULONG i=0 ; i< this->box.NGRID; ++i)
+        if(deltaTR_counts[i]!=0)
+          out[i]=static_cast<double>(deltaTR[i])/static_cast<double>(deltaTR_counts[i]); // Mean mass in cells
+        else
+          out[i]=0;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15440,7 +15456,7 @@ So.leaving(__PRETTY_FUNCTION__);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This metods takes a box and converts it int a mock, although with no evolution
-void Catalog::snap_to_mock(){
+void Catalog::snap_to_mock(bool set_dndz){
 
 // convert equatorial to cartessian
 // Assume a cosmological model and transform distance to redshift
@@ -15466,23 +15482,36 @@ gsl_spline_init(spline,&rrc[0],&zzc[0],rrc.size());
 real_prec ra, dec, r;
 for(ULONG i=0;i<this->NOBJS;++i)
 {
+  // Place observer in the center of the box
   real_prec x=this->tracer[i].coord1-0.5*this->params._Lbox();
   real_prec y=this->tracer[i].coord2-0.5*this->params._Lbox();
   real_prec z=this->tracer[i].coord3-0.5*this->params._Lbox();
+  // Read velocities
   real_prec vx=this->tracer[i].vel1;
   real_prec vy=this->tracer[i].vel2;
   real_prec vz=this->tracer[i].vel3;
+  // Convert cartesian to equatorial 
   cartesian_to_equatorial(x,y,z,ra, dec, r);
   this->tracer[i].coord1=ra;
   this->tracer[i].coord2=dec;
   this->tracer[i].coord3=r;
+  // Get cosmological redshift
   real_prec zc=gsl_spline_eval(spline,r, acc);
+  // Add peculiar component to distance
   real_prec r_pec=r+(1+zc)*(x*vx+y*vy+z*vz)/this->Cosmo.Hubble_function(zc);
+  // Obtain "observed" redshift
   real_prec zp= gsl_spline_eval(spline,r_pec, acc);
-  this->tracer[i].cosmological_redshift = zc;
-  this->tracer[i].redshift = zp;
+  this->tracer[i].cosmological_redshift = zc;  // assign cosmological redhshift
+  this->tracer[i].redshift = zp;               // assign observed redshift
 }
 
+
+if(true==set_dndz){
+  // aca tendré que elegir los redshifts con respecto a una dndz.
+  // genera la nbar normalizada al máximo con alguna dndz
+  // escoge el z de cada objeto son esa probabilidad
+  //
+}
 
 
 

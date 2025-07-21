@@ -20,9 +20,9 @@ void equatorial_to_cartesian(real_prec ra, real_prec dec, real_prec r, real_prec
 //////////////////////////////////////////////////////////
 void cartesian_to_equatorial(real_prec x, real_prec y, real_prec z, real_prec &ra, real_prec &dec, real_prec &r)
 {
-  ra  =0;
-  dec =0;
   r   =sqrt(x*x+y*y+z*z);
+  ra  =atan2(y,x);
+  dec =acos(z/r);
 }
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////

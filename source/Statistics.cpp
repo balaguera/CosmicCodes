@@ -80,15 +80,7 @@ real_prec Statistics::sigma_masa(real_prec m, real_prec z){
 ////////////////////////////////////////////////////////////////////////////
 real_prec Statistics::peak_height(real_prec m, real_prec z, s_CosmologicalParameters *scp){
   /* Sigma as a function of mass */
-  real_prec lkmin=log10(scp->kmin_int);
-  real_prec lkmax=log10(scp->kmax_int);
-  scp->aux_var1 = m;  //log10M
-  scp->aux_var2 = z;
-//  real_prec ans=gsl_integration(isigma_nu,(void *)&this->s_cosmo_pars,this->XX_K,this->WW_K,false);
-  real_prec ans=gsl_integration(200,isigma_nu,(void *)scp,lkmin,lkmax);
-  ans=sqrt(ans/(2.*M_PI*M_PI));
-  real_prec delta_c=this->cosmo.critical_overdensity(z);
-  return delta_c/ans;
+  return this->cosmo.critical_overdensity(z)/sigma_masa(m,z);
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -128,7 +120,6 @@ gsl_real Statistics::isigma_nu(gsl_real lk,void *p){  /* Integrand for sigma^2 *
   PowerSpectrum ps;
   ps.set_cosmo_pars(*s_cp);
   ps.TFset_parameters();
-
   Cosmology cf(*s_cp);
   real_prec m= s_cp->aux_var1;
   real_prec z= s_cp->aux_var2;
@@ -210,7 +201,7 @@ gsl_real Statistics::dsigma_dR(gsl_real lk, void *p){  /* integrand to calculate
 real_prec Statistics::bias(real_prec m, real_prec z, s_CosmologicalParameters *scp){
   MASS_BIAS_FUNCTIONS mb;
   real_prec Smasa=gsl_inter_new(scp->v_mass, scp->v_sigma_mass,m);    //     sigma_masa(M,z,scp);
-  real_prec nu=pow(scp->critical_density/Smasa,2.);
+  real_prec nu=pow(scp->critical_density/Smasa,2);
   return mb.dm_h_bias(z,nu,(void *)scp);
 }
 ////////////////////////////////////////////////////////////////////////////

@@ -111,8 +111,8 @@ real_prec PowerSpectrum::Linear_Matter_Power_Spectrum(real_prec k){        /*thi
     real_prec baryon_piece, cdm_piece;
     real_prec kk=k*this->s_cosmo_pars.hubble;// convert to units of 1/Mpc
     real_prec tf_thisk = TFfit_onek(kk, baryon_piece, cdm_piece);
-    real_prec Tfunc = true==this->s_cosmo_pars.use_wiggles ? pow(fabs(tf_thisk),2.): pow(fabs(cdm_piece),2.) ;
-    return this->s_cosmo_pars.pk_normalization*Tfunc*Primordial_Matter_Power_Spectrum(k)*pow(this->s_cosmo_pars.growth_factor,2);
+    real_prec Tfunc = (true==this->s_cosmo_pars.use_wiggles ? pow(fabs(tf_thisk),2.): pow(fabs(cdm_piece),2.)) ;
+    return this->s_cosmo_pars.pk_normalization*this->Primordial_Matter_Power_Spectrum(k)*pow(this->s_cosmo_pars.growth_factor,2)*Tfunc;
   }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -605,7 +605,6 @@ real_prec PowerSpectrum::mean_galaxy_number_density(real_prec redshift){
     this->k_peak = 2.5*3.14159*(1+0.217*omhh)/this->sound_horizon;
     this->sound_horizon_fit = 44.5*log(9.83/omhh)/sqrt(1+10.0*pow(obhh,0.75));
     this->alpha_gamma = 1-0.328*log(431.0*omhh)*this->s_cosmo_pars.f_baryon + 0.38*log(22.3*omhh)*pow(this->s_cosmo_pars.f_baryon,2);
-     return;
   }
 ////////////////////////////////////////////////////////////////////////////
  ////////////////////////////////////////////////////////////////////////////

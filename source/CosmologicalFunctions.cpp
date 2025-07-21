@@ -72,17 +72,14 @@ real_prec Cosmology::transverse_comoving_distance(real_prec redshift)
 real_prec Cosmology::inter_transverse_comoving_distance(real_prec redshift)
 {
   real_prec fac=this->s_cosmo_pars.Hubble*sqrt(fabs(this->s_cosmo_pars.Om_k));
-  real_prec ans;
+  real_prec ans=0;
   real_prec cd=gsl_inter_new(this->s_cosmo_pars.zv, this->s_cosmo_pars.rv,redshift);
-  if(this->s_cosmo_pars.Om_k<0){
+  if(this->s_cosmo_pars.Om_k<0)
     ans= Constants::speed_light*sin(fac*cd/Constants::speed_light)/fac;
-  }
-  else if(this->s_cosmo_pars.Om_k>0){
+  else if(this->s_cosmo_pars.Om_k>0)
     ans= Constants::speed_light*sinh(fac*cd/Constants::speed_light)/fac;
-  }
   else
-    ans=cd;
-  
+    ans=cd; 
   return ans;
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -91,15 +88,12 @@ real_prec Cosmology::derivative_transverse_comoving_distance(real_prec redshift)
   real_prec fac=this->s_cosmo_pars.Hubble*sqrt(fabs(this->s_cosmo_pars.Om_k));
   real_prec cd=gsl_inter_new(this->s_cosmo_pars.zv, this->s_cosmo_pars.rv, redshift);
   real_prec ans;
-  if(this->s_cosmo_pars.Om_k<0){
+  if(this->s_cosmo_pars.Om_k<0)
     ans= (Constants::speed_light/this->Hubble_function(redshift))*cos(fac*cd/Constants::speed_light)/fac;
-  }
-  if(this->s_cosmo_pars.Om_k==0){
-    ans= Constants::speed_light/this->Hubble_function(redshift);
-  }
-  if(this->s_cosmo_pars.Om_k>0){
+  else  if(this->s_cosmo_pars.Om_k>0)
     ans= (Constants::speed_light/this->Hubble_function(redshift))*cosh(fac*cd/Constants::speed_light)/fac;
-  }
+  else 
+    ans= Constants::speed_light/this->Hubble_function(redshift);
   return ans;
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -134,7 +128,7 @@ real_prec Cosmology::inter_luminosity_distance(real_prec redshift)
 real_prec Cosmology::mean_matter_density(real_prec redshift)
 /*M */
 {
-  return (3.*this->s_cosmo_pars.Hubble*this->s_cosmo_pars.Hubble/(8.*M_PI*Gravitational_constant))*omega_matter(redshift)*(Mpc_to_km/Solar_mass);
+  return (3.*pow(this->s_cosmo_pars.Hubble,2)/(8.0*M_PI*Constants::Gravitational_constant))*omega_matter(redshift)*(Mpc_to_km/Solar_mass);
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology::age_universe(real_prec redshift)
@@ -164,15 +158,15 @@ real_prec Cosmology::halo_dynamical_time(real_prec redshift){
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology::omega_matter(real_prec redshift){
     // Om(z) = Om(z=0) * (1+z)³ / E(z)²
-  return this->s_cosmo_pars.Om_matter*pow(1+redshift,3)*pow(Hubble_function(redshift)/this->s_cosmo_pars.Hubble,-2);
+  return this->s_cosmo_pars.Om_matter*pow(1.+redshift,3)*pow(this->Hubble_function(redshift)/this->s_cosmo_pars.Hubble,-2);
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology::omega_radiation(real_prec redshift){
-  return this->s_cosmo_pars.Om_radiation*pow(1+redshift,4)*pow(Hubble_function(redshift)/this->s_cosmo_pars.Hubble,-2);
+  return this->s_cosmo_pars.Om_radiation*pow(1+redshift,4)*pow(this->Hubble_function(redshift)/this->s_cosmo_pars.Hubble,-2);
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology::omega_curvature(real_prec redshift){
-  return this->s_cosmo_pars.Om_k*pow(1+redshift,2)*pow(Hubble_function(redshift)/this->s_cosmo_pars.Hubble,-2);
+  return this->s_cosmo_pars.Om_k*pow(1+redshift,2)*pow(this->Hubble_function(redshift)/this->s_cosmo_pars.Hubble,-2);
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology::omega_dark_energy(real_prec redshift){

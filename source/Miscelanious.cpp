@@ -26,7 +26,7 @@
 #include <gsl/gsl_sf.h>
 using namespace std;
 ////////////////////////////////////////////////////////////////////////////
-#include "Miscelanious.h"
+#include "../headers/Miscelanious.h"
 ////////////////////////////////////////////////////////////////////////////
 real_prec window(real_prec k,real_prec R){
   /*Top hat window function, normalized suich that \int \dtx W(\xv) = 1*/
@@ -148,7 +148,10 @@ void getDensity_NGP(ULONG N1, ULONG N2, ULONG N3,real_prec L1, real_prec L2, rea
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 //#define parallel_ngp_b
-void getDensity_NGP(s_params_box_mas *params, vector<s_Halo>&Halo, vector<real_prec>&delta, string weight_prop)
+void getDensity_NGP(s_params_box_mas *params, 
+                    vector<s_Halo>&Halo, 
+                    vector<real_prec>&delta, 
+                    string weight_prop)
 {
 #ifdef parallel_ngp_b
 #define DELTAno(i,j,k) private_delta[k+N3*(j+N2*i)]
@@ -196,7 +199,15 @@ void getDensity_NGP(s_params_box_mas *params, vector<s_Halo>&Halo, vector<real_p
       for (ULONG n=0; n<N_OBJ; n++)
 	pwe[n]=Halo[n].number_sub_structures;
     }
-  else if (weight_prop==_RS_)
+    else if (weight_prop==_MACH_)
+    {
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+      for (ULONG n=0; n<N_OBJ; n++)
+    	pwe[n]=Halo[n].mach_number;
+    }
+    else if (weight_prop==_RS_)
     {
 #ifdef _USE_OMP_
 #pragma omp parallel for
@@ -243,6 +254,14 @@ void getDensity_NGP(s_params_box_mas *params, vector<s_Halo>&Halo, vector<real_p
 #endif
       for (ULONG n=0; n<N_OBJ; n++)
   	pwe[n]=Halo[n].bias;
+    }
+    else if (weight_prop==_iBIAS_)
+    {
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+      for (ULONG n=0; n<N_OBJ; n++)
+  	pwe[n]=1./Halo[n].bias;
     }
   ULONG NLOSS=0;
   ULONG NTOT=0;
@@ -675,6 +694,10 @@ void getDensity_CIC(s_params_box_mas *params,const vector<s_Halo>&Halo, vector<r
 	      tracer_weight=Halo[n].spin_bullock;
 	    else if (weight_prop==_BIAS_)
 	      tracer_weight=Halo[n].bias;
+        else if (weight_prop==_iBIAS_)
+	      tracer_weight=1./Halo[n].bias;
+      else if (weight_prop==_MACH_)
+	      tracer_weight=Halo[n].mach_number;
 	    DELTAcc(i,j,k)   += tracer_weight*tx*ty*tz;
 	    DELTAcc(ii,j,k)  += tracer_weight*dx*ty*tz;
 	    DELTAcc(i,jj,k)  += tracer_weight*tx*dy*tz;
@@ -876,6 +899,7 @@ void getDensity_TSC(s_params_box_mas *params, const vector<s_Halo>&Halo, vector<
 	real_prec xnew=xpos;
 	real_prec ynew=ypos;
 	real_prec znew=zpos;
+
 #ifdef _PERIODIC_BC_MAS_      
 	if (xnew<min1)
 	  xnew+=L1;
@@ -927,6 +951,8 @@ void getDensity_TSC(s_params_box_mas *params, const vector<s_Halo>&Halo, vector<
 	      mass=Halo[n].mass;
       else if (weight_prop==_BIAS_)
     	  mass=Halo[n].bias;
+      else if (weight_prop==_iBIAS_)
+    	  mass=1./Halo[n].bias;
       else if (weight_prop==_SAT_FRACTION_)
 	      mass=Halo[n].number_sub_structures;
       else if (weight_prop==_SPIN_)
@@ -935,6 +961,8 @@ void getDensity_TSC(s_params_box_mas *params, const vector<s_Halo>&Halo, vector<
 	      mass=Halo[n].spin_bullock;
       else if (weight_prop==_CONCENTRATION_)
 	      mass=Halo[n].concentration;
+      else if (weight_prop==_MACH_)
+	      mass=Halo[n].mach_number;
 
 	    DELTAtt(i,j,k)    	+= mass*hx0*hy0*hz0;
 	    DELTAtt(ii,jj,kk) 	+= mass*hxp1*hyp1*hzp1;
@@ -1480,6 +1508,7 @@ ULONG get_bin(real_prec x, real_prec xmin, ULONG nbins, real_prec delta, bool ac
       if (ibin>nbins)ibin=nbins-1; // All values above the maximum are placed in the last bin
       if (ibin<0)ibin=0; // All values below the minimum are placed in the first bin
     }
+
   return ibin;
 }
 ////////////////////////////////////////////////////////////////////////////

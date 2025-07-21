@@ -80,8 +80,9 @@ real_prec MASS_BIAS_FUNCTIONS::mass_function(real_prec nu, real_prec z, void *p)
   real_prec q,pp,AA;
   real_prec a,b,c;
   real_prec ans=0;
-  if(mb=="Press_Schechter")ans=sqrt(nu/(2.*M_PI))*exp(-nu/2.0);
-  if(mb=="Sheth_Tormen")
+  if(mb=="Press_Schechter")
+    ans=sqrt(nu/(2.*M_PI))*exp(-nu/2.0);
+  else if(mb=="Sheth_Tormen")
   {
     pp=0.3;
     AA=1./(1.+pow(2,-pp)*gsl_sf_gamma(0.5-pp)/sqrt(M_PI));
@@ -90,24 +91,21 @@ real_prec MASS_BIAS_FUNCTIONS::mass_function(real_prec nu, real_prec z, void *p)
   }
   if(mb=="Jenkins")
       ans= 0.5*0.315*exp(-pow((real_prec)fabs(log(sqrt(nu)/(deltac))+0.61),(real_prec)3.8));
-  if(mb=="Warren")
+  else if(mb=="Warren")
       ans= 0.5*0.7234*(pow((real_prec)(deltac)/sqrt(nu),(real_prec)-1.625)+0.2538)*exp(-1.1982*nu*pow(deltac,(real_prec)-2));
-  if(mb=="Pillepich")
+  else if(mb=="Pillepich")
       ans= 0.5*0.6853*(pow((real_prec)(deltac)/sqrt(nu),(real_prec)-1.868)+0.3324)*exp(-1.2266*nu*pow(deltac,(real_prec)-2));
-  if(mb=="MICE")
+  else if(mb=="MICE")
       ans= 0.5*0.5800*(pow((real_prec)(deltac)/sqrt(nu),(real_prec)-1.37)+0.3)*exp(-1.036*nu*pow(deltac,(real_prec)-2));
-  if(mb=="Tinker")
+  else if(mb=="Tinker")
    {
-    AA=gsl_inter_new(D,A_par,log10((s_cp->Delta_SO)));
-    AA*=pow(1+z,-0.14);
-    a=gsl_inter_new(D,a_par,log10((s_cp->Delta_SO)));
-    a*=pow(1+z,-0.06);
+    AA=gsl_inter_new(D,A_par,log10((s_cp->Delta_SO))) * pow(1+z,-0.14)  ;
+    a=gsl_inter_new(D,a_par,log10((s_cp->Delta_SO)))* pow(1+z,-0.06);
     c=gsl_inter_new(D,c_par,log10((s_cp->Delta_SO)));
-    b=gsl_inter_new(D,b_par,log10((s_cp->Delta_SO)));
-    b*=pow(1+z,-pow(10, -pow(0.75/log10((s_cp->Delta_SO)/75.0),1.2)));
+    b=gsl_inter_new(D,b_par,log10((s_cp->Delta_SO)))*pow(1+z,-pow(10, -pow(0.75/log10((s_cp->Delta_SO)/75.0),1.2)));
     ans= 0.5*AA*(1.0 + pow(deltac/(sqrt(nu)*b),-a))*exp(-c*nu*pow(deltac,-2));
    }
-  if("Watson"==mb)
+  else if(mb=="Watson")
    {
     b=1./1.406;
     ans= 0.282*(pow(deltac/(sqrt(nu)*b),-2.163)+1.0)*exp(-1.2010*nu*pow(deltac,-2));

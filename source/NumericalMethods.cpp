@@ -112,8 +112,7 @@ real_prec gsl_integration(gsl_real (*function)(gsl_real, void *) ,void *p,vector
 {
   real_prec result=0;
   int nn=WW.size();
-
-    if(paral==true)
+  if(paral==true)
     {
 #ifdef _USE_OMP_
   omp_set_num_threads(omp_get_max_threads());
@@ -121,12 +120,10 @@ real_prec gsl_integration(gsl_real (*function)(gsl_real, void *) ,void *p,vector
 #endif
   for(ULONG i=0;i<nn;++i)
      result+=WW[i]*function(XX[i],p);
-}
-    else
-    {
-     for(ULONG i=0;i<nn;++i)
-        result+=WW[i]*function(XX[i],p);
-    }
+  }
+  else
+    for(ULONG i=0;i<nn;++i)
+      result+=WW[i]*function(XX[i],p);
   return static_cast<real_prec>(result);
 }    
 ////////////////////////////////////////////////////////////////////////////
@@ -1712,6 +1709,27 @@ ULONG grid_ID(s_params_box_mas *params, const real_prec &x, const real_prec &y, 
   k = static_cast<ULONG>(fmod(real_prec(k),real_prec(params->Nft)));
   return index_3d(i,j,k,params->Nft,params->Nft);
 }
+
+ULONG grid_ID(real_prec min1, real_prec min2, real_prec min3, real_prec d1, real_prec d2, real_prec d3, ULONG Nft, const real_prec &x, const real_prec &y, const real_prec &z)
+{
+  ULONG i = static_cast<ULONG>(floor((x-min1)/d1)+ BIN_SHIFT); // indices of the cell of the particle
+  ULONG j = static_cast<ULONG>(floor((y-min2)/d2)+ BIN_SHIFT);
+  ULONG k = static_cast<ULONG>(floor((z-min3)/d3)+ BIN_SHIFT);
+
+  if(i==Nft)
+    i--;
+  if(j==Nft)
+    j--;
+  if(k==Nft)
+    k--;
+  
+  i = static_cast<ULONG>(fmod(real_prec(i),real_prec(Nft)));
+  j = static_cast<ULONG>(fmod(real_prec(j),real_prec(Nft)));
+  k = static_cast<ULONG>(fmod(real_prec(k),real_prec(Nft)));
+  return index_3d(i,j,k,Nft,Nft);
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -3658,7 +3676,7 @@ void getDensity_NGP(ULONG Nft, ULONG Nft_HR, real_prec L1, real_prec d1, real_pr
   for (ULONG ig=0; ig<we.size(); ++ig)
     {
       ULONG xc,yc,zc;
-      index2coords(Nft_HR,ig,xc,yc,zc);
+      index2coords(ig,Nft_HR,xc,yc,zc);
       real_prec xpos=(static_cast<real_prec>(zc)+0.5)*delta_hr;
       real_prec ypos=(static_cast<real_prec>(yc)+0.5)*delta_hr;
       real_prec zpos=(static_cast<real_prec>(xc)+0.5)*delta_hr;

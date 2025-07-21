@@ -277,8 +277,6 @@ void Cwclass::get_CWC(vector<real_prec>&delta)
   EigenValuesTweb(this->params._Nft(),this->params._Lbox(),delta, this->potential,this->lambda1,this->lambda2,this->lambda3);//or Pweb, in case this->potential is delta
 #endif
 
-
-
 #ifdef _FULL_VERBOSE_
   So.DONE();
 #endif
@@ -2081,7 +2079,6 @@ int Cwclass::get_Vclassification(int ig)
                 if(this->CWClass_V[ig]==I_KNOT ||  this->CWClass_V[ig]==I_FILAMENT || this->CWClass_V[ig]==I_SHEET)
                   ans=ic;
               }
-
           }
         }
     }
@@ -2172,7 +2169,6 @@ void Cwclass::get_tidal_anisotropy(string input_file, string output_file){
     vector<real_prec>delta(this->params._NGRID(),0);
     this->File.read_array(input_file, delta);
     for(ULONG i=0;i<delta.size();++i)
-    cout<<delta[i]<<endl;
     get_overdens(delta,delta);
     for(ULONG i=0;i<delta.size();++i)
         delta[i]=tidal_anisotropy(this->lambda1[i],this->lambda2[i],this->lambda3[i]);
@@ -2186,4 +2182,21 @@ void Cwclass::get_tidal_anisotropy(vector<real_prec>&delta, string output_file){
     for(ULONG i=0;i<delta.size();++i)
         delta[i]=tidal_anisotropy(this->lambda1[i],this->lambda2[i],this->lambda3[i]);
     this->File.write_array(output_file, delta);
+}
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+void Cwclass::get_tidal_anisotropy(vector<real_prec>&delta){
+  get_overdens(delta,delta);
+  this->get_CWC(delta);
+  for(ULONG i=0;i<delta.size();++i)
+      delta[i]=tidal_anisotropy(this->lambda1[i],this->lambda2[i],this->lambda3[i]);
+}
+////////////////////////////////////////////////////////////////////////////
+void Cwclass::get_tidal_anisotropy(vector<real_prec>&dens, vector<real_prec>&tidal){
+  vector<real_prec>delta(dens.size(),0);
+  get_overdens(dens,delta);
+  this->get_CWC(delta);
+  delta.clear();delta.shrink_to_fit();
+  for(ULONG i=0;i<dens.size();++i)
+      tidal[i]=tidal_anisotropy(this->lambda1[i],this->lambda2[i],this->lambda3[i]);
 }

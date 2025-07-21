@@ -645,6 +645,9 @@ void PowerSpectrumF::compute_cross_power_spectrum_grid(bool dm,string file_X, st
     fftw_functions.data_g.resize(this->params._NGRID(),0);
     vector<real_prec>Y(this->params._NGRID(),0);
     File.read_array_t<PrecType_Y>(file_Y, Y);
+
+    cout<<this->params._input_type_two()<<endl;
+
     if (this->params._input_type_two()=="delta_grid")
       {
 #ifdef _USE_OMP_
@@ -4544,6 +4547,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
    ULONG Kmax_bin=static_cast<ULONG>(floor((this->params._kmax_tracer_bias()-this->params._d_kmin())/this->params._d_DeltaK_data()));//get the bin to go only up to Kmax in the loops
    ULONG new_Nft=2*Kmax_bin;  // Define the new Nft=2*Kmax_bin
    ULONG new_ngrid_h =new_Nft*new_Nft*(new_Nft/2+1);
+   ULONG new_ngrid =new_Nft*new_Nft*new_Nft;
 #ifdef DOUBLE_PREC
    complex_prec * Delta_dm = (complex_prec *)fftw_malloc(2*new_ngrid_h*sizeof(real_prec));
 #else
@@ -4554,21 +4558,47 @@ void PowerSpectrumF::get_window_matrix_multipole()
     So.message_screen("\tMean of field:", mean_field);
     vector<real_prec> over_dm_field(dm_field.size(),0);
     get_overdens(dm_field,mean_field,over_dm_field);
-    So.message_screen("\tFourier transforming");
-    do_fftw_r2c(this->params._Nft(),over_dm_field,Delta_dm);
-    over_dm_field.clear(); over_dm_field.shrink_to_fit();
-   vector<real_prec> kcoords(new_Nft,0);// Build k-coordinates
+  
+
+#ifdef _FULL_VERBOSE_
+    this->So.message_screen("\tNew Nft ",new_Nft);
+    this->So.message_screen("\tComputing from k =", (Kmin_bin+0.5)*this->params._d_DeltaK_data());
+    this->So.message_screen("\t            to k =", this->params._kmax_tracer_bias());
+#endif
+
+#ifdef _GET_TIDAL_ANISOTROPY_
+  So.message_screen("\tCalculations for tidal anisotropy");
+  vector<real_prec> dm_field_new(new_ngrid,0);
+    average(this->params._Lbox(),this->params._Nft(),new_Nft,dm_field,dm_field_new);
+    ULONG old_Nft=this->params._Nft();
+    ULONG old_Ngrid=this->params._NGRID();
+    this->params.set_Nft(new_Nft);
+    this->params.set_NGRID(new_ngrid);
+    Cwclass cwc(this->params);
+    vector<real_prec> over_dm_field_new(dm_field_new.size(),0);
+    mean_field=get_mean(dm_field_new);
+    get_overdens(dm_field_new,mean_field,over_dm_field_new);
+    cwc.get_CWC(over_dm_field_new);
+    dm_field_new.clear();dm_field_new.shrink_to_fit();
+    over_dm_field_new.clear();over_dm_field_new.shrink_to_fit();
+    this->params.set_Nft(old_Nft);
+    this->params.set_NGRID(old_Ngrid);
+#endif
+ 
+
+
+  So.message_screen("\tFourier transforming");
+  do_fftw_r2c(this->params._Nft(),over_dm_field,Delta_dm);
+  over_dm_field.clear(); over_dm_field.shrink_to_fit();
+  vector<real_prec> kcoords(new_Nft,0);// Build k-coordinates
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
    for(int i=0;i<kcoords.size() ;++i)
     kcoords[i]=(i<=new_Nft/2? static_cast<real_prec>(i): -static_cast<real_prec>(new_Nft-i));
-#ifdef _FULL_VERBOSE_
-   this->So.message_screen("\tNew Nft ",new_Nft);
-   this->So.message_screen("\tComputing from k =", (Kmin_bin+0.5)*this->params._d_DeltaK_data());
-   this->So.message_screen("\t            to k =", this->params._kmax_tracer_bias());
-#endif
-   real_prec use_imag=0;
+
+
+    real_prec use_imag=0;
   // This is the normalization of the halo power spectrum, which being computed object-by object, is just the volume
    // FOr the full sample it would be the volume/Ntracer, = nbar. But Ntracer =1 for each object!
    real_prec dk_x=this->params._d_deltak_x();
@@ -4643,7 +4673,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
         real_prec vx=tracer_cat[itr].vel1*conversion_factor;
 #endif
         vector<real_prec>power_cross(Kmax_bin,0);
-#ifndef _TNG_GAL_xº
+#ifndef _TNG_GAL_
        vector<real_prec>power_cross_s(Kmax_bin,0);
        vector<real_prec>Gamma_num(Kmax_bin,0);
 #endif
@@ -4777,22 +4807,41 @@ void PowerSpectrumF::get_window_matrix_multipole()
    vector<real_prec>yaux(tracer_cat.size(),0);
    vector<real_prec>zaux(tracer_cat.size(),0);
 
+#ifdef _GET_TIDAL_ANISOTROPY_
+  this->params.set_Nft(new_Nft);
+  this->params.set_NGRID(new_ngrid);
+  vector<real_prec>g_tidal(tracer_cat.size(),0);
+  vector<real_prec>tidal(this->params._NGRID(),0);
+   for(ULONG i=0;i<tidal.size();++i)
+     tidal[i]=tidal_anisotropy(cwc.lambda1[i], cwc.lambda2[i], cwc.lambda3[i]);
+#endif
+   
+
    for(ULONG i=0;i<xaux.size(); ++i)
     {
         baux[i]=tracer_cat[i].bias;
         xaux[i]=tracer_cat[i].coord1;
         yaux[i]=tracer_cat[i].coord2;
+        ULONG grid=grid_ID(0,0,0,this->params._d1(),this->params._d2(),this->params._d3(), this->params._Nft(), xaux[i], yaux[i],zaux[i]);
         zaux[i]=tracer_cat[i].coord3;
-        cout<<baux[i]<<endl;
+#ifdef _GET_TIDAL_ANISOTROPY_
+        g_tidal[i]=tidal[grid];
+#endif
     }
-    string file_bias=this->params._Output_directory()+"Bias_gal1";
-    this->File.write_array(file_bias, baux);
+//    string file_bias=this->params._Output_directory()+"Bias_gal1";
+//    this->File.write_array(file_bias, baux);
 
-    vector<real_prec>bfaux(this->params._NGRID(),0);
+#ifdef _GET_TIDAL_ANISOTROPY_
+    this->File.write_to_file(this->params._Output_directory()+"alpha_gal.txt",xaux,yaux,zaux,baux,g_tidal);
+//    string file_alpha=this->params._Output_directory()+"alpha_gal";
+//    this->File.write_array(file_alpha, g_tidal);
+#endif
 
-    string file_bias_f=this->params._Output_directory()+"Bias_gal1_field";
-    getDensity_CIC(this->params._Nft(),this->params._Nft(),this->params._Nft(),this->params._Lbox(),this->params._Lbox(),this->params._Lbox(),this->params._d_delta_x(),this->params._d_delta_x(),this->params._d_delta_x(),0,0,0,xaux,yaux,zaux,baux,bfaux,true);
-    this->File.write_array(file_bias_f, bfaux);
+//    vector<real_prec>bfaux(this->params._NGRID(),0);
+//    string file_bias_f=this->params._Output_directory()+"Bias_gal1_field";
+//    getDensity_CIC(this->params._Nft(),this->params._Nft(),this->params._Nft(),this->params._Lbox(),this->params._Lbox(),this->params._Lbox(),this->params._d_delta_x(),this->params._d_delta_x(),this->params._d_delta_x(),0,0,0,xaux,yaux,zaux,baux,bfaux,true);
+//    this->File.write_array(file_bias_f, bfaux);
+
 
 
 /*

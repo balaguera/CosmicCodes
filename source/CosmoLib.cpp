@@ -383,7 +383,7 @@ void CosmoLib::get_cosmolib(){
   }
   else
     So.message_screen("Normalization of matter P(k,z) =", pk_normalization);
-  growth_factor/=Cf.growth_factor(0);
+  growth_factor/=growth_factor_z0;
   // Normalize the growth factor to compute the processed linear matter power spectrum
   // Aca reacomodo algunos de estos factores en la estructura grande
   this->s_cosmo_par.critical_density=critical_density;
@@ -391,9 +391,9 @@ void CosmoLib::get_cosmolib(){
   this->s_cosmo_par.mean_matter_density=mean_matter_density;
   this->s_cosmo_par.growth_factor=growth_factor;
   // ***********************************************************************************************
-  this->Cf.set_cosmo_pars(this->s_cosmo_par);
-  this->Ps.set_cosmo_pars(this->s_cosmo_par);// update
-  this->Cs.set_cosmo_pars(this->s_cosmo_par);
+  this->Cf.set_cosmo_pars(this->s_cosmo_par);// Upate Cosmo
+  this->Ps.set_cosmo_pars(this->s_cosmo_par);// Update Power
+  this->Cs.set_cosmo_pars(this->s_cosmo_par);// Update Stats
   // ***********************************************************************************************
 //  real_prec sigma_from_As=Cs.As2sigma8(&s_cosmo_par);
   // ***********************************************************************************************
