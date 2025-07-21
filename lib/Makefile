@@ -29,9 +29,8 @@ SOURCE_DIR = ../source/
 SRCS =  $(SOURCE_DIR)NumericalMethods.cpp $(SOURCE_DIR)FileOutput.cpp  $(SOURCE_DIR)ScreenOutput.cpp $(SOURCE_DIR)Params.cpp $(SOURCE_DIR)CosmologicalFunctions.cpp\
 	$(SOURCE_DIR)CoordinateSystem.cpp $(SOURCE_DIR)Miscelanious.cpp $(SOURCE_DIR)FftwFunctions.cpp $(SOURCE_DIR)Statistics.cpp $(SOURCE_DIR)BiasFunctions.cpp\
 	$(SOURCE_DIR)PowerSpectrumF.cpp $(SOURCE_DIR)PowerSpectrumTH.cpp $(SOURCE_DIR)Astrophysics.cpp $(SOURCE_DIR)Catalog.cpp $(SOURCE_DIR)GnuplotC.cpp\
-	$(SOURCE_DIR)Cwclass.cpp $(SOURCE_DIR)DensityProfiles.cpp $(SOURCE_DIR)Hod.cpp $(SOURCE_DIR)McmcFunctions.cpp $(SOURCE_DIR)ScalingRelations.cpp 
-#	$(SOURCE_DIR)ClFunctions.cpp
-#$(SOURCE_DIR)Galaxy.cpp
+	$(SOURCE_DIR)Cwclass.cpp $(SOURCE_DIR)DensityProfiles.cpp $(SOURCE_DIR)Hod.cpp $(SOURCE_DIR)McmcFunctions.cpp $(SOURCE_DIR)ScalingRelations.cpp $(SOURCE_DIR)BiasMappingTechnique.cpp
+#(SOURCE_DIR)ClFunctions.cpp $(SOURCE_DIR)Galaxy.cpp
 ##################################################################################
 #C++ Header files
 HEADER_DIR = ../headers/
@@ -40,7 +39,8 @@ HDRS =  $(HEADER_DIR)CosmiCalcLIB.h  $(HEADER_DIR)Constants.h $(HEADER_DIR)const
 	$(HEADER_DIR)Params.h $(HEADER_DIR)CosmologicalFunctions.h $(HEADER_DIR)FftwFunctions.h $(HEADER_DIR)CoordinateSystem.h\
 	$(HEADER_DIR)Miscelanious.h  $(HEADER_DIR)lss_vector.h $(HEADER_DIR)FftwFunctions.h $(HEADER_DIR)BiasFunctions.h $(HEADER_DIR)Statistics.h\
 	$(HEADER_DIR)PowerSpectrumTH.h $(HEADER_DIR)PowerSpectrumF.h $(HEADER_DIR)Catalog.h $(HEADER_DIR)GnuplotC.h $(HEADER_DIR)Cwclass.h $(HEADER_DIR)CosmoLib.h\
-	$(HEADER_DIR)DensityProfiles.h $(HEADER_DIR)Hod.h $(HEADER_DIR)McmcFunctions.h 
+	$(HEADER_DIR)DensityProfiles.h $(HEADER_DIR)Hod.h $(HEADER_DIR)McmcFunctions.h  $(HEADER_DIR)BiasMappingTechnique.h
+#$(HEADER_DIR)ClFunctions.h
 ##################################################################################
 OBJS = $(SRCS:.cpp=.o)
 
@@ -145,10 +145,15 @@ $(SOURCE_DIR)McmcFunctions.o: $(SOURCE_DIR)McmcFunctions.cpp $(HDRS)
 	@echo "Compiling McmcFunctions.cpp"
 	$(CXX) $(CXXFLAGS) $(INCLUDE)  -c $< -o $@ $(LIBS_GSL)
 
-$(SOURCE_DIR) ClFunctions.o: $(SOURCE_DIR)ClFunctions.cpp $(HDRS)
-	@echo "Compiling ClFunctions.cpp"
-	$(CXX) $(CXXFLAGS) $(INCLUDE)  -c $< -o $@ $(LIBS_GSL)
 
+$(SOURCE_DIR)BiasMappingTechnique.o: $(SOURCE_DIR)BiasMappingTechnique.cpp $(HDRS)
+	@echo "Compiling BMT.cpp"
+	$(CXX) $(CXXFLAGS) $(INCLUDE) $(LIBS_HEALPIX)  $(LIBS_FFTW) -c $< -o $@ $(LIBS_GSL) 
+
+
+#$(SOURCE_DIR)ClFunctions.o: $(SOURCE_DIR)ClFunctions.cpp $(HDRS)
+#	@echo "Compiling ClFunctions.cpp"
+#	$(CXX) $(CXXFLAGS) $(INCLUDE)  -c $< -o $@ $(LIBS_GSL)
 
 #$(SOURCE_DIR)Galaxy.o: $(SOURCE_DIR)Galaxy.cpp 
 #	@echo "Compiling Galaxy.cpp"
