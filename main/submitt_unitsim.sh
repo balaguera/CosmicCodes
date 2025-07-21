@@ -9,6 +9,6 @@ reds=(10.700 10.440 10.190 9.941 9.707 9.471 9.235 9.010 8.794 8.579 8.372 8.166
 for i in {65,95,128}
 do
     let new_index=$i
-    ./bmt.exe -b INIT_PARS_UNITSIM_ASSIGN/cosmicatlas_new_unitsim_p"$new_index".ini
+    ./cosmic_web.exe -w INIT_PARS_UNITSIM/cosmicatlas_new_unitsim_p"$new_index".ini
     echo $new_index
 done;
