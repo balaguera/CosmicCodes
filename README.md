@@ -1,5 +1,5 @@
 Library in C++ to perform calculations in Cosmology (theoretical and observational). 
-Theoretical comsology: prediction ofr 1 and 2 point statistics (abundance, power spectrum in 2D and 3D).
+Theoretical cosmology: prediction for 1 and 2 point statistics (abundance, power spectrum in 2D and 3D).
 Observational: measurements of abundance (e.g. luminosity functions, power spectrum, correlation function), marked statistics, halo properties.
 
 Documentation is available in dOxygen and pdf. It can be requested via e-mail to abalant@gmail.com.
