@@ -100,6 +100,9 @@ secbias: $(TARGET_SB)
 gtools: $(TARGET_GT)
 htools: $(TARGET_HT)
 cosmolib: $(TARGET_CLib)
+cosmicweb: $(TARGET_CW)
+
+
 #########################################################################
 $(TARGET_CLib): $(OBJS_CL) 
 	@echo "*******************************************"
@@ -156,6 +159,19 @@ $(TARGET_GT): $(OBJS_GT)
 	@echo "*******************************************"         
 	$(CXX) $(CXXFLAGS) $(SRCS_GT)  $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_GT) $(LIBS_GSL)
 	@echo "Done!"
+
+#########################################################################
+$(TARGET_CW): $(OBJS_CW) 
+	@echo "*******************************************"
+	@echo "*******************************************"
+	@echo "Compiling CWtools"
+	@date  
+	@echo "*******************************************"
+# Este orden es de llamado a las librerias es importantisimo:
+	@echo "*******************************************"         
+	$(CXX) $(CXXFLAGS) $(SRCS_CW)  $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_CW) $(LIBS_GSL)
+	@echo "Done!"
+
 #########################################################################
 $(TARGET_HT): $(OBJS_HT) 
 	@echo "*******************************************"
