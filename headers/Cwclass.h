@@ -42,7 +42,7 @@ class Cwclass {
   //////////////////////////////////////////////////////////
   /**
     *@private
-   * @brief Params object. Contails all parameters read from parameter file.
+   * @brief Params object
    */
   Params params;
 
@@ -50,54 +50,49 @@ class Cwclass {
   //////////////////////////////////////////////////////////
   /**
    * @private
-   * @brief Object of type File. Used to print outputs.
+   * @brief Number of CWT used, computed as the size of the
+   * Bam::cwt_used container
    */
 
   FileOutput File;
   //////////////////////////////////////////////////////////
   /**
-   * @private
-   * @brief Explicity convolution of density with Kernel used in CWT.
-   * @details The operation is performed in Fourier space. 
-   * @details The kernel used for convolution is a public container
+   * @public
+   * @brief Convolution with Kernel used in CWT.
+   * @details The kernel used for convlution is a public containers
    */
   void Konvolve(vector<real_prec> &in, vector<real_prec>&out, string type);
   
   //////////////////////////////////////////////////////////
   /**
-   * @private
+   * @public
    *  @brief Object of type ScreenOutput.
    */
   ScreenOutput So;
 
   //////////////////////////////////////////////////////////
   /**
-   * @private
    *  @brief Fraction of cells defined as knots
    */
   real_prec knots_fraction;
   //////////////////////////////////////////////////////////
   /**
-   * @private
    *  @brief Fraction of cells defined as filaments
    */
   real_prec filaments_fraction;
   //////////////////////////////////////////////////////////
   /**
-   * @private
    *  @brief Fraction of cells defined as sheets
    */
   real_prec sheets_fraction;
   //////////////////////////////////////////////////////////
   /**
-   * @private
    *  @brief Fraction of cells defined as voids
    */
   real_prec voids_fraction;
   //////////////////////////////////////////////////////////
   /**
-   * @private
-   *  @brief Kernel used in convolution with dark matter density.
+   *  @brief Kernel used in convolution
    */
   vector<real_prec>Kernel;
   //////////////////////////////////////////////////////////
@@ -165,13 +160,15 @@ class Cwclass {
   //////////////////////////////////////////////////////////
   /**
    * @public
-   * @brief Container allocating the different T-CW classifications as required in the parameter file.
+   * @brief Container allocating the different T-CW classifications
+   * @brief required in the parameter file.
    */
   vector<ULONG> cwt_used;
   //////////////////////////////////////////////////////////
   /**
    * @public
-   * @brief Container allocating the different V-CW classifications as requested in the parameter file.
+   * @brief Container allocating the different V-CW classifications
+   * @brief required in the parameter file.
    */
   vector<ULONG> cwv_used;
 
@@ -190,26 +187,26 @@ class Cwclass {
     //////////////////////////////////////////////////////////
   /**
    * @public
-   * @brief Container for the eigenvalue lambda_1 on each grid element
+   * @brief Container for the eigenvalue lambda_1 on the grid
    */
   vector<real_prec> lambda1;
   //////////////////////////////////////////////////////////
   /**
    * @public
-   * @brief Container for the eigenvalue lambda_2 on each grid element
+   * @brief Container for the eigenvalue lambda_2 on the grid
    */
   vector<real_prec> lambda2;
   //////////////////////////////////////////////////////////
   /**
    * @public
-   * @brief Container for the eigenvalue lambda_3 on each grid element
+   * @brief Container for the eigenvalue lambda_3 on the grid
    */
   vector<real_prec> lambda3;
 
   //////////////////////////////////////////////////////////
   /**
    * @public
-   * @brief Container for the gravitational potential (maninly obtained from the solution of the Poisson equation)
+   * @brief Container for the potential
    */
   vector<real_prec> potential;
 
@@ -235,14 +232,12 @@ class Cwclass {
   /**
    * @public
    * @brief Container for the delta² term
-   * @warning This is to be deprecated
    */
   vector<real_prec> DELTA2;
   //////////////////////////////////////////////////////////
   /**
    * @public
    * @brief Container for the delta³ term
-   * @warning This is to be deprecated
    */
   vector<real_prec> DELTA3;
   //////////////////////////////////////////////////////////
@@ -314,6 +309,8 @@ class Cwclass {
    * @brief Container for the ELLIPTICITY
    */
   vector<real_prec> Prolatness;
+
+
     //////////////////////////////////////////////////////////
   /**
    * @public
@@ -474,38 +471,24 @@ class Cwclass {
   //////////////////////////////////////////////////////////
   /**
    * @public
-   * @brief Get tidal anisotropy from input binary file inp to write into output binary file out
-   * @details This method computes internaly the eigenvalues of the tidal field using  the method 
-   * @code
-    this->get_CWC(delta) 
-   * @endcode 
-    where delta denotes the overdensity computed from the dark matter density field.  This generates public member vectors lambda1, lambda2, lambda3 l
+   * @brief Get tidal anisotropy from input binary to write into output bin
    */
-
   void get_tidal_anisotropy(string inp, string out);
   //////////////////////////////////////////////////////////
   /**
    * @public
-   * @brief Get tidal anisotropy from input density_field and write into output bin.
-   * @details This method needs the previous calculation of the eigenvalues
+   * @brief Get tidal anisotropy from input density_field and write into output bin
    */
   void get_tidal_anisotropy(vector<real_prec>&den, string out);
-  //////////////////////////////////////////////////////////
-  /**
-   * @public
-   * @brief Get tidal anisotropy from input density_field and write into output bin.
-   * @details This method needs the previous calculation of the eigenvaluee
-   * @returns The same input container but filled with the tidal anisotropy
-   */
-  void get_tidal_anisotropy(vector<real_prec>&den);
-  //////////////////////////////////////////////////////////
-  /**
-   * @public
-   * @brief Get tidal anisotropy from input density_field and write into output bin.
-   * @details This method needs the previous calculation of the eigenvaluee
-   * @returns A new container filled with the tidal anisotropy
-   */
-  void get_tidal_anisotropy(vector<real_prec>&den,vector<real_prec>&tidal);
+
+  ////////////////////////////////////////////////////////////////////////////
+  void get_tidal_anisotropy(vector<real_prec>&delta);
+
+  ////////////////////////////////////////////////////////////////////////////
+  void get_tidal_anisotropy(vector<real_prec>&dens, vector<real_prec>&tidal);
+
+
+
 
   /////////////////////////////////////////////////////////
   /**

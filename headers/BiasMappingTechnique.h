@@ -61,7 +61,6 @@ struct prop_collection{
    * @details The size of this container depends on the number of moments we need, usually two.
    */
   vector<real_prec> stats_tracer_properties;
-
   /**
    * @brief Statistics (mean and variance) of the distribition of tracer properites on each theta bin
    * @details The size of this container depends on the number of moments we need, usually two.

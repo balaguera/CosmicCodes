@@ -19,7 +19,7 @@ namespace Constants
   /**
       @brief Gravitational constant in units units (km)³ /kg/s²
   */
-  const double Gravitational_constant = 6.673e-20;
+  const double Gravitational_constant = 6.6743e-20;
   /**
       @brief Solar mass in Kg
   */

@@ -537,14 +537,6 @@ void index2coords(ULONG index, ULONG N, ULONG &XG, ULONG &YG, ULONG &ZG );
 ULONG grid_ID(s_params_box_mas *params, const real_prec &x, const real_prec &y, const real_prec &z);
 ////////////////////////////////////////////////////////////////////////////
 /**
- * @brief Given cartasian coordiantes and box info, this returns the ID of the cell where the object is located
- * @details This overloaded method expects explicitely parameters used in the calculation of the index ID_GRID
- */
-
-ULONG grid_ID(real_prec min1, real_prec min2, real_prec min3, real_prec d1, real_prec d2, real_prec d3, ULONG Nft, const real_prec &x, const real_prec &y, const real_prec &z);
-
-////////////////////////////////////////////////////////////////////////////
-/**
  * @brief Real to Complex FFT
  * @param Nft Size of the mes per dimenion
  * @param in array wth input field

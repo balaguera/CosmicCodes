@@ -2374,6 +2374,8 @@ private :
    * @brief Threshold value for the V-web classification
    */
   real_prec d3_JK;
+
+
   //////////////////////////////////////////////////////////
   /*
    * @brief Threshold value for the V-web classification
@@ -2403,6 +2405,7 @@ private :
    * @brief 
    */
   bool SN_correction;
+
   //////////////////////////////////////////////////////////
   /*
    * @brief 
@@ -2417,16 +2420,20 @@ private :
   /*
    * @brief 
    */  
+
   string vel_units_g;
+
   //////////////////////////////////////////////////////////
   /*
    * @brief 
    */  
+
   int masskernel;
   //////////////////////////////////////////////////////////
   /*
    * @brief 
    */  
+
   int masskernel_vel;
   //////////////////////////////////////////////////////////
   /*
@@ -3263,6 +3270,8 @@ private :
    */
   int Nbins_hist;
   ///////////////////////////////////////////////////////////
+
+
   // **********************************************************************************
   // **********************************************************************************
   // **********************************************************************************
@@ -3271,6 +3280,7 @@ private :
   // **********************************************************************************
   // **********************************************************************************
   // **********************************************************************************
+
 public:
   /**
    *  @brief default constructor
@@ -3299,20 +3309,25 @@ public:
   //////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////
+
   /**
    *  @brief default destructor
    *  @return none
    */
   ~Params(){}
+
+
   // These variables smust be made private, 
   // andnif thy need to be modified, de define a method, e.g.
   // void set_Nft(int new_Nft){this->Nft=new_Nft;}
+
   //////////////////////////////////////////////////////////
   /**
    * @brief Structure containing cosmological parameters
    **/
 
   s_CosmologicalParameters s_cosmo_pars;
+  
   //////////////////////////////////////////////////////////
   /**
    * @brief Initialize all the parameteres defined as private variables of the class Params.
@@ -3323,11 +3338,13 @@ public:
    * @brief Initialize all the parameteres defined as private variables of the class Params.
    **/
   void explain_pars(string);
+
   //////////////////////////////////////////////////////////
   /**
    * @brief Read input parameter file and allocate var as private variables of Params class.
    **/
   void read_pars(string );
+
   //////////////////////////////////////////////////////////
   /**
    * @brief
@@ -5502,19 +5519,19 @@ public:
    *  @brief 
    *  @return
    */
-  real_prec _d1(){return this->Lbox/static_cast<real_prec>(this->Nft);}
+  real_prec _d1(){return this->d1;}
   //////////////////////////////////////////////////////////
   /**
    *  @brief 
    *  @return
    */
-  real_prec _d2(){return this->Lbox/static_cast<real_prec>(this->Nft);}
+  real_prec _d2(){return this->d2;}
   //////////////////////////////////////////////////////////
   /**
    *  @brief 
    *  @return
    */
-  real_prec _d3(){return this->Lbox/static_cast<real_prec>(this->Nft);}
+  real_prec _d3(){return this->d3;}
   //////////////////////////////////////////////////////////
   /**
    *  @brief
@@ -6406,7 +6423,6 @@ public:
    *  @brief 
    */
   bool _Get_tracer_bias_field(){return this->Get_tracer_bias_field;}
-  void set_Get_tracer_bias_field(bool in){this->Get_tracer_bias=in;}
   //////////////////////////////////////////////////////////
   /**
    *  @brief 
@@ -6442,9 +6458,6 @@ public:
    *  @brief
    */
   bool _Get_tracer_bias(){return this->Get_tracer_bias;}
-  void set_Get_tracer_bias(bool in){this->Get_tracer_bias=in;}
-
-  
 
   //////////////////////////////////////////////////////////
   /**
