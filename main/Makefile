@@ -89,7 +89,10 @@ OBJS_CW = ../codes/cosmic_web.o
 SRCS_CW = $(OBJS_CW:.o=.cpp)
 TARGET_CW = cosmicweb.exe
 #########################################################################
-
+# par
+OBJS_PA = ../codes/paramsr.o 
+SRCS_PA = $(OBJS_PA:.o=.cpp)
+TARGET_PA = params
 
 # make will execute this rule by default
 all: $(TARGET_BMT) 
@@ -101,7 +104,7 @@ gtools: $(TARGET_GT)
 htools: $(TARGET_HT)
 cosmolib: $(TARGET_CLib)
 cosmicweb: $(TARGET_CW)
-
+params: $(TARGET_PA)
 
 #########################################################################
 $(TARGET_CLib): $(OBJS_CL) 
@@ -184,6 +187,20 @@ $(TARGET_HT): $(OBJS_HT)
 	$(CXX) $(CXXFLAGS) $(SRCS_HT)  $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_HT) $(LIBS_GSL)
 	@echo "Done!"
 
+
+#########################################################################
+$(TARGET_PA): $(OBJS_PA) 
+	@echo "*******************************************"
+	@echo "*******************************************"
+	@echo "Compiling Params"
+	@date  
+	@echo "*******************************************"
+# Este orden es de llamado a las librerias es importantisimo:
+	@echo "*******************************************"         
+	$(CXX) $(CXXFLAGS) $(SRCS_PA)  $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_PA) $(LIBS_GSL)
+	@echo "Done!"
+
+
 clean:
 	@echo "Cleaning:"
 	rm -f  core.* *o *exe *~ 
@@ -207,6 +224,12 @@ help:
 	@echo "	  execute with ./gtools.exe parameter_file (this is different from otopns 1-4). This is still under merging stages: merged with class::Catalog"		
 	@echo "-make htools: creates executable for the analysis of halo catalogs "
 	@echo "	  execute with ./htools.exe parameter_file (this is different from otopns 1-4). This is still under merging stages: merged with class::Catalog"		
+	@echo "-make cosmicweb: creates executable for the cosmic web analysis ased on tracer catalos"
+	@echo "	  execute with ./cosmicweb.exe parameter_file"		
+	@echo "-make par: creates executable for the paramsr "
+	@echo "	  execute with ./params.exe parameter_file"		
+
+
 	@echo "·········································································································"
 	@echo "·········································································································"
 
