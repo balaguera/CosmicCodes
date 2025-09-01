@@ -889,6 +889,10 @@ public:
    * @brief Get the interpolated prop-density and write to vector
    */
   void get_density_field_grid(s_params_box_mas , string, vector<real_prec>&);
+  /**
+   * @brief Get the interpolated prop-density and write to vector
+   */  
+  void get_density_field_grid(std::string prop, vector<real_prec>&deltaTR_counts,vector<real_prec>&out);
   //////////////////////////////////////////////////////////
   /**
    * @brief Measure the abundance as a funvtion of a property
@@ -937,8 +941,9 @@ public:
   /**
    * @brief This method converts a snapshot into a mock catalog
    * @details Converts cartesian positions into RA, dec, and Z using cosmological and pecular redshifts.
+   * @parameter  zsel se tto true if a dNdz is to be imposed, false otherwise 
    */
-  void snap_to_mock();
+  void snap_to_mock(bool zsel);
   //////////////////////////////////////////////////////////
   /**
    * @brief Determine the ID of the neighbour tracers to each tracer
