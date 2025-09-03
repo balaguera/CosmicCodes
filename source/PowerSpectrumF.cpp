@@ -4783,7 +4783,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
         xaux[i]=tracer_cat[i].coord1;
         yaux[i]=tracer_cat[i].coord2;
         zaux[i]=tracer_cat[i].coord3;
-        cout<<baux[i]<<endl;
+//        cout<<baux[i]<<endl;
     }
     string file_bias=this->params._Output_directory()+"Bias_gal1";
     this->File.write_array(file_bias, baux);
