@@ -9,6 +9,30 @@
 ////////////////////////////////////////////////////////////////////////////
 using namespace std;
 ////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////
+void usage(string s)
+{
+  std::cout<<BOLDGREEN;  
+  std::cout<<"\t*****************************************************************"<<endl;
+  std::cout<<"\t*****************************************************************"<<endl;
+  std::cout<<"\t*****************************************************************"<<endl;
+  std::cout<<"\tCOSMICATLASS"<<endl;
+  std::cout<<"\t\n\tCosmologicalCATalogs for LArge Scale Structure"<<endl;
+  std::cout<<"\t\n\tHow to run: "<<s<<"\t [-option] [argument]"<<endl;
+  std::cout<<"\t\n\tOptions: "<<endl;
+  std::cout<<"\t         -a for information on the author, no argument"<<endl;
+  std::cout<<"\t         -b parameter_file.ini: To perform cosmic/web analysis"<<endl;
+  std::cout<<"\t         -h parameter_file.ini: Help"<<endl;
+  std::cout<<"\t         -i parameter_file.ini: Shows input pars"<<endl;
+  std::cout<<"\tConsult ../Headers/def.h for pre-procesor directives"<<endl;
+  std::cout<<"\t*****************************************************************"<<endl;
+  std::cout<<"\t*****************************************************************"<<endl;
+  std::cout<<"\t*****************************************************************"<<RESET<<endl;
+  std::cout<<RESET<<endl;                                       
+}
+
 ////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
@@ -30,10 +54,10 @@ int main(int argc, char *argv[])
     So.usage(argv[0]);
     exit(1);
   }
-  while ((temp = getopt(argc, argv, "hadi:w:")) != -1)
+  while ((temp = getopt(argc, argv, "hadi:b:")) != -1)
   {
     if (temp == 'h')
-      So.usage(argv[0]);
+      usage(argv[0]);
 
     else if (temp == 'a') // Show authors
       So.author();
@@ -48,7 +72,7 @@ int main(int argc, char *argv[])
     {
       So.show_preproc();
     }
-    else if ( temp  == 'w') // assign bias to tracers.
+    else if ( temp  == 'b') // assign bias to tracers.
     {
       FileOutput File;
       So.welcome_message_c();
@@ -79,7 +103,7 @@ int main(int argc, char *argv[])
       bias_field.clear();bias_field.shrink_to_fit();
   
 
-     string fileo;
+      string fileo;
       vector<real_prec> tr_field(params._NGRID(), 0);
       cat.get_density_field_grid(_iBIAS_,tr_field);
       cat.get_density_field_grid(_COUNTS_,tr_field);
@@ -93,9 +117,6 @@ int main(int argc, char *argv[])
       // Get tidal anisotropy from tracers
       vector<real_prec> tr_alpha(params._NGRID(), 0);
       cwclass.get_tidal_anisotropy(tr_field, tr_alpha);
-
-
-   
 
 
       fileo=params._Output_directory()+"alpha_hbias_p"+to_string(params._unitsim_plabel());
