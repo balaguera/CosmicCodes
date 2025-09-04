@@ -18,7 +18,18 @@ void get_hist(Params params, vector<real_prec>&dm_alpha, vector<real_prec>&tr_al
 {
 
   int nb=200;
+  FileOutput Fo;
+  string ftype = fitype == 0 ? "dm" : "tr";
   real_prec bmin=-2; real_prec bmax=2; real_prec delta=(bmax-bmin)/static_cast<real_prec>(nb);
+  vector<real_prec>ibins(nb,0); 
+
+#ifdef _USE_OMP_ 
+#pragma omp parallel for 
+#endif
+  for(int i=0; i<nb; ++i)
+    ibins[i]=bmin+(i+0.5)*delta;
+
+
   for (int icwt=0; icwt<=4;++icwt)
      {
 
@@ -32,18 +43,16 @@ void get_hist(Params params, vector<real_prec>&dm_alpha, vector<real_prec>&tr_al
                {
                  int ibin=get_bin(log10(alpha_bias[i]),bmin,nb,delta,0);
                  if(log10(alpha_bias[i])<bmax && log10(alpha_bias[i])>=bmin)
-                    hist[ibin]++;
+                    hist[ibin]+=1./static_cast<real_prec>(dm_alpha.size());
 
                   int abin=get_bin(log10(tr_alpha[i]),bmin,nb,delta,0);
                   if(log10(tr_alpha[i])<bmax && log10(tr_alpha[i])>=bmin)
-                      hist_alphah[abin]++;
+                      hist_alphah[abin]+=1./static_cast<real_prec>(dm_alpha.size());
 
                       
                   int dbin=get_bin(log10(dm_alpha[i]),bmin,nb,delta,0);
                   if(log10(dm_alpha[i])<bmax && log10(dm_alpha[i])>=bmin)
-                      hist_alphadm[dbin]++;
-
-
+                      hist_alphadm[dbin]+=1./static_cast<real_prec>(dm_alpha.size());
                   }
              }
           else
@@ -54,41 +63,27 @@ void get_hist(Params params, vector<real_prec>&dm_alpha, vector<real_prec>&tr_al
                 {
                   int ibin=get_bin(log10(alpha_bias[i]),bmin,nb,delta,0);
                   if(log10(alpha_bias[i])<bmax && log10(alpha_bias[i])>=bmin)
-                    hist[ibin]++;
+                    hist[ibin]+=1./static_cast<real_prec>(dm_alpha.size());
 
                   int abin=get_bin(log10(tr_alpha[i]),bmin,nb,delta,0);
                   if(log10(tr_alpha[i])<bmax && log10(tr_alpha[i])>=bmin)
-                    hist_alphah[abin]++;
+                    hist_alphah[abin]+=1./static_cast<real_prec>(dm_alpha.size());
 
                   int dbin=get_bin(log10(dm_alpha[i]),bmin,nb,delta,0);
                   if(log10(dm_alpha[i])<bmax && log10(dm_alpha[i])>=bmin)
-                    hist_alphadm[dbin]++;
-  
-                    
+                    hist_alphadm[dbin]+=1./static_cast<real_prec>(dm_alpha.size());
+                   
                 }
             }
         }
-        string ftype = fitype == 0 ? "dm" : "tr";
         string fileo=params._Output_directory()+"alpha_hbias_p"+to_string(params._unitsim_plabel())+"_cwt"+to_string(icwt)+"_"+ftype+".txt";
-        cout<<"Writting distribution of alpha bias to file "<<fileo<<endl;
-        ofstream off; off.open(fileo.c_str());
-        for(int i=0; i<nb; ++i)
-            off<<bmin+(i+0.5)*delta<<"\t"<<hist[i]/static_cast<real_prec>(dm_alpha.size())<<endl;
-        off.close();
+        Fo.write_to_file(fileo,ibins,hist);
 
         fileo=params._Output_directory()+"alphah_hbias_p"+to_string(params._unitsim_plabel())+"_cwt"+to_string(icwt)+"_"+ftype+".txt";
-        cout<<"Writting distribution alpha bias to file "<<fileo<<endl;
-        off.open(fileo.c_str());
-        for(int i=0; i<nb; ++i)
-            off<<bmin+(i+0.5)*delta<<"\t"<<hist_alphah[i]/static_cast<real_prec>(dm_alpha.size())<<endl;
-        off.close();
+        Fo.write_to_file(fileo,ibins,hist_alphah);
 
         fileo=params._Output_directory()+"alphadm_hbias_p"+to_string(params._unitsim_plabel())+"_cwt"+to_string(icwt)+"_"+ftype+".txt";
-        cout<<"Writting alpha bias to file "<<fileo<<endl;
-        off.open(fileo.c_str());
-        for(int i=0; i<nb; ++i)
-            off<<bmin+(i+0.5)*delta<<"\t"<<hist_alphadm[i]/static_cast<real_prec>(dm_alpha.size())<<endl;
-        off.close();
+        Fo.write_to_file(fileo,ibins,hist_alphadm);
       }
 
 
@@ -114,10 +109,11 @@ void usage(string s)
   std::cout<<"\t\n\tCosmologicalCATalogs for LArge Scale Structure"<<endl;
   std::cout<<"\t\n\tHow to run: "<<s<<"\t [-option] [argument]"<<endl;
   std::cout<<"\t\n\tOptions: "<<endl;
-  std::cout<<"\t         -a for information on the author. No argument"<<endl;
-  std::cout<<"\t         -b parameter_file.ini: To perform cosmic-web analysis and bias assignment"<<endl;
-  std::cout<<"\t         -h parameter_file.ini: Help"<<endl;
-  std::cout<<"\t         -i parameter_file.ini: Shows input pars"<<endl;
+  std::cout<<"\t         -a for information on the author (no argument). "<<endl;
+  std::cout<<"\t         -b parameter_file.ini (with argument) To perform cosmic-web analysis and bias assignment"<<endl;
+  std::cout<<"\t         -h parameter_file.ini (no argum,ent): Help"<<endl;
+  std::cout<<"\t         -i parameter_file.ini (with argument): Shows input pars"<<endl;
+  std::cout<<"\t\n\tArgument is a parameter file"<<endl;
   std::cout<<"\tConsult ../Headers/def.h for pre-procesor directives"<<endl;
   std::cout<<"\t*****************************************************************"<<endl;
   std::cout<<"\t*****************************************************************"<<endl;
