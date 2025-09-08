@@ -25,7 +25,7 @@
 /**
 *@brief Number of threads to use with OMP
 */
-#define _NTHREADS_ static_cast<int>(10)
+#define _NTHREADS_ static_cast<int>(14)
 // ****************************************************************************************
 // ****************************************************************************************
 #define NEGATIVE_INT static_cast<int>(-1)
@@ -103,9 +103,9 @@
 // ****************************************************************************************
 //#define _MG_
 //#define _SLICS_  
-//#define _UNITSIM_
+#define _UNITSIM_
 //#define _TNG_
-#define _TNG_GAL_ //como para la tng no tenemos vels, entonces prevenimos el uso del v info en el calculo del bias. Cuando llguen, redefinimos cosas.
+//#define _TNG_GAL_ //como para la tng no tenemos vels, entonces prevenimos el uso del v info en el calculo del bias. Cuando llguen, redefinimos cosas.
 //#define _FLAGSHIP_
 // ****************************************************************************************
 #ifdef _UNITSIM_
@@ -268,10 +268,8 @@
 /**
  * @brief  AWEB Uses the ANISOTROPY PARAMETERS (ellipticity, anisotropy, prolatnes) of the tidal field
 */
-//#define _USE_AWEB_
 #ifdef _USE_AWEB_
 #define _USE_TIDAL_ANISOTROPY_
-//#define _USE_ELLIPTICITY_
 //#define _USE_PROLATNESS_
 #endif
 // ======================================================================================================================================
