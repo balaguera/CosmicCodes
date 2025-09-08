@@ -12,6 +12,7 @@
 #include "../headers/cosmo_parameters.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define NOT_USED -1
+#define NN "NoName"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This should be independent of reading the parameter file.
 
@@ -20,86 +21,1297 @@ void Params::explain_pars(string par_name)
 {
   s_message_pars message_pars;
   message_pars.set_par_name(par_name);
-  bool v_string=false;
-  if(par_name=="NX"){
-    message_pars.set_par_description("Number of bins for dark matter");
-    message_pars.set_par_option("Integer > 0");
-    message_pars.set_par_default(this->NX);
-    v_string=false;// if parameter is a string, false. if a number, true
-  }
-  if(par_name=="NY")
-  {
-    message_pars.set_par_description("Number of bins for dark matter halos. ");
-    message_pars.set_par_option("Integer > 0. If the interpolation is NGP, this value is overriden and transformed to maximum occupation number in cells");
-    v_string=false;
-  }
-  else if(par_name=="Redshift" || par_name=="redshift")
+  if(par_name=="Redshift")
   {
     message_pars.set_par_description("Cosmological redshift");
-    message_pars.set_par_option("A number > 0 identifiying");
+    message_pars.set_par_option("Float > 0");
     message_pars.set_par_default(this->redshift);
-    v_string=false;
+  }
+  else if(par_name=="Initial_Redshift_DELTA")
+  {
+    message_pars.set_par_description("Redshift at which the initial linear power spectrum is normalized to genete IC");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->Initial_Redshift_DELTA);
+  }
+  else if(par_name=="Initial_Redshift_SIM")
+  {
+    message_pars.set_par_description("Initial redshift of a given N-body simulation");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->Initial_Redshift_SIM);
   }
   else if(par_name=="IC_index")
   {
     message_pars.set_par_description("Index to characterize the IC of some procedures. ");
     message_pars.set_par_option("Integer");
-    v_string=false;
+    message_pars.set_par_default(this->IC_index);
   }
-  else if(par_name=="Nlambdath")
-  {
-    message_pars.set_par_description("Number of thersholds used to define cosmic-web types. Used only if test with cwc are available");
-    message_pars.set_par_option("Integer > 0");
-    v_string=false;
-  }
-  else if(par_name=="lambdath")
-  {
-    message_pars.set_par_description("Threshold used to define cosmic-web types.");
-    message_pars.set_par_option("Integer > 0");
-    message_pars.set_par_default(this->lambdath);
-    v_string=false;
-  }
-  else if(par_name=="realization")
+  else if(par_name=="Realization" ||par_name=="realization" )
   {
     message_pars.set_par_description("Index to characterize realizations when producing mocks");
     message_pars.set_par_option("Integer > 0");
     message_pars.set_par_default(this->realization);
-    v_string=false;
+  } 
+  else if(par_name=="Unitsim_plabel" )
+  {
+    message_pars.set_par_description("Index to characterize snapshots of the Unit simulation");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(this->Unitsim_plabel);
+  } 
+   
+  else if(par_name=="QUANTITY" )
+  {
+    message_pars.set_par_description("Index to characterize snapshots of the Unit simulation");
+    message_pars.set_par_option("TO BE DECPRECATED?");
+    message_pars.set_par_default(this->Quantity);
+  } 
+
+  
+
+  else if(par_name=="NX"){
+    message_pars.set_par_description("Number of bins for 1d or nD histograms of dark matter density (or log dens)");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(static_cast<int>(floor(this->NX)));
+  }
+  
+  else if(par_name=="iMAS_X")
+  {
+    message_pars.set_par_description("Mass assignment scheme for the dark matter ");
+    message_pars.set_par_option("0=NGP, 1=CIC, 2=TSC, 3=PCS");
+    message_pars.set_par_default(this->iMAS_X);
+  }
+  else if(par_name=="XNAME")
+  {
+    message_pars.set_par_description("Set a name for the X property");
+    message_pars.set_par_option("E.g., DM");
+    message_pars.set_par_default(this->XNAME);
+  }
+
+
+  else if(par_name=="iMAS_X_REF_PDF")
+  {
+    message_pars.set_par_description("Mass assignment scheme for the reference dark matter field used in rank ordering");
+    message_pars.set_par_option("0=NGP, 1=CIC, 2=TSC, 3=PCS");
+    message_pars.set_par_default(this->iMAS_X_REF_PDF);
+  }
+  else if(par_name=="iMAS_X_NEW")
+  {
+    message_pars.set_par_description("Mass assignment scheme for the new dark matter field generated with approximated methods");
+    message_pars.set_par_option("0=NGP, 1=CIC, 2=TSC, 3=PCS");
+    message_pars.set_par_default(this->iMAS_X_NEW);
+  }
+
+  else if(par_name=="Type_of_file_X")
+  {
+    message_pars.set_par_description("Specifies if the input density field for dm (X) is in binary or ascii");
+    message_pars.set_par_option("bin (binnary file), ascii (ascii file)");
+    message_pars.set_par_default(this->Type_of_file_X);
+  }
+
+  else if(par_name=="Name_Property_X")
+  {
+    message_pars.set_par_description("Set a flag for the X property");
+    message_pars.set_par_option("DENSITY, OVERDENSITY");
+    message_pars.set_par_default(this->Name_Property_X);
+  }
+  else if(par_name=="Input_Directory_X")
+  {
+    message_pars.set_par_description("Path to the directory where the DM field is located");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Input_Directory_X);
+  }
+  else if(par_name=="Input_Directory_X_REF")
+  {
+    message_pars.set_par_description(" Path to the directory where the DM_ref (for BMT) field is located");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Input_Directory_X_REF);
+  }
+  else if(par_name=="Input_Directory_X_REF_TWO")
+  {
+    message_pars.set_par_description("Path to the directory where a second reference DM (for BMT using e.g. paiired simulations) field is located");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Input_Directory_X_REF_TWO);
+  }
+  else if(par_name=="Input_Directory_X_NEW")
+  {
+    message_pars.set_par_description(" Path to the directory where new DM (for BMT) field is located");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Input_Directory_X_NEW);
+  }
+
+  else if(par_name=="Input_Directory_X_new_ref")
+  {
+    message_pars.set_par_description("Path to the directory where a new DM_ref (fpr rank ordering) field is located");
+    message_pars.set_par_option("Path. ToBeDeprecated");
+    message_pars.set_par_default(this->Input_Directory_X_new_ref);
+  }
+
+  else if(par_name=="Name_Catalog_X")
+  {
+    message_pars.set_par_description("Name of the (binary or ascii) catalog with dm density field. This is appended to output files");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Name_Catalog_X);
+  }
+  else if(par_name=="Name_Catalog_X_NEW")
+  {
+    message_pars.set_par_description("Name of the (binary or ascii) catalog with a new dm density field. This is appended to output files");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Name_Catalog_X_NEW);
+  }
+  else if(par_name=="Name_Catalog_X_new_ref")
+  {
+    message_pars.set_par_description("Name of the (binary or ascii) catalog with a new dm density field. This is appended to output files");
+    message_pars.set_par_option("TBD");
+    message_pars.set_par_default(this->Name_Catalog_X_NEW);
+  }
+  else if(par_name=="Name_Catalog_X_REF_PDF")
+  {
+    message_pars.set_par_description("Name of the (binary or ascii) catalog with a reeference dm density field for Rank ordering");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Name_Catalog_X_REF_PDF);
+  }
+  else if(par_name=="Convert_Density_to_Delta_X")
+  {
+    message_pars.set_par_description("If the input DM field is density, convert it to overdensity");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Convert_Density_to_Delta_X);
+  }
+  else if(par_name=="Name_VelFieldx_X")
+  {
+    message_pars.set_par_description("Path to file containing the x-componetns of the dm velocities");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Name_VelFieldx_X);
+  }
+  else if(par_name=="Name_VelFieldy_X")
+  {
+    message_pars.set_par_description("Path to file containing the y-componetns of the dm velocities");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Name_VelFieldy_X);
+  }
+  else if(par_name=="Name_VelFieldz_X")
+  {
+    message_pars.set_par_description("Path to file containing the z-componetns of the dm velocities");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Name_VelFieldz_X);
+  }
+  else if(par_name=="Scale_X")
+  {
+    message_pars.set_par_description("Specify whether the histograms are done in log or linear scale for X");
+    message_pars.set_par_option("log, linear");
+    message_pars.set_par_default(this->Scale_X);
   }
   else if(par_name=="delta_X_min")
   {
-    message_pars.set_par_description("Minimum vaue of overdensity for histogram (in linear scale)");
-    message_pars.set_par_option("Number > 0");
+    message_pars.set_par_description("Minimum value of delta_dm (linear scale) used for distribution, histograms and bias analysis. If requiested from parameter file (Using Redefine_limits), this value is overloaded by computing it from the input fields");
+    message_pars.set_par_option("log, linear");
     message_pars.set_par_default(this->delta_X_min);
-    v_string=false;
   }
-  else  if(par_name=="delta_X_max")
+
+  else if(par_name=="delta_X_max")
   {
-    message_pars.set_par_description("Maximum vaue of overdensity for histogram (in linear scale)");
-    message_pars.set_par_option("Number > 0");
+    message_pars.set_par_description("Maximum value of delta_dm (linear scale) used for distribution, histograms and bias analysis. If requiested from parameter file (Using Redefine_limits), this value is overloaded by computing it from the input fields");
+    message_pars.set_par_option("log, linear");
     message_pars.set_par_default(this->delta_X_max);
-    v_string=false;
   }
-  else  if(par_name=="ldelta_X_max")
-  {
-    message_pars.set_par_description("Maximum vaue of overdensity for histogram (in log(1+delta))");
-    message_pars.set_par_option("Number > 0");
-    message_pars.set_par_default(this->ldelta_X_max);
-    v_string=false;
-  }
+
   else if(par_name=="ldelta_X_min")
   {
-    message_pars.set_par_description("Minimum vaue of overdensity for histogram (in log(1+delta))");
-    message_pars.set_par_option("Number > 0");
+    message_pars.set_par_description("Minimum value of delta_dm (log(1+delta) scale) used for distribution, histograms and bias analysis. If requiested from parameter file (Using Redefine_limits), this value is overloaded by computing it from the input fields");
+    message_pars.set_par_option("log, linear");
     message_pars.set_par_default(this->ldelta_X_min);
-    v_string=false;
   }
+
+  else if(par_name=="ldelta_X_max")
+  {
+    message_pars.set_par_description("Maximum value of delta_dm (log (1+delta) scale) used for distribution, histograms and bias analysis. If requiested from parameter file (Using Redefine_limits), this value is overloaded by computing it from the input fields");
+    message_pars.set_par_option("log, linear");
+    message_pars.set_par_default(this->ldelta_X_max);
+  }
+
+
+else if(par_name=="NY"){
+    message_pars.set_par_description("Number of bins for 1d or nD histograms of dark matter density (or log dens)");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(this->NY);
+  }
+  
+  else if(par_name=="iMAS_Y")
+  {
+    message_pars.set_par_description("Mass assignment scheme for the tracers of dark matter. ");
+    message_pars.set_par_option("0=NGP, 1=CIC, 2=TSC, 3=PCS");
+    message_pars.set_par_default(this->iMAS_Y);
+  }
+  else if(par_name=="YNAME")
+  {
+    message_pars.set_par_description("Set a name for the Y property");
+    message_pars.set_par_option("E.g., DM");
+    message_pars.set_par_default(this->YNAME);
+  }
+
+  else if(par_name=="Type_of_file_Y")
+  {
+    message_pars.set_par_description("Specifies if the input density field for tr (Y) is in binary or ascii");
+    message_pars.set_par_option("bin (binnary file), ascii (ascii file)");
+    message_pars.set_par_default(this->Type_of_file_Y);
+  }
+
+  else if(par_name=="Name_Property_Y")
+  {
+    message_pars.set_par_description("Set a flag for the Y property");
+    message_pars.set_par_option("DENSITY, OVERDENSITY");
+    message_pars.set_par_default(this->Name_Property_Y);
+  }
+  else if(par_name=="Input_Directory_Y")
+  {
+    message_pars.set_par_description("Path to the directory where the tracer field is located");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Input_Directory_Y);
+  }
+  else if(par_name=="Input_Directory_Y_TWO")
+  {
+    message_pars.set_par_description("Path to the directory where a second reference TR (for BMT using e.g. paiired simulations) field is located");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Input_Directory_Y_TWO);
+  }
+
+  else if(par_name=="Name_Catalog_Y")
+  {
+    message_pars.set_par_description("Name of the (binary or ascii) catalog with tracer density field. This is appended to output files");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Name_Catalog_Y);
+  }
+
+  else if(par_name=="Name_Catalog_Y_new_ref")
+  {
+    message_pars.set_par_description("Name of the (binary or ascii) new reference catalog with a tracer density field. This is appended to output files");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Name_Catalog_Y_new_ref);
+  }
+  else if(par_name=="Name_Catalog_Y_HR")
+  {
+    message_pars.set_par_description("Name of the (binary or ascii)  high resolution catalog with a tracer density field");
+    message_pars.set_par_option("");
+    message_pars.set_par_default(this->Name_Catalog_Y_HR);
+  }
+  else if(par_name=="Name_Catalog_Y_MWEIGHTED")
+  {
+    message_pars.set_par_description("Name of the (binary or ascii)  mass weihgted catalog with a tracer density field");
+    message_pars.set_par_option("TBD");
+    message_pars.set_par_default(this->Name_Catalog_Y_MWEIGHTED);
+  }
+
+
+  else if(par_name=="Convert_Density_to_Delta_Y")
+  {
+    message_pars.set_par_description("If the input tracer field is density, convert it to overdensity");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Convert_Density_to_Delta_Y);
+  }
+
+  else if(par_name=="Scale_Y")
+  {
+    message_pars.set_par_description("Specify whether the histograms are done in log or linear scale for Y");
+    message_pars.set_par_option("log, linear");
+    message_pars.set_par_default(this->Scale_Y);
+  }
+  else if(par_name=="delta_Y_min")
+  {
+    message_pars.set_par_description("Minimum value of delta_TR (linear scale) used for distribution, histograms and bias analysis. If requiested from parameter file (Using Redefine_limits), this value is overloaded by computing it from the input fields");
+    message_pars.set_par_option("log, linear");
+    message_pars.set_par_default(this->delta_Y_min);
+  }
+
+  else if(par_name=="delta_Y_max")
+  {
+    message_pars.set_par_description("Maximum value of delta_TR (linear scale) used for distribution, histograms and bias analysis. If requiested from parameter file (Using Redefine_limits), this value is overloaded by computing it from the input fields");
+    message_pars.set_par_option("log, linear");
+    message_pars.set_par_default(this->delta_Y_max);
+  }
+
+  else if(par_name=="ldelta_Y_min")
+  {
+    message_pars.set_par_description("Minimum value of delta_TR (log(1+delta) scale) used for distribution, histograms and bias analysis. If requiested from parameter file (Using Redefine_limits), this value is overloaded by computing it from the input fields");
+    message_pars.set_par_option("log, linear");
+    message_pars.set_par_default(this->ldelta_Y_min);
+  }
+
+  else if(par_name=="ldelta_Y_max")
+  {
+    message_pars.set_par_description("Maximum value of delta_TR (log (1+delta) scale) used for distribution, histograms and bias analysis. If requiested from parameter file (Using Redefine_limits), this value is overloaded by computing it from the input fields");
+    message_pars.set_par_option("log, linear");
+    message_pars.set_par_default(this->ldelta_X_max);
+  }
+
+  else if(par_name=="NY_MASS"){
+    message_pars.set_par_description("Number of bins of tracer mass");
+    message_pars.set_par_option("To be deprecated ¿?");
+    message_pars.set_par_default(this->NY_MASS);
+  }
+  else if(par_name=="NY_SAT_FRAC"){
+    message_pars.set_par_description("Number of bins of halo satellite fraction");
+    message_pars.set_par_option("To be deprecated ¿?");
+    message_pars.set_par_default(this->NY_SAT_FRAC);
+  }
+
+  else if(par_name=="Redefine_limits"){
+    message_pars.set_par_description("Overrun the limits min and max for delta or log delta (dm and tr) and compute from distribution. For BMT, it is best ot set it to false, as the actual limits of the distributions can change in each iteration.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Redefine_limits);
+  }
+
+
+  else if(par_name=="Nlambdath")
+  {
+    message_pars.set_par_description("Number of thersholds used to define cosmic-web types. Used only if test with cwc are available");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(this->Nlambdath);
+  }
+  else if(par_name=="lambdath")
+  {
+    message_pars.set_par_description("Threshold used to define cosmic-web types based on the tidal field");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(this->lambdath);
+  }
+  else if(par_name=="lambdath_v")
+  {
+    message_pars.set_par_description("Threshold used to define cosmic-web types based on the shear of the velocity field");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(this->lambdath_v);
+  }
+
+   else if(par_name=="N_SKNOT_MASSBIN")
+  {
+    message_pars.set_par_description("Number of bins in the Mass of colapsing regions (defined from TWEB) used to build BIAS.");
+    message_pars.set_par_option("ULONG >0");
+    message_pars.set_par_default(this->n_sknot_massbin);
+  }
+
+  else if(par_name=="N_VKNOT_MASSBIN")
+  {
+    message_pars.set_par_description("Number of bins in the Mass of colapsing regions (defined from VWEB) used to build BIAS.");
+    message_pars.set_par_option("ULONG >0");
+    message_pars.set_par_default(this->n_vknot_massbin);
+  }
+
+  else if(par_name=="t_CWT_used")
+  {
+    message_pars.set_par_description("This collects the CWT (TWEB) and their combinations to use in BMT");
+    message_pars.set_par_option("Separate by space end place -END- at the the end. For example, if knots and voids are to be used, set t_CWT_used = 1 4 END. If knots and the rest is to be used, then set t_CWT_used = 1 234 END, etc.");
+    message_pars.set_par_default(1);
+  }
+  else if(par_name=="v_CWT_used")
+  {
+    message_pars.set_par_description("This collects the CWT (VWEB) and their combinations to use in BMT");
+    message_pars.set_par_option("Separate by space end place -END- at the the end. For example, if knots and voids are to be used, set t_CWT_used = 1 4 END. If knots and the rest is to be used, then set t_CWT_used = 1 234 END, etc.");
+    message_pars.set_par_default(this->n_vknot_massbin);
+  }
+
+  else if(par_name=="Write_PDF_number_counts")
+  {
+    message_pars.set_par_description("Ask if ascii file containing the pdf of number counts of halos is to be written.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Write_PDF_number_counts);
+  }
+  else if(par_name=="Comp_joint_PDF")
+  {
+    message_pars.set_par_description("Ask if the joint (2d) pdf from bias is to be computed");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Comp_joint_PDF);
+  }
+  else if(par_name=="Comp_conditional_PDF")
+  {
+    message_pars.set_par_description("Ask if the conditional pdf from bias is to be computed");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Comp_conditional_PDF);
+  }
+  else if(par_name=="write_files_for_histograms")
+  {
+    message_pars.set_par_description("Ask if files for pdf histograms are to be printed.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->write_files_for_histograms);
+  }
+
+
+  else if(par_name=="N_iterations_Kernel")
+  {
+    message_pars.set_par_description("Number of iterations in the BMT");
+    message_pars.set_par_option("Ulong >0");
+    message_pars.set_par_default(this->N_iterations_Kernel);
+  }
+
+  else if(par_name=="Iteration_Kernel_average")
+  {
+    message_pars.set_par_description("Iteration from which kernels and bias are used to make a final average of the iteration procedures");
+    message_pars.set_par_option("Ulong >0 and <N_iterations_Kernel  ");
+    message_pars.set_par_default(this->Iteration_Kernel_average);
+  }
+  else if(par_name=="iteration_ini")
+  {
+    message_pars.set_par_description("Starting iteration");
+    message_pars.set_par_option("To be deprecated");
+    message_pars.set_par_default(this->Iteration_Kernel_average);
+  }
+
+  else if(par_name=="N_dm_realizations")
+  {
+    message_pars.set_par_description("Number of DM that will be created by the approximated gravity solver and on which the Kernel will act to create a halo mock density field.");
+    message_pars.set_par_option("ULONG >=1. To Be Deprecated");
+    message_pars.set_par_default(this->N_dm_realizations);
+  }
+  else if(par_name=="N_dm_initial")
+  {
+    message_pars.set_par_description("Initial label of the DM realizations");
+    message_pars.set_par_option("ULONG >=1. To Be Deprecated");
+    message_pars.set_par_default(this->N_dm_initial);
+  }
+else if(par_name=="N_iterations_dm")
+  {
+    message_pars.set_par_description("Number of iterations for the pre-processing of DM");
+    message_pars.set_par_option("ULONG >=1. To Be Deprecated");
+    message_pars.set_par_default(this->N_iterations_dm);
+  }
+
+else if(par_name=="x_OUTPUT_at_iteration")
+  {
+    message_pars.set_par_description("Collect the steps within the iterative process at which outputs are to be written");
+    message_pars.set_par_option("Indices separated by space with END at end");
+    message_pars.set_par_default(1);
+  }
+else if(par_name=="Apply_Rankordering")
+  {
+    message_pars.set_par_description("Apply rank ordering to the dm in the iterative procedure of BMT at each step");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Apply_Rankordering);
+  }
+else if(par_name=="Apply_Rankordering_ab_initio")
+  {
+    message_pars.set_par_description("Apply rank ordering to the dm in the iterative procedure of BMT at each step");
+    message_pars.set_par_option("true, false. To Be Deprecated");
+    message_pars.set_par_default(this->Apply_Rankordering);
+  }
+
+else if(par_name=="l_LOS_new_dm")
+  {
+    message_pars.set_par_description("Collect ID of seveal independent DM fields to be populated with halo number counts in BMT. Inspired from applications to SLICims");
+    message_pars.set_par_option("Indices separated by space with END at end");
+    message_pars.set_par_default(1);
+  }
+
+else if(par_name=="Number_of_chunks_new_dm")
+  {
+    message_pars.set_par_description("Collect ID of seveal independent DM fields to be populated with halo number counts in BMT");
+    message_pars.set_par_option("Indices separated by space with END at end");
+    message_pars.set_par_default(this->Number_of_chunks_new_dm);
+  }
+else if(par_name=="Input_Directory_BIAS_KERNEL")
+  {
+    message_pars.set_par_description("Path to directory where Bias and Kernel is written.");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->Input_Directory_BIAS_KERNEL);
+  }
+else if(par_name=="Input_Directory_BIAS_KERNEL_TWO")
+  {
+    message_pars.set_par_description("Path to directory where bias and Kernel_two (from anotehre reference or paired simulation) is written.");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->Input_Directory_BIAS_KERNEL_TWO);
+  }
+
+else if(par_name=="Output_directory")
+  {
+    message_pars.set_par_description("Path to output directory");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->Output_directory);
+  }
+
+
   else if(par_name=="Statistics")
   {
     message_pars.set_par_description("Statistics to measure from input catalog");
-    message_pars.set_par_option("For power spectrum: Pk_fkp (FKP estimator), Pk_yb (Yamamoto-Bianchi), Pk_ys(Yamamoto-Scoccimarro)");
-    v_string=true;
+    message_pars.set_par_option("For power spectrum: Pk_fkp (FKP estimator), Pk_yb (Yamamoto-Bianchi), Pk_ys(Yamamoto-Scoccimarro). Angular power spectrum  will be added, using the H-GAP code.");
+    message_pars.set_par_default(this->statistics);
   }
+  else if(par_name=="Name_survey")
+  {
+    message_pars.set_par_description("A name of the survey or simulation, to append in the output power file");
+    message_pars.set_par_option("String");
+    message_pars.set_par_default(this->Name_survey);
+
+  }
+
+ else if(par_name=="Type_of_object")
+  {
+    message_pars.set_par_description("Type of object to get statistics from. To be appended");
+    message_pars.set_par_option("String with TRACER, RANDOM, REF");
+    message_pars.set_par_default(this->type_of_object);
+
+  }
+
+ else if(par_name=="Input_type")
+  {
+    message_pars.set_par_description("Type of file from which the statistics (e.g. power spectrum) will be measured");
+    message_pars.set_par_option("density−grid (density field), delta−grid (overdensity field) or, catalog (ascii)");
+    message_pars.set_par_default(this->input_type);
+
+  }
+ else if(par_name=="Input_type_two")
+  {
+    message_pars.set_par_description("Type of a second file from which the statistics (mainly cross power spectrum) will be measured");
+    message_pars.set_par_option("density−grid (density field), delta−grid (overdensity field) or, catalog (ascii)");
+    message_pars.set_par_default(this->input_type_two);
+  }
+ else if(par_name=="ngal_delta")
+ {
+    message_pars.set_par_description("Number of tracers. This is requested for power spectrum mesurements in case Input−type = delta_grid. Otherwise unused. ");
+    message_pars.set_par_option("ULONG");
+    message_pars.set_par_default(this->ngal_delta);
+  }
+
+ else if(par_name=="Input_dir_cat")
+ {
+    message_pars.set_par_description("Path to input directory");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->Input_dir_cat);
+  }
+ else if(par_name=="Input_dir_cat_TWO")
+ {
+    message_pars.set_par_description("Path to input directory of a second catalog (for cross correlation). Note that it is assumed that the name of this catalog us the same as that set in Catalogue_file_new_ref");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->Input_dir_cat_TWO);
+  }
+ else if(par_name=="Catalogue_file")
+ {
+    message_pars.set_par_description("Name of file containing the tracer catalog");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->file_catalogue);
+  }
+ else if(par_name=="Catalogue_file_new_ref")
+ {
+    message_pars.set_par_description("Name of file containing the a second tracer catalog");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->file_catalogue);
+  }
+ else if(par_name=="Random_file" || par_name=="random_file")
+ {
+    message_pars.set_par_description("Name of file containing the random catalog. Note that it is assumed that the directory where this is saved is the same as Input_dir_cat.");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->file_random);
+  }
+ else if(par_name=="Number_of_random_files" )
+ {
+    message_pars.set_par_description("Number of randoms files used to measure a power spectrum. Used in case of highly dense data sets");
+    message_pars.set_par_option("Int>0");
+    message_pars.set_par_default(this->Number_of_random_files);
+  }
+ else if(par_name=="delta_grid_file")
+ {
+    message_pars.set_par_description("Full path (dir plus name) to overdensity field on a mesh");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->delta_grid_file);
+  }
+ else if(par_name=="delta_grid_file2")
+ {
+    message_pars.set_par_description("Full path (dir plus name) to overdensity field on a mesh");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->delta_grid_file2);
+  }
+ else if(par_name=="delta_grid_file3")
+ {
+    message_pars.set_par_description("Full path (dir plus name) to overdensity field on a mesh");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->delta_grid_file3);
+  }
+ else if(par_name=="delta_grid_file4")
+ {
+    message_pars.set_par_description("Full path (dir plus name) to overdensity field on a mesh");
+    message_pars.set_par_option("Path");
+    message_pars.set_par_default(this->delta_grid_file4);
+  }
+ else if(par_name=="measure_cross")
+ {
+    message_pars.set_par_description("Set true if cross power spectrum is to be measured.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->measure_cross);
+  }
+
+  else if(par_name=="measure_cross_from_1")
+ {
+    message_pars.set_par_description("Pinpoint one field to measure cross-power. If set to 1, it takes the file in delta−grid−file");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(this->measure_cross_from_1);
+  }
+ else if(par_name=="measure_cross_from_2")
+ {
+    message_pars.set_par_description("Pinpoint one field to measure cross-power. If set to 2, it takes the file in delta−grid−file2 and so on");
+    message_pars.set_par_option("Integer > 0");
+    message_pars.set_par_default(this->measure_cross_from_2);
+  }
+
+ else if(par_name=="sys_of_coord_dm")
+ {
+    message_pars.set_par_description("This parameter identifies the system of coordinates in which positions of dark matter particles are written in an ASCII file for a catalog");
+    message_pars.set_par_option("0=(Cartesian coordinates (X,Y,Z)). 1=(Equatorial coordinates (RA,Dec,r)). 2=(Pseudo-equatorial coordinates (RA,Dec,z)). 3=(Pseudo-equatorial coordinates (RA,Dec,z)). With sys_of_coord_dm = 2, the code uses a set of cosmological parameters to compute the comoving distance from redshifts. With sys_of_coord_dm = 3, the redshift is directly used as radial coordinate. All distances are given in units of Mpc over h." );
+    message_pars.set_par_default(this->sys_of_coord_dm);
+  }
+   else if(par_name=="i_coord1_dm")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file containing the coordinates X, RA, RA, RA for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_coord1_dm);
+  }
+   else if(par_name=="i_coord2_dm")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file containing the coordinates Y, Dec, Dec, Dec, for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge.");
+    message_pars.set_par_default(this->i_coord2_dm);
+  }
+   else if(par_name=="i_coord3_dm")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file containing the coordinates Z, r, z, z for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_coord3_dm);
+  }
+   else if(par_name=="i_v1_dm")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file containing the first component (x) of the velocity of dm particles");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_coord3_dm);
+  }
+
+   else if(par_name=="i_v2_dm")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file containing the second component (y) of the velocity of dm particles");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_coord3_dm);
+  }
+   else if(par_name=="i_v3_dm")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file containing the third component (z) of the velocity of dm particles");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_coord3_dm);
+  }
+
+else if(par_name=="i_mass_dm")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer catalogue where the information of the dm mass is allocated. Mass is expected in units of Ms / h");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_mass_g);
+  }
+
+
+  else if(par_name=="sys_of_coord_g")
+  {
+    message_pars.set_par_description("This parameter identifies the system of coordinates in which positions of tracers are written in an ASCII file.");
+    message_pars.set_par_option("0 (Cartesian coordinates (X,Y,Z)). 1 (Equatorial coordinates (RA,Dec,r)). 2 (Pseudo-equatorial coordinates (RA,Dec,z)). 3 (Pseudo-equatorial coordinates (RA,Dec,z))");
+    message_pars.set_par_default(this->sys_of_coord_g);
+  }
+
+ else if(par_name=="redshift_space_coords_g")
+ {
+    message_pars.set_par_description("Set false if the coordinates written in the tracer catalog do not have any effect of peculiar velocities. This can be the case of using Cartesian coordinates in real-space.If power from such input is to be measured in redshift space, go to the pre-proc directive REDSHIFT_SPACE. If instead, the input catalogs has coordinates with RSD already in the coordinates, set to false.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->redshift_space_coords_g);
+  }
+ else if(par_name=="angles_units_g")
+ {
+    message_pars.set_par_description("If positions are in spherical coordinates, specify the units of angles in the object catalogue");
+    message_pars.set_par_option("D (for degrees) or R (for radians)");
+    message_pars.set_par_default(this->angles_units_g);
+  }
+
+
+  else if(par_name=="i_coord1_g")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file (tracer catalog) containing the coordinates X, RA, RA, RA for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_coord1_g);
+  }
+   else if(par_name=="i_coord2_g")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file (tracer catalog) containing the coordinates Y, Dec, Dec, Dec, for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge.");
+    message_pars.set_par_default(this->i_coord2_g);
+  }
+   else if(par_name=="i_coord3_g")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file (tracer catalog) containing the coordinates Z, r, z, z for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_coord3_g);
+  }
+
+   else if(par_name=="i_v1_g")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file containing the first component (x) of the velocity of tracers");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_v1_g);
+  }
+
+   else if(par_name=="i_v2_g")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file containing the second component (y) of the velocity of tracers");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_v2_g);
+  }
+   else if(par_name=="i_v3_g")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file containing the third component (z) of the velocity of tracers");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_v3_g);
+  }
+
+ else if(par_name=="vel_units_g")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file containing the third component (z) of the velocity of tracers");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_coord3_dm);
+  }
+
+else if(par_name=="i_mass_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer catalogue where the information of the mass is allocated. Mass is expected in units of Ms / h");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_mass_g);
+  }
+else if(par_name=="i_vmax_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer catalogue where the information of Vmax (maximum circular velocity) is allocated.. Vmax is expected in units of km / s");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_vmax_g);
+  }
+else if(par_name=="i_vrms_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer catalogue where the information of Vrms (root mean squared velcoity) is allocated.  Mass is expected in units of km / s");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_vrms_g);
+  }
+else if(par_name=="i_rs_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer catalogue where the information of shapre radius or concentration (computed from shape radius if requested from preproc directives.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_rs_g);
+  }
+else if(par_name=="i_spin_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer catalogue where the information of Peeble's dimensionless spin is allocated.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_spin_g);
+  }
+else if(par_name=="i_spin_bullock_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer catalogue where the information of Bullock dimensionless spin is allocated.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_spin_bullock_g);
+  }
+
+else if(par_name=="i_virial_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of the virial T/|W| is allocated.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_virial_g);
+  }
+else if(par_name=="i_rvir_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of the virial radius is allocated. If no information on the mass is provided or is not aimed to be used, set a negative value.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_rvir_g);
+  }
+else if(par_name=="i_b_to_a_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of the ratio b to a of the semi-axis of dark matter halos. If requested from preproc directives, this column will be used to allocate halo prolatness.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_b_to_a_g);
+  }
+
+else if(par_name=="i_c_to_a_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of the ratio c to a of the semi-axis of dark matter halos. If requested from preproc directives, this column will be used to allocate halo ellipticity.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_c_to_a_g);
+  }
+
+else if(par_name=="i_sf_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of the star formation rate is available");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_c_to_a_g);
+  }
+else if(par_name=="i_color_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of the color is available");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_color_g);
+  }
+
+else if(par_name=="i_stellar_mass_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of the stellar mass is available");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_stellar_mass_g);
+  }
+else if(par_name=="i_mean_density_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of the \textbf{mean number density} tabulated at each position of the tracer is allocated. This quantity is expected in units of (h/Mpc}**3");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_mean_density_g);
+  }
+
+else if(par_name=="i_abs_mag_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of the absolute magnitude (in any band) is available.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_abs_mag_g);
+  }
+
+
+else if(par_name=="i_app_mag_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of the apparent magnitude (in any band) is available.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_app_mag_g);
+  }
+
+else if(par_name=="i_weight1_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of an statistical weight (used for power spectruma analysis) w1 is allocated. ");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_app_mag_g);
+  }
+else if(par_name=="use_weight1_g")
+ {
+    message_pars.set_par_description("Use weight 1 for power spectrum analysis.");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->use_weight1_g);
+  }
+else if(par_name=="i_weight2_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of an statistical weight (used for power spectruma analysis) w2 is allocated. ");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_weight2_g);
+  }
+else if(par_name=="use_weight2_g")
+ {
+    message_pars.set_par_description("Use weight 3 for power spectrum analysis.");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->use_weight2_g);
+  }
+
+else if(par_name=="i_weight3_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of an statistical weight (used for power spectruma analysis) w3 is allocated. ");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_weight3_g);
+  }
+else if(par_name=="use_weight3_g")
+ {
+    message_pars.set_par_description("Use weight 3 for power spectrum analysis.");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->use_weight3_g);
+  }
+
+else if(par_name=="i_weight4_g")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of an statistical weight (used for power spectruma analysis) w4 is allocated. ");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_weight4_g);
+  }
+else if(par_name=="use_weight4_g")
+ {
+    message_pars.set_par_description("Use weight 4 for power spectrum analysis.");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->use_weight4_g);
+  }
+else if(par_name=="weight_with_mass")
+ {
+    message_pars.set_par_description("Use tracer mass as a weight for power spectrum analysis");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->weight_with_mass);
+  }
+
+else if(par_name=="weight_vel_with_mass")
+ {
+    message_pars.set_par_description("Use tracer mass to weight velocities as a weight for power spectrum analysis");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->weight_with_mass);
+  }
+
+
+else if(par_name=="use_random_catalog")
+ {
+    message_pars.set_par_description("Use a random catalog to measure clustering. If this is set to false, the users is asked to be consisted with the system of coordinates (it is likely you are using a simulation box, in Cartesian coordinates)");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->use_random_catalog);
+  }
+else if(par_name=="use_random_catalog_cl")
+ {
+    message_pars.set_par_description("Use a random catalog to measure clustering. If this is set to false, the users is asked to be consisted with the system of coordinates (it is likely you are using a simulation box, in Cartesian coordinates)");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->use_random_catalog_cl);
+  }
+  else if(par_name=="nbar_tabulated")
+ {
+    message_pars.set_par_description("Set true if the information of the mean number density is tabulated in both random and real catalog.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->sys_of_coord_r);
+  }
+
+  else if(par_name=="use_nbar_file")
+ {
+    message_pars.set_par_description("Use an input filw with nbar against redshift (to tabulate from)");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->use_file_nbar);
+  }
+
+  else if(par_name=="file_nbar")
+ {
+    message_pars.set_par_description("Path to ascii file with nbar against redshift (to tabulate from)");
+    message_pars.set_par_option("String. Path to file");
+    message_pars.set_par_default(this->file_nbar);
+  }
+
+
+  else if(par_name=="sys_of_coord_r")
+ {
+    message_pars.set_par_description("This parameter identifies the system of coordinates in which positions of randomy distributed objects are written in an ASCII file.");
+    message_pars.set_par_option("0 (Cartesian coordinates (X,Y,Z)). 1 (Equatorial coordinates (RA,Dec,r)). 2 (Pseudo-equatorial coordinates (RA,Dec,z)). 3 (Pseudo-equatorial coordinates (RA,Dec,z))");
+    message_pars.set_par_default(this->sys_of_coord_r);
+  }
+
+
+  else if(par_name=="i_coord1_r")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file (random catalogue) containing the coordinates X, RA, RA, RA for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_coord1_g);
+  }
+   else if(par_name=="i_coord2_r")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file (random catalogue) containing the coordinates Y, Dec, Dec, Dec, for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge.");
+    message_pars.set_par_default(this->i_coord2_g);
+  }
+   else if(par_name=="i_coord3_r")
+ {
+    message_pars.set_par_description("This parameter identifies the column in an ASCII file (random catalogue) containing the coordinates Z, r, z, z for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_coord3_g);
+  }
+
+else if(par_name=="i_mass_r")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the random catalogue where the information of the mass of tracer is allocated. This quantity is expected in units of (h/Mpc}**3");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_mass_r);
+  }
+
+else if(par_name=="i_color_r")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the random catalogue where the information of the color of the tracer is allocated. This quantity is expected in units of (h/Mpc}**3");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_color_r);
+  }
+else if(par_name=="i_stellar_mass_r")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the random catalogue where the information of the stellar mass of the tracer is allocated. This quantity is expected in units of (h/Mpc}**3");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_stellar_mass_r);
+  }
+
+else if(par_name=="i_app_mag_r")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the random catalogue where the information of the apparent magnitude of the tracer is allocated. This quantity is expected in units of (h/Mpc}**3");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_app_mag_r);
+  }
+
+else if(par_name=="i_abs_mag_r")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the random catalogue where the information of the absolute magnitude (or luminosity) of the tracer is allocated. This quantity is expected in units of (h/Mpc}**3");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_abs_mag_r);
+  }
+
+
+
+else if(par_name=="i_mean_density_r")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the random catalogue where the information of the mean number density tabulated at each position of the tracer is allocated. This quantity is expected in units of (h/Mpc}**3");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_mean_density_r);
+  }
+
+
+else if(par_name=="i_weight1_r")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the randoms here the information of an statistical weight (used for power spectruma analysis) w1 is allocated. ");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_app_mag_g);
+  }
+else if(par_name=="use_weight1_r")
+ {
+    message_pars.set_par_description("Use weight 1 for power spectrum analysis.");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->use_weight1_r);
+  }
+else if(par_name=="i_weight2_r")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the randoms where the information of an statistical weight (used for power spectruma analysis) w2 is allocated. ");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_weight2_r);
+  }
+else if(par_name=="use_weight2_r")
+ {
+    message_pars.set_par_description("Use weight 3 for power spectrum analysis.");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->use_weight2_r);
+  }
+
+else if(par_name=="i_weight3_r")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the tracer where the information of an statistical weight (used for power spectruma analysis) w3 is allocated. ");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_weight3_r);
+  }
+else if(par_name=="use_weight3_r")
+ {
+    message_pars.set_par_description("Use weight 3 for power spectrum analysis.");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->use_weight3_r);
+  }
+
+else if(par_name=="i_weight4_r")
+ {
+    message_pars.set_par_description("Identify the column in the ASCII file of the randoms where the information of an statistical weight (used for power spectruma analysis) w4 is allocated. ");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_weight4_r);
+  }
+else if(par_name=="use_weight4_r")
+ {
+    message_pars.set_par_description("Use weight 4 for power spectrum analysis.");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->use_weight4_r);
+  }
+
+
+else if(par_name=="constant_depth")
+ {
+    message_pars.set_par_description("Set true if the survey under inspection has constant depth throughout all the sky. This is going to be used in case nbar−tabulated = false and use−random−catalog = true");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->constant_depth);
+  }
+else if(par_name=="redshift_min_sample")
+ {
+    message_pars.set_par_description("Minimum redshift of the sample. This is going to be used in case nbar−tabulated = false and use−random−catalog = true");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->redshift_min_sample);
+  }
+else if(par_name=="redshift_max_sample")
+ {
+    message_pars.set_par_description("Maximum redshift of the sample. This is going to be used in case nbar−tabulated = false and use−random−catalog = true");
+    message_pars.set_par_option("true, false ");
+    message_pars.set_par_default(this->redshift_max_sample);
+  }
+  else if(par_name=="area_survey")
+ {
+    message_pars.set_par_description("Area of the survey in degreees squared");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->area_survey);
+  }
+  else if(par_name=="get_window_matrix")
+ {
+    message_pars.set_par_description("Compute the window matrix for power spectrum analysis. This applies if a random catalog is provided.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->get_window_matrix);
+  }
+else if(par_name=="i_mask_pixel")
+ {
+    message_pars.set_par_description("Identifiy the column where the HEALPIX ID pixel of the mask is written");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_mask_pixel);
+  }
+
+else if(par_name=="i_mask_alpha")
+ {
+    message_pars.set_par_description("Identifiy the column where the HEALPIX RA (or Galactic Longiitude) coordinate of each mask pixel is written in the mask file.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_mask_alpha);
+  }
+
+else if(par_name=="i_mask_delta")
+ {
+    message_pars.set_par_description("Identifiy the column where the HEALPIX Dec (or Galactic latitude) coordinate of each mask pixel is written in the mask file.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_mask_delta);
+  }
+else if(par_name=="i_mask_flag")
+ {
+    message_pars.set_par_description("Identifiy the column where the mask flag is available in the mask file.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_mask_flag);
+ }
+
+else if(par_name=="n_")
+ {
+    message_pars.set_par_description("Identifiy the column where the mask flag is available in the mask file.");
+    message_pars.set_par_option("Int >=0. Set <0 if this column is not to be read. or does not exist in input cataloge. ");
+    message_pars.set_par_default(this->i_mask_flag);
+ }
+
+
+else if(par_name=="new_los")
+ {
+    message_pars.set_par_description("Define a new line of sight. If true, the code computes the position of the baricenter of the sample and defines it as the new line-of-sight");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->new_los);
+ }
+
+else if(par_name=="Lbox")
+ {
+    message_pars.set_par_description("Lenght side of the box in Mpc/h defined to do Fourier transfomr or the size od a simulation (in Mpc/h)");
+    message_pars.set_par_option("Float, >0");
+    message_pars.set_par_default(this->Lbox);
+ }
+else if(par_name=="Lbox_low")
+ {
+    message_pars.set_par_description("Lenght side of the box in Mpc/h defined to do Fourier transfomr or the size od a simulation (in Mpc/h). This is used in BMT as a larger box to extrapolate the kernel and bias obtained with a fiducial (Lboix) size.");
+    message_pars.set_par_option("Float, >0");
+    message_pars.set_par_default(this->Lbox_low);
+ }
+else if(par_name=="new_Lbox")
+ {
+    message_pars.set_par_description("A new Lbox is computed In Catalog.cpp as the maximum of the differences between the min and max of each coordinate.  If false, the code uses Lbox.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->new_Lbox);
+ }
+
+else if(par_name=="Nft")
+ {
+    message_pars.set_par_description("Number of cells per dimention in the mesh, used to interpolate fieldas and do FFTW");
+    message_pars.set_par_option("ULONG");
+    message_pars.set_par_default(this->Nft);
+ }
+
+else if(par_name=="Nft_HR")
+ {
+    message_pars.set_par_description("Number of cells per dimention in the mesh, used to interpolate fieldas and do FFTW. Higher resolution Nft<Nft_HR");
+    message_pars.set_par_option("ULONG");
+    message_pars.set_par_default(this->Nft_HR);
+ }
+
+else if(par_name=="Nft_low")
+ {
+    message_pars.set_par_description("Number of cells per dimention in the mesh, used to interpolate fieldas and do FFTW. Lower resolution Nft>Nft_low. Used in the calculation of mach numbers and statistics of close neighbours.");
+    message_pars.set_par_option("ULONG");
+    message_pars.set_par_default(this->Nft_low);
+ }
+
+else if(par_name=="Nft_JK")
+ {
+    message_pars.set_par_description("Number of cells per dimention in the mesh, used to divide a volume in a low number of subvolumes, aiming at perform Jackknive estimates of power.");
+    message_pars.set_par_option("ULONG");
+    message_pars.set_par_default(this->Nft_JK);
+ }
+
+
+else if(par_name=="mass_assignment_scheme")
+ {
+    message_pars.set_par_description("Used to interpolate the tracer (and random) density filed into the FFT grid");
+    message_pars.set_par_option("NGP, CIC, TSC, PSC");
+    message_pars.set_par_default(this->mass_assignment_scheme);
+ }
+
+else if(par_name=="MAS_correction")
+ {
+    message_pars.set_par_description("Integer for mass assignment scheme");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->MAS_correction);
+ }
+
+else if(par_name=="type_of_binning")
+ {
+    message_pars.set_par_description("Use log or linear to specify the type of binning for the spherical shells in Fourier space.");
+    message_pars.set_par_option("linear, log");
+    message_pars.set_par_default(this->type_of_binning);
+ }
+
+
+
+
+else if(par_name=="Get_Mstellar_function")
+ {
+    message_pars.set_par_description("Compute the stellar mass function. Standard estimator is Vmax.");
+    message_pars.set_par_option("true, false. ");
+    message_pars.set_par_default(this->Get_Mstellar_function);
+  }
+
+else if(par_name=="Get_Luminosity_function")
+ {
+    message_pars.set_par_description("Compute the luminosity function. Standard estimator is Vmax, but generaliation by COle is also available specifying LF_estimator");
+    message_pars.set_par_option("true, false. ");
+    message_pars.set_par_default(this->Get_Luminosity_function);
+ }
+
+else if(par_name=="Get_color_function")
+ {
+    message_pars.set_par_description("Compute the luminosity function. Standard estimator is Vmax");
+    message_pars.set_par_option("true, false. ");
+    message_pars.set_par_default(this->Get_Color_function);
+ }
+
+else if(par_name=="LF_estimator")
+ {
+    message_pars.set_par_description("Choose an estimator for the luminosity function. More to be exported from Galaxy methods");
+    message_pars.set_par_option("Options are Vmax_dc, Vmax_o, Vmax");
+    message_pars.set_par_default(this->LF_estimator);
+  }
+else if(par_name=="Get_Color_Mag_plane")
+ {
+    message_pars.set_par_description("Compute color-magnitude diagram");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Get_Color_Mag_plane);
+  }
+else if(par_name=="Get_Random_Catalog")
+ {
+    message_pars.set_par_description("Generate a random catalog. More to be exported from Galaxy methods");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Get_Random_Catalog);
+  }
+else if(par_name=="Nbins_color")
+ {
+    message_pars.set_par_description("Number of bins in galaxy color, for histograms, abundance and color-magnitud diagram");
+    message_pars.set_par_option("Int, >0");
+    message_pars.set_par_default(this->Nbins_color);
+  }
+else if(par_name=="Nbins_Mstellar")
+ {
+    message_pars.set_par_description("Number of bins in galaxy stellar mass, for histograms and abundance");
+    message_pars.set_par_option("Int, >0");
+    message_pars.set_par_default(this->Nbins_Mstellar);
+  }
+else if(par_name=="Mstellar_min")
+ {
+    message_pars.set_par_description("Minimum of stellar mass (log)");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->Mstellar_min);
+  }
+  else if(par_name=="Mstellar_max")
+ {
+    message_pars.set_par_description("Maximum of stellar mass (log)");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->Mstellar_max);
+  }
+else if(par_name=="Color_min")
+ {
+    message_pars.set_par_description("Minimum of galaxy color)");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->Color_min);
+  }
+  else if(par_name=="Color_max")
+ {
+    message_pars.set_par_description("Maximum of galaxy color)");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->Color_max);
+  }
+
+
+
   else
   {
     message_pars.set_par_description("Parameter not found");
@@ -107,108 +1319,128 @@ void Params::explain_pars(string par_name)
 
 
 
-  message_pars.show(v_string);
+  message_pars.show();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Params::init_pars()
+ 
+void Params::init_pars() // Inizialization of parameters
 {
-  this->NX = 200;
-  this->NY = 100;
-  this->n_sknot_massbin = 200;
-  this->n_vknot_massbin = 200;
-  this->NMASSbins = 1;
-  this->NMASSbins_power = 1;
-  this->iMAS_X = 0;
-  this->iMAS_X_REF_PDF = 0;
-  this->iMAS_X_NEW = 0;
-  this->iMAS_Y = 0;
-  this->lambdath = 0.0;
-  this->lambdath_v = 0.0;
-  this->realization = 1;
   this->redshift = 0.0;
   this->Initial_Redshift_DELTA=0;
-  this->smscale = 0.0;
-  this->delta_Y_min = 0.;
-  this->delta_Y_max = 10;
+  this->Initial_Redshift_SIM=0;
+  this->IC_index =0;
+  this->realization = 1;
+  this->Unitsim_plabel=1;
+  this->Quantity= "QUANTITY";
+//-----------------------------------------------------------------------------------------
+  this->NX = 200;
+  this->iMAS_X = 0;
+  this->XNAME = "XNAME";
+  this->Name_Property_X = "X_PROPERTY";
+  this->iMAS_X_REF_PDF = 0;
+  this->iMAS_X_NEW = 0;
+  this->Type_of_file_X = "bin";
+  this->Input_Directory_X = NN;
+  this->Input_Directory_X_REF = NN;
+  this->Input_Directory_X_REF_TWO = NN;
+  this->Input_Directory_X_NEW = NN; 
+  this->Input_Directory_X_new_ref = NN;
+  this->Name_Catalog_X = NN;
+  this->Name_Catalog_X_NEW = NN;
+  this->Name_Catalog_X_REF_PDF = NN;
+  this->Name_Catalog_X_new_ref = NN;
+  this->Convert_Density_to_Delta_X = false;
+  this->Name_VelFieldx_X = NN;
+  this->Name_VelFieldy_X = NN;
+  this->Name_VelFieldz_X  = NN;
+  this->Scale_X= "linear";
   this->delta_X_min = 0;
   this->delta_X_max = 10.;
-  this->ldelta_Y_min = 0;
-  this->ldelta_Y_max = 10;
   this->ldelta_X_min = 0.;
   this->ldelta_X_max = 10.;
-  this->Input_Directory_Y = "../Input";
-  this->Name_Catalog_Y = "UNKNOWN_NAME";
-  this->Name_Catalog_Y_new_ref = "UNKNOWN_NAME";
-  this->Name_Catalog_Y_HR = "UNKNOWN_NAME";
-  this->Name_Catalog_Y_MWEIGHTED = "UNKNOWN_NAME";
-  this->Input_Directory_X = "../Input";
-  this->Input_Directory_X_REF = "../Input";
-  this->Input_Directory_X_NEW = "../Input";
-  this->Input_Directory_X_new_ref = "../Input";
-  this->Input_Directory_BIAS_KERNEL = "../Input";
-  this->Input_Directory_BIAS_KERNEL_TWO = "../Input";
-  this->XNAME = "XNAME";
+//-----------------------------------------------------------------------------------------
+  this->NY = 100;
+  this->iMAS_Y = 0;
   this->YNAME = "YNAME";
-  this->Name_Catalog_X = "UNKNOWN_NAME";
-  this->Name_VelFieldx_X = "UNKNOWN_NAME";
-  this->Name_VelFieldy_X = "UNKNOWN_NAME";
-  this->Name_VelFieldz_X = "UNKNOWN_NAME";
-  this->Name_Catalog_X_REF_PDF = "UNKNOWN_NAME";
-  this->Name_Catalog_X_NEW = "UNKNOWN_NAME";
-  this->Name_Catalog_X_new_ref = "UNKNOWN_NAME";
-  this->extra_info = "";
-  this->Name_Property_X = "X_PREPERTY";
   this->Name_Property_Y = "Y_PROPERTY";
-  this->Output_directory = "../output";
-  this->Quantity= "QUANTITY";
-  this->Scale_X= "linear";
+  this->Input_Directory_Y = NN;
+  this->Input_Directory_Y_TWO = NN;
+  this->Name_Catalog_Y = NN;
+  this->Name_Catalog_Y_new_ref = NN;
+  this->Name_Catalog_Y_HR = NN;
+  this->Name_Catalog_Y_MWEIGHTED = NN;
+  this->Convert_Density_to_Delta_Y = false;
   this->Scale_Y= "linear";
+  this->delta_Y_min = 0.;
+  this->delta_Y_max = 10;
+  this->ldelta_Y_min = 0;
+  this->ldelta_Y_max = 10;
+  this->NY_MASS = 1;
+  this->NY_SAT_FRAC = 1;
+//-----------------------------------------------------------------------------------------
+  this->Redefine_limits= false;
+//-----------------------------------------------------------------------------------------
+// CWC analysis
+  this->Nlambdath=1;
+  this->lambdath = 0.0;
+  this->lambdath_v = 0.0;
+  this->n_sknot_massbin = 1;
+  this->n_vknot_massbin = 1;
+  this->NMASSbins = 1;
+  this->NMASSbins_power = 1;
+//-----------------------------------------------------------------------------------------
+// Bias analysis
+  this->Write_PDF_number_counts =false;
+  this->Comp_conditional_PDF = false;
+  this->Comp_joint_PDF = false;
+  this->write_files_for_histograms=false;
+//-----------------------------------------------------------------------------------------
+//BMT parameters
   this->N_iterations_Kernel = 1;
   this->Iteration_Kernel_average = 1;
-  this->Comp_conditional_PDF = false;
+  this->iteration_ini=0;
+  this->N_dm_realizations=1;
+  this->N_dm_initial=1;
+  this->N_iterations_dm=1;
   this->Apply_Rankordering = false;
   this->Apply_Rankordering_ab_initio = false;
-  this->vel_units_g = "kmps";
-  this->IC_index=0;
-  this->Redefine_limits= false;
-  this->Input_dir_cat_new_ref = "../Input/";
-  this->Input_dir_cat_TWO = "../Input/";
-  this->dir_output = "../Output/";
-  this->file_catalogue = "cat.dat";
-  this->file_catalogue_new_ref = "cat.dat";
+  this->Number_of_chunks_new_dm=1;
+  this->Input_Directory_BIAS_KERNEL = NN;
+  this->Input_Directory_BIAS_KERNEL_TWO = NN;
+//-----------------------------------------------------------------------------------------
+  this->Output_directory = "../output";
+//-----------------------------------------------------------------------------------------
+// Power Spectrum
+  this->statistics = "Pk_fkp";
+  this->Name_survey = "Zorbas";
+  this->type_of_object = "TRACER";
   this->input_type = "catalog";
-  this->input_type_two = "catalog";
+  this->input_type_two = NN;
+  this->ngal_delta = 1;
+  this->Input_dir_cat = NN;
+  this->Input_dir_cat_TWO = NN;
+  this->file_catalogue = NN;
+  this->file_catalogue_new_ref = "cat.dat";
+  this->file_random = NN;
+  this->Number_of_random_files = 1;
+  // ************************************************************************
   this->delta_grid_file = "delta_file";
   this->delta_grid_file2 = "delta_file";
   this->delta_grid_file3 = "delta_file";
   this->delta_grid_file4 = "delta_file";
-  this->ngal_delta = 1;
   this->measure_cross = false;
   this->measure_cross_from_1 = 1;
   this->measure_cross_from_2 = 2;
+
   // ************************************************************************
-  this->Get_Mstellar_function = false;
-  this->Get_Luminosity_function = false;
-  this->Get_Color_function = false;
-  this->LF_estimator = "Vmax_o";
-  this->Nbins_color = 0;
-  this->Nbins_Mstellar = 0;
-  this->Mstellar_min = 0;
-  this->Mstellar_max = 1.0;
-  this->Color_min = 0;
-  this->Color_max = 1.0;
-  this->Get_Color_Mag_plane = false;
-  this->Get_Random_Catalog = false;
-  this->Number_of_random_files = 1;
+
+  this->extra_info = "";
+  this->vel_units_g = "kmps";
   // ************************************************************************
+
   this->sys_of_coord_dm = 1;
-  this->N_dm_initial=1;
-  this->N_dm_realizations=1;
-  this->N_iterations_dm =0;
-  this->iteration_ini =0;
   this->i_coord1_dm = NOT_USED;
   this->i_coord2_dm = NOT_USED;
   this->i_coord3_dm = NOT_USED;
@@ -216,128 +1448,95 @@ void Params::init_pars()
   this->i_v2_dm = NOT_USED;
   this->i_v3_dm = NOT_USED;
   this->i_mass_dm = NOT_USED;
-  this->vel_units_g = "kmps";
-  this->Redefine_limits=false;
-  this->Comp_joint_PDF=false;
-  this->Scale_Y="linear";
-    // ************************************************************************
+
+  // ************************************************************************
   this->sys_of_coord_g = 1;
-  this->redshift_space_coords_g =false;
+  this->redshift_space_coords_g = false;
+  this->angles_units_g = "D";
   this->i_coord1_g = NOT_USED;
   this->i_coord2_g = NOT_USED;
   this->i_coord3_g = NOT_USED;
   this->i_v1_g = NOT_USED;
   this->i_v2_g = NOT_USED;
   this->i_v3_g = NOT_USED;
-  this->i_mean_density_g = NOT_USED;
-  this->i_weight1_g = NOT_USED;
-  this->i_weight2_g = NOT_USED;
-  this->i_weight3_g = NOT_USED;
-  this->i_weight4_g = NOT_USED;
+  this->vel_units_g = "kmps";
   this->i_mass_g = NOT_USED;
-  this->i_rs_g = NOT_USED;
-  this->i_spin_g = NOT_USED;
   this->i_vmax_g = NOT_USED;
   this->i_vrms_g = NOT_USED;
+  this->i_rs_g = NOT_USED;
+  this->i_spin_g = NOT_USED;
+  this->i_spin_bullock_g = NOT_USED;
   this->i_virial_g = NOT_USED;
   this->i_b_to_a_g = NOT_USED;
   this->i_c_to_a_g = NOT_USED;
-  this->i_color_g=NOT_USED;
+  this->i_sf_g = NOT_USED;
+  this->i_color_g = NOT_USED;
   this->i_stellar_mass_g=NOT_USED;
+  this->i_mean_density_g = NOT_USED;
   this->i_abs_mag_g=NOT_USED;
   this->i_app_mag_g=NOT_USED;
-  this->type_of_object="TRACER";
+  this->i_weight1_g = NOT_USED;
   this->use_weight1_g = false;
+  this->i_weight2_g = NOT_USED;
   this->use_weight2_g = false;
-  this->use_weight3_g = false;
+  this->i_weight3_g = NOT_USED;
   this->use_weight4_g = false;
-  this->new_Lbox = false;
-  this->n_catalogues = 1;
-  this->angles_units_g = "D";
-  this->MASS_units=1;
-  this->NMASSbins_power=1;
-  this->NMASSbins=1;
-  this->LOGMASSmin=0;
- // ************************************************************************
+  this->i_weight4_g = NOT_USED;
+  this->use_weight3_g = false;
+  this->weight_with_mass = false;
+  this->weight_vel_with_mass =false;
+  // ************************************************************************
   this->use_random_catalog = false;
   this->use_random_catalog_cl = false;
+  this->nbar_tabulated = false;
   this->use_file_nbar=false;
+  this->file_nbar = NN;
   this->sys_of_coord_r = 1;
+  this->angles_units_r = "D";
   this->i_coord1_r = NOT_USED;
   this->i_coord2_r = NOT_USED;
   this->i_coord3_r = NOT_USED;
-  this->i_mean_density_r = NOT_USED;
-  this->i_weight1_r = NOT_USED;
-  this->i_weight2_r = NOT_USED;
-  this->i_weight3_r = NOT_USED;
-  this->i_weight4_r = NOT_USED;
+  this->i_mass_r = NOT_USED;
   this->i_color_r=NOT_USED;
   this->i_stellar_mass_r=NOT_USED;
   this->i_abs_mag_r=NOT_USED;
   this->i_app_mag_r=NOT_USED;
+  this->i_mean_density_r = NOT_USED;
+  this->i_weight1_r = NOT_USED;
+  this->use_weight1_r = false;
+  this->i_weight2_r = NOT_USED;
+  this->use_weight2_r = false;
+  this->i_weight3_r = NOT_USED;
+  this->use_weight3_r = false;
+  this->i_weight4_r = NOT_USED;
+  this->use_weight4_r = false;
   // ************************************************************************
+  this->constant_depth = false;
+  this->redshift_min_sample = 0;
+  this->redshift_min_sample = 10;
   this->i_mask_pixel= NOT_USED;
   this->i_mask_alpha= NOT_USED;
   this->i_mask_delta= NOT_USED;
   this->i_mask_flag= NOT_USED;
   // ************************************************************************
-  this->use_weight1_r = false;
-  this->use_weight2_r = false;
-  this->use_weight3_r = false;
-  this->use_weight4_r = false;
-  this->angles_units_r = "D";
-  this->file_random = "random";
-  this->Name_survey = "survey";
-  this->Get_marked_power_spectrum =false;
-  this->Get_power_spectrum =false;
-  this->Get_cross_power_spectrum =false;
-  this->Get_tracer_number_counts=false;
-  this->Get_tidal_anisotropy_at_halo=false;
-  this->Get_tracer_mass_field=false;
-  this->Get_tracer_vmax_field=false;
-  this->Get_tracer_spin_field=false;
-  this->Get_tracer_spin_bullock_field=false;
-  this->Get_tracer_local_mach_number=false;
-  this->Get_tracer_local_dach_number=false;
-  this->Get_tracer_local_dm_density=false;
-  this->Get_pearson_coefficient=false;
-  this->Get_spearman_coefficient=false;
-  this->Get_cell_local_mach_number=false;
-  this->Scale_mach_number = static_cast<real_prec>(2.0);
-  this->NPROPbins_bam=1;
-  this->Number_of_bins_equal_number_tracers = 1;
-  this->Number_of_bins_equal_number_tracers_main_property = 1;
-  this->set_bins_equal_number_tracers = false;
-  this->set_bins_equal_number_tracers_main_property = false;
-  this->kmax_tracer_bias = 0;
-  this->kmin_tracer_bias = 0;
-  this->kmax_tracer_qbias = 0;
-  this->kmin_tracer_qbias = 0;
-  // ************************************************************************
-  this->lambdath_v=0;
-  this->Number_of_chunks_new_dm=1;
-  this->Name_VelFieldx_X= "file";
-  this->Name_VelFieldy_X= "file";
-  this->Name_VelFieldz_X= "file";
-  this->Apply_Rankordering=false;
-    // ************************************************************************
-  // parameters for the power spectrum
-  this->ndel_window=1;
-  this->ndel_data=1;
-  this->N_mu_bins=10;
-  this->Pest = 20000;
   this->new_los=false;
+  this->Lbox = 100;
+  this->Lbox_low = 100;
+  this->new_Lbox = false;
   this->Nft = 1;
   this->Nft_HR = 1;
   this->Nft_low = 1;
   this->Nft_JK = 1;
-  this->Nft_random_collapse = 1;
-  this->Distance_fraction=1.0;
-  this->Lbox = 100;
-  this->Lbox_low = 100;
   this->mass_assignment_scheme = "NGP";
   this->MAS_correction = false;
   this->type_of_binning = "linear";
+
+
+  this->ndel_window=1;
+  this->ndel_data=1;
+  this->N_mu_bins=10;
+  this->Pest = 20000;
+  this->Distance_fraction=1.0;
   this->DeltaKmin = 0;
   this->N_log_bins = 10;
   this->ndel_data = 1;
@@ -369,8 +1568,68 @@ void Params::init_pars()
   //Parameters for the bispectrum
   this->kmax_bk = 0.2;
   this->kmin_bk = 0.1;
-  this->Nft_random_collapse =32;
+  this->Nft_random_collapse = 32;
   this->use_fundamental_mode_as_kmin_bk = false;
+  this->kmax_tracer_bias = 0;
+  this->kmin_tracer_bias = 0;
+  this->kmax_tracer_qbias = 0;
+  this->kmin_tracer_qbias = 0;
+
+
+
+
+  // ************************************************************************
+  // ************************************************************************
+// Measurements of Abundance (Mass funcito, luminosity function)
+  this->Get_Mstellar_function = false;
+  this->Get_Luminosity_function = false;
+  this->Get_Color_function = false;
+  this->LF_estimator = "Vmax_o";
+  this->Get_Color_Mag_plane = false;
+  this->Get_Random_Catalog = false;
+  this->Nbins_color = 1;
+  this->Nbins_Mstellar = 1;
+  this->Mstellar_min = 1;
+  this->Mstellar_max = 1;
+  this->Color_min = 0;
+  this->Color_max = 1.0;
+
+
+
+  // ************************************************************************
+  // ************************************************************************
+  this->MASS_units=1;
+  this->NMASSbins_power=1;
+  this->NMASSbins=1;
+  this->LOGMASSmin=0;
+  this->Get_marked_power_spectrum =false;
+  this->Get_power_spectrum =false;
+  this->Get_cross_power_spectrum =false;
+  this->Get_tracer_number_counts=false;
+  this->Get_tidal_anisotropy_at_halo=false;
+  this->Get_tracer_mass_field=false;
+  this->Get_tracer_vmax_field=false;
+  this->Get_tracer_spin_field=false;
+  this->Get_tracer_spin_bullock_field=false;
+  this->Get_tracer_local_mach_number=false;
+  this->Get_tracer_local_dach_number=false;
+  this->Get_tracer_local_dm_density=false;
+  this->Get_pearson_coefficient=false;
+  this->Get_spearman_coefficient=false;
+  this->Get_cell_local_mach_number=false;
+  this->Scale_mach_number = static_cast<real_prec>(2.0);
+  this->NPROPbins_bam=1;
+  this->Number_of_bins_equal_number_tracers = 1;
+  this->Number_of_bins_equal_number_tracers_main_property = 1;
+  this->set_bins_equal_number_tracers = false;
+  this->set_bins_equal_number_tracers_main_property = false;
+  // ************************************************************************
+  // ************************************************************************
+  // parameters for the power spectrum
+// ************************************************************************
+  
+
+
   this->get_distribution_min_separations=false;
   this->M_exclusion=1;
   this->use_vel_kernel=false;
@@ -398,6 +1657,9 @@ void Params::init_pars()
   this->Kmax_FA = 0.;
   this->Generate_FA=false;
   this->NVIRIALbins_power=0;
+
+  this->Nft_random_collapse = 1;
+
   // ************************************************************************
  // Set of parameter to be deprecated asap
   this->sfac=0; // these are not requested in the parameter file
@@ -429,7 +1691,7 @@ void Params::init_pars()
   this->ymax = 0;
   this->zmax = 0;
   // ************************************************************************
-  // INitialize cosmological parameters 
+  // Initialize cosmological parameters 
   this->Get_SO_from_BN = false;
   this->Delta_SO = COSMOPARS::Delta_SO; 
   this->om_matter = COSMOPARS::Om_matter;
@@ -2775,11 +4037,6 @@ void Params::read_pars(string file)
 	      if (par_value == "true"){this->new_Lbox = true;}
 	      else if (par_value == "false"){this->new_Lbox = false;}
 	      this->parameter_number.push_back(make_pair(par_name, this->new_Lbox)); 	      
-	    }
-	  else if (par_name == "n_catalogues")
-	    {
-	      this->n_catalogues = atoi(par_value.c_str());
-	      this->parameter_number.push_back(make_pair(par_name, this->n_catalogues)); 	      
 	    }
 	  else if (par_name == "angles_units_g")
 	    {
