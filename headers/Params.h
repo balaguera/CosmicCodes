@@ -18,6 +18,7 @@
 #include <iostream>
 #include <iomanip>
 #include <typeinfo>
+#include <variant>
 using namespace std;
 #include "NumericalMethods.h"  // def.h is included in the NumericalMethods.h file
 
@@ -29,17 +30,20 @@ struct s_message_pars{
   string options;  
   real_prec default_f;
   string default_s;
-  void set_par_name(string np){par_name=np;}
-  void set_par_description(string np){description=np;}
-  void set_par_option(string np){options=np;}
-  void set_par_default(real_prec np){default_f=np;}
-  void show(bool vs)
+  variant<ULONG, int, float, double, string> default_value;
+
+  void set_par_name(const string &np){par_name=np;}
+  void set_par_description(const string &np){description=np;}
+  void set_par_option(const string &np){options=np;}
+  template <typename T>void set_par_default(const T& np){default_value=np;}
+  void show()
   {
     cout<<BLUE<<"Parameter:"<<CYAN<<"\t"<<par_name<<RESET<<endl;
     cout<<BLUE<<"Description:"<<CYAN<<"\t"<<description<<RESET<<endl;
     cout<<BLUE<<"Options:"<<CYAN<<"\t"<<options<<RESET<<endl;
-  if(!vs)
-    cout<<BLUE<<"Default:"<<CYAN<<"\t"<<default_f<<RESET<<endl;
+    cout << BLUE << "Default:" << CYAN << "\t";
+    std::visit([](const auto& val) {cout << val;}, default_value);
+    cout << RESET << endl;
   }
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,12 +86,12 @@ private :
   string statistics;
   //////////////////////////////////////////////////////////
   /**
-   *  @name 
+   *  @brief Redshift at which the initial linear power spectrum is normalized to genete IC
    */
   real_prec Initial_Redshift_DELTA;
   //////////////////////////////////////////////////////////
   /**
-   *  @name
+   *  @brief Initial redshift of a given N-body simulation
    */
   real_prec Initial_Redshift_SIM;
   //////////////////////////////////////////////////////////
@@ -108,51 +112,69 @@ private :
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief Path to directory where the white noise of the initial conditions of a simulation is saved.
    **/
   string ic_WN_dir;
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief Name of file containing the initial density fluctuations.
    **/
   string ic_file;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Path to file containing x-coordinates of dm particles from simulation.
+   **/
+  string file_bin_x_coord;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Path to file containing y-coordinates of dm particles from simulation.
+   **/
+  string file_bin_y_coord;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Path to file containing z-coordinates of dm particles from simulation.
+   **/
+  string file_bin_z_coord;
+  /////////////////////////////////////////////////////////
+
+
+
+  //////////////////////////////////////////////////////////
+  /** 
+   * @brief Number of tracers. This is requested for power spectrum mesurements in case Input−type = delta_grid. Otherwise unused
    **/
   unsigned long ngal_delta;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Full path (dir plus name) to overdensity field on a mesh
    **/
   string delta_grid_file;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Full path (dir plus name) to overdensity field on a mesh
    **/
 
   string delta_grid_file2;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Full path (dir plus name) to overdensity field on a mesh
    **/
 
   string delta_grid_file3;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Full path (dir plus name) to overdensity field on a mesh
    **/
   string delta_grid_file4;
   //////////////////////////////////////////////////////////
   /**
-   * @brief ask if cross is desidered
+   * @brief  Pinpoint one field to measure cross-power. If set to 1, it takes the file in delta−grid−file
    **/
   int measure_cross_from_1;
   //////////////////////////////////////////////////////////
   /**
-   * @brief ask if cross is desidered
+   * @brief Pinpoint one field to measure cross-power. If set to 2, it takes the file in delta−grid−file2 and so on
    **/
-
   int measure_cross_from_2;
   //////////////////////////////////////////////////////////
   /**
@@ -166,22 +188,20 @@ private :
   string Name_binary_mask;
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief Identification for tracerrs, used in BMT. Options are TRACER, TRACER_REF, TRACER_MOCK, TRACER_MOCK_ONLY_COORDS,  TRACER_REF_ONLY_COORDS 
    **/
   string type_of_object;
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief Index to characterize the IC of some procedures
    **/
   int IC_index;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Type if input file, options
-   * are "cat" meaning catalog, and "grid_delta" meaning
-   * that the input is alread the delta in the grid
+   * @name Power Spectrum
+   * @brief File for rando catalogue
    **/
   string file_random;
-
   //////////////////////////////////////////////////////////
   /**
    * @brief 
@@ -206,48 +226,52 @@ private :
   int sys_of_coord_g;
   //////////////////////////////////////////////////////////
   /**
-   * @brief  Column with the infomtion of the number of sub_structures of each tracer (if parent halo)
+   * @brief  Identify the column in the ASCII file of the tracer where the information of the star formation rate is available
    **/
   int i_sf_g;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief To be deprecated.
    **/
   int i_mass_dm;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Identify the column in the ASCII file of the random tracer where the information of the mass is available.
    **/
   int i_mass_r;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief This parameter identifies the system of coordinates in which positions of dark matter particles are written in an ASCII file for a catalog
+   * @details 0=(Cartesian coordinates (X,Y,Z)). 1=(Equatorial coordinates (RA,Dec,r)). 2=(Pseudo-equatorial coordinates (RA,Dec,z)). 3=(Pseudo-equatorial coordinates (RA,Dec,z)). With sys_of_coord_dm = 2, the code uses a set of cosmological parameters to compute the comoving distance from redshifts. With sys_of_coord_dm = 3, the redshift is directly used as radial coordinate. All distances are given in units of Mpc over h.
    **/
 
   int sys_of_coord_dm;
   //////////////////////////////////////////////////////////
-
-  /// the column where the first object coordinate (according to the system of coordinates of the catalog) is written
+ 
   /**
-   * @brief
+   * @brief Column where the first object coordinate (according to the system of coordinates of the catalog) is written
    **/
   int i_coord1_dm;
 
   //////////////////////////////////////////////////////////
-  /// the column where the second object coordinate (according to the system of coordinates of the catalog) is written
   /**
-   * @brief
+   * @brief The column where the second object coordinate (according to the system of coordinates of the catalog) is written
    **/
   int i_coord2_dm;
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief The column where the third object coordinate (according to the system of coordinates of the catalog) is written
+   **/
+  int i_coord3_dm;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Number of chunks of new DMN indepdent fields to be populated with halos
    **/
   int Number_of_chunks_new_dm;
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief Use tracer mass to weight velocities as a weight for power spectrum analysis
    **/
   bool weight_vel_with_mass;
   //////////////////////////////////////////////////////////
@@ -395,24 +419,18 @@ private :
    **/
   int Number_of_MultiLevels;
   //////////////////////////////////////////////////////////
-  /// the column where the third object coordinate (according to the system of coordinates of the catalog) is written
   /**
-   * @brief
-   **/
-  int i_coord3_dm;
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief
+   * @brief This parameter identifies the column in an ASCII file containing the first component (x) of the velocity of dm particles
    **/
   int i_v1_dm;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief This parameter identifies the column in an ASCII file containing the second component (y) of the velocity of dm particles
    **/
   int i_v2_dm;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief This parameter identifies the column in an ASCII file containing the third component (z) of the velocity of dm particles
    **/
   int i_v3_dm;
 
@@ -443,7 +461,7 @@ private :
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief units of angles in the object catalogue: D &rarr; degrees; R &rarr; radians
+   *  @brief If positions are in spherical coordinates, specify the units of angles in the object catalogue: D &rarr; degrees; R &rarr; radians
    */
   string angles_units_g;
 
@@ -477,7 +495,6 @@ private :
   /**
    * @brief
    **/
-
   int Number_of_new_mocks;
   //////////////////////////////////////////////////////////
   /**
@@ -494,34 +511,41 @@ private :
 
   //////////////////////////////////////////////////////////
   /// the column where the first random coordinate (according to the system of coordinates of the catalog) is written
+  /**
+   * @brief This parameter identifies the column in an ASCII file (random catalogue) containing the coordinates X, RA, RA, RA for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively
+   **/
   int i_coord1_r;
 
   //////////////////////////////////////////////////////////
-  /// the column where the second random coordinate (according to the system of coordinates of the catalog) is written
+  /**
+   * @brief  This parameter identifies the column in an ASCII file (random catalogue) containing the coordinates Y, Dec, Dec, Dec, for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively
+   **/
   int i_coord2_r;
 
   //////////////////////////////////////////////////////////
-  /// the column where the third random coordinate (according to the system of coordinates of the catalog) is written
+   /**
+   * @brief This parameter identifies the column in an ASCII file (random catalogue) containing the coordinates Z, r, z, z for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively 
+   **/
   int i_coord3_r;
 
   //////////////////////////////////////////////////////////
-  /*
-   * @brief The column where the color of tracer is located
+  /**
+   * @brief Identify the column in the ASCII file of the random tracer where the information of the color is available.
    */
   int i_color_r ;
   //////////////////////////////////////////////////////////
   /*
-   * @brief The column where the stellar mass of tracer is located
+   * @brief Identify the column in the ASCII file of the random tracer where the information of the stellar_mass is available
    */
   int i_stellar_mass_r;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief The column where the stellar mass of tracer is located
+  /**
+   * @brief Identify the column in the ASCII file of the random tracer where the information of the apparent magnitude is available
    */
   int i_app_mag_r ;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief The column where the stellar mass of tracer is located
+  /**
+   * @brief Identify the column in the ASCII file of the random tracer where the information of the absolute magnitude (or luminosity) is available
    */
   int i_abs_mag_r ;
   //////////////////////////////////////////////////////////
@@ -529,37 +553,48 @@ private :
   int i_weight1_r;
 
   //////////////////////////////////////////////////////////
-  /// the column where the second random weight is written
+  /**
+   * @brief 
+   */
   int i_weight2_r;
   //////////////////////////////////////////////////////////
-  /// the column where the third random weight is written
+  /**
+   * @brief 
+   */
   int i_weight3_r;
 
   //////////////////////////////////////////////////////////
-  /// the column where the fourth random weight is written
+  /**
+   * @brief 
+   */
   int i_weight4_r;
 
   //////////////////////////////////////////////////////////
-  /// the column where the random mean number density is written
+  /**
+   * @brief 
+   */
   int i_mean_density_r;
 
   //////////////////////////////////////////////////////////
-  /// true &rarr; use the first weight; false &rarr; do not use the first weight
+  /**
+   * @brief Use weight 1 for power spectrum analysis.
+   */
   bool use_weight1_r;
 
   //////////////////////////////////////////////////////////
-  /// true &rarr; use the second weight; false &rarr; do not use the second weight
+  /**
+   * @brief Use weight 2 for power spectrum analysis.
+   */
   bool use_weight2_r;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief  
+   * @brief  Use weight 3 for power spectrum analysis.
    */
   bool use_weight3_r;
-
   //////////////////////////////////////////////////////////
   /**
-   * @brief  
+   * @brief  Use weight 4 for power spectrum analysis.
    */
   bool use_weight4_r;
   //////////////////////////////////////////////////////////
@@ -589,85 +624,83 @@ private :
   real_prec kmin_tracer_qbias;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Compute the luminosity function. Standard estimator is Vmax, byt generaliation by COle is also available specifying LF_estimator.
    */
   bool Get_Luminosity_function;
   //////////////////////////////////////////////////////////
-  /**
-   *  @brief
+  /** 
+   *  @brief Compute the color function. Standard estimator is Vmax.
    */
   bool Get_Color_function;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Number of bins in galaxy color, for histograms, abundance and color-magnitud diagram
    */
   int Nbins_color;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
-   */
+   *  @brief Compute the stellar mass function. Standard estimator is Vmax.
+  */
   bool Get_Mstellar_function;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Minimum of stellar mass (log)
    */
   real_prec Mstellar_min;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Maximum of stellar mass (log)
    */
   real_prec Mstellar_max;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Minimum Color for histograms, abundance and color-magnitud diagram
    */
   real_prec Color_min;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Maximm color for histograms, abundance and color-magnitud diagram
    */
   real_prec Color_max;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Number of bins in galaxy stellar mass, for histograms and abundance
    */
   int Nbins_Mstellar;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Choose an estimator for the luminosity function. Options are Vmax_dc, Vmax_o, Vmax
    */
-  std::string LF_estimator;
+  string LF_estimator;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Compute color-magnitude diagram
    */
   bool Get_Color_Mag_plane;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Generate a random catalog.
    */
   bool Get_Random_Catalog;
   //////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////
-  /// Number of grid cells /per dimension for the Discrete Fourier Trasnform
-
-
+  /**
+   *@brief Number if cells per dimention in the mesh.
+   *@details Used to interpolate fieldas and do FFTW. Lower resolution Nft>Nft_low. Used in the calculation of mach numbers and statistics of close neighbours.
+   */
   ULONG Nft_low;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Number of cells per dimention in the mesh, used to interpolate fieldas and do FFTW. Higher resolution Nft<Nft_HR
    **/
-
   ULONG Nft_HR;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Number of cells per dimention in the mesh, used to divide a volume in a low number of subvolumes, aiming at perform Jackknive estimates of power. Catalog.h
    **/
-
   ULONG Nft_JK;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief This is used in BMT as a larger box to extrapolate the kernel and bias obtained with a fiducial (Lbox) size.
    **/
   real_prec Lbox_low;
 
@@ -677,26 +710,35 @@ private :
    **/
   real_prec vkernel_exponent;
   //////////////////////////////////////////////////////////
-  /// true &rarr; compute a new Lbox; false &rarr; the code uses Lbox
+  /**
+   * @brief Ask if a new Lbox is requested. 
+     @details A new Lbox os computed In Catalog.cpp as the maximum difference between the min and max of each coordinate.  If false, the code uses Lbox.
+   **/
   bool new_Lbox;
 
   //////////////////////////////////////////////////////////
-  /// the power spectrum is computed with the help of a random catalogue (if use_random_catalog = true), or from a simulation with known mean (if use_random_catalog = false)
+  /**
+   * @brief Define whether the 3d power spectrum is computed with the help of a random catalogue (if use_random_catalog = true), or from a simulation with known mean (if use_random_catalog = false)
+   **/
   bool use_random_catalog;
 
-
   //////////////////////////////////////////////////////////
-  /// the angular power spectrum is computed with the help of a random catalogue (if use_random_catalog = true), or from a simulation with known mean (if use_random_catalog = false)
+  /**
+   * @brief Define whether the angular power spectrum is computed with the help of a random catalogue (if use_random_catalog = true), or from a simulation with known mean (if use_random_catalog = false)
+   **/
   bool use_random_catalog_cl;
 
-
-
   //////////////////////////////////////////////////////////
-  ///Type of binning in Fourier space: linear/log
+  /**
+   * @brief Use log or linear to specify the type of binning for the spherical shells in Fourier space.
+   **/
   string type_of_binning;
 
   //////////////////////////////////////////////////////////
-  /// Number of log-spaced bins in Fourier space
+  /**
+   * @brief Number of log-spaced bins in Fourier space
+   **/
+
   int N_log_bins;
 
   //////////////////////////////////////////////////////////
@@ -708,80 +750,131 @@ private :
 
 
   //////////////////////////////////////////////////////////
-  /// Ratio between the shell-width and the fundamental mode for window
+  /**
+   * @brief Ratio between the shell-width and the fundamental mode for window
+   **/
   int ndel_window;
 
   //////////////////////////////////////////////////////////
   /// Number of mu-bins for P(k,mu)
+  /**
+   * @brief 
+   **/
   int N_mu_bins;
 
   //////////////////////////////////////////////////////////
   ///Use FKP weights (yes/no)
+  /**
+   * @brief 
+   **/
   bool FKP_weight;
 
   //////////////////////////////////////////////////////////
   /// Estimated power for FKP weights
+  /**
+   * @brief 
+   **/
   real_prec Pest;
 
 
   //////////////////////////////////////////////////////////
   /// Compute FKP error bars? (yes/no)
+  /**
+   * @brief 
+   **/
   bool FKP_error_bars;
 
   //////////////////////////////////////////////////////////
   /// Compute error bars following FKP exact formula(yes/no)
   /// If this is no, and the previous is yes
   /// the code uses the Veff approximation for the variance.
+  /**
+   * @brief 
+   **/
   bool FKP_error_bars_exact;
 
   //////////////////////////////////////////////////////////
-  /// Is the mean number density tabulated?
+  /** 
+   @brief Set true if the information of the mean number density is tabulated in
+both random and real catalog
+   **/
   bool nbar_tabulated;
   //////////////////////////////////////////////////////////
-  /// Is the mean number density tabulated?
+  /**
+   * @brief Use an input filw with nbar against redshift (to tabulate from)
+   **/
   bool use_file_nbar;
 
   //////////////////////////////////////////////////////////
   /// Has the sample a constant depth?
+  /**
+   * @brief Set true if the survey under inspection has constant depth throughout all
+the sky. This is going to be used in case nbar−tabulated = false and use−random−catalog
+= true
+   **/
   bool constant_depth;
 
   //////////////////////////////////////////////////////////
   ///Number of redshift bins to measure dNdz
+  /**
+   * @brief 
+   **/
   int Nbins_redshift;
 
   //////////////////////////////////////////////////////////
-  /// Minimum redshift of the sample. Used when dNdz ahs to be measured
+  /// 
+  /**
+   * @brief Minimum redshift of the sample. Used when dNdz ahs to be measured
+   **/
   real_prec redshift_min_sample;
 
   //////////////////////////////////////////////////////////
   /// Maximum redshift of the sample. Used when dNdz ahs to be measured
+  /**
+   * @brief 
+   **/
   real_prec redshift_max_sample;
 
   //////////////////////////////////////////////////////////
-  ///  Number of dNdz bins to measure
+  /**
+   * @brief Number of dNdz bins to measure
+   **/
   int N_dndz_bins;
 
   //////////////////////////////////////////////////////////
-  /// Number of redshift bins withoin which the measuerd dNdz will be smoothed
+  /**
+   * @brief Number of redshift bins withoin which the measuerd dNdz will be smoothed 
+   **/
   int new_N_dndz_bins;
 
   //////////////////////////////////////////////////////////
-  /// Area of the survey.
+  /**
+   * @brief Area of the survey in degreees squared
+   **/
   real_prec area_survey;
 
   //////////////////////////////////////////////////////////
-  /// Resolution Healpix for pixelization. Used when no nbar is tabulated and dNdz is to be computed from a non-constant depth sample
+  /**
+   * @brief  Resolution Healpix for pixelization. Used when no nbar is tabulated and dNdz is to be computed from a non-constant depth sample 
+   **/
   int Healpix_resolution;
 
   //////////////////////////////////////////////////////////
-  /// output file for the redshift distribution
+  /**
+   * @brief  Output file for the redshift distribution
+   **/
   string file_dndz;
   //////////////////////////////////////////////////////////
-  /// output file for the redshift distribution
+  /**
+   * @brief Input file with nbar against redshift, to tabulate from.
+   **/
   string file_nbar;
 
   //////////////////////////////////////////////////////////
-  /// Redefine a new line of sight
+  /**
+   * @brief Define a new line of sight. If true, the code computes the position of the baricenter
+f the sample and defines it as the new line-of-sight
+   **/
   bool new_los;
 
 
@@ -809,11 +902,6 @@ private :
    * @brief
    **/
   bool use_vel_kernel;
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief
-   **/
-  int n_catalogues;
 
   //////////////////////////////////////////////////////////
   /**
@@ -935,50 +1023,44 @@ private :
    **/
   real_prec DeltaK_window;
 
-
   /////////////////////////////////////////////////////////////
   /**
-   * @brief   Maximum k-value for constructing k-bins
-
+  * @name Bispectrum
+  * @brief  Maximum k-value for constructing k-bins
    **/
   real_prec kmax_bk;
+  /////////////////////////////////////////////////////////////
   /**
-   *  @name angular power spectrum
+   *  @name Angular Power Spectrum
+      @brief Path to angular mask
    */
-  ///@{
-
-
-
   string input_file_mask;
   //////////////////////////////////////////////////////////
-  /// the column where the pixel of the mask is written
   /**
-   * @brief   Maximum k-value for constructing k-bins
-
+   *  @name Angular Power Spectrum
+   * @brief  Identifiy the column where the HEAPIX pixel ID of the mask is written
    **/
   int i_mask_pixel;
 
   //////////////////////////////////////////////////////////
   /// the column where the RA of the pixel of the mask is written
   /**
-   * @brief   Maximum k-value for constructing k-bins
-
+   * @name Angular Power Spectrum
+   * @brief Identifiy the column where the HEALPIX RA (or GA) coordinate of each mask pixel is written in the mask file.
    **/
   int i_mask_alpha;
 
   //////////////////////////////////////////////////////////
-  /// the column where the DEC of the pixel of the mask is written
   /**
-   * @brief   Maximum k-value for constructing k-bins
-
+   * @name Angular Power Spectrum
+   * @brief Identifiy the column where the HEALPIX Dec (or GL) coordinate of each mask pixel is written in the mask file.
    **/
   int i_mask_delta;
 
   //////////////////////////////////////////////////////////
-  /// the column where the FLAG of the mask is written
   /**
-   * @brief   Maximum k-value for constructing k-bins
-
+   * @name Angular Power Spectrum
+   * @brief Identifiy the column where the HEALPIX flag (0 or 1) is written in the mask file.
    **/
   int i_mask_flag;
 
@@ -1033,33 +1115,27 @@ private :
    */
   ///@{
   //////////////////////////////////////////////////////////
-  /// &Omega;<SUB>M</SUB>: the density of baryons, cold dark matter and massive neutrinos (in units of the critical density) at z=0
   /**
-   * @brief 
+   * @brief &Omega;<SUB>M</SUB>: the density of baryons, cold dark matter and massive neutrinos (in units of the critical density) at z=0
 
    **/
   real_prec om_matter;
   //////////////////////////////////////////////////////////
-  /// &Omega;<SUB>M</SUB>: the density of baryons, cold dark matter and massive neutrinos (in units of the critical density) at z=0
   /**
-   * @brief 
-
+   * @brief  &Omega;<SUB>M</SUB>: the density of baryons, cold dark matter and massive neutrinos (in units of the critical density) at z=0
    **/
   real_prec om_cdm;
 
   //////////////////////////////////////////////////////////
-  /// &Omega;<SUB>rad</SUB>: the radiation density at z=0
   /**
-   * @brief 
+   * @brief &Omega;<SUB>rad</SUB>: the radiation density at z=0
 
    **/
   real_prec om_radiation;
 
   ///////////////////////////////////////////////////y///////
-  /// &Omega;<SUB>b</SUB>: the baryon density at z=0
-  /**
-   * @brief 
-
+   /**
+   * @brief &Omega;<SUB>b</SUB>: the baryon density at z=0
    **/
   real_prec om_baryons;
   //////////////////////////////////////////////////////////
@@ -1070,59 +1146,48 @@ private :
    **/
   real_prec om_vac;
   //////////////////////////////////////////////////////////
-  /// &Omega;<SUB>k</SUB>: the density of curvature energy
   /**
-   * @brief 
-
+   * @brief &Omega;<SUB>k</SUB>: the density of curvature energy
    **/
   real_prec om_k;
   //////////////////////////////////////////////////////////
-  /// H<SUB>0</SUB>: the Hubble constant at z=0 [km/sec/Mpc]
   /**
-   * @brief 
-
+   * @brief  H<SUB>0</SUB>: the Hubble constant at z=0 [km/sec/Mpc]
    **/
   real_prec Hubble;
   //////////////////////////////////////////////////////////
-  /// \e h: the Hubble parameter, H<SUB>0</SUB>/100
-  /**
-   * @brief 
-
+   /**
+   * @brief  The Hubble parameter, H<SUB>0</SUB>/100
    **/
   real_prec hubble;
   //////////////////////////////////////////////////////////
-  /// n<SUB>spec</SUB>: the primordial spectral index
   /**
-   * @brief 
+   * @brief  n<SUB>spec</SUB>: the primordial spectral index
 
    **/
   real_prec spectral_index;
   //////////////////////////////////////////////////////////
-  /// w<SUB>0</SUB>: the parameter of the dark energy equation of state
   /**
-   * @brief 
+   * @brief w<SUB>0</SUB>: the parameter of the dark energy equation of state
 
    **/
   real_prec wde_eos;
   //////////////////////////////////////////////////////////
-  /// N<SUB>eff</SUB>: the effective number (for QED + non-instantaneous decoupling)
   /**
-   * @brief 
+   * @brief  N<SUB>eff</SUB>: the effective number (for QED + non-instantaneous decoupling)
 
    **/
   real_prec N_eff;
   //////////////////////////////////////////////////////////
-  /// &sigma;<SUB>8</SUB>: the power spectrum normalization
   /**
-   * @brief 
+   * @brief  &sigma;<SUB>8</SUB>: the power spectrum normalization
 
    **/
   real_prec sigma8;
   //////////////////////////////////////////////////////////
-  /// T<SUB>CMB</SUB>: the present day CMB temperature [K]
-  /**
-   * @brief 
-
+   /**
+   * @brief T<SUB>CMB</SUB>: the present day CMB temperature [K]
+ 
    **/
   real_prec Tcmb;
 
@@ -1133,7 +1198,7 @@ private :
   real_prec A_s;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Spectral index of primordial density fluctuations
    **/
   real_prec specral_index;
   //////////////////////////////////////////////////////////
@@ -1148,40 +1213,24 @@ private :
   real_prec RR;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Spherical Overdensity
    **/
   real_prec Delta_SO;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Use linear power spoectrum with or without wiggles.
    **/
   bool use_wiggles;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Baryon fracrion
    **/
   real_prec f_baryon;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Whether calculations in theoiretical comsology are done at a fixed redshift.
    **/
   bool fixed_redshift;
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief
-   **/
-  string file_bin_x_coord;
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief
-   **/
-  string file_bin_y_coord;
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief
-   **/
-  string file_bin_z_coord;
-  /////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////
   /**
    *  @brief
@@ -1210,37 +1259,37 @@ private :
 
 
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief ASCII parameter file.
    */
   string par_file;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   ULONG NGRID;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   ULONG NGRID_low;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   ULONG NGRID_HR;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   ULONG NGRID_h;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   ULONG NGRID_JK;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   ULONG N_lines_binary;
@@ -1251,6 +1300,17 @@ private :
    * to the maximum number of TR in one cell.
    */
   int NY;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief Specifies if the input density field for dm (X) is in binary or ascii
+    */
+  string Type_of_file_X;
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief Specifies if the input density field for TRACERS (Y) is in binary or ascii
+    */
+  string Type_of_file_Y;
+
   //////////////////////////////////////////////////////////
   /**
    * @brief Number of bins in X to construct BIAS
@@ -1272,24 +1332,24 @@ private :
    */
   int NY_SAT_FRAC;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief Number of thersholds used to define cosmic-web types. Used only if test with cwc are available
    */
   int Nlambdath;
 
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief Path to the directory where the tracer field is located
    */
   string Input_Directory_Y;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief Path to the directory where a second reference TR (for BMT using e.g. paiired simulations) field is located
    */
   string Input_Directory_Y_TWO;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief  Name of the (binary or ascii) catalog with tracer density field. This is appended to output files 
    */
   string Name_Catalog_Y;
   //////////////////////////////////////////////////////////
@@ -1299,123 +1359,117 @@ private :
   string Name_Catalog_Y_new_ref;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief 
    **/
-
   string Name_Catalog_Y_HR;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief TBD
    **/
-
   string Name_Catalog_Y_MWEIGHTED;
-
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief Path to the directory where the DM field is located
    */
   string Input_Directory_X;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+    * @brief Path to the directory where the DM_ref (for BMT) field is located
    */
   string Input_Directory_X_REF;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief Path to the directory where a new DM_ref (fpr rank ordering) field is located
    */
   string Input_Directory_X_new_ref;
-
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief Path to the directory where a second reference DM (for BMT using e.g. paiired simulations) field is located
    */
   string Input_Directory_X_REF_TWO;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief Path to the directory where an independent (new) DM is located (for assigning halo counts within BMT
+   */
+  string Input_Directory_X_NEW;
+  //////////////////////////////////////////////////////////
+  /** 
+   * @brief Path to directory where Bias and Kernel is written.
    */
   string Input_Directory_BIAS_KERNEL;
-
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief Path to directory where Bias and Kernel_two (from anotehre reference or paired simulation) is written.
    */
   string Input_Directory_BIAS_KERNEL_TWO;
 
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
-   */
-  string Input_Directory_X_NEW;
-  //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief Set a name for the X property
    */
   string XNAME;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief INput density field for dark matter
+  /** 
+   * @brief Name of the (binary or ascii) catalog with dm density field
    */
   string Name_Catalog_X;
   //////////////////////////////////////////////////////////
-  /*
+  /**  
    * @brief INput density field for dark matter
    */
   string Name_Catalog_X_new_ref;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief INput density field for dark matter
+  /** 
+   * @brief Path to file containing the x-componetns of the dm velocities
    */
   string Name_VelFieldx_X;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief INput density field for dark matter
+  /** 
+   * @brief Path to file containing the y-componetns of the dm velocities
    */
   string Name_VelFieldy_X;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief INput density field for dark matter
+  /** 
+   * @brief Path to file containing the z-componetns of the dm velocities
    */
   string Name_VelFieldz_X;
   //////////////////////////////////////////////////////////
-
-  /*
-   * @brief
+  /** 
+   * @brief Name of the (binary or ascii) catalog with a reeference dm density field for Rank ordering
    */
   string Name_Catalog_X_REF_PDF;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**  
+   * @brief Name of the (binary or ascii) catalog with a new dm density field
    */
   string Name_Catalog_X_NEW;
   //////////////////////////////////////////////////////////
-  /*
+  /** 
    * @brief
    */
   string Name_Catalog_X_NEW_TWO;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief Set a flag for the X property
    */
   string Name_Property_X;
   //////////////////////////////////////////////////////////
-  /*
+  /** 
    * @brief
    */
   string new_Name_Property_X;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**  
+   * @brief Set a name for the Y property
    */
   string YNAME;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief Set a flag for the Y property
    */
   string Name_Property_Y;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   string new_Name_Property_Y;
@@ -1426,22 +1480,22 @@ private :
   string extra_info;
   //////////////////////////////////////////////////////////
   /*
-   * @brief
+   * @brief Mass assignment scheme for the dark matter (0=NGP, 1=CIC, 2=TSC, 3=PCS)
    */
   int iMAS_X;
   //////////////////////////////////////////////////////////
   /*
-   * @brief
+   * @brief Mass assignment scheme for the reference dark matter field used in rank ordering (0=NGP, 1=CIC, 2=TSC, 3=PCS)
    */
   int iMAS_X_REF_PDF;
   //////////////////////////////////////////////////////////
   /*
-   * @brief
+   * @brief Mass assignment scheme for the new dark matter field generated with approximated methods (0=NGP, 1=CIC, 2=TSC, 3=PCS)
    */
   int iMAS_X_NEW;
   //////////////////////////////////////////////////////////
   /*
-   * @brief
+   * @brief Mass assignment scheme for the tracer field.
    */
   int iMAS_Y;
   //////////////////////////////////////////////////////////
@@ -1467,21 +1521,21 @@ private :
   real_prec delta_X_max;
   //////////////////////////////////////////////////////////
   /*
-   * @brief Minimum value of the DM overdensity
-   * @details If requiested from parameter filw, this value is overloaded
+   * @brief Minimum value of the DM overdensity (linear scale) used for distribution, histograms and bias analysis
+   * @details If requiested from parameter file (Using Redin), this value is overloaded
    * by computing it from the input fields
    */
   real_prec delta_X_min;
   /////////////////////////////////////////////////////////
   /**
-   * @brief Maximum value of the log(1+overdensity) for TR
+   * @brief Maximum value of the log(1+overdensity) for TR used for distribution, histograms and bias analysis
    * @detail If requiested from parameter filw, this value is overloaded
    * by computing it from the input fields
    */
   real_prec ldelta_Y_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Minimum value of the log(1+overdensity) for TR
+   * @brief Minimum value of the log(1+overdensity) for TR used for distribution, histograms and bias analysis
    * @detail If requiested from parameter filw, this value is overloaded
    * by computing it from the input fields
    */
@@ -1489,14 +1543,14 @@ private :
   //////////////////////////////////////////////////////////
   /*
    * @brief
-   * @brief Maximum value of the log(1+overdensity) for DM
+   * @brief Maximum value of the log(1+overdensity) for DM used for distribution, histograms and bias analysis
    * @detail If requiested from parameter filw, this value is overloaded
    * by computing it from the input fields
    */
   real_prec ldelta_X_max;
   //////////////////////////////////////////////////////////
   /*
-   * @brief Minimum value of the log(1+overdensity) for DM
+   * @brief Minimum value of the log(1+overdensity) for DM used for distribution, histograms and bias analysis
    * @detail If requiested from parameter filw, this value is overloaded
    * by computing it from the input fields
    */
@@ -1629,90 +1683,93 @@ private :
   real_prec redshift;
 
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief To be deprecated
    */
   real_prec smscale;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Identification for a realization
    * @brief Read from parameter file
    */
   int realization;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief Ask if the conditional pdf from bias is to be computed"
    */
   bool Comp_conditional_PDF;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief Ask if the joint (2d) pdf from bias is to be computed
    */
   bool Comp_joint_PDF;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief Ask if files for pdf histograms are to be printed
    */
   bool write_files_for_histograms;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief Overrun the limits min and max for delta or log delta (dm and tr) and compute from distribution. 
+   * @details For BMT, it is best ot set it to false, as the actual limits of the distributions can change interation after iteration
    */
   bool Redefine_limits;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /** 
+   * @brief If the input DM field is density, convert it to overdensity
    */
   bool Convert_Density_to_Delta_X;
   //////////////////////////////////////////////////////////
   /*
-   * @brief
+   * @brief If the input tr field is density, convert it to overdensity
    */
   bool Convert_Density_to_Delta_Y;
   //////////////////////////////////////////////////////////
   /*
-   * @brief Threshold value for the TWEB classification
+   * @brief Threshold used to define cosmic-web types based on the tidal field 
    */
   real_prec lambdath;
 
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Threshold value for the TWEB classification
+  /**
+   * @brief Compute the window matrix, if a random catalog is provided.
+   * @name Window matrix for power spectrum
+   * @details This is constrained by the fact that a random catalog is provided. 
    */
   bool get_window_matrix;
   //////////////////////////////////////////////////////////
   /**
-   * @brief CPONtainer for the minimum value pf log Mass for mass bins to be used in power spectrum
+   * @brief Container for the minimum value of log Mass for mass bins to be used in power spectrum
    */
   vector<real_prec> MASSbins_min;
   //////////////////////////////////////////////////////////
   /**
-   * @brief CPONtainer for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> MASSbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> VMAXbins_min;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> VMAXbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> VRMSbins_min;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> VRMSbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> RSbins_min;
   //////////////////////////////////////////////////////////
@@ -1722,103 +1779,103 @@ private :
   vector<real_prec> RSbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> CONCENTRATIONbins_min;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> CONCENTRATIONbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> RVIRbins_min;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> RVIRbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> SPINbins_min;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> SPINbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> SPINBULLOCKbins_min;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> SPINBULLOCKbins_max;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> VIRIALbins_min;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> VIRIALbins_max;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> BTOAbins_min;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> BTOAbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> CTOAbins_min;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> CTOAbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> MACHbins_min;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> MACHbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> DACHbins_min;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Container for the minimum value pf log Mass for mass bins
+   * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> DACHbins_max;
   //////////////////////////////////////////////////////////
@@ -1876,55 +1933,68 @@ private :
   vector<real_prec> TAbins_max;
   //////////////////////////////////////////////////////////
   /**
+  * @name Halo Analysis
    * @brief Container for the minimum value of tidal anisotropy
    */
   vector<real_prec> LOCALDMbins_min;
   //////////////////////////////////////////////////////////
   /**
+  * @name Halo Analysis
    * @brief Container for the maximum value of localoverdensiuty
    */
   vector<real_prec> LOCALDMbins_max;
   //////////////////////////////////////////////////////////
   /**
+  * @name Halo Analysis
    * @brief Container for the minimum value of peak height at halo
    */
   vector<real_prec> PHbins_min;
   //////////////////////////////////////////////////////////
   /**
+  * @name Halo Analysis
    * @brief Container for the maximum value of peak height at halo
    */
   vector<real_prec> PHbins_max;
   //////////////////////////////////////////////////////////
   /**
-   * @brief CPONtainer for the minimum value pf log Mass for mass bins
+  * @name Halo Analysis
+  * @brief Container for the minimum value of log Mass for mass bins
    */
   vector<real_prec> MASScuts;
-
-
   //////////////////////////////////////////////////////////
   /**
-   * @brief CPONtainer for the minimum value pf log Mass for mass bins
-   */
+  * @name Power Spectrum
+  * @brief Container to allocate the name of random files.
+  */
   vector<string> RANDOMfiles;
+  //////////////////////////////////////////////////////////
+  /**
+  * @name Power Spectrum
+   * @brief NUmber of random files, computed from the size of the container RANDOMfiles;
+   */
   int NRANDOMfiles;
 
   //////////////////////////////////////////////////////////
   /**
+  * @name Bias Mapping Technique
    * @brief Container with the LOS of new DM fields used in the case in which seveal LOS are built simultaneously
    */
   vector<int> list_new_dm_fields;
   //////////////////////////////////////////////////////////
   /**
+  * @name Bias Mapping Technique
    * @brief Container with the LOS of new DM fields used in the case in which seveal LOS are built simultaneously
    */
   vector<int> list_Nft_MultiLevels;
   //////////////////////////////////////////////////////////
   /**
+  * @name Bias Mapping Technique
    * @brief Container with the LOS of new DM fields used in the case in which seveal LOS are built simultaneously
    */
   vector<ULONG> list_Ntracers_MultiLevels;
   //////////////////////////////////////////////////////////
   /**
+  * @name Bias Mapping Technique
    * @brief Container with the LOS of new DM fields used in the case in which seveal LOS are built simultaneously
    */
   vector<real_prec> list_Props_Threshold_MultiLevels;
@@ -1971,58 +2041,58 @@ private :
 
 
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Threshold value for the V-web classification
+  /** 
+   * @brief Threshold used to define cosmic-web types based on the shear of the velocity field
    */
   real_prec lambdath_v;
 
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   bool Write_Scatter_Plot;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief Ask if ascii filw containing the pdf of number counts of halos is to be written
    */
   bool Write_PDF_number_counts;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Specify whether the histograms are done in log or linear scale for Y
    * @brief Read from parameter file
    */
   string Scale_Y;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Specify whether the histograms are done in log or linear scale for X
    */
   string Scale_X;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Number of bins in the Mk info to build BIAS.
+  /**
+   * @brief Number of bins in the Mass of colapsing regions (defined from TWEB) used to build BIAS.
    */
   int n_sknot_massbin;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Number of bins in the Veldisp info to build BIAS.
+  /**
+   * @brief Number of bins in the Mass of colapsing regions (defined from VWEB) used to build BIAS.
    */
   int n_vknot_massbin;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Number of BAM iterations
+   * @brief "Number of iterations in the BMT
    * @brief Read from parameter file
    */
   ULONG N_iterations_Kernel;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Number of BAM iterations
+   * @brief Iteration from which kernels and bias are used to make a final average of the iteration procedures
    * @brief Read from parameter file
    */
   ULONG Iteration_Kernel_average;
   //////////////////////////////////////////////////////////
   /*
-   * @brief
+   * @brief TO BE DEPRECATED
    */
   int iteration_ini;
 
@@ -2046,12 +2116,12 @@ private :
   int N_iterations_dm;
   //////////////////////////////////////////////////////////
   /*
-   * @brief
+   * @brief Apply rank ordering from the covolved dm to the ref dm in the iterative procedure of BMT at each step
    */
   bool Apply_Rankordering;
   //////////////////////////////////////////////////////////
   /*
-   * @brief
+   * @brief Apply rank ordering from the ref dm to some exact dm in the first step  iterative procedure of BMT at each step
    */
   bool Apply_Rankordering_ab_initio;
   //////////////////////////////////////////////////////////
@@ -2397,7 +2467,7 @@ private :
   real_prec d3_low;
   //////////////////////////////////////////////////////////
   /*
-   * @brief Number if cells per dimention in the mesh. 
+   * @brief Number if cells per dimention in the mesh, used to interpolate fieldas and do FFTW 
    */
   ULONG Nft;
   //////////////////////////////////////////////////////////
@@ -2439,7 +2509,7 @@ private :
   /*
    * @brief 
    */  
-  string dir_output;
+//  string dir_output;
   //////////////////////////////////////////////////////////
   /**
    * @brief Size of the box in Mpc/h
@@ -2457,8 +2527,9 @@ private :
    */  
   string file_power_th;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief To identif if RSD are included in coordinates
+  /**
+   * @brief This parameter identif if RSD are included in coordinates
+   * @details Set \texttt{false} if the coordinates written in the tracer catalog do not have any effect of peculiar velocities. This can be the case of using Cartesian coordinates in real-space.If power from such input is to be measured in redshift space, go to the pre-proc directive \paramp{\texttt{REDSHIFT\gi SPACE}} (see \S\ref{sec:ppreproc}). If instead, the input catalogs has coordinates with RSD already in the coordinates, set to \texttt{false}.
    */  
   bool redshift_space_coords_g;
   //////////////////////////////////////////////////////////
@@ -2492,80 +2563,82 @@ private :
    */  
   int i_v3_g;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief  Column for mas of tracer
+  /**
+   * @brief Identify the column in the ASCII file of the tracer where the information of the mass is allocated. If no information on the mass is provided or is not aimed to be used, set a negative value. Mass is expected in units of Ms / h
    */  
   int i_mass_g;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief  Column for maximum circular velocity of tracer
+  /**
+   * @brief Identify the column in the ASCII file of the tracer where the information of Vmax (maximum circular velocity) is allocated. If no information on the mass is provided or is not aimed to be used, set a negative value. Mass is expected in units of km / s
    */  
   int i_vmax_g;
   //////////////////////////////////////////////////////////
   /*
-   * @brief Column index for velocity dispersion of tracer
+   * @brief Identify the column in the ASCII file of the tracer where the information of Vrms (root mean squared velcoity) is allocated. If no information on the mass is provided or is not aimed to be used, set a negative value. Mass is expected in units of km / s
    */  
   int i_vrms_g;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief  Column for Shape radius Rs of tracer
+  /**
+   * @brief Identify the column in the ASCII file of the tracer where the information of shape radius or concentration (computed from shape radius if requested from preproc directives) is provided.
    */  
   int i_rs_g;
   //////////////////////////////////////////////////////////
   /*
-   * @brief Column for Virial radius of tracer
+   * @brief Identify the column in the ASCII file of the tracer where the information of the \textbf{virial} radius is allocated. If no information on the mass is provided or is not aimed to be used, set a negative value.
    */
   int i_rvir_g;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Column for the dimensionless spin (Peebles by default) of tracer
+  /**
+   * @brief Identify the column in the ASCII file of the tracer where the information of Peebles Spin is allocated.
    */  
   int i_spin_g;
   //////////////////////////////////////////////////////////
   /*
-   * @brief Column for the dimensionless spin (Bullock by default) of tracer
+   * @brief Identify the column in the ASCII file of the tracer where the information of Bullockś Spin is allocated.
    */
   int i_spin_bullock_g;
 
   //////////////////////////////////////////////////////////
   /*
-   * @brief The column where the halo mean densityis written
+   * @brief Identify the column in the ASCII file of the tracer where the information of the \textbf{mean number density} tabulated at each position of the tracer is allocated. If no information on this quantities is provided or is not aimed to be used, set a negative value. This quantity is expected in units of $($Mpc$\,h^{-1})^{-3}$.
    **/
   int i_mean_density_g;
   //////////////////////////////////////////////////////////
   ///
-  /*
-   * @brief the column where the object T/|W| ratio  (0.5=virialization)
+  /**
+   * @brief  Identify the column in the ASCII file of the tracer where the information of the \textbf{virial} $T/|W|$ is allocated. If no information on the mass is provided or is not aimed to be used, set a negative value
    */
   int i_virial_g;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief The column where ration b_to_ of the semiaxi¡s ls located
+  /**
+   * @brief Identify the column in the ASCII file of the tracer where the information of the \textbf{ratio $b$ to $a$} of the semi-axis of dark matter halos
+   * @details If requested from preproc directives, this column will be used to allocate halo prolatness. 
    */
   int i_b_to_a_g;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief The column where ration c_to_ of the semiaxis ls located
+  /**
+   * @brief Identify the column in the ASCII file of the tracer where the information of the \textbf{ratio $c$ to $a$} of the semi-axis of dark matter halos
+   * @details If requested from preproc directives, this column will be used to allocate halo ellipticity.
    */
   int i_c_to_a_g;
   //////////////////////////////////////////////////////////
   /*
-   * @brief The column where the color of tracer is located
+   * @brief Identify the column in the ASCII file of the tracer where the information of the color is available. If no information is provided or is not aimed to be used, set a negative value. 
    */
   int i_color_g ;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief The column where the stellar mass of tracer is located
+  /**
+   * @brief Identify the column in the ASCII file of the tracer where the information of the stellar mass is available. If no information is provided or is not aimed to be used, set a negative value. 
    */
   int i_stellar_mass_g ;
   //////////////////////////////////////////////////////////
   /*
-   * @brief The column where the stellar mass of tracer is located
+   * @brief Identify the column in the ASCII file of the tracer where the information of the apparent magnitude (in any band) is available. 
    */
   int i_app_mag_g ;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief The column where the stellar mass of tracer is located
+  /**
+   * @brief Identify the column in the ASCII file of the tracer where the information of the absolute magnitude (in any band) is available.
    */
   int i_abs_mag_g ;
 
@@ -2615,7 +2688,7 @@ private :
   bool use_weight4_g;
   //////////////////////////////////////////////////////////
   /*
-   * @brief 
+   * @brief Use tracer mass as a weight for power spectrum analysis
    */  
   bool weight_with_mass;
   //////////////////////////////////////////////////////////
@@ -2629,14 +2702,15 @@ private :
    */  
   real_prec Distance_fraction;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief 
+  /**
+   * @brief Used to
+      interpolate the tracer (and random) density filed into the FFT grid. Options are as NGP, CIC, TSC, PSC.
    */  
   string mass_assignment_scheme;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Integer for mass assignment
-   */
+   * @brief Integer for mass assignment scheme
+  */
   int mass_assignment;
   //////////////////////////////////////////////////////////
   /*
@@ -2650,12 +2724,12 @@ private :
   string file_catalogue_new_ref;
   //////////////////////////////////////////////////////////
   /*
-   * @brief 
+   * @brief Apply correction due to MAS
    */  
   bool MAS_correction;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief 
+  /**
+   * @brief Set a name for survey or simulation
    */  
   string Name_survey;
   //////////////////////////////////////////////////////////
@@ -2784,8 +2858,8 @@ private :
    */  
   bool Get_prop_function_tracer_cwt;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief Set true if cross power spectrum is to be measured.
    */
   bool measure_cross;
   //////////////////////////////////////////////////////////
@@ -2879,12 +2953,12 @@ private :
   //-------------------now parameter for cosmolib ---------//
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Minimum redshift of the sample. This is going to be used in case nbar−tabulated = false and use−random−catalog = true
    */
   real_prec redshift_min;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Maximum redshift of the sample. This is going to be used in case nbar−tabulated = false and use−random−catalog = true
    */
   real_prec redshift_max;
   //////////////////////////////////////////////////////////
@@ -3150,32 +3224,32 @@ private :
   string galaxy_correlation_function_halo_model_output_file;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @name Theoretical Power Spectrum
    */
   string scale_cf;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @name Theoretical Power Spectrum
    */
   int npoints_cf;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @name Theoretical Power Spectrum
    */
   string linear_matter_cf_output_file;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @name Theoretical Power Spectrum
    */
   string non_linear_matter_cf_halo_fit_output_file;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @name Theoretical Power Spectrum
    */
   bool compute_output_linear_correlation_function;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @name Theoretical Power Spectrum
    */
   bool compute_output_non_linear_correlation_function;
   //////////////////////////////////////////////////////////
@@ -3335,7 +3409,7 @@ public:
   void init_pars();
   //////////////////////////////////////////////////////////
   /**
-   * @brief Initialize all the parameteres defined as private variables of the class Params.
+   * @brief Explanation of all parameters
    **/
   void explain_pars(string);
 
@@ -3347,12 +3421,12 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Computation of derived parameters based on imput params.
    **/
   void derived_pars();
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   ULONG _NX(){return this->NX;}
@@ -3364,27 +3438,27 @@ public:
   }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _NY(){return this->NY;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NY_MASS(){return this->NY_MASS;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NY_SAT_FRAC(){return this->NY_SAT_FRAC;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _Nlambdath(){return this->Nlambdath;}
@@ -3397,261 +3471,277 @@ public:
   void set_Output_directory(string new_Output_directory){this->Output_directory=new_Output_directory;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   string _Input_Directory_Y(){return this->Input_Directory_Y;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   string _Input_Directory_Y_TWO(){return this->Input_Directory_Y_TWO;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_Catalog_Y
    */
   string _Name_Catalog_Y(){return this->Name_Catalog_Y;}
-
-  string _Name_Catalog_Y_new_ref(){return this->Name_Catalog_Y_new_ref;}
-
-  string _Name_Catalog_Y_HR(){return this->Name_Catalog_Y_HR;}
-
-
-  string _Name_Catalog_Y_MWEIGHTED(){return this->Name_Catalog_Y_MWEIGHTED;}
-
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_Catalog_Y_new_ref 
+   */
+  string _Name_Catalog_Y_new_ref(){return this->Name_Catalog_Y_new_ref;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member
+   *  @return Name_Catalog_Y_HR
+   */
+  string _Name_Catalog_Y_HR(){return this->Name_Catalog_Y_HR;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member
+   *  @return Name_Catalog_Y_MWEIGHTED
+   */
+  string _Name_Catalog_Y_MWEIGHTED(){return this->Name_Catalog_Y_MWEIGHTED;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member
+   *  @return Input_Directory_X
    */
   string _Input_Directory_X(){return this->Input_Directory_X;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return  _Input_Directory_BIAS_KERNEL
    */
   string _Input_Directory_BIAS_KERNEL(){return this->Input_Directory_BIAS_KERNEL;}
   //////////////////////////////////////////////////////////
-
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Input_Directory_BIAS_KERNEL_TWO
    */
   string _Input_Directory_BIAS_KERNEL_TWO(){return this->Input_Directory_BIAS_KERNEL_TWO;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Number_of_references
    */
   int _Number_of_references(){return this->Number_of_references;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Set the value of the private member
+   *  @return Number_of_references
+   */
   void set_Number_of_references(int new_number_of_references){this->Number_of_references=new_number_of_references;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Number_of_new_mocks
    */
-  
-  int _Number_of_new_mocks(){return this->Number_of_new_mocks;}
-
+    int _Number_of_new_mocks(){return this->Number_of_new_mocks;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Input_Directory_X_REF
    */
   string _Input_Directory_X_REF(){return this->Input_Directory_X_REF;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Input_Directory_X_REF_TWO
    */
   string _Input_Directory_X_REF_TWO(){return this->Input_Directory_X_REF_TWO;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Input_Directory_X_NEW
    */
   string _Input_Directory_X_NEW(){return this->Input_Directory_X_NEW;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Input_Directory_X_new_ref
    */
   string _Input_Directory_X_new_ref(){return this->Input_Directory_X_new_ref;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return XNAME
    */
   string _XNAME(){return this->XNAME;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_Catalog_X
    */
   string _Name_Catalog_X(){return this->Name_Catalog_X;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_Catalog_X_new_ref
    */
   string _Name_Catalog_X_new_ref(){return this->Name_Catalog_X_new_ref;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_VelFieldx_X
    */
   string _Name_VelFieldx_X(){return this->Name_VelFieldx_X;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_VelFieldy_X
    */
   string _Name_VelFieldy_X(){return this->Name_VelFieldy_X;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_VelFieldz_X
    */
   string _Name_VelFieldz_X(){return this->Name_VelFieldz_X;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_Catalog_X_REF_PDF
    */
   string _Name_Catalog_X_REF_PDF(){return this->Name_Catalog_X_REF_PDF;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_Catalog_X_NEW
    */
   string _Name_Catalog_X_NEW(){return this->Name_Catalog_X_NEW;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_Catalog_X_NEW_TWO
    */
   string _Name_Catalog_X_NEW_TWO(){return this->Name_Catalog_X_NEW_TWO;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_Property_X
    */
   string _Name_Property_X(){return this->Name_Property_X;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return YNAME
    */
   string _YNAME(){return this->YNAME;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return Name_Property_Y
    */
   string _Name_Property_Y(){return this->Name_Property_Y;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return iMAS_X
    */
   int _iMAS_X(){return this->iMAS_X;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _iMAS_X_NEW(){return this->iMAS_X_NEW;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _iMAS_X_REF_PDF(){return this->iMAS_X_REF_PDF;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return iMAS_Y
    */
   int _iMAS_Y(){return this->iMAS_Y;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return delta_Y_max
    */
   real_prec _delta_Y_max(){return this->delta_Y_max;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return delta_Y_min
    */
   real_prec _delta_Y_min(){return this->delta_Y_min;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return delta_X_max
    */
   real_prec _delta_X_max(){return this->delta_X_max;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return delta_X_min
    */
   real_prec _delta_X_min(){return this->delta_X_min;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @retunr _ldelta_Y_maxn
    */
   real_prec _ldelta_Y_max(){return this->ldelta_Y_max;}
   void set_ldelta_Y_max(real_prec new_xmin){this->ldelta_Y_max=new_xmin;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member
+   *  @return ldelta_Y_min
    */
   real_prec _ldelta_Y_min(){return this->ldelta_Y_min;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Set the value of the private member
+   */
   void set_ldelta_Y_min(real_prec new_xmin){this->ldelta_Y_min=new_xmin;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   real_prec _ldelta_X_max(){return this->ldelta_X_max;}
   void set_ldelta_X_max(real_prec new_xm){this->ldelta_X_max=new_xm;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   real_prec _ldelta_X_min(){return this->ldelta_X_min;}
   void set_ldelta_X_min(real_prec new_xmin){this->ldelta_X_min=new_xmin;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   string _Quantity(){return this->Quantity;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   ULONG _NMASSbins(){return this->NMASSbins;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   ULONG _NPROPbins_bam(){return this->NPROPbins_bam;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
  
@@ -3659,138 +3749,138 @@ public:
   void set_NMASSbins_mf(int new_NMASSbins_mf){this->NMASSbins_mf=new_NMASSbins_mf;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NMASSbins_power(){return this->MASSbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NVMAXbins_power(){return this->VMAXbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NVRMSbins_power(){return this->VRMSbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NRSbins_power(){return this->RSbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NRVIRbins_power(){return this->RVIRbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NCONCENTRATIONbins_power(){return this->CONCENTRATIONbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NSPINbins_power(){return this->SPINbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NSPINBULLOCKbins_power(){return this->SPINBULLOCKbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _NMACHbins_power(){return this->MACHbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _NLOCALDMbins_power(){return this->LOCALDMbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _NDACHbins_power(){return this->DACHbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _NBIASbins_power(){return this->BIASbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _NRBIASbins_power(){return this->RBIASbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _NQBIASbins_power(){return this->QBIASbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _NLCbins_power(){return this->LCbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _NTAbins_power(){return this->TAbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _NPHbins_power(){return this->PHbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NVIRIALbins_power(){return this->VIRIALbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NBTOAbins_power(){return this->BTOAbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
   int _NCTOAbins_power(){return this->CTOAbins_max.size();}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
 
@@ -3799,62 +3889,62 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   real_prec _redshift(){return this->redshift;}
   void set_redshift(real_prec new_redshift){this->redshift=new_redshift;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   real_prec _smscale(){return this->smscale;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _realization(){return this->realization;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _Comp_conditional_PDF(){return this->Comp_conditional_PDF;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _Comp_joint_PDF(){return this->Comp_joint_PDF;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _write_files_for_histograms(){return this->write_files_for_histograms;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _Redefine_limits(){return this->Redefine_limits;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _Convert_Density_to_Delta_X(){return this->Convert_Density_to_Delta_X;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _Convert_Density_to_Delta_Y(){return this->Convert_Density_to_Delta_Y;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   real_prec _lambdath(){return this->lambdath;}
@@ -3864,25 +3954,25 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _Write_Scatter_Plot(){return this->Write_Scatter_Plot;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _Write_PDF_number_counts(){return this->Write_PDF_number_counts;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   string _Scale_X(){return this->Scale_X;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   string _Scale_Y(){return this->Scale_Y;}
@@ -3890,93 +3980,93 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _N_dm_initial(){return this->N_dm_initial;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _n_sknot_massbin(){return this-> n_sknot_massbin;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _n_vknot_massbin(){return this-> n_vknot_massbin;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   ULONG _N_iterations_Kernel(){return this->N_iterations_Kernel;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   ULONG _Iteration_Kernel_average(){return this->Iteration_Kernel_average;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   void set_N_iterations_Kernel(int new_N_iterations_Kernel){this->N_iterations_Kernel=new_N_iterations_Kernel;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _Apply_Rankordering(){return this->Apply_Rankordering;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _Apply_Rankordering_ab_initio(){return this->Apply_Rankordering_ab_initio;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   vector<ULONG> _cwt_used(){return this->cwt_used;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   vector<ULONG> _cwv_used(){return this->cwv_used;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   vector<ULONG> _output_at_iteration(){return this->output_at_iteration;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member n_cwt
+   *  @brief Get the value of the private member n_cwt
    *  @return
    */
   ULONG _n_cwt(){return this->n_cwt;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member n_cwv
+   *  @brief Get the value of the private member n_cwv
    *  @return
    */
   ULONG _n_cwv(){return this->n_cwv;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member n_cwv
+   *  @brief Get the value of the private member n_cwv
    *  @return
    */
   int _NRANDOMfiles(){return this->NRANDOMfiles;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member n_cwv
+   *  @brief Get the value of the private member n_cwv
    *  @return
    */
   string _RANDOMfile(int i){return this->RANDOMfiles[i];}
@@ -3996,21 +4086,21 @@ public:
 
   // function to get private variables
   /**
-   *  @brief get the value of the private member statistics
+   *  @brief Get the value of the private member statistics
    *  @return statistics
    */
   string _statistics () {return statistics;}
   void set_statistics (string new_stats) {this->statistics=new_stats;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member Input_dir_cat
+   *  @brief Get the value of the private member Input_dir_cat
    *  @return Input_dir_cat
    */
   string _Input_dir_cat () {return this->Input_dir_cat;}
   string _Input_dir_cat_new_ref () {return this->Input_dir_cat_new_ref;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member Input_dir_cat
+   *  @brief Get the value of the private member Input_dir_cat
    *  @return Input_dir_cat
    */
   string _Input_dir_cat_TWO () {return this->Input_dir_cat_TWO;}
@@ -4021,73 +4111,69 @@ public:
   void set_measure_cross(bool new_meas){this->measure_cross=new_meas;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member dir_output
-   *  @return dir_output
-   */
-  string _dir_output(){return this->dir_output;}
-  void set_dir_output(string new_dir_output){this->dir_output=new_dir_output;}
-  //////////////////////////////////////////////////////////
-  /**
-   *  @brief get the value of the private member dir_output
-   *  @return dir_output
+   *  @brief Get the value of the private member input_type
+   *  @return input_type
    */
   string _input_type () {return input_type;}
   void set_input_type(string new_input_type){input_type=new_input_type;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member dir_output
-   *  @return dir_output
+   *  @brief Get the value of the private member  input_type_two
+   *  @return input_type_two
    */
 
   string _input_type_two () {return input_type_two;}
   void set_input_type_two(string new_input_type){input_type_two=new_input_type;}
+  //////////////////////////////////////////////////////////
+  void set_dir_output(string new_out){this->Output_directory=new_out;}
+
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   ULONG _ngal_delta() {return ngal_delta;}
   void set_ngal_delta(ULONG new_ngal_delta) {this->ngal_delta=new_ngal_delta;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   string _delta_grid_file () {return delta_grid_file;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   string _delta_grid_file2 () {return delta_grid_file2;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   string _delta_grid_file3 () {return delta_grid_file3;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   string _delta_grid_file4 () {return delta_grid_file4;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   bool _measure_cross () {return measure_cross;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _measure_cross_from_1 () {return measure_cross_from_1;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member
+   *  @brief Get the value of the private member
    *  @return
    */
   int _measure_cross_from_2 () {return measure_cross_from_2;}
@@ -4103,7 +4189,7 @@ public:
   void set_Input_dir_cat_new_ref (string _Input_dir_cat) {Input_dir_cat_new_ref = _Input_dir_cat;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member file_catalogue
+   *  @brief Get the value of the private member file_catalogue
    *  @return file_catalogue
    */
   string _file_catalogue () {return file_catalogue;}
@@ -4115,63 +4201,63 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member file_random
+   *  @brief Get the value of the private member file_random
    *  @return file_random
    */
   string _file_random () {return file_random;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member new_Lbox
+   *  @brief Get the value of the private member new_Lbox
    *  @return new_Lbox
    */
   bool _new_Lbox () {return new_Lbox;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member sys_of_coord_g
+   *  @brief Get the value of the private member sys_of_coord_g
    *  @return sys_of_coord_g
    */
   int _sys_of_coord_g () {return sys_of_coord_g;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member sys_of_coord_g
+   *  @brief Get the value of the private member sys_of_coord_g
    *  @return sys_of_coord_dm
    */
   int _sys_of_coord_dm () {return sys_of_coord_dm;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord1_g
+   *  @brief Get the value of the private member i_coord1_g
    *  @return i_coord1_g
    */
   int _i_coord1_g () {return this->i_coord1_g;}
   void set_i_coord1_g(int new_i_coord1_g){this->i_coord1_g=new_i_coord1_g;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord2_g
+   *  @brief Get the value of the private member i_coord2_g
    *  @return i_coord2_g
    */
   int _i_coord2_g () {return i_coord2_g;}
   void set_i_coord2_g(int new_i_coord2_g){this->i_coord2_g=new_i_coord2_g;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord3_g
+   *  @brief Get the value of the private member i_coord3_g
    *  @return i_coord3_g
    */
   int _i_coord3_g () {return this->i_coord3_g;}
   void set_i_coord3_g(int new_i_coord3_g){this->i_coord3_g=new_i_coord3_g;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord1_g
+   *  @brief Get the value of the private member i_coord1_g
    *  @return i_coord1_g
    */
   int _i_v1_g () {return i_v1_g;}
   void set_i_v1_g(int new_i_v1_g){this->i_v1_g=new_i_v1_g;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord2_g
+   *  @brief Get the value of the private member i_coord2_g
    *  @return i_coord2_g
    */
   int _i_v2_g () {return i_v2_g;}
@@ -4179,7 +4265,7 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord3_g
+   *  @brief Get the value of the private member i_coord3_g
    *  @return i_coord3_g
    */
   int _i_v3_g () {return this->i_v3_g;}
@@ -4188,7 +4274,7 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord3_g
+   *  @brief Get the value of the private member i_coord3_g
    *  @return i_coord3_g
    */
   int _i_mass_g () {return this->i_mass_g;}
@@ -4293,7 +4379,7 @@ public:
   void set_i_abs_mag_g (int new_i_g) {this->i_abs_mag_g=new_i_g;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord3_g
+   *  @brief Get the value of the private member i_coord3_g
    *  @return i_coord3_g
    */
   int _i_mass_dm () {return this->i_mass_dm;}
@@ -4301,56 +4387,56 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_weight1_g
+   *  @brief Get the value of the private member i_weight1_g
    *  @return i_weight1_g
    */
   int _i_weight1_g () {return this->i_weight1_g;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_weight2_g
+   *  @brief Get the value of the private member i_weight2_g
    *  @return i_weight2_g
    */
   int _i_weight2_g () {return this->i_weight2_g;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_weight3_g
+   *  @brief Get the value of the private member i_weight3_g
    *  @return i_weight3_g
    */
   int _i_weight3_g () {return this->i_weight3_g;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_weight4_g
+   *  @brief Get the value of the private member i_weight4_g
    *  @return i_weight4_g
    */
   int _i_weight4_g () {return i_weight4_g;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_weight1_g
+   *  @brief Get the value of the private member use_weight1_g
    *  @return use_weight1_g
    */
   bool _use_weight1_g () {return this->use_weight1_g;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_weight2_g
+   *  @brief Get the value of the private member use_weight2_g
    *  @return use_weight2_g
    */
   bool _use_weight2_g () {return this->use_weight2_g;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_weight3_g
+   *  @brief Get the value of the private member use_weight3_g
    *  @return use_weight3_g
    */
   bool _use_weight3_g () {return this->use_weight3_g;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_weight4_g
+   *  @brief Get the value of the private member use_weight4_g
    *  @return use_weight4_g
    */
   bool _use_weight4_g () {return this->use_weight4_g;}
@@ -4364,55 +4450,55 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord1_g
+   *  @brief Get the value of the private member i_coord1_g
    *  @return i_coord1_g
    */
   int _i_coord1_dm () {return i_coord1_dm;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord2_g
+   *  @brief Get the value of the private member i_coord2_g
    *  @return i_coord2_g
    */
   int _i_coord2_dm () {return i_coord2_dm;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord3_g
+   *  @brief Get the value of the private member i_coord3_g
    *  @return i_coord3_g
    */
   int _i_coord3_dm () {return this->i_coord3_dm;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord1_g
+   *  @brief Get the value of the private member i_coord1_g
    *  @return i_coord1_g
    */
   int _i_v1_dm () {return i_v1_dm;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord2_g
+   *  @brief Get the value of the private member i_coord2_g
    *  @return i_coord2_g
    */
   int _i_v2_dm () {return i_v2_dm;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord3_g
+   *  @brief Get the value of the private member i_coord3_g
    *  @return i_coord3_g
    */
   int _i_v3_dm() {return this->i_v3_dm;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member Name_survey
+   *  @brief Get the value of the private member Name_survey
    *  @return Name_survey
    */
   string _Name_survey () {return this->Name_survey;}
   void set_Name_survey(string new_Name_survey){this->Name_survey=new_Name_survey;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_mean_density_g
+   *  @brief Get the value of the private member i_mean_density_g
    *  @return i_mean_density_g
    */
   int _i_mean_density_g () {return i_mean_density_g;}
@@ -4420,14 +4506,14 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member angles_units_g
+   *  @brief Get the value of the private member angles_units_g
    *  @return angles_units_g
    */
   string _angles_units_g () {return angles_units_g;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_random_catalog
+   *  @brief Get the value of the private member use_random_catalog
    *  @return use_random_catalog
    */
   bool _use_random_catalog () {return use_random_catalog;}
@@ -4436,7 +4522,7 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_random_catalog
+   *  @brief Get the value of the private member use_random_catalog
    *  @return use_random_catalog
    */
   bool _use_random_catalog_cl () {return use_random_catalog_cl;}
@@ -4444,83 +4530,83 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member new_los
+   *  @brief Get the value of the private member new_los
    *  @return new_los
    */
   bool _new_los () {return new_los;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member sys_of_coord_r
+   *  @brief Get the value of the private member sys_of_coord_r
    *  @return sys_of_coord_r
    */
   int _sys_of_coord_r () {return sys_of_coord_r;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord1_r
+   *  @brief Get the value of the private member i_coord1_r
    *  @return i_coord1_r
    */
   int _i_coord1_r () {return i_coord1_r;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord2_r
+   *  @brief Get the value of the private member i_coord2_r
    *  @return i_coord2_r
    */
   int _i_coord2_r () {return i_coord2_r;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_coord3_r
+   *  @brief Get the value of the private member i_coord3_r
    *  @return i_coord3_r
    */
   int _i_coord3_r () {return i_coord3_r;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_weight1_r
+   *  @brief Get the value of the private member i_weight1_r
    *  @return i_weight1_r
    */
   int _i_weight1_r () {return i_weight1_r;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_weight2_r
+   *  @brief Get the value of the private member i_weight2_r
    *  @return i_weight2_r
    */
   int _i_weight2_r () {return i_weight2_r;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_weight3_r
+   *  @brief Get the value of the private member i_weight3_r
    *  @return i_weight3_r
    */
   int _i_weight3_r () {return i_weight3_r;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_weight4_r
+   *  @brief Get the value of the private member i_weight4_r
    *  @return i_weight4_r
    */
   int _i_weight4_r () {return i_weight4_r;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_mass_r
+   *  @brief Get the value of the private member i_mass_r
    *  @return i_mass_r
    */
   int _i_mass_r () {return i_mass_r;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_weight1_r
+   *  @brief Get the value of the private member use_weight1_r
    *  @return use_weight1_r
    */
   bool _use_weight1_r () {return use_weight1_r;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_weight1_r
+   *  @brief Get the value of the private member use_weight1_r
    *  @return use_weight1_r
    */
 
@@ -4528,25 +4614,25 @@ public:
   void set_weight_with_mass(bool new_weight_with_mass){this->weight_with_mass=new_weight_with_mass;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_weight2_r
+   *  @brief Get the value of the private member use_weight2_r
    *  @return use_weight2_r
    */
   bool _use_weight2_r () {return use_weight2_r;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_weight3_r
+   *  @brief Get the value of the private member use_weight3_r
    *  @return use_weight3_r
    */
   bool _use_weight3_r () {return use_weight3_r;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_weight4_r
+   *  @brief Get the value of the private member use_weight4_r
    *  @return use_weight4_r
    */
   bool _use_weight4_r () {return use_weight4_r;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member i_mean_density_r
+   *  @brief Get the value of the private member i_mean_density_r
    *  @return i_mean_density_r
    */
   int _i_mean_density_r () {return i_mean_density_r;}
@@ -4582,19 +4668,10 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member angles_units_r
+   *  @brief Get the value of the private member angles_units_r
    *  @return angles_units_r
    */
   string _angles_units_r () {return angles_units_r;}
-
-  //////////////////////////////////////////////////////////
-  /**
-   *  @brief get the value of the private member n_catalogues
-   *  @return n_catalogues
-   */
-  int _n_catalogues () {return n_catalogues;}
-
-
   //////////////////////////////////////////////////////////
   /**
    *  @brief get / set the value of the private member Nft
@@ -4652,20 +4729,20 @@ public:
   void set_Distance_fraction(real_prec new_Distance_fraction){this->Distance_fraction=new_Distance_fraction;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member Nft
+   *  @brief Get the value of the private member Nft
    *  @return Nf   */
   ULONG _NGRID(){return this->NGRID;}
   void set_NGRID(ULONG new_NGRID){this->NGRID=new_NGRID;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member Nft
+   *  @brief Get the value of the private member Nft
    *  @return Nft
    */
   ULONG _NGRID_HR(){return this->NGRID_HR;}
   void set_NGRID_HR(ULONG new_NGRID){this->NGRID_HR=new_NGRID;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member Nft
+   *  @brief Get the value of the private member Nft
    *  @return Nft
    */
   ULONG _NGRID_JK(){return this->NGRID_JK;}
@@ -4679,14 +4756,14 @@ public:
   void set_NGRID_h(ULONG new_NGRID_h){this->NGRID_h=new_NGRID_h;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member Nft
+   *  @brief Get the value of the private member Nft
    *  @return Nft
    */
   ULONG _NGRID_low(){return this->NGRID_low;}
   void set_NGRID_low(ULONG new_NGRID_l){this->NGRID_low=new_NGRID_l;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member Lbox
+   *  @brief Get the value of the private member Lbox
    *  @return Lbox
    */
   real_prec _Lbox () {return this->Lbox;}
@@ -4700,21 +4777,21 @@ public:
   void set_Lbox_low(real_prec new_Lbox_low){this->Lbox_low=new_Lbox_low;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member mass_assignment_scheme
+   *  @brief Get the value of the private member mass_assignment_scheme
    *  @return mass_assignment_scheme
    */
   string _mass_assignment_scheme () {return this->mass_assignment_scheme;}
   void set_mass_assignment_scheme (string new_mass_assignment_scheme) {this->mass_assignment_scheme=new_mass_assignment_scheme;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member mass_assignment_scheme
+   *  @brief Get the value of the private member mass_assignment_scheme
    *  @return mass_assignment_scheme
    */
   int _mass_assignment () {return this->mass_assignment;}
   void set_mass_assignment_scheme (int new_mass_assignment_scheme) {this->mass_assignment=new_mass_assignment_scheme;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member type_of_binning
+   *  @brief Get the value of the private member type_of_binning
    *  @return type_of_binning
    */
   string _type_of_binning () {return this->type_of_binning;}
@@ -4722,7 +4799,7 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member type_of_binning
+   *  @brief Get the value of the private member type_of_binning
    *  @return type_of_binning
    */
 
@@ -4737,49 +4814,49 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member type_of_binning
+   *  @brief Get the value of the private member type_of_binning
    *  @return type_of_binning
    */
   string _extra_info () {return this->extra_info;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member N_log_bins
+   *  @brief Get the value of the private member N_log_bins
    *  @return N_log_bins
    */
   int _N_log_bins () {return this->N_log_bins;}
   void set_N_log_bins(int new_N_log_bins){this->N_log_bins=new_N_log_bins;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member ndel_data
+   *  @brief Get the value of the private member ndel_data
    *  @return ndel_data
    */
   int _ndel_data () {return this->ndel_data;}
   void set_ndel_data(int new_ndel_data){this->ndel_data=new_ndel_data;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member ndel_window
+   *  @brief Get the value of the private member ndel_window
    *  @return ndel_window
    */
   int _ndel_window () {return this->ndel_window;}
   void set_ndel_window(int new_ndel_window){this->ndel_data=new_ndel_window;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member N_mu_bins
+   *  @brief Get the value of the private member N_mu_bins
    *  @return N_mu_bins
    */
   int _N_mu_bins () {return this->N_mu_bins;}
   void set_N_mu_bins(int new_N_mu_bins){this->N_mu_bins=new_N_mu_bins;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member MAS_correction
+   *  @brief Get the value of the private member MAS_correction
    *  @return MAS_correction
    */
   bool _MAS_correction () {return this->MAS_correction;}
   void set_MAS_correction(bool new_MAS_correction){this->MAS_correction=new_MAS_correction;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member FKP_weight
+   *  @brief Get the value of the private member FKP_weight
    *  @return FKP_weight
    */
   bool _FKP_weight () {return FKP_weight;}
@@ -4792,132 +4869,132 @@ public:
   void set_SN_correction (bool new_sn_correction) {this->SN_correction=new_sn_correction;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member FKP_error_bars
+   *  @brief Get the value of the private member FKP_error_bars
    *  @return FKP_error_bars
    */
   bool _FKP_error_bars () {return FKP_error_bars;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member FKP_error_bars_exact
+   *  @brief Get the value of the private member FKP_error_bars_exact
    *  @return FKP_error_bars_exact
    */
   bool _FKP_error_bars_exact () {return FKP_error_bars_exact;}
   ///////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member Pest
+   *  @brief Get the value of the private member Pest
    *  @return Pest
    */
   real_prec _Pest () {return this->Pest;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member nbar_tabulated
+   *  @brief Get the value of the private member nbar_tabulated
    *  @return nbar_tabulated
    */
   bool _nbar_tabulated () {return this->nbar_tabulated;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member nbar_tabulated
+   *  @brief Get the value of the private member nbar_tabulated
    *  @return nbar_tabulated
    */
   bool _use_file_nbar () {return this->use_file_nbar;}
   ///////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member constant_depth
+   *  @brief Get the value of the private member constant_depth
    *  @return constant_depth
    */
   bool _constant_depth () {return constant_depth;}
   //////////////////////////////////////////////////////////
 
   /**
-   *  @brief get the value of the private member N_z_bins
+   *  @brief Get the value of the private member N_z_bins
    *  @return N_z_bins
    */
   int _Nbins_redshift () {return Nbins_redshift;}
   /////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member redshift_min_sample
+   *  @brief Get the value of the private member redshift_min_sample
    *  @return redshift_min_sample
    */
   real_prec _redshift_min_sample () {return redshift_min_sample;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member redshift_max_sample
+   *  @brief Get the value of the private member redshift_max_sample
    *  @return redshift_max_sample
    */
   real_prec _redshift_max_sample () {return redshift_max_sample;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member N_dndz_bins
+   *  @brief Get the value of the private member N_dndz_bins
    *  @return N_dndz_bins
    */
   int _N_dndz_bins () {return N_dndz_bins;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member new_N_dndz_bins
+   *  @brief Get the value of the private member new_N_dndz_bins
    *  @return new_N_dndz_bins
    */
   int _new_N_dndz_bins () {return new_N_dndz_bins;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member Healpix_resolution
+   *  @brief Get the value of the private member Healpix_resolution
    *  @return Healpix_resolution
    */
   int _Healpix_resolution () {return Healpix_resolution;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member file_dndz
+   *  @brief Get the value of the private member file_dndz
    *  @return file_dndz
    */
   string _file_dndz () {return this->file_dndz;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member file_dndz
+   *  @brief Get the value of the private member file_dndz
    *  @return file_dndz
    */
   string _file_nbar () {return this->file_nbar;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member file_power
+   *  @brief Get the value of the private member file_power
    *  @return file_power
    */
   string _file_power () {return this->file_power;}
   void set_file_power(string new_file_power){this->file_power=new_file_power;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member file_power_log
+   *  @brief Get the value of the private member file_power_log
    *  @return file_power_log
    */
   string _file_power_log () {return file_power_log;}
   //////////////////////////////////////////////////////////
 
   /**
-   *  @brief get the value of the private member file_window
+   *  @brief Get the value of the private member file_window
    *  @return file_window
    */
   string _file_window () {return file_window;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member file_power2d
+   *  @brief Get the value of the private member file_power2d
    *  @return file_power2d
    */
   string _file_power2d () {return file_power2d;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member file_power2d_mk
+   *  @brief Get the value of the private member file_power2d_mk
    *  @return file_power2d_mk
    */
   string _file_power2d_mk () {return file_power2d_mk;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member kmin_bk;
+   *  @brief Get the value of the private member kmin_bk;
    *  @return kmin_bk
    */
   real_prec _kmin_bk () {return kmin_bk;}
   void set_kmin_bk(real_prec new_kmin_bk){kmin_bk=new_kmin_bk;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member kmin_bk;
+   *  @brief Get the value of the private member kmin_bk;
    *  @return kmax_bk
    */
   real_prec _kmax_bk () {return kmax_bk;}
@@ -4925,14 +5002,14 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member use_fundamental_mode_as_kmin_bk
+   *  @brief Get the value of the private member use_fundamental_mode_as_kmin_bk
    *  @return Nshells_bk
    */
   bool _use_fundamental_mode_as_kmin_bk () {return use_fundamental_mode_as_kmin_bk;}
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member file_bispectrum
+   *  @brief Get the value of the private member file_bispectrum
    *  @return file_bispectrum
    */
   string _file_bispectrum () {return file_bispectrum;}
@@ -4941,7 +5018,7 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member kmax_y_ds
+   *  @brief Get the value of the private member kmax_y_ds
    *  @return kmax_y_ds
    */
   real_prec _kmax_y_ds () {return kmax_y_ds;}
@@ -5030,92 +5107,92 @@ public:
 
 
   /**
-   *  @brief get the value of the private member &Omega;<SUB>M</SUB>
+   *  @brief Get the value of the private member &Omega;<SUB>M</SUB>
    *  @return &Omega;<SUB>M</SUB>
    */
   real_prec _om_matter () { return om_matter; }
 
   /**
-   *  @brief get the value of the private member &Omega;<SUB>M</SUB>
+   *  @brief Get the value of the private member &Omega;<SUB>M</SUB>
    *  @return &Omega;<SUB>M</SUB>
    */
   real_prec _om_cdm () { return om_cdm; }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member &Omega;<SUB>rad</SUB>: the radiation density at z=0
+   *  @brief Get the value of the private member &Omega;<SUB>rad</SUB>: the radiation density at z=0
    *  @return &Omega;<SUB>rad</SUB>
    */
   real_prec _om_radiation () { return om_radiation; }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member &Omega;<SUB>b</SUB>: the baryon density at z=0
+   *  @brief Get the value of the private member &Omega;<SUB>b</SUB>: the baryon density at z=0
    *  @return &Omega;<SUB>b</SUB>
    */
   real_prec _om_baryons () { return om_baryons; }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member &Omega;<SUB>DE</SUB>: the dark energy density at z=0
+   *  @brief Get the value of the private member &Omega;<SUB>DE</SUB>: the dark energy density at z=0
    *  @return &Omega;<SUB>DE</SUB>
    */
   real_prec _om_vac () { return om_vac; }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member &Omega;<SUB>k</SUB>: the density of curvature energy
+   *  @brief Get the value of the private member &Omega;<SUB>k</SUB>: the density of curvature energy
    *  @return &Omega;<SUB>k</SUB>
    */
   real_prec _om_k () { return om_k; }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member H<SUB>0</SUB>: the Hubble constant at z=0 [km/sec/Mpc]
+   *  @brief Get the value of the private member H<SUB>0</SUB>: the Hubble constant at z=0 [km/sec/Mpc]
    *  @return H<SUB>0</SUB>
    */
   real_prec _Hubble () { return Hubble; }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member \e h: the Hubble parameter, H<SUB>0</SUB>/100
+   *  @brief Get the value of the private member \e h: the Hubble parameter, H<SUB>0</SUB>/100
    *  @return \e h
    */
   real_prec _hubble () { return hubble; }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member n<SUB>spec</SUB>: the primordial spectral index
+   *  @brief Get the value of the private member n<SUB>spec</SUB>: the primordial spectral index
    *  @return n<SUB>spec</SUB>
    */
   real_prec _spectral_index () { return spectral_index; }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member n<SUB>spec</SUB>: f_baryon
+   *  @brief Get the value of the private member n<SUB>spec</SUB>: f_baryon
    *  @return n<SUB>spec</SUB>
    */
   real_prec _f_baryon () { return this->f_baryon;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member n<SUB>spec</SUB>: f_baryon
+   *  @brief Get the value of the private member n<SUB>spec</SUB>: f_baryon
    *  @return n<SUB>spec</SUB>
    */
   real_prec _A_s () { return this->A_s;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member w<SUB>0</SUB>: the parameter of the dark energy equation of state
+   *  @brief Get the value of the private member w<SUB>0</SUB>: the parameter of the dark energy equation of state
    *  @return w<SUB>0</SUB>
    */
   real_prec _wde_eos () { return wde_eos; }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member N<SUB>eff</SUB>: the effective number (for QED + non-instantaneous decoupling)
+   *  @brief Get the value of the private member N<SUB>eff</SUB>: the effective number (for QED + non-instantaneous decoupling)
    *  @return N<SUB>eff</SUB>
    */
   real_prec _N_eff () { return N_eff; }
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member &sigma;<SUB>8</SUB>: the power spectrum normalization
+   *  @brief Get the value of the private member &sigma;<SUB>8</SUB>: the power spectrum normalization
    *  @return &sigma;<SUB>8</SUB>
    */
   real_prec _sigma8 () { return sigma8; }
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the private member T<SUB>CMB</SUB>: the present day CMB temperature [K]
+   *  @brief Get the value of the private member T<SUB>CMB</SUB>: the present day CMB temperature [K]
    *  @return T<SUB>CMB</SUB>
    */
   real_prec _Tcmb () { return Tcmb; }
@@ -7051,10 +7128,9 @@ public:
         this->CONCENTRATIONbins_max.resize(new_size,0);
         this->CONCENTRATIONbins_min.resize(new_size,0);
     }
-
-  // -----------------------------------------------------------------------------------------------
+  /////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Maximum wavenumber for intergration
    */
   real_prec _kmax_integration () {return this->kmax_integration;}
   //////////////////////////////////////////////////////////
@@ -7456,12 +7532,5 @@ public:
    *  @name input/output
    */
   real_prec _area_survey(){return this->area_survey;}
-
-
-
-
 };
-
-
-
 #endif
