@@ -193,6 +193,7 @@ int main(int argc, char *argv[])
       //Assign individual bias to objhects in cat.Halo. That bias uses the dm_field.
       power.object_by_object_bias(cat.Halo, dm_field);
 
+      
       vector<real_prec> bias_field(params._NGRID(), 0); // Define container to allocate the bias on a mesh
        
       cat.get_density_field_grid(_COUNTS_,tr_field_counts,bias_field); //Get halo bias averaged on a mesh.
@@ -220,20 +221,20 @@ int main(int argc, char *argv[])
       vector<real_prec> tr_alpha(params._NGRID(), 0); // Container for TA computed from the halo tidal field
       cwclass.get_tidal_anisotropy(tr_field, tr_alpha); // Compute the TA halo field --tr_field-- and allocate in tr_alpha
 
-      fileo=params._Output_directory()+"alpha_hbias_p"+to_string(params._unitsim_plabel());
-      File.write_array(fileo,tr_alpha); //Write tidal anisotropy
+      fileo=params._Output_directory()+"alpha_tr_p"+to_string(params._unitsim_plabel());
+      File.write_array(fileo,tr_alpha); //Write tidal anisotropy based on the tracers
 
-      fileo=params._Output_directory()+"l1_hbias_p"+to_string(params._unitsim_plabel());
+      fileo=params._Output_directory()+"l1_tr_p"+to_string(params._unitsim_plabel());
       File.write_array(fileo,cwclass.lambda1); //Write first eigenvalue of halo tidal field
 
 
-      fileo=params._Output_directory()+"l2_hbias_p"+to_string(params._unitsim_plabel());
+      fileo=params._Output_directory()+"l2_tr_p"+to_string(params._unitsim_plabel());
       File.write_array(fileo,cwclass.lambda2); //Write second eigenvalue of halo tidal field
 
-      fileo=params._Output_directory()+"l3_hbias_p"+to_string(params._unitsim_plabel());
+      fileo=params._Output_directory()+"l3_tr_p"+to_string(params._unitsim_plabel());
       File.write_array(fileo,cwclass.lambda3); //Write third eigenvalue of halo tidal field
 
-      fileo=params._Output_directory()+"cwc_hbias_p"+to_string(params._unitsim_plabel());
+      fileo=params._Output_directory()+"cwc_tr_p"+to_string(params._unitsim_plabel());
       File.write_array(fileo,cwclass.CWClass);  //Write the cwc of each cell, computed in from tracers in CWClass.
 
 
