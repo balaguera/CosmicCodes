@@ -5407,9 +5407,38 @@ void Catalog::select_random_subsample(real_prec fraction, string file){
     do
      {
       int i= gsl_rng_uniform_int(gBaseRando,this->Halo.size());
-//      rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<endl;
-//      rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].rs)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<log10(this->Halo[i].vrms)<<"\t"<<this->Halo[i].virial<<"\t"<<this->Halo[i].b_to_a<<"\t"<<this->Halo[i].c_to_a<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<this->Halo[i].qbias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<"\t"<<this->Halo[i].dach_number<<"\t"<<this->Halo[i].tidal_anisotropy<<"\t"<<this->Halo[i].peak_height<<"\t"<<this->Halo[i].gal_cwt<<"\t"<<this->Halo[i].relative_bias<<"\t"<<this->Halo[i].bias_rs<<"\t"<<this->Halo[i].rs_factor<<"\t"<<this->Halo[i].local_dm<<"\t"<<this->Halo[i].lambda1<<"\t"<<this->Halo[i].lambda2<<"\t"<<this->Halo[i].lambda3<<"\t"<<log10(this->Halo[i].mass_closest_neighbour)<<"\t"<<this->Halo[i].distance_closest_neighbour<<"\t"<<log10(this->Halo[i].spin_closest_neighbour)<<"\t"<<log10(this->Halo[i].concentration_closest_neighbour)<<"\t"<<log10(this->Halo[i].most_massive_neighbour)<<"\t"<<this->Halo[i].distance_to_most_massive_neighbour<<endl;
       rcat<<log10(this->Halo[i].mass)<<"\t"<<log10(this->Halo[i].mean_number_density)<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].rs)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<log10(this->Halo[i].vrms)<<"\t"<<this->Halo[i].virial<<"\t"<<this->Halo[i].b_to_a<<"\t"<<this->Halo[i].c_to_a<<"\t"<<this->Halo[i].mach_number<<"\t"<<this->Halo[i].bias<<"\t"<<this->Halo[i].qbias<<"\t"<<log10(1+this->Halo[i].local_overdensity)<<"\t"<<this->Halo[i].dach_number<<"\t"<<this->Halo[i].tidal_anisotropy<<"\t"<<this->Halo[i].peak_height<<"\t"<<this->Halo[i].gal_cwt<<"\t"<<this->Halo[i].relative_bias<<"\t"<<this->Halo[i].bias_rs<<"\t"<<this->Halo[i].rs_factor<<"\t"<<this->Halo[i].local_dm<<"\t"<<this->Halo[i].lambda1<<"\t"<<this->Halo[i].lambda2<<"\t"<<this->Halo[i].lambda3<<"\t"<<log10(this->Halo[i].mass_closest_neighbour)<<"\t"<<this->Halo[i].distance_closest_neighbour<<"\t"<<log10(this->Halo[i].spin_closest_neighbour)<<"\t"<<log10(this->Halo[i].concentration_closest_neighbour)<<"\t"<<log10(this->Halo[i].most_massive_neighbour)<<"\t"<<this->Halo[i].distance_to_most_massive_neighbour<<endl;
+      counter++;
+    }while(counter<Nobjs_fraction);
+    rcat.close();
+   So.DONE();
+   So.message_screen("\tWritting downsample catalog in file", file);
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Catalog::select_random_subsample_bl(real_prec fraction, string file){
+    this->So.enter(__PRETTY_FUNCTION__);
+    const gsl_rng_type * rng_t;
+    gsl_rng * gBaseRando;
+    gsl_rng_env_setup();
+    gsl_rng_default_seed=35;
+    rng_t = gsl_rng_mt19937;//_default;
+    gBaseRando = gsl_rng_alloc (rng_t);
+
+   ULONG Nobjs_fraction=static_cast<ULONG>(floor(fraction*this->NOBJS));
+   ofstream rcat;
+   rcat.open(file.c_str());
+   rcat.precision(3);
+   rcat.setf(ios::showpoint);
+   rcat.setf(ios::scientific);
+   ULONG counter=0;
+   So.message_screen("\tSelecting a fraction: ",100*fraction, "%");
+    do
+     {
+      int i= gsl_rng_uniform_int(gBaseRando,this->Halo.size());
+      rcat<<log10(this->Halo[i].mass)<<"\t"<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].rs)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<this->Halo[i].bias<<"\t";
+      for(int il=0;il<this->Halo[i].bias_multipole.size();++il)cout<<this->Halo[i].bias_multipole[il]<<"\t";
+      cout<<endl;
       counter++;
     }while(counter<Nobjs_fraction);
     rcat.close();

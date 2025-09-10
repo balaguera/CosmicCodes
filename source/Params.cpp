@@ -1181,6 +1181,25 @@ else if(par_name=="new_Lbox")
     message_pars.set_par_default(this->new_Lbox);
  }
 
+else if(par_name=="xmin")
+ {
+    message_pars.set_par_description("Minimum value of x-coordinate of the box/survey");
+    message_pars.set_par_option("Float. In Mpc/h");
+    message_pars.set_par_default(this->xmin);
+ }
+else if(par_name=="ymin")
+ {
+    message_pars.set_par_description("Minimum value of y-coordinate of the box/survey");
+    message_pars.set_par_option("Float. In Mpc/h");
+    message_pars.set_par_default(this->ymin);
+ }
+else if(par_name=="zmin")
+ {
+    message_pars.set_par_description("Minimum value of z-coordinate of the box/survey");
+    message_pars.set_par_option("Float. In Mpc/h");
+    message_pars.set_par_default(this->zmin);
+ }
+ 
 else if(par_name=="Nft")
  {
     message_pars.set_par_description("Number of cells per dimention in the mesh, used to interpolate fieldas and do FFTW");
@@ -1230,7 +1249,103 @@ else if(par_name=="type_of_binning")
     message_pars.set_par_option("linear, log");
     message_pars.set_par_default(this->type_of_binning);
  }
+else if(par_name=="N_log_bins")
+ {
+    message_pars.set_par_description("Number of log-spaced bins in Fourier space. Applies when type_of_binning is set to log.");
+    message_pars.set_par_option("ULONG >0.");
+    message_pars.set_par_default(this->N_log_bins);
+ }
 
+
+ else if(par_name=="DeltaKmin")
+ {
+    message_pars.set_par_description("This parameter f_{k} determines the minimum value of Fourier wavenumber in order to define spherical shells. Minimum wavenumber is f * Delta, where Delta is the fundamental mode. See documentation for further details");
+    message_pars.set_par_option("Float >0.");
+    message_pars.set_par_default(this->DeltaKmin);
+ }
+
+ else if(par_name=="ndel_data")
+ {
+    message_pars.set_par_description("This parameter nd determines the width of the spherical shells in Fourier space. If the fundamental mode is Dk, the width of spherical shells is dk = nd * Dk such that the arrays defining the spherical shells are defined as ki = kmin + (i + 0.5)*dk.");
+    message_pars.set_par_option("Float >0.");
+    message_pars.set_par_default(this->ndel_data);
+ }
+
+ else if(par_name=="ndel_window")
+ {
+    message_pars.set_par_description("This parameter nd determines the width of the spherical shells in Fourier space, used for the window function. If the fundamental mode is Dk, the width of spherical shells is dk = n * Dk such that the arrays defining the spherical shells are defined as ki = kmin + (i + 0.5)* dk .");
+    message_pars.set_par_option("Float >0.");
+    message_pars.set_par_default(this->ndel_window);
+ }
+
+ else if(par_name=="FKP_weight")
+ {
+    message_pars.set_par_description("Use FKP weights");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->FKP_weight);
+ }
+
+ else if(par_name=="Pest")
+ {
+    message_pars.set_par_description("Estimated power for FKP weights");
+    message_pars.set_par_option("Float >0, in units of power spectrum 1/mean number density");
+    message_pars.set_par_default(this->Pest);
+ }
+
+ else if(par_name=="N_mu_bins")
+ {
+    message_pars.set_par_description("Number of mu-bins for 2d power spectrum ion polar coordinates P(k,mu).");
+    message_pars.set_par_option("ULONG");
+    message_pars.set_par_default(this->N_mu_bins);
+ }
+
+ else if(par_name=="SN_correction")
+ {
+    message_pars.set_par_description("Correct for Poisson shot-noise. Set this to false when dark matter is to be analyzed, or when the cross correlation function is to be measured.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->SN_correction);
+ }
+
+ else if(par_name=="FKP_error_bars")
+ {
+    message_pars.set_par_description("Compute FKP error bars ");
+    message_pars.set_par_option("true, false.");
+    message_pars.set_par_default(this->FKP_error_bars);
+ }
+
+else if(par_name=="FKP_error_bars_exact")
+ {
+    message_pars.set_par_description("Compute FKP error bars using the exact expression derived in FKP paper.");
+    message_pars.set_par_option("true, false. If set to false, but error bars are requested, the code uses an approximation using the effective volume.");
+    message_pars.set_par_default(this->FKP_error_bars_exact);
+ }
+
+else if(par_name=="N_dndz_bins")
+ {
+    message_pars.set_par_description("Number of bins in redshift used to construct mean number density if requested.");
+    message_pars.set_par_option("ULONG");
+    message_pars.set_par_default(this->N_dndz_bins);
+ }
+else if(par_name=="new_N_dndz_bins")
+ {
+    message_pars.set_par_description("Number of bins in redshift used to construct smoothed mean number density.");
+    message_pars.set_par_option("ULONG");
+    message_pars.set_par_default(this->new_N_dndz_bins);
+ }
+
+else if(par_name=="file_power")
+ {
+    message_pars.set_par_description("Something to name power spectrum outputs (like institution, or experiment).");
+    message_pars.set_par_option("String");
+    message_pars.set_par_default(this->file_power);
+ }
+
+else if(par_name=="file_power_log")
+ {
+    message_pars.set_par_description("Output log file for power spectrum.");
+    message_pars.set_par_option("String");
+    message_pars.set_par_default(this->file_power_log);
+ }
 
 
 
@@ -1310,6 +1425,12 @@ else if(par_name=="Color_min")
     message_pars.set_par_default(this->Color_max);
   }
 
+  else if(par_name=="lmax_bias")
+ {
+    message_pars.set_par_description("Maximum multipolo for individual bias");
+    message_pars.set_par_option("Int >0");
+    message_pars.set_par_default(this->lmax_bias);
+  }
 
 
   else
@@ -1514,6 +1635,7 @@ void Params::init_pars() // Inizialization of parameters
   this->constant_depth = false;
   this->redshift_min_sample = 0;
   this->redshift_min_sample = 10;
+  this->area_survey = 1000;
   this->i_mask_pixel= NOT_USED;
   this->i_mask_alpha= NOT_USED;
   this->i_mask_delta= NOT_USED;
@@ -1530,35 +1652,28 @@ void Params::init_pars() // Inizialization of parameters
   this->mass_assignment_scheme = "NGP";
   this->MAS_correction = false;
   this->type_of_binning = "linear";
-
-
-  this->ndel_window=1;
-  this->ndel_data=1;
-  this->N_mu_bins=10;
-  this->Pest = 20000;
-  this->Distance_fraction=1.0;
-  this->DeltaKmin = 0;
   this->N_log_bins = 10;
-  this->ndel_data = 1;
-  this->ndel_window = 1;
-  this->N_mu_bins = 10;
+  this->DeltaKmin = 0;
+  this->ndel_data=1;
+  this->ndel_window=1;
   this->FKP_weight = false;
-  this->Pest = 1000.0;
+  this->Pest = 20000;
+  this->N_mu_bins=10;
   this->SN_correction = false;
   this->FKP_error_bars = false;
   this->FKP_error_bars_exact = false;
-  this->nbar_tabulated = false;
-  this->constant_depth = false;
+  // ************************************************************************
   this->Nbins_redshift = 10;
-  this->redshift_min_sample = 0;
-  this->redshift_max_sample = 1;
   this->N_dndz_bins = 2;
   this->new_N_dndz_bins = 2;
-  this->area_survey = 1000;
-  this->Healpix_resolution = 4;
+  // ************************************************************************
   this->file_power = "power";
   this->file_power_log = "power_log";
   this->file_window = "window";
+  // ************************************************************************
+
+
+  this->Healpix_resolution = 4;
   this->file_dndz = "dndz";
   this->file_power2d = "power2d";
   this->file_power2d_mk = "power2d_mk";
@@ -1576,6 +1691,7 @@ void Params::init_pars() // Inizialization of parameters
   this->kmin_tracer_qbias = 0;
 
 
+  this->Distance_fraction=1.0;
 
 
   // ************************************************************************
@@ -1623,6 +1739,7 @@ void Params::init_pars() // Inizialization of parameters
   this->Number_of_bins_equal_number_tracers_main_property = 1;
   this->set_bins_equal_number_tracers = false;
   this->set_bins_equal_number_tracers_main_property = false;
+  this->lmax_bias=0;
   // ************************************************************************
   // ************************************************************************
   // parameters for the power spectrum
@@ -2132,6 +2249,11 @@ void Params::read_pars(string file)
           {
             this->Number_of_bins_equal_number_tracers_main_property  = atoi(par_value.c_str());
             this->parameter_number.push_back(make_pair(par_name, this->Number_of_bins_equal_number_tracers_main_property)); 
+          }
+        else if (par_name == "lmax_bias")
+          {
+            this->lmax_bias  = atoi(par_value.c_str());
+            this->parameter_number.push_back(make_pair(par_name, this->lmax_bias)); 
           }
         else if (par_name == "set_bins_equal_number_tracers")
           {

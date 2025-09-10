@@ -22,7 +22,14 @@ void cartesian_to_equatorial(real_prec x, real_prec y, real_prec z, real_prec &r
 {
   r   =sqrt(x*x+y*y+z*z);
   ra  =atan2(y,x);
-  dec =acos(z/r);
+  dec =acos(z/r); //this is theta. When using, we convert it to delta
+}
+//////////////////////////////////////////////////////////
+void cartesian_to_spherical(real_prec x, real_prec y, real_prec z, real_prec &alpha, real_prec &theta, real_prec &r)
+{
+  r  = sqrt(x*x+y*y+z*z);
+  alpha  =atan2(y,x);
+  theta =acos(z/r); //azimutal angle measured form the z-axis
 }
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////

@@ -1595,7 +1595,7 @@ void BiasMT::analyze_input()
       So.message_screen("Total number of Y objects =", nmean_Y);
 #endif
     }
-  real_prec LLBOX;
+  real_prec LLBOX=0;
   ULONG NNGRID;
 #ifdef _EXTRAPOLATE_VOLUME_
   LLBOX=this->params._Lbox_low();

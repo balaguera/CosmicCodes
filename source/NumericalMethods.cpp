@@ -3097,20 +3097,16 @@ void calc_LapPhiv(ULONG N1,ULONG N2,ULONG N3,real_prec L1,real_prec L2,real_prec
     m2v[i]-=dummy[i];
   fnamef=string("aux");
   dump_scalar(m2v,N1,N2,N3,9,fnamef);	
-    ////
-  // LapPhiv1xz[i]
   gradfindif(N1,N2,N3,L1,L2,L3,phiv,m2v,1);
   gradfindif(N1,N2,N3,L1,L2,L3,m2v,dummy,3);
   fnamef=string("aux1");
   dump_scalar(dummy,N1,N2,N3,9,fnamef);	
-  // LapPhiv2xz[i]
   gradfindif(N1,N2,N3,L1,L2,L3,phiv2,m2v,1);
   gradfindif(N1,N2,N3,L1,L2,L3,m2v,dummy,3);
    {
     string fname=string("aux1");
     getscalar(fname,m2v,N1,N2,N3);
   }
- // LapPhiv1xz[i]*LapPhiv2xz[i] 
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     dummy[i]*=m2v[i];
@@ -3118,11 +3114,6 @@ void calc_LapPhiv(ULONG N1,ULONG N2,ULONG N3,real_prec L1,real_prec L2,real_prec
     string fname=string("aux");
     getscalar(fname,m2v,N1,N2,N3);
   }
-  // 0.5*LapPhiv1xx[i]*LapPhiv2yy[i]+0.5*LapPhiv2xx[i]*LapPhiv1yy[i]
-  //+0.5*LapPhiv1xx[i]*LapPhiv2zz[i]+0.5*LapPhiv2xx[i]*LapPhiv1zz[i]
-  //+0.5*LapPhiv1yy[i]*LapPhiv2zz[i]+0.5*LapPhiv2yy[i]*LapPhiv1zz[i]
-  //-LapPhiv1xy[i]*LapPhiv2xy[i] 
-  //-LapPhiv1xz[i]*LapPhiv2xz[i] 
 #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     m2v[i]-=dummy[i];
@@ -3149,13 +3140,8 @@ void calc_LapPhiv(ULONG N1,ULONG N2,ULONG N3,real_prec L1,real_prec L2,real_prec
     string fname=string("aux");
     getscalar(fname,m2v,N1,N2,N3);
   }
-   // 0.5*LapPhiv1xx[i]*LapPhiv2yy[i]+0.5*LapPhiv2xx[i]*LapPhiv1yy[i]
-  //+0.5*LapPhiv1xx[i]*LapPhiv2zz[i]+0.5*LapPhiv2xx[i]*LapPhiv1zz[i]
-  //+0.5*LapPhiv1yy[i]*LapPhiv2zz[i]+0.5*LapPhiv2yy[i]*LapPhiv1zz[i]
-  //-LapPhiv1xy[i]*LapPhiv2xy[i] 
-  //-LapPhiv1xz[i]*LapPhiv2xz[i] 
-  //-LapPhiv1yz[i]*LapPhiv2yz[i] 
-#pragma omp parallel for
+
+  #pragma omp parallel for
   for(ULONG i=0;i<N;i++)    
     m2v[i]-=dummy[i];
 #endif 

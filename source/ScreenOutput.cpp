@@ -553,8 +553,7 @@ void ScreenOutput::author(){
   std::cout<<"\t***********************************************************************"<<endl;
   std::cout<<"\t***********************************************************************"<<endl;
   std::cout<<"\tCOSMICATLASS                                                          *"<<endl;
-  std::cout<<"\tAndres Balaguera-Antolinez (balaguera@iac.es)                         *"<<endl;
-  std::cout<<"\tInstituto de Astrofisica de Canarias                                  *"<<endl;
+  std::cout<<"\tAndres Balaguera-Antolinez (abalant@gmail.com)                         *"<<endl;
   std::cout<<"\t2011-2023                                                             *"<<endl;
   std::cout<<"\t***********************************************************************"<<endl;
   std::cout<<"\t***********************************************************************"<<endl;

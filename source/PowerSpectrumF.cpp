@@ -4776,14 +4776,15 @@ void PowerSpectrumF::get_window_matrix_multipole()
    vector<real_prec>xaux(tracer_cat.size(),0);
    vector<real_prec>yaux(tracer_cat.size(),0);
    vector<real_prec>zaux(tracer_cat.size(),0);
-
-   for(ULONG i=0;i<xaux.size(); ++i)
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+  for(ULONG i=0;i<xaux.size(); ++i)
     {
         baux[i]=tracer_cat[i].bias;
         xaux[i]=tracer_cat[i].coord1;
         yaux[i]=tracer_cat[i].coord2;
         zaux[i]=tracer_cat[i].coord3;
-//        cout<<baux[i]<<endl;
     }
     string file_bias=this->params._Output_directory()+"Bias_gal1";
     this->File.write_array(file_bias, baux);
@@ -4794,30 +4795,227 @@ void PowerSpectrumF::get_window_matrix_multipole()
     getDensity_CIC(this->params._Nft(),this->params._Nft(),this->params._Nft(),this->params._Lbox(),this->params._Lbox(),this->params._Lbox(),this->params._d_delta_x(),this->params._d_delta_x(),this->params._d_delta_x(),0,0,0,xaux,yaux,zaux,baux,bfaux,true);
     this->File.write_array(file_bias_f, bfaux);
 
-
-/*
-    file_bias=this->params._Output_directory()+"Bias_gal2";
-    for(ULONG i=0;i<baux.size(); ++i)
-       baux[i]=tracer_cat[i].bias2;
-     this->File.write_array(file_bias, baux);
-    file_bias_f=this->params._Output_directory()+"Bias_gal2_field";
-    getDensity_CIC(this->params._Nft(),this->params._Nft(),this->params._Nft(),this->params._Lbox(),this->params._Lbox(),this->params._Lbox(),this->params._d_delta_x(),this->params._d_delta_x(),this->params._d_delta_x(),0,0,0,xaux,yaux,zaux,baux,bfaux,true);
-    this->File.write_array(file_bias_f, bfaux);
-
-
-
-    file_bias=this->params._Output_directory()+"Bias_gal3";
-    for(ULONG i=0;i<baux.size(); ++i)
-       baux[i]=tracer_cat[i].bias3;
-     this->File.write_array(file_bias, baux);
-    file_bias_f=this->params._Output_directory()+"Bias_gal3_field";
-    getDensity_CIC(this->params._Nft(),this->params._Nft(),this->params._Nft(),this->params._Lbox(),this->params._Lbox(),this->params._Lbox(),this->params._d_delta_x(),this->params._d_delta_x(),this->params._d_delta_x(),0,0,0,xaux,yaux,zaux,baux,bfaux,true);
-    this->File.write_array(file_bias_f, bfaux);
-*/
-
 #endif
    So.DONE();
  }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ // Assignment of individual bias for harmonic decomposition in Fourier space. Halo catalog is in the vector tracer_cat. Dark matter field in the dm_field
+ void PowerSpectrumF::object_by_object_bias_lm(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field, int &lmax){
+   this->So.enter(__PRETTY_FUNCTION__);
+#ifdef _FULL_VERBOSE_
+   this->So.message_screen("Getting object-to-object bias for different multipoles. Max. = ", lmax);
+#endif
+     kvector_data.clear();
+#if defined _TNG_ || defined _TNG_GAL_ || defined _UNITSIM_
+     kvector_data.shrink_to_fit();
+     for(int i=0;i<this->params._d_Nnp_data();i++)
+       kvector_data.push_back(this->params._d_kmin()+this->params._d_DeltaK_data()*(i+0.5));
+#endif
+#ifdef _USE_OMP_
+   int NTHREADS=_NTHREADS_;
+   omp_set_num_threads(NTHREADS);
+#endif
+   // Given kmax, determine the maximum number of bins requested
+   ULONG Kmin_bin=static_cast<ULONG>(floor((this->params._kmin_tracer_bias()-this->params._d_kmin())/this->params._d_DeltaK_data()));
+   ULONG Kmax_bin=static_cast<ULONG>(floor((this->params._kmax_tracer_bias()-this->params._d_kmin())/this->params._d_DeltaK_data()));//get the bin to go only up to Kmax in the loops
+   ULONG new_Nft=2*Kmax_bin;  // Define the new Nft=2*Kmax_bin
+   ULONG new_ngrid_h =new_Nft*new_Nft*(new_Nft/2+1);
+#ifdef DOUBLE_PREC
+   complex_prec * Delta_dm = (complex_prec *)fftw_malloc(2*new_ngrid_h*sizeof(real_prec));
+#else
+//    complex_prec * Delta_dm =(complex_prec *)fftwf_malloc(2*new_ngrid_h*sizeof(real_prec));
+    complex_prec * Delta_dm =(complex_prec *)fftwf_malloc(2*this->params._NGRID_h()*sizeof(real_prec));
+#endif
+    real_prec mean_field=get_mean(dm_field);
+    So.message_screen("\tMean of field:", mean_field);
+    vector<real_prec> over_dm_field(dm_field.size(),0);
+    get_overdens(dm_field,mean_field,over_dm_field);
+    So.message_screen("\tFourier transforming");
+    do_fftw_r2c(this->params._Nft(),over_dm_field,Delta_dm);
+    over_dm_field.clear(); over_dm_field.shrink_to_fit();
+   vector<real_prec> kcoords(new_Nft,0);// Build k-coordinates
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+   for(int i=0;i<kcoords.size() ;++i)
+    kcoords[i]=(i<=new_Nft/2? static_cast<real_prec>(i): -static_cast<real_prec>(new_Nft-i));
+#ifdef _FULL_VERBOSE_
+   this->So.message_screen("\tNew Nft ",new_Nft);
+   this->So.message_screen("\tComputing from k =", (Kmin_bin+0.5)*this->params._d_DeltaK_data());
+   this->So.message_screen("\t            to k =", this->params._kmax_tracer_bias());
+#endif
+   real_prec use_imag=0;
+  // This is the normalization of the halo power spectrum, which being computed object-by object, is just the volume
+   // FOr the full sample it would be the volume/Ntracer, = nbar. But Ntracer =1 for each object!
+   real_prec dk_x=this->params._d_deltak_x();
+   real_prec dk_y=this->params._d_deltak_y();
+   real_prec dk_z=this->params._d_deltak_z();
+
+   this->So.message_screen("\tGetting power dark matter");//----------------------------
+  // This is done once for all tracers
+   vector<real_prec>power_dmat(Kmax_bin,0);
+#ifdef _USE_OMP_
+#pragma omp parallel for collapse(3)
+#endif
+   for(ULONG i=Kmin_bin; i< new_Nft/2;++i)
+     for(ULONG j=Kmin_bin; j< new_Nft/2;++j)
+         for(ULONG k=Kmin_bin; k< new_Nft/2+1;++k)
+         {
+           ULONG lp=index_3d(i,j,k,this->params._Nft(),this->params._Nft()/2+1);
+           real_prec  kv=sqrt(pow(dk_x*kcoords[i],2)+pow(dk_y*kcoords[j],2)+pow(dk_z*kcoords[k],2));
+           ULONG kbin=static_cast<ULONG>(floor((kv-this->params._d_kmin())/this->params._d_DeltaK_data()));
+           if(lp!=0)
+             if(kbin<Kmax_bin)
+#ifdef _USE_OMP_
+#pragma omp atomic
+#endif
+                 power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+           if(j>0  && k>0)
+             {
+               lp=index_3d(i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
+               if(kbin<Kmax_bin)
+#ifdef _USE_OMP_
+#pragma omp atomic
+#endif
+                 power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+            }
+           if(i>0  && (j>0 || k>0))
+             {
+               lp=index_3d(this->params._Nft()-i,j,k,this->params._Nft(),this->params._Nft()/2+1);
+               if(kbin<Kmax_bin)
+#ifdef _USE_OMP_object_b
+#pragma omp atomic
+#endif
+                   power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+             }
+             if(i>0  && j>0  && k>0)
+             {
+               lp=index_3d(this->params._Nft()-i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
+               if(kbin<Kmax_bin)
+#ifdef _USE_OMP_
+#pragma omp atomic
+#endif
+                   power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+             }
+         }
+    So.DONE();
+    real_prec conversion_factor=(1.+this->params._redshift())/(this->cosmology.Hubble_function(this->params._redshift()));
+
+
+   for(ULONG itr=0;itr<tracer_cat.size();++itr)
+        tracer_cat[itr].bias_multipole.resize(lmax,0);
+
+#ifdef _USE_OMP_
+#pragma omp parallel for 
+#endif
+   for(ULONG itr=0;itr<tracer_cat.size();++itr)
+     {
+        real_prec xtracer=tracer_cat[itr].coord1;
+        real_prec ytracer=tracer_cat[itr].coord2;
+        real_prec ztracer=tracer_cat[itr].coord3;
+
+        vector<real_prec>power_cross(Kmax_bin,0);
+
+        // Here goes the loop over l and m
+       for(int ell=0; ell<=lmax;++ell)
+       {
+        real_prec hll=0;
+         for(int mm=-ell; mm<=ell; ++mm)
+        {
+
+          for(ULONG i=Kmin_bin; i< new_Nft/2;++i)
+            for(ULONG j=Kmin_bin; j< new_Nft/2;++j)
+                for(ULONG k=Kmin_bin; k< new_Nft/2+1;++k)
+                {
+                  ULONG lp=index_3d(i,j,k,this->params._Nft(),this->params._Nft()/2+1);
+                  real_prec k_dot_r=0;
+                  real_prec  kv=sqrt(pow(dk_x*kcoords[i],2)+pow(dk_y*kcoords[j],2)+pow(dk_z*kcoords[k],2));
+                  ULONG kbin=static_cast<ULONG>(floor((kv-this->params._d_kmin())/this->params._d_DeltaK_data()));
+
+                  /****************************************************************/
+                  if(lp!=0)
+                  {
+                    real_prec theta_k=1;
+                    real_prec phi_k=1;
+                    real_prec kk =1;
+                    cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
+                    real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
+                    real_prec Relm=leg*sin(mm*phi_k);
+                    real_prec Imlm=leg*cos(mm*phi_k);
+                    k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;  // vec k dot vec r
+                    if(kbin<Kmax_bin){
+                        power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG])*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Imlm ;
+                    }
+                  }
+                  /****************************************************************/
+                  if(j>0  && k>0)
+                    {
+                      lp=index_3d(i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
+                      k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
+                      real_prec theta_k=1;
+                      real_prec phi_k=1;
+                      real_prec kk =1;
+                      cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
+                    real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
+                    real_prec Relm=leg*sin(mm*phi_k);
+                    real_prec Imlm=leg*cos(mm*phi_k);
+                      if(kbin<Kmax_bin){
+                        power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG])*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Imlm ;
+                      }
+                      }
+                  if(i>0  && (j>0 || k>0))
+                    {
+                      lp=index_3d(this->params._Nft()-i,j,k,this->params._Nft(),this->params._Nft()/2+1);
+                      k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
+                      real_prec theta_k=1;
+                      real_prec phi_k=1;
+                      real_prec kk =1;
+                      cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
+                    real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
+                    real_prec Relm=leg*sin(mm*phi_k);
+                    real_prec Imlm=leg*cos(mm*phi_k);
+                       if(kbin<Kmax_bin){
+                        power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG])*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Imlm ;
+                      }
+                  }
+                    if(i>0  && j>0  && k>0)
+                    {
+                      lp=index_3d(this->params._Nft()-i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
+                      k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer+dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
+                      real_prec theta_k=1;
+                      real_prec phi_k=1;
+                      real_prec kk =1;
+                      cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
+                    real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
+                    real_prec Relm=leg*sin(mm*phi_k);
+                    real_prec Imlm=leg*cos(mm*phi_k);
+                      if(kbin<Kmax_bin)
+                      {
+                        power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG])*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Imlm ;
+                      }
+                  }
+              }
+            real_prec power_hm=0;
+            real_prec p_dm=0;
+            for(ULONG i=Kmin_bin; i< Kmax_bin;++i)
+              {
+                power_hm+=power_cross[i]; // *** here it must be nmodes*(<power>_av)= nmodes*(power/nmodes)=power. That's why I do not need nmodes
+                p_dm+=power_dmat[i];
+            }
+            real_prec hb=(power_hm/p_dm)*this->params._NGRID();
+            hll+=hb;
+          }// closes loop over mm
+           tracer_cat[itr].bias_multipole[ell]=hll/(2.*ell+1);
+        }   //closes loop over l
+        } // loop over tracers
+
+   So.DONE();
+ }
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // this method is likely to be called from another method in this class, once the catalog has been alloacated in a member-type object Catalog
