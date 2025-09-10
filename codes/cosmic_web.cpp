@@ -190,13 +190,15 @@ int main(int argc, char *argv[])
       // Definr an object of type Power Spectrum, passing the parametes through the class variable param
       PowerSpectrumF power(params);
 
-      //Assign individual bias to objhects in cat.Halo. That bias uses the dm_field.
-      power.object_by_object_bias(cat.Halo, dm_field);
-
-      //Assign individual harmonic-based bias to objects in cat.Halo. That bias uses the dm_field.
-      power.object_by_object_bias_lm(cat.Halo, dm_field, params._lmax_bias());
+      // Dilute the sample:
+      cat.select_random_subsample(params._fraction_dilute());
+      //Assign individual bias to objhects in cat.Halo. That bias uses the dm_field:
+      power.object_by_object_bias(cat.Halo_random_subsample, dm_field);
+      //Assign individual harmonic-based bias to objects in cat.Halo. That bias uses the dm_field:
+      power.object_by_object_bias_lm(cat.Halo_random_subsample, dm_field, params._lmax_bias());
       string file_cat_new=params._Output_directory()+"diluted_cat_blm.txt";
-      cat.select_random_subsample_bl(0.1, file_cat_new);
+      // Print catalog:
+      print_catalog(cat.Halo_random_subsample, file_cat_new);
       
 
       vector<real_prec> bias_field(params._NGRID(), 0); // Define container to allocate the bias on a mesh
