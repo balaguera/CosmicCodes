@@ -542,7 +542,7 @@ void add_catalogues(int, int, int);
    * @brief Measurements of power spectrum
    * @details This function is to be called from inside the code where catalogs are allocated in a s_halo type structure.
    * @param tracer: a s_Halo type container with the halo catalog.
-   * @param space: "real slape" or ·"redshift space"
+   * @param space: "real space" or ·"redshift space"
    * @param property : "_MASS_", or "_VMAX_". No more properties of the catalog are allowed at this function
 */
   void compute_power_spectrum(vector<s_Halo>&tracer, string space, string property);
@@ -553,7 +553,7 @@ void add_catalogues(int, int, int);
    * The ordering of the properties is fixed, but the name of the ouput dir must emphasize which is the main property somehow.
    * This is the main method used for seconday bias studies.
    * @param space: real_space, redshift_space
-   * @warning This can be regarded as an external function that implements methods of the current class.
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
 */
   void halo_bias_analysis(string space);
   //////////////////////////////////////////////////////////
@@ -744,26 +744,29 @@ void add_catalogues(int, int, int);
    * two indices for wavenumber modes, k and k': k runs over the bins used in the measurements, 
    * while k' runs oer the modes implemented in the Gauss -legendre integration.
    * This computation involves a double rum over the random catalog.
-   * @warning This can be regarded as an external function that implements methods of the current class.
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
   */
   void get_window_matrix_multipole();
   //////////////////////////////////////////////////////////
   /**
    * @brief Compute GRF
-   * @warning This can be regarded as an external function that implements methods of the current class.
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
   void get_GaussianRandomField();
   //////////////////////////////////////////////////////////
   /**
    * @brief Method to assign effective bias to tracers
-   * @param tracer_cat Catlog of dark matter tracers
+   * @param tracer_cat Catalog of dark matter tracers
    * @param dm_field Dark matter density field intepolated on a mesh
    * @details The individual bias is computed as 
    * \f[
    * b^{(i)}_{hm}=\frac{\sum_{j,k_{j}<k_{max}}N^{j}_{k}\langle {\rm e}^{-i\textbf{k} \cdot \textbf{r}_{i}} \delta_{\mathrm{dm}}^{*}(\textbf{k}) \rangle_{k_{j}}}{\sum_{j,k_{j}<k_{max}} N^{j}_{k}P_{\rm dm}(k_{j})},
    * \f]
-   * where \f$ N^{j}_{k} \f$ is the number of Fourier modes in the $j-$th spherical shell. It is important to notice that for a fixed maximum wavenumber, these estimators are not expected to provide the same large-scale bias, as non-linear evolution affects differently the halo and dark matter field
-   * @warning This can be regarded as an external function that implements methods of the current class.
+   * where:  
+   * - \f$ N_k^j \f$ is the number of Fourier modes in the \f$ j \f$-th spherical shell,
+   * - \f$ \delta_{\mathrm{dm}}(\mathbf{k}) \f$ is the Fourier transform of the dark matter density field,
+   * - \f$ P_{\mathrm{dm}}(k_j) \f$ is the dark matter power spectrum.
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
   void object_by_object_bias(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field);
   //////////////////////////////////////////////////////////
@@ -773,13 +776,13 @@ void add_catalogues(int, int, int);
    * @param dm_field Dark matter density field intepolated on a mesh
    * @param tracer_field tracer density field intepolated on a mesh
    * @details The power spectrum of the DM has been computed before the call of this method  and is still allocated in the container this->pk0
-   * @warning This can be regarded as an external function that implements methods of the current class.
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
   void object_by_object_bias(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field,vector<real_prec>& tracer_field);
   //////////////////////////////////////////////////////////
   /**
    * @brief Assignment of the object-by-object relative_bias.
-   * @details Included in compute_power_spectrum meant to do that task in a realiztic sample. This method is meant to assign rbias for a realistic sample which imvolves the computation of the window fnuction * @warning This can be regarded as an external function that implements methods of the current class.
+   * @details Included in compute_power_spectrum meant to do that task in a realiztic sample. This method is meant to assign rbias for a realistic sample which imvolves the computation of the window fnuction * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
   void object_by_object_rbias();
   //////////////////////////////////////////////////////////
@@ -791,16 +794,21 @@ void add_catalogues(int, int, int);
   //////////////////////////////////////////////////////////
   /**
    * @brief Method to assign effective bias to tracers
-   * @param tracer_cat Catlog of dark matter tracers
+   * @param tracer_cat Catalog of dark matter tracers
    * @param dm_field Dark matter density field intepolated on a mesh
+   * @param lmax_bias Maximum multipole
    * @details The individual bias is computed as 
    * \f[
    * b_{\ell}^{(i)}= \frac{1}{2\ell +1} \sum_{m=-\ell}^{m=\ell} \frac{\sum_{j,k_{j}<k_{max}}N^{j}_{k}\langle {\rm e}^{-i\textbf{k} \cdot \textbf{r}_{i}} \delta_{\mathrm{dm}}^{*}(\textbf{k})Y_{\ell m}(\hat{\textbf{k}}) \rangle_{k_{j}}}{\sum_{j,k_{j}<k_{max}} N^{j}_{k}P_{\rm dm}(k_{j})},
    * \f]
-   * where \f$ N^{j}_{k} \f$ is the number of Fourier modes in the \f$ j-\f $th spherical shell. It is important to notice that for a fixed maximum wavenumber, these estimators are not expected to provide the same large-scale bias, as non-linear evolution affects differently the halo and dark matter field
-   * @warning This can be regarded as an external function that implements methods of the current class.
+   * where:  
+   * - \f$ N_k^j \f$ is the number of Fourier modes in the \f$ j \f$-th spherical shell,
+   * - \f$ \delta_{\mathrm{dm}}(\mathbf{k}) \f$ is the Fourier transform of the dark matter density field,
+   * - \f$ Y_{\ell m}(\hat{\mathbf{k}}) \f$ are spherical harmonics,
+   * - \f$ P_{\mathrm{dm}}(k_j) \f$ is the dark matter power spectrum.
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
-  void object_by_object_bias_lm(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field, int &lmax);
+  void object_by_object_bias_lm(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field, int lmax);
   //////////////////////////////////////////////////////////
   /**
    *  @brief Compute cross correlatio.
@@ -809,13 +817,13 @@ void add_catalogues(int, int, int);
   //////////////////////////////////////////////////////////
   /**
    * @brief Method to do several taks lined to the secondary bias project
-   * @warning This can be regarded as an external function that implements methods of the current class.
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
   void GetSuperClusters(string, string);
   //////////////////////////////////////////////////////////
   /**
    * @brief Method to do several taks lined to the secondary bias project
-   * @warning This can be regarded as an external function that implements methods of the current class.
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
   void GetSuperClusters(string);
   //////////////////////////////////////////////////////////
