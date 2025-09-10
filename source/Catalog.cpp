@@ -5437,8 +5437,8 @@ void Catalog::select_random_subsample_bl(real_prec fraction, string file){
      {
       int i= gsl_rng_uniform_int(gBaseRando,this->Halo.size());
       rcat<<log10(this->Halo[i].mass)<<"\t"<<"\t"<<log10(this->Halo[i].vmax)<<"\t"<<log10(this->Halo[i].rs)<<"\t"<<log10(this->Halo[i].concentration)<<"\t"<<log10(this->Halo[i].spin_bullock)<<"\t"<<this->Halo[i].bias<<"\t";
-      for(int il=0;il<this->Halo[i].bias_multipole.size();++il)cout<<this->Halo[i].bias_multipole[il]<<"\t";
-      cout<<endl;
+      for(int il=0;il<this->Halo[i].bias_multipole.size();++il)rcat<<this->Halo[i].bias_multipole[il]<<"\t";
+      rcat<<endl;
       counter++;
     }while(counter<Nobjs_fraction);
     rcat.close();
