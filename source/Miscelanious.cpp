@@ -3049,3 +3049,22 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
 
  }
 
+
+
+ void print_catalog(vector<s_Halo>&Halo, string file){
+ 
+   ofstream rcat;
+   rcat.open(file.c_str());
+   rcat.precision(3);
+   rcat.setf(ios::showpoint);
+   rcat.setf(ios::scientific);
+   ULONG counter=0;
+   for(ULONG i=0;i<Halo.size();++i)
+     {
+      rcat<<log10(Halo[i].mass)<<"\t"<<"\t"<<log10(Halo[i].vmax)<<"\t"<<log10(Halo[i].rs)<<"\t"<<log10(Halo[i].concentration)<<"\t"<<log10(Halo[i].spin_bullock)<<"\t"<<Halo[i].bias<<"\t";
+      for(int il=0;il<Halo[i].bias_multipole.size();++il)rcat<<Halo[i].bias_multipole[il]<<"\t";
+      rcat<<endl;
+    }
+   rcat.close();
+   cout<<"\tWritting downsample catalog in file "<< file<<endl;
+}
