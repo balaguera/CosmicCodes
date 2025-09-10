@@ -3061,7 +3061,7 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
    ULONG counter=0;
    for(ULONG i=0;i<Halo.size();++i)
      {
-      rcat<<log10(Halo[i].mass)<<"\t"<<"\t"<<log10(Halo[i].vmax)<<"\t"<<log10(Halo[i].rs)<<"\t"<<log10(Halo[i].concentration)<<"\t"<<log10(Halo[i].spin_bullock)<<"\t"<<Halo[i].bias<<"\t";
+      rcat<<log10(Halo[i].mass)<<"\t"<<log10(Halo[i].rs)<<"\t"<<log10(Halo[i].concentration)<<"\t"<<log10(Halo[i].spin_bullock)<<"\t"<<Halo[i].bias<<"\t";
       for(int il=0;il<Halo[i].bias_multipole.size();++il)rcat<<Halo[i].bias_multipole[il]<<"\t";
       rcat<<endl;
     }
