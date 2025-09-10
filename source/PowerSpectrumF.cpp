@@ -4606,7 +4606,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
              {
                lp=index_3d(this->params._Nft()-i,j,k,this->params._Nft(),this->params._Nft()/2+1);
                if(kbin<Kmax_bin)
-#ifdef _USE_OMP_object_b
+#ifdef _USE_OMP_
 #pragma omp atomic
 #endif
                    power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
@@ -4771,6 +4771,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
    }
    lss_bias_halo/=static_cast<real_prec>(tracer_cat.size());
    So.message_screen("\tMean large-scale bias from individual bias =", lss_bias_halo);
+
 #ifdef _TNG_GAL_
    vector<real_prec>baux(tracer_cat.size(),0);
    vector<real_prec>xaux(tracer_cat.size(),0);
@@ -4802,7 +4803,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  // Assignment of individual bias for harmonic decomposition in Fourier space. Halo catalog is in the vector tracer_cat. Dark matter field in the dm_field
- void PowerSpectrumF::object_by_object_bias_lm(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field, int &lmax){
+ void PowerSpectrumF::object_by_object_bias_lm(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field, int lmax){
    this->So.enter(__PRETTY_FUNCTION__);
 #ifdef _FULL_VERBOSE_
    this->So.message_screen("Getting object-to-object bias for different multipoles. Max. = ", lmax);
@@ -4885,7 +4886,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
              {
                lp=index_3d(this->params._Nft()-i,j,k,this->params._Nft(),this->params._Nft()/2+1);
                if(kbin<Kmax_bin)
-#ifdef _USE_OMP_object_b
+#ifdef _USE_OMP_
 #pragma omp atomic
 #endif
                    power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
@@ -4904,11 +4905,15 @@ void PowerSpectrumF::get_window_matrix_multipole()
     real_prec conversion_factor=(1.+this->params._redshift())/(this->cosmology.Hubble_function(this->params._redshift()));
 
 
+
    for(ULONG itr=0;itr<tracer_cat.size();++itr)
-        tracer_cat[itr].bias_multipole.resize(lmax,0);
+        tracer_cat[itr].bias_multipole.resize(lmax+1,0);
+
+   real_prec b00=0;
+   real_prec factor_ylm = sqrt(4.*M_PI);
 
 #ifdef _USE_OMP_
-#pragma omp parallel for 
+#pragma omp parallel for reduction(+: b00)
 #endif
    for(ULONG itr=0;itr<tracer_cat.size();++itr)
      {
@@ -4919,6 +4924,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
         vector<real_prec>power_cross(Kmax_bin,0);
 
         // Here goes the loop over l and m
+        real_prec hbb=0;
        for(int ell=0; ell<=lmax;++ell)
        {
         real_prec hll=0;
@@ -4942,11 +4948,12 @@ void PowerSpectrumF::get_window_matrix_multipole()
                     real_prec kk =1;
                     cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
                     real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
-                    real_prec Relm=leg*sin(mm*phi_k);
-                    real_prec Imlm=leg*cos(mm*phi_k);
+                    real_prec Relm=leg*cos(mm*phi_k)*factor_ylm;
+                    real_prec Imlm=leg*sin(mm*phi_k)*factor_ylm;
+//                    cout<<Relm<<"  "<<Imlm<<endl;
                     k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;  // vec k dot vec r
                     if(kbin<Kmax_bin){
-                        power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG])*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Imlm ;
+                        power_cross[kbin]+=cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm;
                     }
                   }
                   /****************************************************************/
@@ -4958,11 +4965,11 @@ void PowerSpectrumF::get_window_matrix_multipole()
                       real_prec phi_k=1;
                       real_prec kk =1;
                       cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
-                    real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
-                    real_prec Relm=leg*sin(mm*phi_k);
-                    real_prec Imlm=leg*cos(mm*phi_k);
+                      real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
+                      real_prec Relm=leg*cos(mm*phi_k)*factor_ylm;
+                      real_prec Imlm=leg*sin(mm*phi_k)*factor_ylm;
                       if(kbin<Kmax_bin){
-                        power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG])*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Imlm ;
+                        power_cross[kbin]+=cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm;
                       }
                       }
                   if(i>0  && (j>0 || k>0))
@@ -4973,11 +4980,11 @@ void PowerSpectrumF::get_window_matrix_multipole()
                       real_prec phi_k=1;
                       real_prec kk =1;
                       cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
-                    real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
-                    real_prec Relm=leg*sin(mm*phi_k);
-                    real_prec Imlm=leg*cos(mm*phi_k);
+                      real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
+                      real_prec Relm=leg*cos(mm*phi_k)*factor_ylm;
+                      real_prec Imlm=leg*sin(mm*phi_k)*factor_ylm;
                        if(kbin<Kmax_bin){
-                        power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG])*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Imlm ;
+                        power_cross[kbin]+=cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm;
                       }
                   }
                     if(i>0  && j>0  && k>0)
@@ -4988,12 +4995,12 @@ void PowerSpectrumF::get_window_matrix_multipole()
                       real_prec phi_k=1;
                       real_prec kk =1;
                       cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
-                    real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
-                    real_prec Relm=leg*sin(mm*phi_k);
-                    real_prec Imlm=leg*cos(mm*phi_k);
+                      real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
+                      real_prec Relm=leg*cos(mm*phi_k)*factor_ylm;
+                      real_prec Imlm=leg*sin(mm*phi_k)*factor_ylm;
                       if(kbin<Kmax_bin)
                       {
-                        power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG])*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Imlm ;
+                        power_cross[kbin]+=cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm;
                       }
                   }
               }
@@ -5003,13 +5010,20 @@ void PowerSpectrumF::get_window_matrix_multipole()
               {
                 power_hm+=power_cross[i]; // *** here it must be nmodes*(<power>_av)= nmodes*(power/nmodes)=power. That's why I do not need nmodes
                 p_dm+=power_dmat[i];
-            }
+              }
             real_prec hb=(power_hm/p_dm)*this->params._NGRID();
-            hll+=hb;
+            hll+=hb;           
           }// closes loop over mm
-           tracer_cat[itr].bias_multipole[ell]=hll/(2.*ell+1);
+
+          tracer_cat[itr].bias_multipole[ell]=hll/(2.*ell+1);
+          hbb=hll/(2.*ell+1);
+
         }   //closes loop over l
-        } // loop over tracers
+          b00+=hbb;
+      } // loop over tracers
+
+   b00/=static_cast<real_prec>(tracer_cat.size());
+   So.message_screen("\tMean large-scale bias from individual bias =", b00);
 
    So.DONE();
  }
