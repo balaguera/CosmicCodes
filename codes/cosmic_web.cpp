@@ -193,9 +193,13 @@ int main(int argc, char *argv[])
       //Assign individual bias to objhects in cat.Halo. That bias uses the dm_field.
       power.object_by_object_bias(cat.Halo, dm_field);
 
+      //Assign individual harmonic-based bias to objects in cat.Halo. That bias uses the dm_field.
+      power.object_by_object_bias_lm(cat.Halo, dm_field, params._lmax_bias());
+      string file_cat_new=params._Output_directory()+"diluted_cat_blm.txt";
+      cat.select_random_subsample_bl(0.1, file_cat_new);
       
+
       vector<real_prec> bias_field(params._NGRID(), 0); // Define container to allocate the bias on a mesh
-       
       cat.get_density_field_grid(_COUNTS_,tr_field_counts,bias_field); //Get halo bias averaged on a mesh.
 
       string fileb=params._Output_directory()+"ls_bias_p"+to_string(params._unitsim_plabel()); //Defile output file
