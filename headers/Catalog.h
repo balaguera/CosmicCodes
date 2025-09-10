@@ -836,6 +836,14 @@ public:
   /**
    * @brief Selects random sub-sample from catalog
    * @arg fraction:  fraction of the total number of tracers to be selected
+   * @arg fname: output file name for reduced catalog
+   * @details This method writes mass, vmax, rs, concentration and spin, followed by the multipole -individual bias 
+   */
+  void select_random_subsample_bl(real_prec fraction, string fname);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Selects random sub-sample from catalog
+   * @arg fraction:  fraction of the total number of tracers to be selected
    */
   void select_random_subsample(real_prec fraction, int, vector<real_prec>&, string, string);
   //////////////////////////////////////////////////////////

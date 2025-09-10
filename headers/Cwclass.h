@@ -480,15 +480,19 @@ class Cwclass {
    * @brief Get tidal anisotropy from input density_field and write into output bin
    */
   void get_tidal_anisotropy(vector<real_prec>&den, string out);
-
   ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @public
+   * @brief 
+   */
   void get_tidal_anisotropy(vector<real_prec>&delta);
 
   ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @public
+   * @brief 
+   */
   void get_tidal_anisotropy(vector<real_prec>&dens, vector<real_prec>&tidal);
-
-
-
 
   /////////////////////////////////////////////////////////
   /**
@@ -532,13 +536,25 @@ class Cwclass {
     this->cwt_used=this->params._cwt_used();
     this->s_cosmo_pars=this->params.s_cosmo_pars;
   }
-//////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////
   /**
    * @brief 
    */
   real_prec _knots_fraction(){return this->knots_fraction;}  
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */
   real_prec _filaments_fraction(){return this->filaments_fraction;}  
+    //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */
   real_prec _sheets_fraction(){return this->sheets_fraction;}  
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */
   real_prec _voids_fraction(){return this->voids_fraction;}  
   //////////////////////////////////////////////////////////
 

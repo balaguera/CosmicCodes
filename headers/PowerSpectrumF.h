@@ -481,7 +481,7 @@ void add_catalogues(int, int, int);
    * @param verbose: use dto write on screen
    * @param verbose: true or false to whether cuts in mass is to be done, to be deprecated.
    * @details This method reads input files and get power without touching the data, i-.e, does not make any binning in any property. It accepts catalogs as well as density fields.
-   * @note Thes methood has been adapted to the case in which the random catalogs are too large to be kept in memmory or they come in chunks of randoms
+   * @note This methood has been adapted to the case in which the random catalogs are too large to be kept in memmory or they come in chunks of randoms
    * with the SAME volume. The steps performed fr teh random catalog in this case are
    * 1 Read catalog.
    * 2 Get ready for nbar.
@@ -599,29 +599,58 @@ void add_catalogues(int, int, int);
   void compute_cross_power_spectrum_grid(bool dm, string file_X,string file_Y,bool get_cross);
   //////////////////////////////////////////////////////////
   /**
+ * @brief Large-scale bias from power spectra
+ *
+ * @details
+ * If the power spectra involved come from Gaussian initial conditions (IC),
+ * we need to use the error bars from the Gaussian approximation on large scales.
+ *
+ * The bias is computed using:
+ * \f[
+ * \langle b \rangle = \frac{\sum \left( b_k / \sigma_{b_k}^2 \right)}{\sum \left( 1 / \sigma_{b_k}^2 \right)}
+ * \f]
+ * and the error is:
+ * \f[
+ * \sigma^2 = \frac{1}{\sum \left( 1 / \sigma_{b_k}^2 \right)}
+ * \f]
+ * where \f$ \sigma_{b_k} \f$ is the error on the bias,
+ * and the bias is defined as:
+ * \f[
+ * b = \sqrt{\frac{P_h}{P_{\mathrm{dm}}}}
+ * \f]
+ *
+ * The error on the bias is given by:
+ * \f[
+ * \sigma_{b_k}^2 = \frac{1}{4} b_k^2 \left( \frac{\sigma_{k,h}^2}{P_h^2} + \frac{\sigma_{k,\mathrm{dm}}^2}{P_{\mathrm{dm}}^2} \right)
+ * \f]
+ * (errors added in quadrature), where:
+ * \f[
+ * \sigma_k^2 = P^2 \cdot \frac{2}{N_k}
+ * \f]
+ * (neglecting shot noise), and \f$ N_k \f$ is the number of modes in each k-bin. This yields:
+ * \f[
+ * \langle b \rangle = \frac{\sum (N_k / b_k^2)}{\sum (N_k / b_k^2)}
+ * \f]
+ * and:
+ * \f[
+ * \sigma_{b_k}^2 = \frac{b_k^2}{N_k} = \frac{1}{\sum (N_k / b_k^2)}
+ * \f]
+ * If we use fixed-amplitude fields, the average bias is computed as a simple mean,
+ * and its error follows from the standard deviation.
+ *
+ * @note Ojo
+ */
+
+  pair<real_prec, real_prec> get_lss_bias(vector<real_prec>&,vector<real_prec>&,vector<real_prec>&, vector<int>&, int init, real_prec kmax);
+  //////////////////////////////////////////////////////////
+  /**
    * @brief Large-scale bias from cross-power
    */
   pair<real_prec, real_prec> get_lss_cross_bias(vector<real_prec>&,vector<real_prec>& ,vector<real_prec>&, vector<int>&, int init, real_prec kmax);
   //////////////////////////////////////////////////////////
-  /**
-   * @brief Large-scale bias from power
-   * @note  If the power spectra involved come from a Gaussian IC, we need to use the error bars
-      from the Gaussian approximation on large scales, and compute <bias>=sum (b_k /sigma_b_k²) and sigma² = sum(1/sigma_b_k²)
-      where sigma_b_k is the error on the bias b=sqrt(Ph/Pdm), given as
-      sigma_b_k² = (1/4)*(b_k)³*(sigma_k_h²/P_h² + sigma_k_dm²/P_dm² ) (added in quadrature)
-      where sigma_k² = P² * (2/N_k) (neglecting shot noise).
-      This yields <b>=sum (N_k /b_k²) / sum (N_k /b_k³) and
-      sigma_b_k² = b_k³/N_k =  1/sum(N_k/b_k³)
-      where N_k is the number of modes in each k-bin
-      If we use Fixed amplitude fields, the average bias is computed as a simple mean and
-      its errors follows from the standard deviation
-
-   */
-  pair<real_prec, real_prec> get_lss_bias(vector<real_prec>&,vector<real_prec>&,vector<real_prec>&, vector<int>&, int init, real_prec kmax);
-  //////////////////////////////////////////////////////////
   /** 
    * @brief Write output of power spectrum and/or bispectrum 
-   * @param write sigma yes/no.
+   * @param write sigma true/false.
    */
   void write_power_spectrum (bool);
   //////////////////////////////////////////////////////////
@@ -726,16 +755,21 @@ void add_catalogues(int, int, int);
   void get_GaussianRandomField();
   //////////////////////////////////////////////////////////
   /**
-   * @brief Method to assign effelctive bias to tracers
+   * @brief Method to assign effective bias to tracers
    * @param tracer_cat Catlog of dark matter tracers
    * @param dm_field Dark matter density field intepolated on a mesh
+   * @details The individual bias is computed as 
+   * \f[
+   * b^{(i)}_{hm}=\frac{\sum_{j,k_{j}<k_{max}}N^{j}_{k}\langle {\rm e}^{-i\textbf{k} \cdot \textbf{r}_{i}} \delta_{\mathrm{dm}}^{*}(\textbf{k}) \rangle_{k_{j}}}{\sum_{j,k_{j}<k_{max}} N^{j}_{k}P_{\rm dm}(k_{j})},
+   * \f]
+   * where \f$ N^{j}_{k} \f$ is the number of Fourier modes in the $j-$th spherical shell. It is important to notice that for a fixed maximum wavenumber, these estimators are not expected to provide the same large-scale bias, as non-linear evolution affects differently the halo and dark matter field
    * @warning This can be regarded as an external function that implements methods of the current class.
    */
   void object_by_object_bias(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field);
   //////////////////////////////////////////////////////////
   /**
   *  @brief Method to assign effective bias and relative bias to tracers
-   * @param tracer_cat Catlog of dark matter tracers
+   * @param tracer_cat Catalog of dark matter tracers
    * @param dm_field Dark matter density field intepolated on a mesh
    * @param tracer_field tracer density field intepolated on a mesh
    * @details The power spectrum of the DM has been computed before the call of this method  and is still allocated in the container this->pk0
@@ -750,10 +784,23 @@ void add_catalogues(int, int, int);
   void object_by_object_rbias();
   //////////////////////////////////////////////////////////
   /**
-   * @brief Method to assign quadratic bias to tracers
+   * @brief Method to assign large scale bias as a function of harmonic index from Harmonic decomposition in Fourier space.
    * @details See details in this->object_by_object_bias
    */
   void object_by_object_qbias(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Method to assign effective bias to tracers
+   * @param tracer_cat Catlog of dark matter tracers
+   * @param dm_field Dark matter density field intepolated on a mesh
+   * @details The individual bias is computed as 
+   * \f[
+   * b_{\ell}^{(i)}= \frac{1}{2\ell +1} \sum_{m=-\ell}^{m=\ell} \frac{\sum_{j,k_{j}<k_{max}}N^{j}_{k}\langle {\rm e}^{-i\textbf{k} \cdot \textbf{r}_{i}} \delta_{\mathrm{dm}}^{*}(\textbf{k})Y_{\ell m}(\hat{\textbf{k}}) \rangle_{k_{j}}}{\sum_{j,k_{j}<k_{max}} N^{j}_{k}P_{\rm dm}(k_{j})},
+   * \f]
+   * where \f$ N^{j}_{k} \f$ is the number of Fourier modes in the \f$ j-\f $th spherical shell. It is important to notice that for a fixed maximum wavenumber, these estimators are not expected to provide the same large-scale bias, as non-linear evolution affects differently the halo and dark matter field
+   * @warning This can be regarded as an external function that implements methods of the current class.
+   */
+  void object_by_object_bias_lm(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field, int &lmax);
   //////////////////////////////////////////////////////////
   /**
    *  @brief Compute cross correlatio.

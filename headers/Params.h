@@ -81,58 +81,69 @@ private :
 
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   * @brief Statistics to be measured from a tracer catalog
+   * @details Read from input parameter file.
    */
   string statistics;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Redshift at which the initial linear power spectrum is normalized to genete IC
+   * @brief Redshift at which the initial linear power spectrum is normalized to genete IC
+   * @details Read from input parameter file.
    */
   real_prec Initial_Redshift_DELTA;
   //////////////////////////////////////////////////////////
   /**
    *  @brief Initial redshift of a given N-body simulation
+   * @details Read from input parameter file.
    */
   real_prec Initial_Redshift_SIM;
   //////////////////////////////////////////////////////////
   /**
    * @brief input directory where the tracers, dm and random catalogues are stored
+   * @details Read from input parameter file.
    **/
   string Input_dir_cat;
   //////////////////////////////////////////////////////////
   /**
    * @brief input directory where the a new reference catalog aimed to be assigned properties is located
+   * @details Read from input parameter file.
    **/
   string Input_dir_cat_new_ref;
   //////////////////////////////////////////////////////////
   /**
    * @brief input directory where the tracers, dm and random catalogues are stored
+   * @details Read from input parameter file.
    **/
   string Input_dir_cat_TWO;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief Path to directory where the white noise of the initial conditions of a simulation is saved.
+   * @details Read from input parameter file.
    **/
   string ic_WN_dir;
   //////////////////////////////////////////////////////////
   /**
    * @brief Name of file containing the initial density fluctuations.
+   * @details Read from input parameter file.
    **/
   string ic_file;
   //////////////////////////////////////////////////////////
   /**
    * @brief Path to file containing x-coordinates of dm particles from simulation.
+   * @details Read from input parameter file.
    **/
   string file_bin_x_coord;
   //////////////////////////////////////////////////////////
   /**
    * @brief Path to file containing y-coordinates of dm particles from simulation.
+   * @details Read from input parameter file.
    **/
   string file_bin_y_coord;
   //////////////////////////////////////////////////////////
   /**
    * @brief Path to file containing z-coordinates of dm particles from simulation.
+   * @details Read from input parameter file.
    **/
   string file_bin_z_coord;
   /////////////////////////////////////////////////////////
@@ -158,37 +169,43 @@ private :
   //////////////////////////////////////////////////////////
   /**
    * @brief Full path (dir plus name) to overdensity field on a mesh
+   * @details Read from input parameter file.
    **/
-
   string delta_grid_file3;
   //////////////////////////////////////////////////////////
   /**
    * @brief Full path (dir plus name) to overdensity field on a mesh
+   * @details Read from input parameter file.
    **/
   string delta_grid_file4;
   //////////////////////////////////////////////////////////
   /**
    * @brief  Pinpoint one field to measure cross-power. If set to 1, it takes the file in delta−grid−file
+   * @details Read from input parameter file.
    **/
   int measure_cross_from_1;
   //////////////////////////////////////////////////////////
   /**
    * @brief Pinpoint one field to measure cross-power. If set to 2, it takes the file in delta−grid−file2 and so on
+   * @details Read from input parameter file.
    **/
   int measure_cross_from_2;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file. To be deprecated
    **/
   string Name_redshift_mask;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   string Name_binary_mask;
   //////////////////////////////////////////////////////////
   /**
    * @brief Identification for tracerrs, used in BMT. Options are TRACER, TRACER_REF, TRACER_MOCK, TRACER_MOCK_ONLY_COORDS,  TRACER_REF_ONLY_COORDS 
+   * @details Read from input parameter file.
    **/
   string type_of_object;
   //////////////////////////////////////////////////////////
@@ -244,256 +261,305 @@ private :
   /**
    * @brief This parameter identifies the system of coordinates in which positions of dark matter particles are written in an ASCII file for a catalog
    * @details 0=(Cartesian coordinates (X,Y,Z)). 1=(Equatorial coordinates (RA,Dec,r)). 2=(Pseudo-equatorial coordinates (RA,Dec,z)). 3=(Pseudo-equatorial coordinates (RA,Dec,z)). With sys_of_coord_dm = 2, the code uses a set of cosmological parameters to compute the comoving distance from redshifts. With sys_of_coord_dm = 3, the redshift is directly used as radial coordinate. All distances are given in units of Mpc over h.
+   * @details Read from input parameter file.
    **/
-
   int sys_of_coord_dm;
   //////////////////////////////////////////////////////////
  
   /**
    * @brief Column where the first object coordinate (according to the system of coordinates of the catalog) is written
+   * @details Read from input parameter file.
    **/
   int i_coord1_dm;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief The column where the second object coordinate (according to the system of coordinates of the catalog) is written
+   * @details Read from input parameter file.
    **/
   int i_coord2_dm;
   //////////////////////////////////////////////////////////
   /**
    * @brief The column where the third object coordinate (according to the system of coordinates of the catalog) is written
+   * @details Read from input parameter file.
    **/
   int i_coord3_dm;
   //////////////////////////////////////////////////////////
   /**
    * @brief Number of chunks of new DMN indepdent fields to be populated with halos
+   * @details Read from input parameter file.
    **/
   int Number_of_chunks_new_dm;
   //////////////////////////////////////////////////////////
   /**
    * @brief Use tracer mass to weight velocities as a weight for power spectrum analysis
+   * @details Read from input parameter file.
    **/
   bool weight_vel_with_mass;
   //////////////////////////////////////////////////////////
   /**
    * @brief Minium apparent magnitude
+   * @details Read from input parameter file.
    **/
   real_prec mKmin;
-
   //////////////////////////////////////////////////////////
   /**
    * @brief Minium apparent magnitude
+   * @details Read from input parameter file.
    **/
   real_prec mKmax;
-
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec MASS_units;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec LOGMASSmin;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec LOGMASSmax;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
-
   real_prec VMAXmin;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec VMAXmax;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
-
   real_prec VRMSmin;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec VRMSmax;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec RSmin;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec RSmax;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec CONCENTRATIONmin;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec CONCENTRATIONmax;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec SPINmin;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec SPINmax;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec VIRIALmin;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec VIRIALmax;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec BTOAmin;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec BTOAmax;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec CTOAmin;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec CTOAmax;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool use_real_and_redshift_space;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool Get_marked_power_spectrum;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool Get_power_spectrum;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool Get_cross_power_spectrum;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool Get_pearson_coefficient;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool Get_spearman_coefficient;
   //////////////////////////////////////////////////////////
   /**
+   * @brief
+   * @details Read from input parameter file.
+   **/
+  int lmax_bias;
+
+
+  //////////////////////////////////////////////////////////
+  /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   int Number_of_MultiLevels;
   //////////////////////////////////////////////////////////
   /**
    * @brief This parameter identifies the column in an ASCII file containing the first component (x) of the velocity of dm particles
+   * @details Read from input parameter file.
    **/
   int i_v1_dm;
   //////////////////////////////////////////////////////////
   /**
    * @brief This parameter identifies the column in an ASCII file containing the second component (y) of the velocity of dm particles
+   * @details Read from input parameter file.
    **/
   int i_v2_dm;
   //////////////////////////////////////////////////////////
   /**
    * @brief This parameter identifies the column in an ASCII file containing the third component (z) of the velocity of dm particles
+   * @details Read from input parameter file.
    **/
   int i_v3_dm;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   int i_weight1_g;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief The column where the second object weight is written
-
+   * @details Read from input parameter file.
    **/
   int i_weight2_g;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief The column where the third object weight is written
+   * @details Read from input parameter file.
    **/
   int i_weight3_g;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief The column where the third object weight is written
+   * @details Read from input parameter file.
    **/
   int i_weight4_g;
 
   //////////////////////////////////////////////////////////
   /**
    *  @brief If positions are in spherical coordinates, specify the units of angles in the object catalogue: D &rarr; degrees; R &rarr; radians
+   * @details Read from input parameter file.
    */
   string angles_units_g;
 
   //////////////////////////////////////////////////////////
   /**
    *  @brief units of angles in the object catalogue: D &rarr; degrees; R &rarr; radians
+   * @details Read from input parameter file.
    */
   string angles_units_r;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
-
   real_prec M_exclusion;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   real_prec Deltal;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   real_prec Deltamu;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   int Number_of_references;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   int Number_of_new_mocks;
   //////////////////////////////////////////////////////////
@@ -506,6 +572,7 @@ private :
    *  @note with option 2, the code uses the set of cosmological
    *  parameters to transform redshift z to comoving distance; with
    *  option 3, the redshift is directly used as radial coordinate
+   * @details Read from input parameter file.
    */
   int sys_of_coord_r;
 
@@ -513,24 +580,28 @@ private :
   /// the column where the first random coordinate (according to the system of coordinates of the catalog) is written
   /**
    * @brief This parameter identifies the column in an ASCII file (random catalogue) containing the coordinates X, RA, RA, RA for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively
+   * @details Read from input parameter file.
    **/
   int i_coord1_r;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief  This parameter identifies the column in an ASCII file (random catalogue) containing the coordinates Y, Dec, Dec, Dec, for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively
+   * @details Read from input parameter file.
    **/
   int i_coord2_r;
 
   //////////////////////////////////////////////////////////
    /**
    * @brief This parameter identifies the column in an ASCII file (random catalogue) containing the coordinates Z, r, z, z for sys_of_coordinate_dm = 0, 1, 2 or 3 respectively 
+   * @details Read from input parameter file.
    **/
   int i_coord3_r;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief Identify the column in the ASCII file of the random tracer where the information of the color is available.
+   * @details Read from input parameter file.
    */
   int i_color_r ;
   //////////////////////////////////////////////////////////
@@ -546,135 +617,162 @@ private :
   //////////////////////////////////////////////////////////
   /**
    * @brief Identify the column in the ASCII file of the random tracer where the information of the absolute magnitude (or luminosity) is available
+   * @details Read from input parameter file.
    */
   int i_abs_mag_r ;
   //////////////////////////////////////////////////////////
-  /// the column where the first random weight is written
+   /**
+   * @brief Identify the column where the first random weight is written
+   * @details Read from input parameter file.
+   */
   int i_weight1_r;
-
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    */
   int i_weight2_r;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    */
   int i_weight3_r;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    */
   int i_weight4_r;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief 
+   * @details Read from input parameter file.
    */
   int i_mean_density_r;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief Use weight 1 for power spectrum analysis.
+   * @details Read from input parameter file.
    */
   bool use_weight1_r;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief Use weight 2 for power spectrum analysis.
+   * @details Read from input parameter file.
    */
   bool use_weight2_r;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief  Use weight 3 for power spectrum analysis.
+   * @details Read from input parameter file.
    */
   bool use_weight3_r;
   //////////////////////////////////////////////////////////
   /**
    * @brief  Use weight 4 for power spectrum analysis.
+   * @details Read from input parameter file.
    */
   bool use_weight4_r;
   //////////////////////////////////////////////////////////
   /**
    * @brief  
+   * @details Read from input parameter file.
    */
   bool get_distribution_min_separations;
   //////////////////////////////////////////////////////////
   /**
    * @brief  
+   * @details Read from input parameter file.
    */
   real_prec kmin_tracer_bias;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    */
   real_prec kmax_tracer_bias;
   //////////////////////////////////////////////////////////
   /**
    * @brief  
+   * @details Read from input parameter file.
    */
   real_prec kmax_tracer_qbias;
   //////////////////////////////////////////////////////////
   /**
    * @brief  
+   * @details Read from input parameter file.
    */
   real_prec kmin_tracer_qbias;
   //////////////////////////////////////////////////////////
   /**
    *  @brief Compute the luminosity function. Standard estimator is Vmax, byt generaliation by COle is also available specifying LF_estimator.
+   * @details Read from input parameter file.
    */
   bool Get_Luminosity_function;
   //////////////////////////////////////////////////////////
   /** 
-   *  @brief Compute the color function. Standard estimator is Vmax.
+   * @brief Compute the color function. Standard estimator is Vmax.
+   * @details Read from input parameter file.
    */
   bool Get_Color_function;
   //////////////////////////////////////////////////////////
   /**
    *  @brief Number of bins in galaxy color, for histograms, abundance and color-magnitud diagram
+   * @details Read from input parameter file.
    */
   int Nbins_color;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Compute the stellar mass function. Standard estimator is Vmax.
+   * @brief Compute the stellar mass function. Standard estimator is Vmax.
+   * @details Read from input parameter file.
   */
   bool Get_Mstellar_function;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Minimum of stellar mass (log)
+   * @brief Minimum of stellar mass (log)
+   * @details Read from input parameter file.
    */
   real_prec Mstellar_min;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Maximum of stellar mass (log)
+   * @brief Maximum of stellar mass (log)
+   * @details Read from input parameter file.
    */
   real_prec Mstellar_max;
   //////////////////////////////////////////////////////////
   /**
    *  @brief Minimum Color for histograms, abundance and color-magnitud diagram
+   * @details Read from input parameter file.
    */
   real_prec Color_min;
   //////////////////////////////////////////////////////////
   /**
    *  @brief Maximm color for histograms, abundance and color-magnitud diagram
+   * @details Read from input parameter file.
    */
   real_prec Color_max;
   //////////////////////////////////////////////////////////
   /**
    *  @brief Number of bins in galaxy stellar mass, for histograms and abundance
+   * @details Read from input parameter file.
    */
   int Nbins_Mstellar;
   //////////////////////////////////////////////////////////
   /**
    *  @brief Choose an estimator for the luminosity function. Options are Vmax_dc, Vmax_o, Vmax
+   * @details Read from input parameter file.
    */
   string LF_estimator;
   //////////////////////////////////////////////////////////
   /**
    *  @brief Compute color-magnitude diagram
+   * @details Read from input parameter file.
    */
   bool Get_Color_Mag_plane;
   //////////////////////////////////////////////////////////
@@ -686,138 +784,143 @@ private :
   /**
    *@brief Number if cells per dimention in the mesh.
    *@details Used to interpolate fieldas and do FFTW. Lower resolution Nft>Nft_low. Used in the calculation of mach numbers and statistics of close neighbours.
+   * @details Read from input parameter file.
    */
   ULONG Nft_low;
   //////////////////////////////////////////////////////////
   /**
    * @brief Number of cells per dimention in the mesh, used to interpolate fieldas and do FFTW. Higher resolution Nft<Nft_HR
+   * @details Read from input parameter file.
    **/
   ULONG Nft_HR;
   //////////////////////////////////////////////////////////
   /**
    * @brief Number of cells per dimention in the mesh, used to divide a volume in a low number of subvolumes, aiming at perform Jackknive estimates of power. Catalog.h
+   * @details Read from input parameter file.
    **/
   ULONG Nft_JK;
   //////////////////////////////////////////////////////////
   /**
    * @brief This is used in BMT as a larger box to extrapolate the kernel and bias obtained with a fiducial (Lbox) size.
+   * @details Read from input parameter file.
    **/
   real_prec Lbox_low;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   real_prec vkernel_exponent;
   //////////////////////////////////////////////////////////
   /**
    * @brief Ask if a new Lbox is requested. 
      @details A new Lbox os computed In Catalog.cpp as the maximum difference between the min and max of each coordinate.  If false, the code uses Lbox.
+   * @details Read from input parameter file.
    **/
   bool new_Lbox;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief Define whether the 3d power spectrum is computed with the help of a random catalogue (if use_random_catalog = true), or from a simulation with known mean (if use_random_catalog = false)
+   * @details Read from input parameter file.
    **/
   bool use_random_catalog;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief Define whether the angular power spectrum is computed with the help of a random catalogue (if use_random_catalog = true), or from a simulation with known mean (if use_random_catalog = false)
+   * @details Read from input parameter file.
    **/
   bool use_random_catalog_cl;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief Use log or linear to specify the type of binning for the spherical shells in Fourier space.
+   * @details Read from input parameter file.
    **/
   string type_of_binning;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Number of log-spaced bins in Fourier space
+   * @brief Number of log-spaced bins in Fourier space. Applies when type_of_binning is set to log.
+   * @details Read from input parameter file.
    **/
-
   int N_log_bins;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Size of bins in Foureir space
-   * @details The size of k-bins is ndel times the fundamental mode
+   * @brief Size of bins in Foureir space for power spectrum.
+   * @details This parameter \f$ n_{\Delta} \f$ determines the width of the spherical shells in Fourier space. If the fundamental mode is \f$ \Delta k \f$, the width of spherical shells is \f$ \delta k = n_{\Delta} \Delta k \f$ such that the arrays defining the spherical shells are defined as \f$ k_{i} = k_{min} + (i + 0.5)\delta k \f$ .
+   * @details Read from input parameter file.
    */
   int ndel_data;
 
-
   //////////////////////////////////////////////////////////
   /**
-   * @brief Ratio between the shell-width and the fundamental mode for window
+   * @brief Size of bins in Foureir space for Window function.
+   * @details This parameter \f$ n_{\Delta} \f$ determines the width of the spherical shells in Fourier space used for the window function. If the fundamental mode is \f$ \Delta k \f$, the width of spherical shells is \f$ \delta k = n_{\Delta} \Delta k \f$ such that the arrays defining the spherical shells are defined as \f$ k_{i} = k_{min} + (i + 0.5)\delta k \f$ .
+   * @details Read from input parameter file.
    **/
   int ndel_window;
 
   //////////////////////////////////////////////////////////
-  /// Number of mu-bins for P(k,mu)
   /**
-   * @brief 
+   * @brief  Number of mu-bins for 2d power spectrum in polar coordinates P(k,mu)
+   * @details Read from input parameter file.
    **/
   int N_mu_bins;
 
   //////////////////////////////////////////////////////////
-  ///Use FKP weights (yes/no)
   /**
-   * @brief 
+   * @brief Use FKP weights (yes/no)
    **/
   bool FKP_weight;
 
   //////////////////////////////////////////////////////////
-  /// Estimated power for FKP weights
   /**
-   * @brief 
+   * @brief Estimated power for FKP weights, in units of 1/mean number density
+   * @details Read from input parameter file.
    **/
   real_prec Pest;
-
-
   //////////////////////////////////////////////////////////
-  /// Compute FKP error bars? (yes/no)
-  /**
-   * @brief 
+   /**
+   * @brief Compute FKP error bars? (yes/no)
+   * @details Read from input parameter file.
    **/
   bool FKP_error_bars;
 
   //////////////////////////////////////////////////////////
-  /// Compute error bars following FKP exact formula(yes/no)
-  /// If this is no, and the previous is yes
-  /// the code uses the Veff approximation for the variance.
   /**
-   * @brief 
+   * @brief Compute error bars following FKP exact formula(yes/no). The code uses the Veff approximation for the variance.
+   * @details Read from input parameter file.
    **/
   bool FKP_error_bars_exact;
-
   //////////////////////////////////////////////////////////
   /** 
-   @brief Set true if the information of the mean number density is tabulated in
-both random and real catalog
+   @brief Set true if the information of the mean number density is tabulated in both random and real catalog
+   * @details Read from input parameter file.
    **/
   bool nbar_tabulated;
   //////////////////////////////////////////////////////////
   /**
    * @brief Use an input filw with nbar against redshift (to tabulate from)
+   * @details Read from input parameter file.
    **/
   bool use_file_nbar;
 
   //////////////////////////////////////////////////////////
   /// Has the sample a constant depth?
   /**
-   * @brief Set true if the survey under inspection has constant depth throughout all
-the sky. This is going to be used in case nbar−tabulated = false and use−random−catalog
-= true
+   * @brief Set true if the survey under inspection has constant depth throughout all the sky. This is going to be used in case nbar−tabulated = false and use−random−catalog= true
+   * @details Read from input parameter file.
    **/
   bool constant_depth;
-
   //////////////////////////////////////////////////////////
   ///Number of redshift bins to measure dNdz
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   int Nbins_redshift;
 
@@ -825,6 +928,7 @@ the sky. This is going to be used in case nbar−tabulated = false and use−ran
   /// 
   /**
    * @brief Minimum redshift of the sample. Used when dNdz ahs to be measured
+   * @details Read from input parameter file.
    **/
   real_prec redshift_min_sample;
 
@@ -832,80 +936,109 @@ the sky. This is going to be used in case nbar−tabulated = false and use−ran
   /// Maximum redshift of the sample. Used when dNdz ahs to be measured
   /**
    * @brief 
+   * @details Read from input parameter file.
    **/
   real_prec redshift_max_sample;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Number of dNdz bins to measure
+   * @brief Number of bins in redshift used to construct mean number density if requested.
+   * @details Read from input parameter file.
    **/
   int N_dndz_bins;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Number of redshift bins withoin which the measuerd dNdz will be smoothed 
+   * @brief Number of bins in redshift used to construct smoothed mean number density
+   * @details Read from input parameter file.
    **/
   int new_N_dndz_bins;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief Area of the survey in degreees squared
+   * @details Read from input parameter file.
    **/
   real_prec area_survey;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief  Resolution Healpix for pixelization. Used when no nbar is tabulated and dNdz is to be computed from a non-constant depth sample 
+   * @details Read from input parameter file.
    **/
   int Healpix_resolution;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief  Output file for the redshift distribution
+   * @details Read from input parameter file.
    **/
   string file_dndz;
   //////////////////////////////////////////////////////////
   /**
    * @brief Input file with nbar against redshift, to tabulate from.
+   * @details Read from input parameter file.
    **/
   string file_nbar;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Define a new line of sight. If true, the code computes the position of the baricenter
-f the sample and defines it as the new line-of-sight
+   * @brief Define a new line of sight. If true, the code computes the position of the baricenter of the sample and defines it as the new line-of-sight
+   * @details Read from input parameter file.
    **/
   bool new_los;
 
 
   //////////////////////////////////////////////////////////
-  /// output log file for the FKP power spectrum
+  /**
+   * @brief Something to name power spectrum outputs (like institution, or experiment).
+   * @details Read from input parameter file.
+   */
+  string file_power;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Output log file for power spectrum
+   * @details Read from input parameter file.
+   **/
   string file_power_log;
 
   //////////////////////////////////////////////////////////
-  /// output file for the power spectrum of thw window function
+  /**
+   * @brief  output file for the power spectrum of thw window function
+   * @details Read from input parameter file.
+   **/
   string file_window;
   //////////////////////////////////////////////////////////
-  /// output file for the 2d power spectrum in cartesian coordinates
+  /**
+   * @brief  output file for the 2d power spectrum in cartesian coordinates 
+   * @details Read from input parameter file.
+   **/
   string file_power2d;
 
   //////////////////////////////////////////////////////////
-  /// output file for the 2d power spectrum in polar coordinates
+  /**
+   * @brief  output file for the 2d power spectrum in polar coordinates 
+   * @details Read from input parameter file.
+   **/
   string file_power2d_mk;
 
   //////////////////////////////////////////////////////////
-  /// Maximum k value for the direct sum approach to Yamamoto-*Blake
+  /**
+   * @brief  Maximum k value for the direct sum approach to Yamamoto-Blake
+   * @details Read from input parameter file.
+   **/
   real_prec kmax_y_ds;
-
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool use_vel_kernel;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief name of the output file used to store the bispectrum
+   * @details Read from input parameter file.
    **/
   string file_bispectrum;
 
@@ -913,16 +1046,19 @@ f the sample and defines it as the new line-of-sight
   /// These parameters is used to define the shells in k-space
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool use_fundamental_mode_as_kmin_bk;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   real_prec kmin_bk;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   real_prec delta_x;
   /////////////////////////////////////////////////////////////
@@ -1678,7 +1814,7 @@ f the sample and defines it as the new line-of-sight
   //////////////////////////////////////////////////////////
   /**
    * @brief Cosmological redshift
-   * @brief Read from parameter file
+   * @brief Read from input parameter file
    */
   real_prec redshift;
 
@@ -1690,7 +1826,7 @@ f the sample and defines it as the new line-of-sight
   //////////////////////////////////////////////////////////
   /**
    * @brief Identification for a realization
-   * @brief Read from parameter file
+   * @brief Read from input parameter file
    */
   int realization;
   //////////////////////////////////////////////////////////
@@ -1735,6 +1871,7 @@ f the sample and defines it as the new line-of-sight
    * @brief Compute the window matrix, if a random catalog is provided.
    * @name Window matrix for power spectrum
    * @details This is constrained by the fact that a random catalog is provided. 
+   * @brief Read from input parameter file
    */
   bool get_window_matrix;
   //////////////////////////////////////////////////////////
@@ -1953,24 +2090,28 @@ f the sample and defines it as the new line-of-sight
   /**
   * @name Halo Analysis
    * @brief Container for the maximum value of peak height at halo
+   * @details Read from input parameter file.
    */
   vector<real_prec> PHbins_max;
   //////////////////////////////////////////////////////////
   /**
   * @name Halo Analysis
   * @brief Container for the minimum value of log Mass for mass bins
+   * @details Read from input parameter file.
    */
   vector<real_prec> MASScuts;
   //////////////////////////////////////////////////////////
   /**
   * @name Power Spectrum
   * @brief Container to allocate the name of random files.
+   * @details Read from input parameter file.
   */
   vector<string> RANDOMfiles;
   //////////////////////////////////////////////////////////
   /**
   * @name Power Spectrum
    * @brief NUmber of random files, computed from the size of the container RANDOMfiles;
+   * @details Read from input parameter file.
    */
   int NRANDOMfiles;
 
@@ -1978,12 +2119,14 @@ f the sample and defines it as the new line-of-sight
   /**
   * @name Bias Mapping Technique
    * @brief Container with the LOS of new DM fields used in the case in which seveal LOS are built simultaneously
+   * @details Read from input parameter file.
    */
   vector<int> list_new_dm_fields;
   //////////////////////////////////////////////////////////
   /**
   * @name Bias Mapping Technique
    * @brief Container with the LOS of new DM fields used in the case in which seveal LOS are built simultaneously
+   * @details Read from input parameter file.
    */
   vector<int> list_Nft_MultiLevels;
   //////////////////////////////////////////////////////////
@@ -2043,28 +2186,32 @@ f the sample and defines it as the new line-of-sight
   //////////////////////////////////////////////////////////
   /** 
    * @brief Threshold used to define cosmic-web types based on the shear of the velocity field
+   * @details Read from input parameter file.
    */
   real_prec lambdath_v;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    */
   bool Write_Scatter_Plot;
   //////////////////////////////////////////////////////////
   /**
    * @brief Ask if ascii filw containing the pdf of number counts of halos is to be written
+   * @details Read from input parameter file.
    */
   bool Write_PDF_number_counts;
   //////////////////////////////////////////////////////////
   /**
    * @brief Specify whether the histograms are done in log or linear scale for Y
-   * @brief Read from parameter file
+   * @details Read from input parameter file.
    */
   string Scale_Y;
   //////////////////////////////////////////////////////////
   /**
    * @brief Specify whether the histograms are done in log or linear scale for X
+   * @details Read from input parameter file.
    */
   string Scale_X;
   //////////////////////////////////////////////////////////
@@ -2081,75 +2228,79 @@ f the sample and defines it as the new line-of-sight
   //////////////////////////////////////////////////////////
   /**
    * @brief "Number of iterations in the BMT
-   * @brief Read from parameter file
+   * @brief Read from input parameter file
    */
   ULONG N_iterations_Kernel;
   //////////////////////////////////////////////////////////
   /**
    * @brief Iteration from which kernels and bias are used to make a final average of the iteration procedures
-   * @brief Read from parameter file
+   * @brief Read from input parameter file
    */
   ULONG Iteration_Kernel_average;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief TO BE DEPRECATED
+   * @details Read from input parameter file.
    */
   int iteration_ini;
 
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Number of DM that will be created by the approximated gravity solver
    * @ and on which the Kernel will act to create a halo mock density field.
+   * @details Read from input parameter file.
    */
   int N_dm_realizations;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Initial label of the DM realizations
+   * @details Read from input parameter file.
    */
   int N_dm_initial;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Number of iterations for the pre-processing of DM
-   * Parameter set in the parameter file.
-   * Default 0
-   */
+   * @details Read from input parameter file.
+  */
   int N_iterations_dm;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Apply rank ordering from the covolved dm to the ref dm in the iterative procedure of BMT at each step
+   * @details Read from input parameter file.
    */
   bool Apply_Rankordering;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Apply rank ordering from the ref dm to some exact dm in the first step  iterative procedure of BMT at each step
+   * @details Read from input parameter file.
    */
   bool Apply_Rankordering_ab_initio;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   vector<ULONG> cwt_used;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
    */
   vector<ULONG> cwv_used;
 
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief  Container specifying iterations at which some outputs are produced
+   * @details Read from input parameter file.
    */
   vector<ULONG> output_at_iteration;
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Number of CWT used, computed as the size of the
-   * Bam::cwt_used container
+   * @brief Number of CWT used, computed as the size of the Bmt::cwt_used container
    */
 
   ULONG n_cwt;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Number of CWT based on the shear of velocity field used
    */
 
@@ -2182,60 +2333,69 @@ f the sample and defines it as the new line-of-sight
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool runsim;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool runv;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool diffcosmorz;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   string ic_power_file;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Read from input parameter file.
    **/
   bool ic_alias_corrected;
-
-
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @brief Read from input parameter file
    **/
   string ic_input_type;
 
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @brief Read from input parameter file
    **/
   string ic_WN_file;
   //////////////////////////////////////////////////////////
   /**
    * @brief Inidcates approximated gravity solver to evolve IC
+   * @brief Read from input parameter file
    **/
   int Structure_Formation_Model;
  
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @brief Read from input parameter file
    **/
   string dir;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @brief Read from input parameter file
    **/
   bool readPS;
   //////////////////////////////////////////////////////////
   /**
    * @brief
+   * @brief Read from input parameter file
    **/
   real_prec slength;
   //////////////////////////////////////////////////////////
@@ -2310,7 +2470,7 @@ f the sample and defines it as the new line-of-sight
   real_prec devpois;
   //////////////////////////////////////////////////////////
   /**
-   * @brief0
+   * @brief
    **/
   real_prec deltathH;
   //////////////////////////////////////////////////////////
@@ -2324,22 +2484,22 @@ f the sample and defines it as the new line-of-sight
    */
   real_prec cs2;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
    */
   real_prec cs3;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
    */
   real_prec cst;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
    */
   real_prec cpsi;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
    */
   real_prec cdeltas2;
@@ -2350,12 +2510,12 @@ f the sample and defines it as the new line-of-sight
    */
   real_prec sfac;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
    */
   real_prec ep;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
    */
   real_prec xllc;
@@ -2365,17 +2525,17 @@ f the sample and defines it as the new line-of-sight
    */
   real_prec yllc;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
    */
   real_prec zllc;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
    */
   real_prec xobs;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
    */
   real_prec yobs;
@@ -2389,71 +2549,82 @@ f the sample and defines it as the new line-of-sight
    */
   real_prec zobs;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
+   * @details Read from input parameter file.
    */
   bool Normalize_IC_to_initial_redshift;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Threshold value for the V-web classification
+  /**
+   * @brief 
+   * @details Read from input parameter file.
    */
   real_prec Initial_Redshift_TH_power_file;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Threshold value for the V-web classification
+  /**
+   * @brief 
+   * @details Derived parameter.
    */
   real_prec d1;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Threshold value for the V-web classification
+  /**
+   * @brief 
+   * @details Derived parameter.
    */
   real_prec d2;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Threshold value for the V-web classification
+  /**
+   * @brief 
+   * @details Derived parameter.
    */
   real_prec d3;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Threshold value for the V-web classification
+  /**
+   * @brief 
+   * @details Derived parameter.
    */
   real_prec d1_HR;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Threshold value for the V-web classification
+  /**
+   * @brief 
+   * @details Derived parameter.
    */
   real_prec d2_HR;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Threshold value for the V-web classification
+  /**
+   * @brief 
+   * @details Derived parameter.
    */
   real_prec d3_HR;
 
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
+   * @details Derived parameter.
    */
   real_prec d1_JK;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
+   * @details Derived parameter.
    */
   real_prec d2_JK;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
+   * @details Derived parameter.
    */
   real_prec d3_JK;
-
-
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
+   * @details Derived parameter.
    */
   real_prec d1_low;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
+   * @details Derived parameter.
    */
   real_prec d2_low;
   //////////////////////////////////////////////////////////
@@ -2461,146 +2632,162 @@ f the sample and defines it as the new line-of-sight
    * @brief Threshold value for the V-web classification
    */
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Threshold value for the V-web classification
+   * @details Derived parameter.
    */
   real_prec d3_low;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Number if cells per dimention in the mesh, used to interpolate fieldas and do FFTW 
+   * @details Read from input parameter file.
    */
   ULONG Nft;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief 
+  /**
+   * @brief Correct for Poisson shot-noise. Set this to false when dark matter is to be analyzed, or when the cross correlation function is to be measured.
+   * @details Read from input parameter file.
    */
   bool SN_correction;
 
   //////////////////////////////////////////////////////////
-  /*
-   * @brief 
+  /**
+   * @brief Path to output directory.
+   * @details Read from input parameter file.
    */  
   string Output_directory;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief 
+   * @details Read from input parameter file.
    */  
   int NMASSbins_mf;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief 
+   * @details Read from input parameter file.
    */  
-
   string vel_units_g;
-
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief 
+   * @details Read from input parameter file.
    */  
-
   int masskernel;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief 
+   * @details Read from input parameter file.
    */  
-
   int masskernel_vel;
-  //////////////////////////////////////////////////////////
-  /*
-   * @brief 
-   */  
-//  string dir_output;
   //////////////////////////////////////////////////////////
   /**
    * @brief Size of the box in Mpc/h
-   * @brief Read from parameter file
+   * @details Read from input parameter file.
    */
   real_prec Lbox;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief 
+  /**
+   * @brief This parameter \f$(f_{k})\f$ determines the minimum value of Fourier wavenumber in order to define spherical shells. Being \f$\Delta_{k}=2\pi /L_{\mathrm box}\f$ the fundamental mode, the minimum is defined as \f$k_{\mathrm min}=f_{k}\Delta_{k}\f$.
+   * @details Read from input parameter file.
    */  
   real_prec DeltaKmin;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief 
+   * @details Read from input parameter file.
    */  
   string file_power_th;
   //////////////////////////////////////////////////////////
   /**
    * @brief This parameter identif if RSD are included in coordinates
    * @details Set \texttt{false} if the coordinates written in the tracer catalog do not have any effect of peculiar velocities. This can be the case of using Cartesian coordinates in real-space.If power from such input is to be measured in redshift space, go to the pre-proc directive \paramp{\texttt{REDSHIFT\gi SPACE}} (see \S\ref{sec:ppreproc}). If instead, the input catalogs has coordinates with RSD already in the coordinates, set to \texttt{false}.
+   * @details Read from input parameter file.
    */  
   bool redshift_space_coords_g;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Column for x-coordinate of tracer
+   * @details Read from input parameter file.
    */  
   int i_coord1_g;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Column for y-coordinate of tracer
+   * @details Read from input parameter file.
    */  
   int i_coord2_g;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Column for z-coordinate of tracer
+   * @details Read from input parameter file.
    */  
   int i_coord3_g;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Column for x-component of tracer
+   * @details Read from input parameter file.
    */  
   int i_v1_g;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief  Column for y-vel compònent of tracer
+   * @details Read from input parameter file.
    */  
   int i_v2_g;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief  Column for z-vel component of tracer
+   * @details Read from input parameter file.
    */  
   int i_v3_g;
   //////////////////////////////////////////////////////////
   /**
    * @brief Identify the column in the ASCII file of the tracer where the information of the mass is allocated. If no information on the mass is provided or is not aimed to be used, set a negative value. Mass is expected in units of Ms / h
+   * @details Read from input parameter file.
    */  
   int i_mass_g;
   //////////////////////////////////////////////////////////
   /**
    * @brief Identify the column in the ASCII file of the tracer where the information of Vmax (maximum circular velocity) is allocated. If no information on the mass is provided or is not aimed to be used, set a negative value. Mass is expected in units of km / s
+   * @details Read from input parameter file.
    */  
   int i_vmax_g;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Identify the column in the ASCII file of the tracer where the information of Vrms (root mean squared velcoity) is allocated. If no information on the mass is provided or is not aimed to be used, set a negative value. Mass is expected in units of km / s
+   * @details Read from input parameter file.
    */  
   int i_vrms_g;
   //////////////////////////////////////////////////////////
   /**
    * @brief Identify the column in the ASCII file of the tracer where the information of shape radius or concentration (computed from shape radius if requested from preproc directives) is provided.
+   * @details Read from input parameter file.
    */  
   int i_rs_g;
   //////////////////////////////////////////////////////////
   /*
    * @brief Identify the column in the ASCII file of the tracer where the information of the \textbf{virial} radius is allocated. If no information on the mass is provided or is not aimed to be used, set a negative value.
+   * @details Read from input parameter file.
    */
   int i_rvir_g;
   //////////////////////////////////////////////////////////
   /**
    * @brief Identify the column in the ASCII file of the tracer where the information of Peebles Spin is allocated.
+   * @details Read from input parameter file.
    */  
   int i_spin_g;
   //////////////////////////////////////////////////////////
   /*
    * @brief Identify the column in the ASCII file of the tracer where the information of Bullockś Spin is allocated.
+   * @details Read from input parameter file.
    */
   int i_spin_bullock_g;
 
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Identify the column in the ASCII file of the tracer where the information of the \textbf{mean number density} tabulated at each position of the tracer is allocated. If no information on this quantities is provided or is not aimed to be used, set a negative value. This quantity is expected in units of $($Mpc$\,h^{-1})^{-3}$.
+   * @details Read from input parameter file.
    **/
   int i_mean_density_g;
   //////////////////////////////////////////////////////////
@@ -3309,20 +3496,14 @@ f the sample and defines it as the new line-of-sight
   string density_profile_k_output_file ;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Use input power spectrum (true, false)
    */
   bool use_file_power;
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
-  string file_power;
-  //////////////////////////////////////////////////////////
-  /**
-   *  @name input/output
-   */
   bool Get_SO_from_BN;
-
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
@@ -4832,6 +5013,10 @@ public:
    *  @return ndel_data
    */
   int _ndel_data () {return this->ndel_data;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Set the value of the private member ndel_data
+   */
   void set_ndel_data(int new_ndel_data){this->ndel_data=new_ndel_data;}
   //////////////////////////////////////////////////////////
   /**
@@ -4906,8 +5091,8 @@ public:
   //////////////////////////////////////////////////////////
 
   /**
-   *  @brief Get the value of the private member N_z_bins
-   *  @return N_z_bins
+   *  @brief Get the value of the private member Nbins_redshift
+   *  @return Nbins_redshift
    */
   int _Nbins_redshift () {return Nbins_redshift;}
   /////////////////////////////////////////////////////////
@@ -5018,7 +5203,7 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Get the value of the private member kmax_y_ds
+   *  @brief Get the value of the private member 
    *  @return kmax_y_ds
    */
   real_prec _kmax_y_ds () {return kmax_y_ds;}
@@ -5026,10 +5211,14 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief 
-   *  @return
+   *  @brief Get the value of the private member kmax_y_ds
+   *  @return DeltaKmin
    */
   real_prec _DeltaKmin () {return this->DeltaKmin;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Set the value of the private member DeltaKmin
+   */
   void set_DeltaKmin(real_prec new_DeltaKmin){this->DeltaKmin=new_DeltaKmin;}
   //////////////////////////////////////////////////////////
   /**
@@ -7015,6 +7204,13 @@ public:
    *  @brief
    *  @return
    */
+  int _lmax_bias(){return this->lmax_bias;}
+  void set_lmax_bias(int lm){this->lmax_bias=lm;}
+  /////////////////////////////////////////////////////////
+  /**
+   *  @brief
+   *  @return
+   */
   int _Number_of_random_files(){return this->Number_of_random_files;}
   void set_Number_of_random_files(int Ni){this->Number_of_random_files=Ni;}
   /////////////////////////////////////////////////////////
@@ -7411,6 +7607,8 @@ public:
    */
   real_prec _kmax_ps() {return kmax_ps ;}
   void set_kmax_ps(real_prec nk) {this->kmax_ps=nk;}
+
+ 
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output

@@ -31,12 +31,15 @@ using namespace std;
   void equatorial_to_cartesian(real_prec, real_prec, real_prec, real_prec &, real_prec &, real_prec &);
 //////////////////////////////////////////////////////////
  /**
-   * @brief Convert equatorial coordinates, i.e, right ascension, declination and distance  
-   * to cartessian coordinates. 
-   * @details Input values of RA and Dec are in degrees,          
-   * the output is in the units of r       
+ /**
+   * @brief Convert cartessian coordinates  to equatorial coordinates. 
    */
   void cartesian_to_equatorial(real_prec, real_prec, real_prec, real_prec &, real_prec &, real_prec &);
+//////////////////////////////////////////////////////////
+ /**
+   * @brief Convert cartessian coordinates  to spherical coordinates. 
+   */
+  void cartesian_to_spherical(real_prec, real_prec, real_prec, real_prec &, real_prec &, real_prec &);
 ///////////////////////////////////////////////////////
    /**
    * @brief Convert cartesian coordinates into equatorial RA, DEC, r  

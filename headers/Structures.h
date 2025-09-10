@@ -590,7 +590,7 @@ struct A1{
  * The method Catalog::read_catalog() assigns the information of the column i_x (e.g., X-coords) as:
  *@code
  vector<s_Halo> halo(NOBJS);
- for(int i=0;i<NOBJECTS;++i)
+ for(ULONG i=0;i<NOBJS;++i)
      halo[i].coord1 = prop[i_x+i*NCOLS]; // x-coordinate of a catalog with NOBJECTS
  *@endcode
  */
@@ -708,6 +708,11 @@ struct s_Halo
    *@brief  bias computed from a box in redshift space
    */
   real_prec  bias_rs;
+  // -----------------------------------
+  /**
+   *@brief  bias computed from a a box as a function of multipole l (Sheth)
+   */
+  vector<real_prec>  bias_multipole;
   // -----------------------------------
   /**
    *@brief  Parfameter linekd to the individual bias in redshift space
