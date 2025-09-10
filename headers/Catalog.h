@@ -836,6 +836,13 @@ public:
   /**
    * @brief Selects random sub-sample from catalog
    * @arg fraction:  fraction of the total number of tracers to be selected
+   * @details Select a random subsample from Halo and place it in Halo_random_subsample, both memers oc this class. It coies elemnts manually, unfortunately.
+   */
+  void select_random_subsample(real_prec fraction);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Selects random sub-sample from catalog
+   * @arg fraction:  fraction of the total number of tracers to be selected
    * @arg fname: output file name for reduced catalog
    * @details This method writes mass, vmax, rs, concentration and spin, followed by the multipole -individual bias 
    */
