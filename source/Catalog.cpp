@@ -5414,6 +5414,38 @@ void Catalog::select_random_subsample(real_prec fraction, string file){
    So.DONE();
    So.message_screen("\tWritting downsample catalog in file", file);
 }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Catalog::select_random_subsample(real_prec fraction){
+  this->So.enter(__PRETTY_FUNCTION__);
+  const gsl_rng_type * rng_t;
+  gsl_rng * gBaseRando;
+  gsl_rng_env_setup();
+  gsl_rng_default_seed=35;
+  rng_t = gsl_rng_mt19937;//_default;
+  gBaseRando = gsl_rng_alloc (rng_t);
+   ULONG Nobjs_fraction=static_cast<ULONG>(floor(fraction*this->NOBJS));
+   this->Halo_random_subsample.resize(Nobjs_fraction); 
+   ULONG counter=0;
+   So.message_screen("\tSelecting a fraction: ",100*fraction, "%");
+    do
+     {
+      int i= gsl_rng_uniform_int(gBaseRando,this->Halo.size());
+      this->Halo_random_subsample[counter].coord1 = this->Halo[i].coord1;
+      this->Halo_random_subsample[counter].coord2 = this->Halo[i].coord2;
+      this->Halo_random_subsample[counter].coord3 = this->Halo[i].coord3;
+      this->Halo_random_subsample[counter].mass = this->Halo[i].mass;
+      this->Halo_random_subsample[counter].spin_bullock = this->Halo[i].spin_bullock;
+      this->Halo_random_subsample[counter].concentration = this->Halo[i].concentration;
+      this->Halo_random_subsample[counter].rs = this->Halo[i].rs;
+      counter++;
+    }while(counter<Nobjs_fraction);
+   So.DONE();
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Catalog::select_random_subsample_bl(real_prec fraction, string file){
