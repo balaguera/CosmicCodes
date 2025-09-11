@@ -125,8 +125,11 @@ void usage(string s)
 int main(int argc, char *argv[])
 {
   //  system("clear");
+
+  auto start_time = chrono::high_resolution_clock::now();
   time_t start_all;
   time(&start_all);
+
   char temp;
   string par_file;
 
@@ -186,48 +189,47 @@ int main(int argc, char *argv[])
       cat.get_density_field_grid(_COUNTS_,tr_field_counts);  // Computing counts
 
       //Assign bias to tracers and get the bias field:
-
       // Definr an object of type Power Spectrum, passing the parametes through the class variable param
       PowerSpectrumF power(params);
 
-      // Dilute the sample:
-      cat.select_random_subsample(params._fraction_dilute());
-      //Assign individual bias to objhects in cat.Halo. That bias uses the dm_field:
-      power.object_by_object_bias(cat.Halo_random_subsample, dm_field);
-      //Assign individual harmonic-based bias to objects in cat.Halo. That bias uses the dm_field:
-      power.object_by_object_bias_lm(cat.Halo_random_subsample, dm_field, params._lmax_bias());
       string file_cat_new=params._Output_directory()+"diluted_cat_blm.txt";
-      // Print catalog:
-      print_catalog(cat.Halo_random_subsample, file_cat_new);
-      
+      if(params._assign_bias_to_full_sample())
+      {
+        power.object_by_object_bias(cat.Halo, dm_field);
+        power.object_by_object_bias_lm(cat.Halo, dm_field, params._lmax_bias());
+        cat.select_random_subsample_bl(params._fraction_dilute(), file_cat_new);
+      }
+      else{
+      // Dilute the sample:
+        cat.select_random_subsample(params._fraction_dilute());
+        //Assign individual bias to objhects in cat.Halo. That bias uses the dm_field:
+        power.object_by_object_bias(cat.Halo_random_subsample, dm_field);
+        //Assign individual harmonic-based bias to objects in cat.Halo. That bias uses the dm_field:
+        power.object_by_object_bias_lm(cat.Halo_random_subsample, dm_field, params._lmax_bias());
+        // Print catalog:
+        print_catalog(cat.Halo_random_subsample, file_cat_new);
+      }
 
-      vector<real_prec> bias_field(params._NGRID(), 0); // Define container to allocate the bias on a mesh
-      cat.get_density_field_grid(_COUNTS_,tr_field_counts,bias_field); //Get halo bias averaged on a mesh.
+      vector<real_prec> bias_field; // Define container to allocate the bias on a mesh
+      if(!params._assign_bias_to_full_sample())
+      {
+        bias_field.resize(params._NGRID(), 0);
+        cat.get_density_field_grid(_COUNTS_,tr_field_counts,bias_field); //Get halo bias averaged on a mesh.
+        string fileb=params._Output_directory()+"ls_bias_p"+to_string(params._unitsim_plabel()); //Defile output file
+        File.write_array(fileb,bias_field); //Write the bias on the mesh to poutput file (binary)
+        bias_field.clear();bias_field.shrink_to_fit();// Release memmory
+      }
 
-      string fileb=params._Output_directory()+"ls_bias_p"+to_string(params._unitsim_plabel()); //Defile output file
-
-      File.write_array(fileb,bias_field); //Write the bias on the mesh to poutput file (binary)
-
-      bias_field.clear();bias_field.shrink_to_fit();// Release memmory
  
-
-      vector<real_prec> tr_field(params._NGRID(), 0); //container for
-      cat.get_density_field_grid(_iBIAS_,tr_field);  
-      cat.get_density_field_grid(_COUNTS_,tr_field);
-      string fileo=params._Output_directory()+"field_hbias_p"+to_string(params._unitsim_plabel());
-
-      File.write_array(fileo,tr_field);
-
-
       //-----------------------------
       // Define Cwc cobject to perform cosmic-web analysis based on the halo density field.  
       Cwclass cwclass(params); // for halos
 
       // Get tidal anisotropy (TA hereafter) from tracers
       vector<real_prec> tr_alpha(params._NGRID(), 0); // Container for TA computed from the halo tidal field
-      cwclass.get_tidal_anisotropy(tr_field, tr_alpha); // Compute the TA halo field --tr_field-- and allocate in tr_alpha
+      cwclass.get_tidal_anisotropy(tr_field_counts, tr_alpha); // Compute the TA from halo field --tr_field-- and allocate in tr_alpha
 
-      fileo=params._Output_directory()+"alpha_tr_p"+to_string(params._unitsim_plabel());
+      string fileo=params._Output_directory()+"alpha_tr_p"+to_string(params._unitsim_plabel());
       File.write_array(fileo,tr_alpha); //Write tidal anisotropy based on the tracers
 
       fileo=params._Output_directory()+"l1_tr_p"+to_string(params._unitsim_plabel());
@@ -290,7 +292,7 @@ int main(int argc, char *argv[])
      //Relesas memmory (not requested as memmory is clean when this if ends)   
      dm_alpha.clear(); dm_alpha.shrink_to_fit();
      dm_field.clear(); dm_field.shrink_to_fit();
-     tr_field.clear(); tr_field.shrink_to_fit();
+     tr_field_counts.clear(); tr_field_counts.shrink_to_fit();
      
      // End of the '-b' option
 
@@ -303,6 +305,11 @@ int main(int argc, char *argv[])
       exit(1);
     }
   }
+
+ auto end_time = chrono::high_resolution_clock::now();
+ real_prec difft=chrono::duration<real_prec>(end_time-start_time).count();
+ cout<<YELLOW<<"Time "<<difft<<" secs "<<RESET<<endl;
+
   exit(0);
   return 0;
 }
