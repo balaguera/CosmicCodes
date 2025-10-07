@@ -17,6 +17,7 @@ using namespace std;
 void get_hist(Params params, vector<real_prec>&dm_alpha, vector<real_prec>&tr_alpha, vector<real_prec>&alpha_bias, vector<ULONG>&cwc, bool fitype)
 {
 
+  ScreenOutput So;
   int nb=200;
   FileOutput Fo;
   string ftype = fitype == 0 ? "dm" : "tr";
@@ -76,13 +77,16 @@ void get_hist(Params params, vector<real_prec>&dm_alpha, vector<real_prec>&tr_al
                 }
             }
         }
+        So.message_screen("Writting ascii file for histogram of bias_alpha. CWC is done accorging to ", ftype);
         string fileo=params._Output_directory()+"alpha_hbias_p"+to_string(params._unitsim_plabel())+"_cwt"+to_string(icwt)+"_"+ftype+".txt";
         Fo.write_to_file(fileo,ibins,hist);
 
-        fileo=params._Output_directory()+"alphah_hbias_p"+to_string(params._unitsim_plabel())+"_cwt"+to_string(icwt)+"_"+ftype+".txt";
+        So.message_screen("Writting ascii file for histogram of tidal anisotroipy based on tracers. CWC is done accorging to ", ftype);
+        fileo=params._Output_directory()+"alphah_p"+to_string(params._unitsim_plabel())+"_cwt"+to_string(icwt)+"_"+ftype+".txt";
         Fo.write_to_file(fileo,ibins,hist_alphah);
 
-        fileo=params._Output_directory()+"alphadm_hbias_p"+to_string(params._unitsim_plabel())+"_cwt"+to_string(icwt)+"_"+ftype+".txt";
+        So.message_screen("Writting ascii file for histogram of tidal anisotroipy based on dm. CWC is done accorging to ", ftype);
+        fileo=params._Output_directory()+"alphadm_p"+to_string(params._unitsim_plabel())+"_cwt"+to_string(icwt)+"_"+ftype+".txt";
         Fo.write_to_file(fileo,ibins,hist_alphadm);
       }
 
@@ -185,13 +189,80 @@ int main(int argc, char *argv[])
       // Get density field from tracers
       //----------------------------------------------
  
-      vector<real_prec> tr_field_counts(params._NGRID(), 0); // Cointainer for counts
-      cat.get_density_field_grid(_COUNTS_,tr_field_counts);  // Computing counts
+      bool get_cwc=true;
+      if(false==get_cwc){
+        So.message_screen("============================================================");
+        So.message_screen("NO CWC quantities are to be computed. Check line", __LINE__);
+        So.message_screen("============================================================");
+      }
 
+        vector<real_prec> tr_field_counts; // Cointainer for counts
+      if(get_cwc)
+      {
+        tr_field_counts.resize(params._NGRID(), 0); // Cointainer for counts
+        cat.get_density_field_grid(_COUNTS_,tr_field_counts);  // Computing counts
+      }  
+
+ 
+ 
+      //-----------------------------
+      Cwclass cwclass(params); // for halos
+      vector<real_prec> tr_alpha; // Container for TA computed from the halo tidal field
+
+      if(get_cwc)
+      {
+ 
+      // Define Cwc cobject to perform cosmic-web analysis based on the halo density field.  
+      // Get tidal anisotropy (TA hereafter) from tracers
+      tr_alpha.resize(params._NGRID(), 0); // Container for TA computed from the halo tidal field
+      cwclass.get_tidal_anisotropy(tr_field_counts, tr_alpha); // Compute the TA from halo field --tr_field-- and allocate in tr_alpha
+
+      So.message_screen("Writting binary file tidal anisotropy based in tracer tidal filed in the mesh");
+      string fileo=params._Output_directory()+"alpha_tr_p"+to_string(params._unitsim_plabel());
+      File.write_array(fileo,tr_alpha); //Write tidal anisotropy based on the tracers
+
+      So.message_screen("Writting binary file for lambda_1 from tracer filed in the mesh");
+      fileo=params._Output_directory()+"l1_tr_p"+to_string(params._unitsim_plabel());
+      File.write_array(fileo,cwclass.lambda1); //Write first eigenvalue of halo tidal field
+
+      So.message_screen("Writting binary file for lambda_2 from tracer filed in the mesh");
+      fileo=params._Output_directory()+"l2_tr_p"+to_string(params._unitsim_plabel());
+      File.write_array(fileo,cwclass.lambda2); //Write second eigenvalue of halo tidal field
+
+      So.message_screen("Writting binary file for lambda_3 from tracer filed in the mesh");
+      fileo=params._Output_directory()+"l3_tr_p"+to_string(params._unitsim_plabel());
+      File.write_array(fileo,cwclass.lambda3); //Write third eigenvalue of halo tidal field
+      
+      So.message_screen("Writting binary file the cosmic-web classificcation based on tracers in the mesh");
+      fileo=params._Output_directory()+"cwc_tr_p"+to_string(params._unitsim_plabel());
+      File.write_array(fileo,cwclass.CWClass);  //Write the cwc of each cell, computed in from tracers in CWClass.
+      }
+
+      //-----------------------------
+      //-----------------------------
+      // Get tidal anisotropy from dm
+
+      vector<real_prec> dm_alpha(params._NGRID(), 0); //Coitainer for TA computed from the tidal field of dm
+      Cwclass cwclass_dm(params); //CWC type for dark matter
+      if(get_cwc)
+      {
+        cwclass_dm.get_tidal_anisotropy(dm_field, dm_alpha); //Compute tidal anisotropy from dm
+        string fileo=params._Output_directory()+"alpha_dm_p"+to_string(params._unitsim_plabel());
+        File.write_array(fileo,dm_alpha); // Write TA from dm to binary
+      }
+      // --------------------------------------------------
+      // Assign ID and cwc to halos in cat.Halo
+      cat.assign_idgrid_to_tracers();
+      if(get_cwc)
+      {
+      cat.assign_cwc_to_tracers(cwclass_dm.CWClass);
+      cat.assign_tidal_anisotropy_to_tracers(tr_alpha, false);
+      cat.assign_tidal_anisotropy_to_tracers(dm_alpha, true);
+      }
+      // --------------------------------------------------
       //Assign bias to tracers and get the bias field:
-      // Definr an object of type Power Spectrum, passing the parametes through the class variable param
+     // Define an object of type Power Spectrum, passing the parametes through the class variable param
       PowerSpectrumF power(params);
-
       string file_cat_new=params._Output_directory()+"diluted_cat_blm.txt";
       if(params._assign_bias_to_full_sample())
       {
@@ -205,9 +276,9 @@ int main(int argc, char *argv[])
         //Assign individual bias to objhects in cat.Halo. That bias uses the dm_field:
         power.object_by_object_bias(cat.Halo_random_subsample, dm_field);
         //Assign individual harmonic-based bias to objects in cat.Halo. That bias uses the dm_field:
-        power.object_by_object_bias_lm(cat.Halo_random_subsample, dm_field, params._lmax_bias());
-        // Print catalog:
-        print_catalog(cat.Halo_random_subsample, file_cat_new);
+        power.object_by_object_bias_lm(cat.Halo_random_subsample, dm_field, params._lmax_bias());  
+        // Print catalog: do it below, after cwc is done
+        print_catalog(cat.Halo_random_subsample, file_cat_new, true); // set true of blm are to be written, 
       }
 
       vector<real_prec> bias_field; // Define container to allocate the bias on a mesh
@@ -219,44 +290,10 @@ int main(int argc, char *argv[])
         File.write_array(fileb,bias_field); //Write the bias on the mesh to poutput file (binary)
         bias_field.clear();bias_field.shrink_to_fit();// Release memmory
       }
+  // --------------------------------------------------
 
- 
-      //-----------------------------
-      // Define Cwc cobject to perform cosmic-web analysis based on the halo density field.  
-      Cwclass cwclass(params); // for halos
-
-      // Get tidal anisotropy (TA hereafter) from tracers
-      vector<real_prec> tr_alpha(params._NGRID(), 0); // Container for TA computed from the halo tidal field
-      cwclass.get_tidal_anisotropy(tr_field_counts, tr_alpha); // Compute the TA from halo field --tr_field-- and allocate in tr_alpha
-
-      string fileo=params._Output_directory()+"alpha_tr_p"+to_string(params._unitsim_plabel());
-      File.write_array(fileo,tr_alpha); //Write tidal anisotropy based on the tracers
-
-      fileo=params._Output_directory()+"l1_tr_p"+to_string(params._unitsim_plabel());
-      File.write_array(fileo,cwclass.lambda1); //Write first eigenvalue of halo tidal field
-
-
-      fileo=params._Output_directory()+"l2_tr_p"+to_string(params._unitsim_plabel());
-      File.write_array(fileo,cwclass.lambda2); //Write second eigenvalue of halo tidal field
-
-      fileo=params._Output_directory()+"l3_tr_p"+to_string(params._unitsim_plabel());
-      File.write_array(fileo,cwclass.lambda3); //Write third eigenvalue of halo tidal field
-
-      fileo=params._Output_directory()+"cwc_tr_p"+to_string(params._unitsim_plabel());
-      File.write_array(fileo,cwclass.CWClass);  //Write the cwc of each cell, computed in from tracers in CWClass.
-
-
-      //-----------------------------
-      //-----------------------------
-      // Get tidal anisotropy from dm
-
-      vector<real_prec> dm_alpha(params._NGRID(), 0); //Coitainer for TA computed from the tidal field of dm
-      Cwclass cwclass_dm(params); //CWC type for dark matter
-
-      cwclass_dm.get_tidal_anisotropy(dm_field, dm_alpha); //Compute tidal anisotropy from dm
-
-      fileo=params._Output_directory()+"alpha_dm_p"+to_string(params._unitsim_plabel());
-      File.write_array(fileo,dm_alpha); // Write TA from dm to binary
+    if(get_cwc)
+      {
 
       vector<real_prec> alpha_bias(params._NGRID(), 0); // Container for the bias--ratio-- of TA
 
@@ -266,19 +303,23 @@ int main(int argc, char *argv[])
   for(ULONG i=0;i<dm_field.size();++i) // get the ratio between TA from tr and TA from dm
       alpha_bias[i]=tr_alpha[i]/dm_alpha[i];
 
-
-      fileo=params._Output_directory()+"bias_alpha_p"+to_string(params._unitsim_plabel());
+      So.message_screen("Writting binary file for alpha_tr / alpha _dm in the mesh");
+      string fileo=params._Output_directory()+"bias_alpha_p"+to_string(params._unitsim_plabel());
       File.write_array(fileo,alpha_bias); //Write the ratio of TA's
 
+      So.message_screen("Writting binary file for eigenvalue lambda_1_dm in the mesh");
       fileo=params._Output_directory()+"l1_dm_p"+to_string(params._unitsim_plabel());
       File.write_array(fileo,cwclass_dm.lambda1); //Write first eigenvalue of DM tidal field
 
+      So.message_screen("Writting binary file for eigenvalue lambda_2_dm in the mesh");
       fileo=params._Output_directory()+"l2_dm_p"+to_string(params._unitsim_plabel());
       File.write_array(fileo,cwclass_dm.lambda2);//Write second eigenvalue of DM tidal field
 
+      So.message_screen("Writting binary file for eigenvalue lambda_3_dm in the mesh");
       fileo=params._Output_directory()+"l3_dm_p"+to_string(params._unitsim_plabel());
       File.write_array(fileo,cwclass_dm.lambda3);//Write third eigenvalue of DM tidal field
 
+      So.message_screen("Writting binary file the cosmic-web classificcation based on dm in the mesh");
       fileo=params._Output_directory()+"cwc_dm_p"+to_string(params._unitsim_plabel());
       File.write_array(fileo,cwclass_dm.CWClass);  //Write the cwc of each cell, computed in from tracers in CWClass.
 
@@ -289,11 +330,12 @@ int main(int argc, char *argv[])
       // Histograms here are done classifying CW according to tracers.
       get_hist(params, dm_alpha, tr_alpha, alpha_bias,cwclass.CWClass, 1);
 
-     //Relesas memmory (not requested as memmory is clean when this if ends)   
+      //Relesas memmory (not requested as memmory is clean when this if ends)   
      dm_alpha.clear(); dm_alpha.shrink_to_fit();
      dm_field.clear(); dm_field.shrink_to_fit();
      tr_field_counts.clear(); tr_field_counts.shrink_to_fit();
-     
+
+      }
      // End of the '-b' option
 
     }
