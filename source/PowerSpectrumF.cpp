@@ -4920,16 +4920,15 @@ void PowerSpectrumF::get_window_matrix_multipole()
         real_prec xtracer=tracer_cat[itr].coord1;
         real_prec ytracer=tracer_cat[itr].coord2;
         real_prec ztracer=tracer_cat[itr].coord3;
-
         vector<real_prec>power_cross(Kmax_bin,0);
-
         // Here goes the loop over l and m
-        real_prec hbb=0;
-       for(int ell=0; ell<=lmax;++ell)
+       for(int ell=0; ell<=lmax;++ell) // loop over l
        {
         real_prec hll=0;
-         for(int mm=-ell; mm<=ell; ++mm)
+         for(int mm=-ell; mm<=ell; ++mm) // loop over m
         {
+          real_prec conn_phase = mm < 0 ? pow(-1, -mm) : 1;
+          int fmm=fabs(mm);
 
           for(ULONG i=Kmin_bin; i< new_Nft/2;++i)
             for(ULONG j=Kmin_bin; j< new_Nft/2;++j)
@@ -4937,93 +4936,104 @@ void PowerSpectrumF::get_window_matrix_multipole()
                 {
                   ULONG lp=index_3d(i,j,k,this->params._Nft(),this->params._Nft()/2+1);
                   real_prec k_dot_r=0;
-                  real_prec  kv=sqrt(pow(dk_x*kcoords[i],2)+pow(dk_y*kcoords[j],2)+pow(dk_z*kcoords[k],2));
-                  ULONG kbin=static_cast<ULONG>(floor((kv-this->params._d_kmin())/this->params._d_DeltaK_data()));
-
+                  real_prec kv=sqrt(pow(dk_x*kcoords[i],2)+pow(dk_y*kcoords[j],2)+pow(dk_z*kcoords[k],2));
+                  ULONG kbin = static_cast<ULONG>(floor((kv-this->params._d_kmin())/this->params._d_DeltaK_data()));
+                  real_prec theta_k=1;
+                  real_prec phi_k=1;
+                  real_prec kk =1;
+                  real_prec ss =0;
+                  real_prec cc =0;
                   /****************************************************************/
                   if(lp!=0)
                   {
-                    real_prec theta_k=1;
-                    real_prec phi_k=1;
-                    real_prec kk =1;
                     cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
-                    real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
-                    real_prec Relm=leg*cos(mm*phi_k)*factor_ylm;
-                    real_prec Imlm=leg*sin(mm*phi_k)*factor_ylm;
-//                    cout<<Relm<<"  "<<Imlm<<endl;
                     k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;  // vec k dot vec r
-                    if(kbin<Kmax_bin){
-                        power_cross[kbin]+=cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm;
-                    }
+                    ss = sin(k_dot_r);
+                    cc = cos(k_dot_r);
+                    real_prec leg = gsl_sf_legendre_sphPlm(ell,fmm,cos(theta_k));
+                    real_prec Relm=leg*cos(mm*phi_k)*conn_phase;
+                    real_prec Imlm=leg*sin(mm*phi_k)*conn_phase;
+                    if(kbin<Kmax_bin)
+                        power_cross[kbin]+=cc*Delta_dm[lp][REAL]*Relm-ss*Delta_dm[lp][IMAG]*Relm+ss*Delta_dm[lp][REAL]*Imlm + cc*Delta_dm[lp][IMAG]*Imlm;
                   }
                   /****************************************************************/
                   if(j>0  && k>0)
                     {
                       lp=index_3d(i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
                       k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
-                      real_prec theta_k=1;
-                      real_prec phi_k=1;
-                      real_prec kk =1;
-                      cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
-                      real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
-                      real_prec Relm=leg*cos(mm*phi_k)*factor_ylm;
-                      real_prec Imlm=leg*sin(mm*phi_k)*factor_ylm;
-                      if(kbin<Kmax_bin){
-                        power_cross[kbin]+=cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm;
-                      }
-                      }
+                      ss = sin(k_dot_r);
+                      cc = cos(k_dot_r);
+                      cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[new_Nft-j],dk_z*kcoords[k], phi_k, theta_k, kk);
+                      real_prec leg = gsl_sf_legendre_sphPlm(ell,fmm,cos(theta_k));
+                      real_prec Relm=leg*cos(mm*phi_k)*conn_phase;
+                      real_prec Imlm=leg*sin(mm*phi_k)*conn_phase;
+                      if(kbin<Kmax_bin)
+                        power_cross[kbin]+=cc*Delta_dm[lp][REAL]*Relm-ss*Delta_dm[lp][IMAG]*Relm+ss*Delta_dm[lp][REAL]*Imlm + cc*Delta_dm[lp][IMAG]*Imlm;
+                    }
                   if(i>0  && (j>0 || k>0))
                     {
                       lp=index_3d(this->params._Nft()-i,j,k,this->params._Nft(),this->params._Nft()/2+1);
                       k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
-                      real_prec theta_k=1;
-                      real_prec phi_k=1;
-                      real_prec kk =1;
-                      cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
-                      real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
-                      real_prec Relm=leg*cos(mm*phi_k)*factor_ylm;
-                      real_prec Imlm=leg*sin(mm*phi_k)*factor_ylm;
-                       if(kbin<Kmax_bin){
-                        power_cross[kbin]+=cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm;
-                      }
-                  }
+                      ss = sin(k_dot_r);
+                      cc = cos(k_dot_r);
+                      cartesian_to_spherical(dk_x*kcoords[new_Nft-i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
+                      real_prec leg = gsl_sf_legendre_sphPlm(ell,fmm,cos(theta_k));
+                      real_prec Relm=leg*cos(mm*phi_k)*conn_phase;
+                      real_prec Imlm=leg*sin(mm*phi_k)*conn_phase;
+                      if(kbin<Kmax_bin)
+                        power_cross[kbin]+=cc*Delta_dm[lp][REAL]*Relm-ss*Delta_dm[lp][IMAG]*Relm+ss*Delta_dm[lp][REAL]*Imlm + cc*Delta_dm[lp][IMAG]*Imlm;
+                    }
                     if(i>0  && j>0  && k>0)
                     {
                       lp=index_3d(this->params._Nft()-i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
                       k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer+dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
-                      real_prec theta_k=1;
-                      real_prec phi_k=1;
-                      real_prec kk =1;
-                      cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
-                      real_prec leg= mm<0 ? gsl_sf_legendre_sphPlm(ell,fabs(mm),cos(theta_k))*pow(-1, -mm) : gsl_sf_legendre_sphPlm(ell,mm,cos(theta_k));
-                      real_prec Relm=leg*cos(mm*phi_k)*factor_ylm;
-                      real_prec Imlm=leg*sin(mm*phi_k)*factor_ylm;
+                      ss = sin(k_dot_r);
+                      cc = cos(k_dot_r);
+                      cartesian_to_spherical(dk_x*kcoords[new_Nft-i],dk_y*kcoords[new_Nft-j],dk_z*kcoords[k], phi_k, theta_k, kk);
+                      real_prec leg = gsl_sf_legendre_sphPlm(ell,fmm,cos(theta_k));
+                      real_prec Relm=leg*cos(mm*phi_k)*conn_phase;
+                      real_prec Imlm=leg*sin(mm*phi_k)*conn_phase;
                       if(kbin<Kmax_bin)
-                      {
-                        power_cross[kbin]+=cos(k_dot_r)*Delta_dm[lp][REAL]*Relm-sin(k_dot_r)*Delta_dm[lp][IMAG]*Relm+sin(k_dot_r)*Delta_dm[lp][REAL]*Imlm + cos(k_dot_r)*Delta_dm[lp][IMAG]*Imlm;
-                      }
-                  }
+                        power_cross[kbin]+=cc*Delta_dm[lp][REAL]*Relm-ss*Delta_dm[lp][IMAG]*Relm+ss*Delta_dm[lp][REAL]*Imlm + cc*Delta_dm[lp][IMAG]*Imlm;
+                    }
               }
             real_prec power_hm=0;
             real_prec p_dm=0;
             for(ULONG i=Kmin_bin; i< Kmax_bin;++i)
               {
-                power_hm+=power_cross[i]; // *** here it must be nmodes*(<power>_av)= nmodes*(power/nmodes)=power. That's why I do not need nmodes
+                power_hm+=power_cross[i]*factor_ylm; 
                 p_dm+=power_dmat[i];
               }
             real_prec hb=(power_hm/p_dm)*this->params._NGRID();
-            hll+=hb;           
+            hll+=hb;           //Add different m modes
           }// closes loop over mm
-
-          tracer_cat[itr].bias_multipole[ell]=hll/(2.*ell+1);
-          hbb=hll/(2.*ell+1);
-
+          hll/=static_cast<double>(2*ell+1);    // average over the number of independent m-modes
+          tracer_cat[itr].bias_multipole[ell]=hll;
         }   //closes loop over l
-          b00+=hbb;
       } // loop over tracers
 
-   b00/=static_cast<real_prec>(tracer_cat.size());
-   So.message_screen("\tMean large-scale bias from individual bias =", b00);
+//compute average of all bl's
+      vector<real_prec>bmean(lmax+1,0);
+      vector<real_prec>bvar(lmax+1,0);
+for(int ell=0; ell<=lmax;++ell)
+      {
+        real_prec bll=0;
+#ifdef _USE_OMP_
+#pragma omp parallel for reduction(+:bll)
+#endif
+        for(ULONG itr=0;itr<tracer_cat.size();++itr)
+          bll+=tracer_cat[itr].bias_multipole[ell];
+        bmean[ell]=bll/static_cast<double>(tracer_cat.size());
+    
+        bll=0;
+#ifdef _USE_OMP_
+#pragma omp parallel for reduction(+:bll)
+#endif
+        for(ULONG itr=0;itr<tracer_cat.size();++itr)
+          bll+=pow(tracer_cat[itr].bias_multipole[ell]-bmean[ell],2)/(static_cast<double>(tracer_cat.size())-1);
+        bvar[ell]=sqrt(bll)/static_cast<double>(tracer_cat.size()); // error of the mean
+        std::cout<<CYAN<<"Mean large-scale bias from individual bias l=" << ell<<" : "<<bmean[ell]<<" +- "<<bvar[ell]<<RESET<<endl;
+     }
 
    So.DONE();
  }
@@ -6405,7 +6415,9 @@ pair<real_prec, real_prec> PowerSpectrumF::get_lss_bias(vector<real_prec>&p1, ve
    //   jacknife
      So.message_screen("Getting Jackknife estimates");
    So.message_screen("using ",this->params.d_NGRID_JK()," 1time deleted sub-samples");
+#ifdef _USE_OMP_
 #pragma omp parallel for
+#endif
    for(ULONG i=0;i<size_cat;++i) 
         cat.tracer_aux[i].GridID_n = grid_ID(&cat.box_JK, cat.tracer_aux[i].coord1,cat.tracer_aux[i].coord2,cat.tracer_aux[i].coord3);
 
