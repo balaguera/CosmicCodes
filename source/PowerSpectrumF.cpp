@@ -4682,7 +4682,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
                    lp=index_3d(i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
                    k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
 #ifndef _TNG_GAL_
-                   k_dot_s=dk_x*kcoords[i]*(xtracer+vx) + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
+                   k_dot_s=dk_x*kcoords[i]*(xtracer+vx) + dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
 #endif
                    if(kbin<Kmax_bin){
                      power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]-sin(k_dot_r)*Delta_dm[lp][IMAG]);
@@ -4697,7 +4697,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
                    lp=index_3d(this->params._Nft()-i,j,k,this->params._Nft(),this->params._Nft()/2+1);
                    k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
 #ifndef _TNG_GAL_
-                   k_dot_s=dk_x*kcoords[i]*(xtracer+vx) + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
+                   k_dot_s=dk_x*kcoords[new_Nft-i]*(xtracer+vx) + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
 #endif
                    if(kbin<Kmax_bin){
                        power_cross[kbin]+=(cos(k_dot_r)*Delta_dm[lp][REAL]-sin(k_dot_r)*Delta_dm[lp][IMAG]);
@@ -4712,7 +4712,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
                    lp=index_3d(this->params._Nft()-i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
                    k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer+dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
 #ifndef _TNG_GAL_
-                   k_dot_s=dk_x*kcoords[i]*(xtracer+vx) + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
+                   k_dot_s=dk_x*kcoords[new_Nft-i]*(xtracer+vx) + dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
 #endif
                    if(kbin<Kmax_bin)
                    {
@@ -4837,12 +4837,16 @@ void PowerSpectrumF::get_window_matrix_multipole()
     do_fftw_r2c(this->params._Nft(),over_dm_field,Delta_dm);
     over_dm_field.clear(); over_dm_field.shrink_to_fit();
    vector<real_prec> kcoords(new_Nft,0);// Build k-coordinates
+
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
-   for(int i=0;i<kcoords.size() ;++i)
+// IN the loop through FOurier modes, wi will go only to N/2
+  for(int i=0;i<kcoords.size() ;++i)
     kcoords[i]=(i<=new_Nft/2? static_cast<real_prec>(i): -static_cast<real_prec>(new_Nft-i));
-#ifdef _FULL_VERBOSE_
+
+
+    #ifdef _FULL_VERBOSE_
    this->So.message_screen("\tNew Nft ",new_Nft);
    this->So.message_screen("\tComputing from k =", (Kmin_bin+0.5)*this->params._d_DeltaK_data());
    this->So.message_screen("\t            to k =", this->params._kmax_tracer_bias());
@@ -4935,21 +4939,18 @@ void PowerSpectrumF::get_window_matrix_multipole()
                 for(ULONG k=Kmin_bin; k< new_Nft/2+1;++k)
                 {
                   ULONG lp=index_3d(i,j,k,this->params._Nft(),this->params._Nft()/2+1);
-                  real_prec k_dot_r=0;
                   real_prec kv=sqrt(pow(dk_x*kcoords[i],2)+pow(dk_y*kcoords[j],2)+pow(dk_z*kcoords[k],2));
                   ULONG kbin = static_cast<ULONG>(floor((kv-this->params._d_kmin())/this->params._d_DeltaK_data()));
                   real_prec theta_k=1;
                   real_prec phi_k=1;
                   real_prec kk =1;
-                  real_prec ss =0;
-                  real_prec cc =0;
                   /****************************************************************/
                   if(lp!=0)
                   {
+                    real_prec k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer; 
+                    real_prec ss = sin(k_dot_r);
+                    real_prec cc = cos(k_dot_r);
                     cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
-                    k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;  // vec k dot vec r
-                    ss = sin(k_dot_r);
-                    cc = cos(k_dot_r);
                     real_prec leg = gsl_sf_legendre_sphPlm(ell,fmm,cos(theta_k));
                     real_prec Relm=leg*cos(mm*phi_k)*conn_phase;
                     real_prec Imlm=leg*sin(mm*phi_k)*conn_phase;
@@ -4960,9 +4961,9 @@ void PowerSpectrumF::get_window_matrix_multipole()
                   if(j>0  && k>0)
                     {
                       lp=index_3d(i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
-                      k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
-                      ss = sin(k_dot_r);
-                      cc = cos(k_dot_r);
+                      real_prec k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
+                      real_prec ss = sin(k_dot_r);
+                      real_prec cc = cos(k_dot_r);
                       cartesian_to_spherical(dk_x*kcoords[i],dk_y*kcoords[new_Nft-j],dk_z*kcoords[k], phi_k, theta_k, kk);
                       real_prec leg = gsl_sf_legendre_sphPlm(ell,fmm,cos(theta_k));
                       real_prec Relm=leg*cos(mm*phi_k)*conn_phase;
@@ -4973,9 +4974,9 @@ void PowerSpectrumF::get_window_matrix_multipole()
                   if(i>0  && (j>0 || k>0))
                     {
                       lp=index_3d(this->params._Nft()-i,j,k,this->params._Nft(),this->params._Nft()/2+1);
-                      k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
-                      ss = sin(k_dot_r);
-                      cc = cos(k_dot_r);
+                      real_prec k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
+                      real_prec ss = sin(k_dot_r);
+                      real_prec cc = cos(k_dot_r);
                       cartesian_to_spherical(dk_x*kcoords[new_Nft-i],dk_y*kcoords[j],dk_z*kcoords[k], phi_k, theta_k, kk);
                       real_prec leg = gsl_sf_legendre_sphPlm(ell,fmm,cos(theta_k));
                       real_prec Relm=leg*cos(mm*phi_k)*conn_phase;
@@ -4986,9 +4987,9 @@ void PowerSpectrumF::get_window_matrix_multipole()
                     if(i>0  && j>0  && k>0)
                     {
                       lp=index_3d(this->params._Nft()-i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
-                      k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer+dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
-                      ss = sin(k_dot_r);
-                      cc = cos(k_dot_r);
+                      real_prec k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer+dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
+                      real_prec ss = sin(k_dot_r);
+                      real_prec cc = cos(k_dot_r);
                       cartesian_to_spherical(dk_x*kcoords[new_Nft-i],dk_y*kcoords[new_Nft-j],dk_z*kcoords[k], phi_k, theta_k, kk);
                       real_prec leg = gsl_sf_legendre_sphPlm(ell,fmm,cos(theta_k));
                       real_prec Relm=leg*cos(mm*phi_k)*conn_phase;
