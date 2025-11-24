@@ -1,0 +1,11 @@
+digraph "BiasMT::get_minimum_multiscale_property"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Roboto,fontsize=8,labelfontname=Roboto,labelfontsize=8];
+  node [fontname=Roboto,fontsize=8,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="BiasMT::get_minimum\l_multiscale_property",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Computes the DM density field at eacfh iteration by convolviong the initial DM field with the Kernel."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="BiasMT::BiasMT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classBiasMT.html#a157febe5968e9007f4420089c8bcd03b",tooltip=" "];
+}

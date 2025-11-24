@@ -1,0 +1,51 @@
+digraph "GALAXY"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Roboto,fontsize=8,labelfontname=Roboto,labelfontsize=8];
+  node [fontname=Roboto,fontsize=8,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="GALAXY",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" cosmology",fontcolor="grey" ];
+  Node2 [id="Node000002",label="Cosmology",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classCosmology.html",tooltip="Header file for the class Cosmology::"];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" s_cosmo_pars",fontcolor="grey" ];
+  Node3 [id="Node000003",label="s_CosmologicalParameters",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$Structures_8h.html#structs__CosmologicalParameters",tooltip="The s_CosmoInfo struct."];
+  Node4 -> Node1 [id="edge3_Node000001_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" params",fontcolor="grey" ];
+  Node4 [id="Node000004",label="Params",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classParams.html",tooltip=" "];
+  Node3 -> Node4 [id="edge4_Node000004_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" s_cosmo_pars",fontcolor="grey" ];
+  Node5 -> Node1 [id="edge5_Node000001_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" random\ntracer",fontcolor="grey" ];
+  Node5 [id="Node000005",label="Catalog",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classCatalog.html",tooltip="Header file for the class Catalog::"];
+  Node2 -> Node5 [id="edge6_Node000005_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" Cosmo",fontcolor="grey" ];
+  Node6 -> Node5 [id="edge7_Node000005_Node000006",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" cwclass",fontcolor="grey" ];
+  Node6 [id="Node000006",label="Cwclass",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classCwclass.html",tooltip="Header file for the class Cwclass::"];
+  Node4 -> Node6 [id="edge8_Node000006_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" params",fontcolor="grey" ];
+  Node7 -> Node6 [id="edge9_Node000006_Node000007",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" File",fontcolor="grey" ];
+  Node7 [id="Node000007",label="FileOutput",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classFileOutput.html",tooltip="Header file for the class FileOutput::"];
+  Node8 -> Node7 [id="edge10_Node000007_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" So",fontcolor="grey" ];
+  Node8 [id="Node000008",label="ScreenOutput",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classScreenOutput.html",tooltip=" "];
+  Node4 -> Node8 [id="edge11_Node000008_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" params",fontcolor="grey" ];
+  Node8 -> Node6 [id="edge12_Node000006_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" So",fontcolor="grey" ];
+  Node3 -> Node6 [id="edge13_Node000006_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" s_cosmo_pars",fontcolor="grey" ];
+  Node9 -> Node6 [id="edge14_Node000006_Node000009",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" s_cosmo_info",fontcolor="grey" ];
+  Node9 [id="Node000009",label="s_CosmoInfo",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$CosmologicalFunctions_8h.html#structs__CosmoInfo",tooltip="The s_CosmoInfo struct."];
+  Node10 -> Node5 [id="edge15_Node000005_Node000010",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" stats",fontcolor="grey" ];
+  Node10 [id="Node000010",label="Statistics",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classStatistics.html",tooltip=" "];
+  Node2 -> Node10 [id="edge16_Node000010_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" cosmo",fontcolor="grey" ];
+  Node3 -> Node10 [id="edge17_Node000010_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" s_cosmo_pars",fontcolor="grey" ];
+  Node11 -> Node5 [id="edge18_Node000005_Node000011",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" ps",fontcolor="grey" ];
+  Node11 [id="Node000011",label="PowerSpectrum",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classPowerSpectrum.html",tooltip=" "];
+  Node8 -> Node11 [id="edge19_Node000011_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" So",fontcolor="grey" ];
+  Node3 -> Node11 [id="edge20_Node000011_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" s_cosmo_pars",fontcolor="grey" ];
+  Node7 -> Node5 [id="edge21_Node000005_Node000007",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" File",fontcolor="grey" ];
+  Node8 -> Node5 [id="edge22_Node000005_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" So",fontcolor="grey" ];
+  Node3 -> Node5 [id="edge23_Node000005_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" s_cosmo_pars",fontcolor="grey" ];
+  Node9 -> Node5 [id="edge24_Node000005_Node000009",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" s_cosmo_info",fontcolor="grey" ];
+  Node12 -> Node5 [id="edge25_Node000005_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" box\nbox_HR\nbox_JK\nbox_low\nbox_n",fontcolor="grey" ];
+  Node12 [id="Node000012",label="s_params_box_mas",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$Structures_8h.html#structs__params__box__mas",tooltip="Auxiliary structure used to pass box arguments to different functions."];
+  Node4 -> Node5 [id="edge26_Node000005_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" params",fontcolor="grey" ];
+  Node8 -> Node1 [id="edge27_Node000001_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" So",fontcolor="grey" ];
+  Node7 -> Node1 [id="edge28_Node000001_Node000007",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" File",fontcolor="grey" ];
+  Node3 -> Node1 [id="edge29_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" scp",fontcolor="grey" ];
+  Node13 -> Node1 [id="edge30_Node000001_Node000013",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" gp",fontcolor="grey" ];
+  Node13 [id="Node000013",label="gal_parameters",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$Galaxy_8h.html#structgal__parameters",tooltip=" "];
+}

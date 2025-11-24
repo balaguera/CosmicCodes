@@ -1,0 +1,11 @@
+digraph "ParametersCosmolib::_M_max_mf"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Roboto,fontsize=8,labelfontname=Roboto,labelfontsize=8];
+  node [fontname=Roboto,fontsize=8,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="ParametersCosmolib\l::_M_max_mf",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CosmoLib::CosmoLib",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classCosmoLib.html#a31b78b2b8b60aa2aebb8072b79b61557",tooltip="Constructor passed the impot parameter file to."];
+}

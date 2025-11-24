@@ -1,0 +1,13 @@
+digraph "PowerSpectrumF::set_output_filenames"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Roboto,fontsize=8,labelfontname=Roboto,labelfontsize=8];
+  node [fontname=Roboto,fontsize=8,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="PowerSpectrumF::set\l_output_filenames",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Set the values of the private variables that regard filenames - with one catalogue."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="PowerSpectrumF::PowerSpectrumF",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classPowerSpectrumF.html#af87d6f68b7f06fed9b981d5d2c9a77a5",tooltip="Overloaded constructor."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="PowerSpectrumF::PowerSpectrumF",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classPowerSpectrumF.html#a41db44342829e8e5a62f7bee60797bbb",tooltip=" "];
+}

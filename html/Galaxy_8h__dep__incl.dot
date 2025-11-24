@@ -1,0 +1,16 @@
+digraph "Galaxy.h"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Roboto,fontsize=8,labelfontname=Roboto,labelfontsize=8];
+  node [fontname=Roboto,fontsize=8,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="Galaxy.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="The class Galaxy."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="AngularPowerSpectrumTH.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$AngularPowerSpectrumTH_8h.html",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="COSMOlib.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$COSMOlib_8h.html",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="ClFunctions.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$ClFunctions_8h.html",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CosmoLib.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$CosmoLib_8h.html",tooltip=" "];
+}

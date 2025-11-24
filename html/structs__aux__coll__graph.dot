@@ -1,0 +1,12 @@
+digraph "s_aux&lt; T &gt;"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Roboto,fontsize=8,labelfontname=Roboto,labelfontsize=8];
+  node [fontname=Roboto,fontsize=8,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="s_aux\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Template structure s_aux."];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" scp_a",fontcolor="grey" ];
+  Node2 [id="Node000002",label="s_CosmologicalParameters",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$Structures_8h.html#structs__CosmologicalParameters",tooltip="The s_CosmoInfo struct."];
+  Node3 -> Node1 [id="edge2_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" s_clth",fontcolor="grey" ];
+  Node3 [id="Node000003",label="params_clth",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$Structures_8h.html#structparams__clth",tooltip="The params_clth struct."];
+}

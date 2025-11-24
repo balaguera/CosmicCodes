@@ -1,0 +1,17 @@
+digraph "Params::_Output_directory"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Roboto,fontsize=8,labelfontname=Roboto,labelfontsize=8];
+  node [fontname=Roboto,fontsize=8,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="Params::_Output_directory",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="get/set the value of the private member"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="Catalog::Catalog",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classCatalog.html#a3534399810ddc704aa16afd98a3068c4",tooltip="Constructor (overloaded)"];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="Catalog::set_params",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classCatalog.html#aec418b60d12cea43ef489ab72bee1d47",tooltip="Function to set parameters."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="Cl_FUNCTIONS::Cl_FUNCTIONS",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classCl__FUNCTIONS.html#a0e7b130806bf31c38fa6482b18f86033",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="PowerSpectrumF::PowerSpectrumF",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classPowerSpectrumF.html#af87d6f68b7f06fed9b981d5d2c9a77a5",tooltip="Overloaded constructor."];
+}

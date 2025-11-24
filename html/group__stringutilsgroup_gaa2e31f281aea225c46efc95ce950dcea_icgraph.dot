@@ -1,0 +1,11 @@
+digraph "stringToData"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Roboto,fontsize=8,labelfontname=Roboto,labelfontsize=8];
+  node [fontname=Roboto,fontsize=8,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="stringToData",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Reads a value of a given datatype from a string."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="stringToData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$group__stringutilsgroup.html#ga02dbc953eb2a638ecffa725c6edca91a",tooltip="Reads a value of a given datatype from a string."];
+}

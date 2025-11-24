@@ -1,0 +1,13 @@
+digraph "PowerSpectrum::compute_int_table_mass"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Roboto,fontsize=8,labelfontname=Roboto,labelfontsize=8];
+  node [fontname=Roboto,fontsize=8,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="PowerSpectrum::compute\l_int_table_mass",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="PowerSpectrum::PowerSpectrum",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classPowerSpectrum.html#a8552dd3e34164d9bbfe7a5474cd548c7",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="PowerSpectrum::PowerSpectrum",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classPowerSpectrum.html#a5c7f0d9f00d66257d28bfa7225bc697b",tooltip=" "];
+}
