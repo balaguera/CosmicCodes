@@ -36,3 +36,7 @@ CosmiCalc compiling options
 	  execute with ./cosmolib.exe -c parameter_file. to get theoretical outputs for different cosmological functions at fixed redshift
 	  execute with ./cosmolib.exe -h parameter_file. to get theoretical outputs for HOD predictions (under constuction)
 	  execute with ./cosmolib.exe -z parameter_file. to get theoretical outputs for redshift dependent quantities
+
+
+Doxygen documentation available at html/index.html
+
