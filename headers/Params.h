@@ -310,7 +310,7 @@ private :
   real_prec mKmax;
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief Unit factor for masses. If masses are in Ms/h, set this to 1.
    * @details Read from input parameter file.
    **/
   real_prec MASS_units;
@@ -424,7 +424,7 @@ private :
   real_prec CTOAmax;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief For halo analysis, use rean and redshift space statiustical properties (power, mainly). See PowerSpectrumF
    * @details Read from input parameter file.
    **/
   bool use_real_and_redshift_space;
@@ -448,24 +448,28 @@ private :
   bool Get_cross_power_spectrum;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Obtain the pearsoin correlation coefficient from halo properties. Used in halo analysis and secondary bias
    * @details Read from input parameter file.
    **/
   bool Get_pearson_coefficient;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Obtain the Spearman correlation coefficient from halo properties. Used in halo analysis and secondary bias
    * @details Read from input parameter file.
    **/
   bool Get_spearman_coefficient;
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Maximum multipole used to compute anisotropic bias in Fourier space.
    * @details Read from input parameter file.
    **/
   int lmax_bias;
-
-
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Assign buas to full sample. If false, the code dilutes the sample.
+   * @details Read from input parameter file.
+   **/
+  bool assign_bias_to_full_sample;
   //////////////////////////////////////////////////////////
   /**
    * @brief 
@@ -1043,9 +1047,8 @@ private :
   string file_bispectrum;
 
   //////////////////////////////////////////////////////////
-  /// These parameters is used to define the shells in k-space
-  /**
-   * @brief
+    /**
+   * @brief These parameters is used to define the shells in k-space
    * @details Read from input parameter file.
    **/
   bool use_fundamental_mode_as_kmin_bk;
@@ -1058,104 +1061,122 @@ private :
   /////////////////////////////////////////////////////////////
   /**
    * @brief
-   * @details Read from input parameter file.
+   * @details Derived parameter
    **/
   real_prec delta_x;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec delta_y;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec delta_z;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec delta_x_low;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec delta_y_low;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec delta_z_low;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec deltak_x;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec deltak_y;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec deltak_z;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec deltak_x_low;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec deltak_y_low;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec deltak_z_low;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec deltak_0;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec deltak_0_low;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec kmin;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec kmin_low;
-
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec kmax;
 
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec DeltaK_data;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec DeltaK_data_low;
   /////////////////////////////////////////////////////////////
   /**
    * @brief
+   * @details Derived parameter
    **/
   real_prec DeltaK_window;
 
@@ -2778,7 +2799,7 @@ private :
    */  
   int i_spin_g;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief Identify the column in the ASCII file of the tracer where the information of Bullockś Spin is allocated.
    * @details Read from input parameter file.
    */
@@ -3025,22 +3046,22 @@ private :
    */
   bool Get_peak_height_at_halo;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   bool Get_cell_local_mach_number;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
    */
   real_prec Scale_mach_number;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief 
    */  
   bool Get_prop_function_tracer;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief 
    */  
   bool Get_prop_function_tracer_cwt;
@@ -3050,23 +3071,26 @@ private :
    */
   bool measure_cross;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief For halo analysis, this defines bins in the main property  with the same number of objects.
    */
   bool set_bins_equal_number_tracers;
   //////////////////////////////////////////////////////////
   /*
-   * @brief
+   * @brief For halo analysis, this defines bins in the main property (e.g., mass, vmax) with the same number of objects.
+   * @details Read from input parameter file.
    */
   bool set_bins_equal_number_tracers_main_property;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief
+  /**
+   * @brief Number of bins populated with the same number of tracers with respect to the main property.
+   * @details Read from input parameter file.
    */
   int Number_of_bins_equal_number_tracers;
   //////////////////////////////////////////////////////////
-  /*
+  /**
    * @brief
+   * @details Read from input parameter file.
    */
   int Number_of_bins_equal_number_tracers_main_property;
   //////////////////////////////////////////////////////////
@@ -3521,7 +3545,8 @@ private :
   int npoints_ps;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   * @brief  Number of bins for 1d or 2d histograms
+   * @name input/output
    */
   int Nbins_hist;
   ///////////////////////////////////////////////////////////
@@ -4184,15 +4209,15 @@ public:
    */
   ULONG _N_iterations_Kernel(){return this->N_iterations_Kernel;}
   //////////////////////////////////////////////////////////
-  /**
-   *  @brief Get the value of the private member
-   *  @return
+  /** 
+   *  @brief Get the value of the private member Iteration_Kernel_average
+   *  @return Iteration_Kernel_average
    */
   ULONG _Iteration_Kernel_average(){return this->Iteration_Kernel_average;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Get the value of the private member
-   *  @return
+   *  @brief Get the value of the private member N_iterations_Kernel
+   *  @return N_iterations_Kernel
    */
   void set_N_iterations_Kernel(int new_N_iterations_Kernel){this->N_iterations_Kernel=new_N_iterations_Kernel;}
 
@@ -5753,14 +5778,18 @@ public:
    */
   bool _dilute_dm_sample(){return this->dilute_dm_sample;}
   //////////////////////////////////////////////////////////
+  /** 
+   *  @brief 
+   *  @return fraction_dilute
+   */
+  real_prec _fraction_dilute(){return this->fraction_dilute;}
+
+  //////////////////////////////////////////////////////////
   /**
    *  @brief 
    *  @return
    */
-  real_prec _fraction_dilute(){return this->fraction_dilute;}
-
-
-
+  void set_fraction_dilute(real_prec fd){this->fraction_dilute=fd;}
   //////////////////////////////////////////////////////////
   /**
    *  @brief 
@@ -7147,37 +7176,37 @@ public:
   bool _Get_marked_power_spectrum(){return this->Get_marked_power_spectrum;}
   /////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief Get the value of the private member 
    *  @return
    */
   bool _Get_power_spectrum(){return this->Get_power_spectrum;}
   /////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief  Get the value of the private member 
    *  @return
    */
   bool _Get_cross_power_spectrum(){return this->Get_cross_power_spectrum;}
   /////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief  Get the value of the private member 
    *  @return
    */
   bool _Get_pearson_coefficient(){return this->Get_pearson_coefficient;}
   /////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief  Get the value of the private member 
    *  @return
    */
   bool _Get_spearman_coefficient(){return this->Get_spearman_coefficient;}
   /////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief  Get the value of the private member 
    *  @return
    */
   bool _Get_Mstellar_function(){return this->Get_Mstellar_function;}
   /////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief  Get the value of the private member 
    *  @return
    */
   bool _Get_Luminosity_function(){return this->Get_Luminosity_function;}
@@ -7195,17 +7224,27 @@ public:
   bool _Get_Color_Mag_plane(){return this->Get_Color_Mag_plane;}
   /////////////////////////////////////////////////////////
   /**
-   *  @brief
-   *  @return
+   *  @brief Get the value of the private member Get_Random_Catalog
+   *  @return Get_Random_Catalog
    */
   bool _Get_Random_Catalog(){return this->Get_Random_Catalog;}
   /////////////////////////////////////////////////////////
   /**
-   *  @brief
-   *  @return
+   *  @brief Get the value of the private member lmax_bias
+   *  @return lmax_bias
    */
   int _lmax_bias(){return this->lmax_bias;}
-  void set_lmax_bias(int lm){this->lmax_bias=lm;}
+  /////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member  assign_bias_to_full_sample
+   *  @return assign_bias_to_full_sample
+   */
+  bool _assign_bias_to_full_sample(){return this->assign_bias_to_full_sample;}
+  /////////////////////////////////////////////////////////
+  /**
+   *  @brief Set the value of the private member  assign_bias_to_full_sample
+   */
+  void set_assign_bias_to_full_sample(bool lm){this->assign_bias_to_full_sample=lm;}
   /////////////////////////////////////////////////////////
   /**
    *  @brief
@@ -7222,10 +7261,14 @@ public:
   void set_Nbins_color(int Nc){this->Nbins_color=Nc;}
   /////////////////////////////////////////////////////////
   /**
-   *  @brief
+   *  @brief  Get the value of the private member 
    *  @return
    */
   int _Nbins_Mstellar() {return this->Nbins_Mstellar;}
+  /////////////////////////////////////////////////////////
+  /**
+   *  @brief  Set the value of the private member 
+   */
   void set_Nbins_Mstellar(int Nc){this->Nbins_Mstellar=Nc;}
   /////////////////////////////////////////////////////////
   /**
