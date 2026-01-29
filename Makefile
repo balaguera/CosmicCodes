@@ -108,7 +108,7 @@ gtools: $(TARGET_GT)
 htools: $(TARGET_HT)
 cosmolib: $(TARGET_CLib)
 cosmicweb: $(TARGET_CW)
-params: $(TARGET_PA)
+par: $(TARGET_PA)
 
 #########################################################################
 $(TARGET_CLib): $(OBJS_CL) 
@@ -205,7 +205,7 @@ $(TARGET_PA): $(OBJS_PA)
 	$(CXX) $(CXXFLAGS) $(SRCS_PA)  $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_PA) $(LIBS_GSL)
 	@echo "$(GREEN)Done"
 	@echo "$(GREEN)Execute with ./params.exe -n PAR_NAME to know about a PARameter"
-	@echo "$(GREEN)Execute with ./params.exe -s parameter_filw to show parameters"
+	@echo "$(GREEN)Execute with ./params.exe -s parameter_file to show parameters"
 
 
 clean:
@@ -233,7 +233,7 @@ help:
 	@echo "	  execute with ./htools.exe parameter_file (this is different from otopns 1-4). This is still under merging stages: merged with class::Catalog"		
 	@echo "-make cosmicweb: creates executable for the cosmic web analysis ased on tracer catalos"
 	@echo "	  execute with ./cosmicweb.exe parameter_file"		
-	@echo "-make par: creates executable for the paramsr "
+	@echo "-make params: creates executable for the paramsr "
 	@echo "	  execute with ./params.exe parameter_file"		
 
 
