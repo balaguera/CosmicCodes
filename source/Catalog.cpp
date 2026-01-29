@@ -1185,7 +1185,7 @@ void Catalog::read_catalog(string input_file, real_prec prop_min, real_prec prop
                     {
                     this->Halo[iN].observed=true;
 #endif
-#ifndef _POWER_   // This lines are only useful when analysing the catalog with BAM, not to measure the power spectrum
+#ifndef _POWER_   // This lines are only useful when analysing the catalog with BMT, not to measure the power spectrum
                 if(this->params._sys_of_coord_g()==0)
                 {
                     this->Halo[iN].GridID = grid_ID(&box, x,y,z);
@@ -1597,7 +1597,6 @@ if(type_of_object=="TRACER_REF")
       ULONG part_level_counter=0;
       for(int il=0; il<this->params._Number_of_MultiLevels();++il )
         {
-//          ULONG N_AUX=  static_cast<ULONG>(floor(this->params.get_Props_Tolerance_MultiLevels(il)*n_auxtr[il]));
           ULONG N_AUX=  n_auxtr[il];
           part_level_counter+=N_AUX;
           this->params.set_Ntracers_MultiLevels(il, N_AUX);
@@ -5440,6 +5439,10 @@ void Catalog::select_random_subsample(real_prec fraction){
       this->Halo_random_subsample[counter].spin_bullock = this->Halo[i].spin_bullock;
       this->Halo_random_subsample[counter].concentration = this->Halo[i].concentration;
       this->Halo_random_subsample[counter].rs = this->Halo[i].rs;
+      this->Halo_random_subsample[counter].GridID = this->Halo[i].GridID;
+      this->Halo_random_subsample[counter].gal_cwt = this->Halo[i].gal_cwt;
+      this->Halo_random_subsample[counter].tidal_anisotropy = this->Halo[i].tidal_anisotropy;
+      this->Halo_random_subsample[counter].tidal_anisotropy_dm = this->Halo[i].tidal_anisotropy_dm;
       counter++;
     }while(counter<Nobjs_fraction);
    So.DONE();
@@ -15575,10 +15578,50 @@ if(true==set_dndz){
   //
 }
 
-
-
-
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Catalog::assign_idgrid_to_tracers()
+{
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+  for(ULONG i=0;i<this->NOBJS;++i)
+    this->Halo[i].GridID = grid_ID(&this->box, this->Halo[i].coord1,this->Halo[i].coord2,this->Halo[i].coord3);
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Catalog::assign_cwc_to_tracers(vector<ULONG>&cwc)
+{
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+  for(ULONG i=0;i<this->NOBJS;++i)
+    this->Halo[i].gal_cwt = cwc[this->Halo[i].GridID];
 
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Catalog::assign_tidal_anisotropy_to_tracers(vector<real_prec>&tidal, bool tr)
+{
+  if(false==tr) // tr =0 for tracers, 1 for dm
+  {
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+  for(ULONG i=0;i<this->NOBJS;++i)
+    this->Halo[i].tidal_anisotropy = tidal[this->Halo[i].GridID];
+  }
+  else
+{
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+  for(ULONG i=0;i<this->NOBJS;++i)
+    this->Halo[i].tidal_anisotropy_dm = tidal[this->Halo[i].GridID];
+  
+}
+
+}
