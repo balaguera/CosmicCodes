@@ -708,5 +708,5 @@ inline void my_get_mean_density_interpolated(Healpix_Map<real_prec> &map, int ne
 #endif
 
 ////////////////////////////////////////////////////////////////////////////
- void print_catalog(vector<s_Halo>&Halo, string file);
+ void print_catalog(vector<s_Halo>&Halo, string file, bool);
 
