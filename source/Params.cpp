@@ -433,15 +433,15 @@ else if(par_name=="NY"){
 
   else if(par_name=="N_iterations_Kernel")
   {
-    message_pars.set_par_description("Number of iterations in the BMT");
-    message_pars.set_par_option("Ulong >0");
+    message_pars.set_par_description("Number of iterations in the BMT algorithm to calibrate the kernel and the bias");
+    message_pars.set_par_option("Ulong ");
     message_pars.set_par_default(this->N_iterations_Kernel);
   }
 
   else if(par_name=="Iteration_Kernel_average")
   {
     message_pars.set_par_description("Iteration from which kernels and bias are used to make a final average of the iteration procedures");
-    message_pars.set_par_option("Ulong >0 and <N_iterations_Kernel  ");
+    message_pars.set_par_option("Ulong and <N_iterations_Kernel  ");
     message_pars.set_par_default(this->Iteration_Kernel_average);
   }
   else if(par_name=="iteration_ini")
@@ -1333,6 +1333,14 @@ else if(par_name=="new_N_dndz_bins")
     message_pars.set_par_default(this->new_N_dndz_bins);
  }
 
+else if(par_name=="file_dndz")
+ {
+    message_pars.set_par_description("String for putput file containing the redshift distribution comnputed if requested");
+    message_pars.set_par_option("String");
+    message_pars.set_par_default(this->file_dndz);
+ }
+
+
 else if(par_name=="file_power")
  {
     message_pars.set_par_description("Something to name power spectrum outputs (like institution, or experiment).");
@@ -1345,6 +1353,59 @@ else if(par_name=="file_power_log")
     message_pars.set_par_description("Output log file for power spectrum.");
     message_pars.set_par_option("String");
     message_pars.set_par_default(this->file_power_log);
+ }
+
+else if(par_name=="file_window")
+ {
+    message_pars.set_par_description("Output file for window_function (spherical average)");
+    message_pars.set_par_option("String");
+    message_pars.set_par_default(this->file_window);
+ }
+
+else if(par_name=="file_power2d")
+ {
+    message_pars.set_par_description("Output file for two dimensional power spectrum in cartessian coordinates");
+    message_pars.set_par_option("String");
+    message_pars.set_par_default(this->file_power2d);
+ }
+else if(par_name=="file_power2d_mk")
+ {
+    message_pars.set_par_description("Output file for two dimensional power spectrum in polar coordinates");
+    message_pars.set_par_option("String");
+    message_pars.set_par_default(this->file_power2d_mk);
+ }
+
+else if(par_name=="kmax_y_ds")
+ {
+    message_pars.set_par_description("Maximum wavenumber for the direct sum approach to Yamamoto-Blake");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->kmax_y_ds);
+ }
+else if(par_name=="kmax_bk")
+ {
+    message_pars.set_par_description("Maximum k-value for constructing k-bins for the Bispectrum estimator");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->kmax_bk);
+ }
+
+else if(par_name=="kmin_bk")
+ {
+    message_pars.set_par_description("Minimum k-value for constructing k-bins for the Bispectrum estimator");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->kmin_bk);
+ }
+
+else if(par_name=="use_fundamental_mode_as_kmin_bk")
+ {
+    message_pars.set_par_description("These parameters is used to define the shells in k-space");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->use_fundamental_mode_as_kmin_bk);
+ }
+else if(par_name=="file_bispectrum")
+ {
+    message_pars.set_par_description("Output file for bispectrum");
+    message_pars.set_par_option("String");
+    message_pars.set_par_default(this->file_bispectrum);
  }
 
 
@@ -1414,23 +1475,400 @@ else if(par_name=="Mstellar_min")
   }
 else if(par_name=="Color_min")
  {
-    message_pars.set_par_description("Minimum of galaxy color)");
+    message_pars.set_par_description("Minimum of galaxy color");
     message_pars.set_par_option("Float >0");
     message_pars.set_par_default(this->Color_min);
   }
   else if(par_name=="Color_max")
  {
-    message_pars.set_par_description("Maximum of galaxy color)");
+    message_pars.set_par_description("Maximum of galaxy color");
     message_pars.set_par_option("Float >0");
     message_pars.set_par_default(this->Color_max);
   }
 
-  else if(par_name=="lmax_bias")
+
+  else if(par_name=="MASS_units")
  {
+    message_pars.set_par_description("Unit factor for masses. If masses are in Ms/h, set this to 1.");
+    message_pars.set_par_option("Float >0");
+    message_pars.set_par_default(this->MASS_units);
+  }
+
+
+ else if(par_name=="NMASSbins")
+ {
+    message_pars.set_par_description("Number of bins in tracer mass to measure histograms with respect to the mass");
+    message_pars.set_par_option("Int>0. Used in Catalog.cpp and PowerSpectrumF.cpp");
+    message_pars.set_par_default(this->NMASSbins);
+  }
+
+ else if(par_name=="NMASSbins_mf")
+ {
+    message_pars.set_par_description("Number of bins in tracer mass to measure halo mass function");
+    message_pars.set_par_option("Int>0. Used in Catalog.cpp and PowerSpectrumF.cpp");
+    message_pars.set_par_default(this->NMASSbins_mf);
+  }
+
+ else if(par_name=="NMASSbins_power")
+ {
+    message_pars.set_par_description("Number of bins in tracer mass to measure power spectrum.");
+    message_pars.set_par_option("Int>0. Used in Catalog.cpp and PowerSpectrumF.cpp");
+    message_pars.set_par_default(this->NMASSbins_power);
+  }
+
+
+ else if(par_name=="LOGMASSmin")
+ {
+    message_pars.set_par_description("Logarithm (10) of the minimum mass (in Ms/h) to be used for the catalog. Objects with masses below are excluded in any analysis. Note that the halo mass is the main property to define a sample.");
+    message_pars.set_par_option("Float.");
+    message_pars.set_par_default(this->LOGMASSmin);
+  }
+ else if(par_name=="LOGMASSmax")
+ {
+    message_pars.set_par_description("Logarithm (10) of the maximum mass (in Ms/h) to be used for the catalog. Objects with masses above are excluded in any analysis.");
+    message_pars.set_par_option("Float.");
+    message_pars.set_par_default(this->LOGMASSmax);
+  }
+else if(par_name=="VMAXmin")
+ {
+    message_pars.set_par_description("Minimum Vmax (in km/s) to be used for the catalog. ");
+    message_pars.set_par_option("Float.");
+    message_pars.set_par_default(this->VMAXmin);
+  }
+else if(par_name=="VMAXmax")
+ {
+    message_pars.set_par_description("Maximum Vmax (in km/s) to be used for the catalog. ");
+    message_pars.set_par_option("Float.");
+    message_pars.set_par_default(this->VMAXmax);
+  }
+
+else if(par_name=="RSmin")
+ {
+    message_pars.set_par_description("Minimum Rs (in kpc/h) to be used for the catalog. ");
+    message_pars.set_par_option("Float.");
+    message_pars.set_par_default(this->RSmin);
+  }
+else if(par_name=="RSmax")
+ {
+    message_pars.set_par_description("Maximum Rs (in kpc/h) to be used for the catalog. ");
+    message_pars.set_par_option("Float.");
+    message_pars.set_par_default(this->RSmax);
+  }
+
+else if(par_name=="SPINmin")
+ {
+    message_pars.set_par_description("Minimum dimensionless spin to be used for the catalog. ");
+    message_pars.set_par_option("Float.");
+    message_pars.set_par_default(this->SPINmin);
+  }
+else if(par_name=="SPINmax")
+ {
+    message_pars.set_par_description("Maximum dimensionless spin to be used for the catalog. ");
+    message_pars.set_par_option("Float.");
+    message_pars.set_par_default(this->SPINmax);
+  }
+
+else if(par_name=="NPROPbins_bam")
+ {
+    message_pars.set_par_description("Number of bins in differnet halo properties (secondary) used for bias analysis in BMT.");
+    message_pars.set_par_option("Int>0");
+    message_pars.set_par_default(this->NPROPbins_bam);
+  }
+
+else if(par_name=="o_MASScuts")
+ {
+    message_pars.set_par_description("Set cut-values of log M for power spectrum analysis in mass-cuts, e.g. MASScuts_min = 11.0 12.5 13 END. The code internally includes always the full-sample as the zero-th bin.");
+    message_pars.set_par_option("Sequence of log M separated by spce with END to close line.");
+    message_pars.set_par_default(this->NPROPbins_bam);
+  }
+
+else if(par_name=="set_bins_equal_number_tracers_main_property")
+ {
+    message_pars.set_par_description("For halo analysis, this defines bins in the main property (e.g., mass, vmax) with the same number of objects.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->set_bins_equal_number_tracers_main_property);
+  }
+
+else if(par_name=="Number_of_bins_equal_number_tracers")
+ {
+    message_pars.set_par_description("Number of bins populated with the same number of tracers with respect to the main property.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Number_of_bins_equal_number_tracers_main_property);
+  }
+
+else if(par_name=="set_bins_equal_number_tracers")
+ {
+    message_pars.set_par_description("For halo analysis, this defines bins in secondary properties with the same number of objects.");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->set_bins_equal_number_tracers);
+  }
+
+ else if(par_name=="Number_of_bins_equal_number_tracers")
+ {
+    message_pars.set_par_description("Number of bins populated with the same number of tracers with respect to a secondary property .");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->Number_of_bins_equal_number_tracers);
+  }
+
+ else if(par_name=="m_MASSbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of log10 M for bins of halo masses, used in halo analysis (e.g. secondary bias) and power spectrum in mass bins");
+    message_pars.set_par_option("Example: m_MASSbins_min = 11.0 12.0 12.5 13.0 END");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="n_MASSbins_max")
+ {
+    message_pars.set_par_description("Set minimum values of log10 M for bins of halo masses (compatible with the minimums set with m_MASSbins_min), used in halo analysis (e.g. secondary bias) and power spectrum in mass bins");
+    message_pars.set_par_option("Example: m_MASSbins_max = 12.0 12.5 13 15.0 END");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="a_VMAXbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of log10 Vmax for bins of halo Vmax (in km/s), used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Exaemple: a_VMAXbins_min = 1.5 1.5 1.7 1.9 2.1 2.3 2.5 2.7 2.9 3.1 END");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="b_VMAXbins_max")
+  {
+    message_pars.set_par_description("Set maximum values of log10 Vmax for bins of halo Vmax (in km/s), used in halo analysis (e.g. secondary bias) and compatible with the minimum values stored at a_VMAXbins_min. The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: a_VMAXbins_min = 1.5 1.5 1.7 1.9 2.1 2.3 2.5 2.7 2.9 3.1 END");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="k_RSbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of Rs for bins of halo Rs (in kpc/h), used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="r_RSbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of Rs for bins of halo Rs (in kpc/h), used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="q_SPINbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of dimensionless spin for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="p_SPINbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of dimensionless spin for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="w_VRMSbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of Vrms for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="z_VRMSbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of Vrns for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="f_VIRSbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of Virial for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="g_VIRbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of Virial for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="c_BTOAbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of b to a halo semiaxis ratio (or prolatness, see preproc directives) for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="d_BTOAbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of b to a halo semiaxis ratio (or prolatness, see preproc directives) for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="h_CTOAbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of c to a halo semiaxis ratio (or ellipticity, see preproc directives) for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="j_CTOAbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of c to a halo semiaxis ratio (or ellipticity, see preproc directives) for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="e_MACHbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of relative halo mach number for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="i_MACHbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of relative halo mach number for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="e_DACHbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of halo dach number (neighbour statistics) for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="i_DACHbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of halo dach number (neighbour statistics) for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="eb_BIASbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of halo individual bias for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="ib_BIASbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of halo individual bias for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="lb_LCSbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of halo local clustering for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="il_LCbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of halo local clustering for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="et_TAbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of tidal anisotropy for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="it_TAbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of tidal anisotropy for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+else if(par_name=="pm_PHbins_min")
+ {
+    message_pars.set_par_description("Set minimum values of peak height as a function of halo mass for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="px_PHbins_max")
+ {
+    message_pars.set_par_description("Set maximum values of peak height as a function of halo mass for bins used in halo analysis (e.g. secondary bias). The code internally defines the zeroth bin as that containig the full sample.");
+    message_pars.set_par_option("Example: see a_VMAXbins_min");
+    message_pars.set_par_default("Emtpy container");
+  }
+
+ else if(par_name=="Nbins_hist")
+ {
+    message_pars.set_par_description("Number of bins for 1d or 2d histograms");
+    message_pars.set_par_option("int >0");
+    message_pars.set_par_default(this->Nbins_hist);
+  }
+
+
+else if(par_name=="use_real_and_redshift_space")
+ {
+    message_pars.set_par_description("For halo analysis, use rean and redshift space statiustical properties (power, mainly)");
+    message_pars.set_par_option("true, false.");
+    message_pars.set_par_default(this->use_real_and_redshift_space);
+  }
+
+else if(par_name=="Get_pearson_coefficient")
+ {
+    message_pars.set_par_description("Obtain the Pearson correlation coefficient from halo properties. Used in halo analysis and secondary bias.");
+    message_pars.set_par_option("true, false.");
+    message_pars.set_par_default(this->Get_pearson_coefficient);
+  }
+
+else if(par_name=="Get_spearman_coefficient")
+ {
+    message_pars.set_par_description("Obtain the Spearman correlation coefficient from halo properties. Used in halo analysis and secondary bias.");
+    message_pars.set_par_option("true, false.");
+    message_pars.set_par_default(this->Get_pearson_coefficient);
+  }
+
+
+  else if(par_name=="lmax_bias")
+  {
     message_pars.set_par_description("Maximum multipolo for individual bias");
     message_pars.set_par_option("Int >0");
     message_pars.set_par_default(this->lmax_bias);
   }
+
+  else if(par_name=="assign_bias_to_full_sample")
+ {
+    message_pars.set_par_description("Assign_individual bias_to_full_sample. If false, the code dilutes the sample, which is faster for plotting or quick assessment");
+    message_pars.set_par_option("true, false");
+    message_pars.set_par_default(this->assign_bias_to_full_sample);
+  }
+
+  else if(par_name=="fraction_dilute")
+ {
+    message_pars.set_par_description("Fraction of the total sample of tracers to be randomly selected for halo analysis");
+    message_pars.set_par_option("Float in [0, 1].");
+    message_pars.set_par_default(this->fraction_dilute);
+  }
+  else if(par_name=="kmax_tracer_bias")
+ {
+    message_pars.set_par_description("Maximum wavenumber (moduli) used to compute individual tracer bias");
+    message_pars.set_par_option("Float in [0, K nyquist]. In units of h/Mpc.");
+    message_pars.set_par_default(this->kmax_tracer_bias);
+  }
+  else if(par_name=="kmin_tracer_bias")
+ {
+    message_pars.set_par_description("Minimum wavenumber (moduli) used to compute individual tracer bias");
+    message_pars.set_par_option("Float in [0, K nyquist]. In units of h/Mpc.");
+    message_pars.set_par_default(this->kmin_tracer_bias);
+  }
+
 
 
   else
@@ -1666,37 +2104,28 @@ void Params::init_pars() // Inizialization of parameters
   this->Nbins_redshift = 10;
   this->N_dndz_bins = 2;
   this->new_N_dndz_bins = 2;
+  this->file_dndz = "dndz";
   // ************************************************************************
   this->file_power = "power";
   this->file_power_log = "power_log";
   this->file_window = "window";
-  // ************************************************************************
-
-
-  this->Healpix_resolution = 4;
-  this->file_dndz = "dndz";
   this->file_power2d = "power2d";
   this->file_power2d_mk = "power2d_mk";
-  this->file_bispectrum = "bispectrum";
-  //output files for Yamamoto estimator of moments
+  // ************************************************************************
   this->kmax_y_ds = 0.2;
-  //Parameters for the bispectrum
   this->kmax_bk = 0.2;
   this->kmin_bk = 0.1;
-  this->Nft_random_collapse = 32;
   this->use_fundamental_mode_as_kmin_bk = false;
-  this->kmax_tracer_bias = 0;
-  this->kmin_tracer_bias = 0;
+  this->file_bispectrum = "bispectrum";
+  this->Nft_random_collapse = 32;
+  this->kmax_tracer_bias = 0.7;
+  this->kmin_tracer_bias = 0.01;
   this->kmax_tracer_qbias = 0;
   this->kmin_tracer_qbias = 0;
-
-
-  this->Distance_fraction=1.0;
-
-
-  // ************************************************************************
-  // ************************************************************************
-// Measurements of Abundance (Mass funcito, luminosity function)
+  this->Healpix_resolution = 4;
+ // ************************************************************************
+ // ************************************************************************
+ // Measurements of Abundance (Mass funcito, luminosity function)
   this->Get_Mstellar_function = false;
   this->Get_Luminosity_function = false;
   this->Get_Color_function = false;
@@ -1709,15 +2138,28 @@ void Params::init_pars() // Inizialization of parameters
   this->Mstellar_max = 1;
   this->Color_min = 0;
   this->Color_max = 1.0;
-
-
-
   // ************************************************************************
   // ************************************************************************
   this->MASS_units=1;
-  this->NMASSbins_power=1;
   this->NMASSbins=1;
+  this->NMASSbins_mf=1;
+  this->NMASSbins_power=1;
   this->LOGMASSmin=0;
+  this->LOGMASSmax=16;
+  this->VMAXmin = 0;
+  this->VMAXmax = 1000;
+  this->RSmin = 0;
+  this->RSmax = 1000;
+  this->SPINmin = 0;
+  this->SPINmax = 1000;
+  this->NPROPbins_bam=1;
+  this->set_bins_equal_number_tracers = false;
+  this->Number_of_bins_equal_number_tracers_main_property = 1;
+  this->set_bins_equal_number_tracers_main_property = false;
+  this->Number_of_bins_equal_number_tracers = 1;
+  this->Nbins_hist = 10;
+
+  this->Get_pearson_coefficient=false;
   this->Get_marked_power_spectrum =false;
   this->Get_power_spectrum =false;
   this->Get_cross_power_spectrum =false;
@@ -1730,23 +2172,15 @@ void Params::init_pars() // Inizialization of parameters
   this->Get_tracer_local_mach_number=false;
   this->Get_tracer_local_dach_number=false;
   this->Get_tracer_local_dm_density=false;
-  this->Get_pearson_coefficient=false;
   this->Get_spearman_coefficient=false;
   this->Get_cell_local_mach_number=false;
   this->Scale_mach_number = static_cast<real_prec>(2.0);
   this->NPROPbins_bam=1;
-  this->Number_of_bins_equal_number_tracers = 1;
-  this->Number_of_bins_equal_number_tracers_main_property = 1;
-  this->set_bins_equal_number_tracers = false;
-  this->set_bins_equal_number_tracers_main_property = false;
   this->lmax_bias=0;
+  this->assign_bias_to_full_sample = false;
+  this->Distance_fraction=1.0;
   // ************************************************************************
   // ************************************************************************
-  // parameters for the power spectrum
-// ************************************************************************
-  
-
-
   this->get_distribution_min_separations=false;
   this->M_exclusion=1;
   this->use_vel_kernel=false;
@@ -2272,6 +2706,12 @@ void Params::read_pars(string file)
             if (par_value=="true")this->dilute_dm_sample = true;
             else this->dilute_dm_sample = false;
             this->parameter_boolean.push_back(make_pair(par_name, this->dilute_dm_sample)); 
+          }
+          else if (par_name == "assign_bias_to_full_sample")
+          {
+            if (par_value=="true")this->assign_bias_to_full_sample = true;
+            else this->assign_bias_to_full_sample = false;
+            this->parameter_boolean.push_back(make_pair(par_name, this->assign_bias_to_full_sample)); 
           }
         else if (par_name == "fraction_dilute")
           {
