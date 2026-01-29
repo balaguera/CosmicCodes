@@ -708,6 +708,10 @@ struct s_Halo
    *@brief  bias computed from a box in redshift space
    */
   real_prec  bias_rs;
+  /**
+   *@brief  bias squared, computed using suto power spectrum for halos  and matter
+   */
+  real_prec  bias_squared;
   // -----------------------------------
   /**
    *@brief  bias computed from a a box as a function of multipole l (Sheth)
@@ -927,6 +931,10 @@ struct s_Halo
   /**
      @brief  Tidal anisotropy evaluated at the tracer position */
   real_prec tidal_anisotropy;
+  // -----------------------------------
+  /**
+     @brief  Tidal anisotropy evaluated at the tracer position based on the DM tidal field */
+  real_prec tidal_anisotropy_dm;
   // -----------------------------------
   /**
      @brief  Peak height delta/sigma computed for each tracer based on their virial mass*/
