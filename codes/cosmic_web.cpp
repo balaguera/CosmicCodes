@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
       // Get density field from tracers
       //----------------------------------------------
  
-      bool get_cwc=true;
+      bool get_cwc=false;
       if(false==get_cwc){
         So.message_screen("============================================================");
         So.message_screen("NO CWC quantities are to be computed. Check line", __LINE__);
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
       }
 
         vector<real_prec> tr_field_counts; // Cointainer for counts
-      if(get_cwc)
+//      if(get_cwc)//commented for the test of computing b²
       {
         tr_field_counts.resize(params._NGRID(), 0); // Cointainer for counts
         cat.get_density_field_grid(_COUNTS_,tr_field_counts);  // Computing counts
@@ -263,8 +263,10 @@ int main(int argc, char *argv[])
       //Assign bias to tracers and get the bias field:
      // Define an object of type Power Spectrum, passing the parametes through the class variable param
       PowerSpectrumF power(params);
-      string file_cat_new=params._Output_directory()+"diluted_cat_blm.txt";
-      if(params._assign_bias_to_full_sample())
+//      string file_cat_new=params._Output_directory()+"diluted_cat_blm.txt";
+//      string file_cat_new=params._Output_directory()+"diluted_cat_blm_bsquared.txt";
+      string file_cat_new=params._Output_directory()+"diluted_cat_bias.txt";
+      if(true==params._assign_bias_to_full_sample())
       {
         power.object_by_object_bias(cat.Halo, dm_field);
         power.object_by_object_bias_lm(cat.Halo, dm_field, params._lmax_bias());
@@ -273,16 +275,21 @@ int main(int argc, char *argv[])
       else{
       // Dilute the sample:
         cat.select_random_subsample(params._fraction_dilute());
-        //Assign individual bias to objhects in cat.Halo. That bias uses the dm_field:
+
+        //Assign individual bias to objects in cat.Halo. That bias uses the dm_field:
         power.object_by_object_bias(cat.Halo_random_subsample, dm_field);
+
+        //Assign individual bias^2 to objects in cat.Halo. That bias uses the dm_field:
+        power.object_by_object_bias_squared(  cat.Halo_random_subsample, dm_field, tr_field_counts); // to compute b² for each tracer
+
         //Assign individual harmonic-based bias to objects in cat.Halo. That bias uses the dm_field:
-        power.object_by_object_bias_lm(cat.Halo_random_subsample, dm_field, params._lmax_bias());  
+//        power.object_by_object_bias_lm(cat.Halo_random_subsample, dm_field, params._lmax_bias());  
         // Print catalog: do it below, after cwc is done
         print_catalog(cat.Halo_random_subsample, file_cat_new, true); // set true of blm are to be written, 
       }
 
       vector<real_prec> bias_field; // Define container to allocate the bias on a mesh
-      if(!params._assign_bias_to_full_sample())
+      if(true==params._assign_bias_to_full_sample())
       {
         bias_field.resize(params._NGRID(), 0);
         cat.get_density_field_grid(_COUNTS_,tr_field_counts,bias_field); //Get halo bias averaged on a mesh.
