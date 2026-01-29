@@ -5595,7 +5595,239 @@ void PowerSpectrumF::object_by_object_bias(vector<s_Halo>& tracer_cat, vector<re
 #endif
    So.DONE();
  }
+
+
+
+
+
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void PowerSpectrumF::object_by_object_bias_squared(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field, vector<real_prec>&tracer_field){
+   this->So.enter(__PRETTY_FUNCTION__);
+#ifdef _FULL_VERBOSE_
+   this->So.message_screen("Getting object-to-object bias squared");
+#endif
+#if defined _TNG_ || defined _TNG_GAL_
+     kvector_data.clear();
+     kvector_data.shrink_to_fit();
+     for(int i=0;i<this->params._d_Nnp_data();i++)
+       kvector_data.push_back(this->params._d_kmin()+this->params._d_DeltaK_data()*(i+0.5));
+#endif
+#ifdef _USE_OMP_
+   int NTHREADS=_NTHREADS_;
+   omp_set_num_threads(NTHREADS);
+#endif
+
+   // Given kmax, determine the maximum number of bins requested
+   ULONG initial_mode=static_cast<ULONG>(floor((this->params._kmin_tracer_bias()-this->params._d_kmin())/this->params._d_DeltaK_data()));//get the bin to go only up to Kmax in the loops
+   ULONG Kmax_bin=static_cast<ULONG>(floor((this->params._kmax_tracer_bias()-this->params._d_kmin())/this->params._d_DeltaK_data()));//get the bin to go only up to Kmax in the loops
+   // ---------------------------------------------------
+   // Define the new Nft=2*Kmax_bin
+   ULONG new_Nft=2*Kmax_bin;
+   // ---------------------------------------------------
+   ULONG new_ngrid_h =new_Nft*new_Nft*(new_Nft/2+1);
+#ifdef DOUBLE_PREC
+   complex_prec * Delta_dm = (complex_prec *)fftw_malloc(2*new_ngrid_h*sizeof(real_prec));
+#else
+    complex_prec * Delta_dm =(complex_prec *)fftwf_malloc(2*this->params._NGRID_h()*sizeof(real_prec));
+#endif
+#ifdef DOUBLE_PREC
+   complex_prec * Delta_tr = (complex_prec *)fftw_malloc(2*new_ngrid_h*sizeof(real_prec));
+#else
+    complex_prec * Delta_tr =(complex_prec *)fftwf_malloc(2*this->params._NGRID_h()*sizeof(real_prec));
+#endif
+    real_prec mean_field=get_mean(dm_field);
+    So.message_screen("\tMean of field:", mean_field);
+    vector<real_prec> over_dm_field(dm_field.size(),0);
+    get_overdens(dm_field,mean_field,over_dm_field);
+    So.message_screen("\tFourier transforming DM field");
+    do_fftw_r2c(this->params._Nft(),over_dm_field,Delta_dm);
+    over_dm_field.clear(); over_dm_field.shrink_to_fit();
+    mean_field=get_mean(tracer_field);
+    So.message_screen("\tMean of field:", mean_field);
+    get_overdens(tracer_field,mean_field,tracer_field);
+    So.message_screen("\tFourier transforming TR field");
+    do_fftw_r2c(this->params._Nft(),tracer_field,Delta_tr);
+   // Build k-coordinates
+   vector<real_prec> kcoords(new_Nft,0);
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+   for(int i=0;i<kcoords.size() ;++i)
+    kcoords[i]=(i<=new_Nft/2? static_cast<real_prec>(i): -static_cast<real_prec>(new_Nft-i));
+#ifdef _FULL_VERBOSE_
+   this->So.message_screen("\tNew Nft ",new_Nft);
+   this->So.message_screen("\tComputing from k =", (initial_mode+0.5)*this->params._d_DeltaK_data());
+   this->So.message_screen("\t            to k =", this->params._kmax_tracer_bias());
+#endif
+   real_prec use_imag=0;
+   real_prec vol=pow(this->params._Lbox(),3);
+   real_prec normal_dm= sqrt(vol)/static_cast<real_prec>(this->params._NGRID());
+   real_prec normal_h =static_cast<real_prec>(1./vol);
+   real_prec normal_cross= 1; //normal_dm * normal_h;
+   real_prec dk_x=this->params._d_deltak_x();
+   real_prec dk_y=this->params._d_deltak_y();
+   real_prec dk_z=this->params._d_deltak_z();
+   this->So.message_screen("\tGetting power dark matter:");
+  // This is done once for all tracers
+   vector<real_prec>power_dmat(Kmax_bin,0);
+   vector<real_prec>power_tracer(Kmax_bin,0);
+#ifdef _USE_OMP_
+#pragma omp parallel for collapse(3)
+#endif
+   for(ULONG i=initial_mode; i< new_Nft/2;++i)
+     for(ULONG j=initial_mode; j< new_Nft/2;++j)
+         for(ULONG k=initial_mode; k< new_Nft/2+1;++k)
+         {
+           ULONG lp=index_3d(i,j,k,this->params._Nft(),this->params._Nft()/2+1);
+           real_prec  kv=sqrt(pow(dk_x*kcoords[i],2)+pow(dk_y*kcoords[j],2)+pow(dk_z*kcoords[k],2));
+           ULONG kbin=static_cast<ULONG>(floor((kv-this->params._d_kmin())/this->params._d_DeltaK_data()));
+           if(lp!=0)
+             if(kbin<Kmax_bin)
+#ifdef _USE_OMP_
+#pragma omp atomic
+#endif
+                 power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+          if(j>0  && k>0)
+             {
+               lp=index_3d(i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
+               if(kbin<Kmax_bin)
+#ifdef _USE_OMP_
+#pragma omp atomic
+#endif
+                 power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+            }
+           if(i>0  && (j>0 || k>0))
+             {
+               lp=index_3d(this->params._Nft()-i,j,k,this->params._Nft(),this->params._Nft()/2+1);
+               if(kbin<Kmax_bin)
+#ifdef _USE_OMP_object_b
+#pragma omp atomic
+#endif
+                   power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+             }
+             if(i>0  && j>0  && k>0)
+             {
+               lp=index_3d(this->params._Nft()-i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
+               if(kbin<Kmax_bin)
+#ifdef _USE_OMP_
+#pragma omp atomic
+#endif
+                   power_dmat[kbin]+=(Delta_dm[lp][REAL]*Delta_dm[lp][REAL]+Delta_dm[lp][IMAG]*Delta_dm[lp][IMAG]);
+             }
+         }
+    So.DONE();
+    real_prec conversion_factor=(1.+this->params._redshift())/(this->cosmology.Hubble_function(this->params._redshift()));
+    real_prec kmax_b=0.06;
+    real_prec kmax_c=0.04;
+    real_prec lss_bias_halo=0;
+    real_prec lss_rbias_halo=0;
+     this->So.message_screen("\tAssigining bias:");
+#ifdef _USE_OMP_
+#pragma omp parallel for reduction(+:lss_bias_halo)
+#endif
+   for(ULONG itr=0;itr<tracer_cat.size();++itr)
+     {
+        real_prec xtracer=tracer_cat[itr].coord1;
+        real_prec ytracer=tracer_cat[itr].coord2;
+        real_prec ztracer=tracer_cat[itr].coord3;
+#ifndef _TNG_GAL_
+        real_prec vx=tracer_cat[itr].vel1*conversion_factor;
+#endif
+        vector<real_prec>power_cross(Kmax_bin,0);
+        vector<real_prec>power_cross_tr(Kmax_bin,0);
+#ifndef _TNG_GAL_
+       vector<real_prec>power_cross_s(Kmax_bin,0);
+       vector<real_prec>Gamma_num(Kmax_bin,0);
+#endif
+        // Loop over the Fourier box up to the maximum k (bin) used to get bias
+       for(ULONG i=initial_mode; i< new_Nft/2;++i)
+         for(ULONG j=initial_mode; j< new_Nft/2;++j)
+             for(ULONG k=initial_mode; k< new_Nft/2+1;++k)
+             {
+               ULONG lp=index_3d(i,j,k,this->params._Nft(),this->params._Nft()/2+1);
+               real_prec k_dot_r=0;
+               real_prec k_dot_s=0;
+               real_prec  kv=sqrt(pow(dk_x*kcoords[i],2)+pow(dk_y*kcoords[j],2)+pow(dk_z*kcoords[k],2));
+               ULONG kbin=static_cast<ULONG>(floor((kv-this->params._d_kmin())/this->params._d_DeltaK_data()));
+               /****************************************************************/
+               if(lp!=0)
+               {
+                 k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
+                 if(kbin<Kmax_bin){
+                     power_cross[kbin]+=(cos(k_dot_r)*Delta_tr[lp][REAL]-sin(k_dot_r)*Delta_tr[lp][IMAG]);
+//                     power_cross[kbin]+=(cos(k_dot_r)*Delta_tr[lp][REAL]-sin(k_dot_r)*Delta_tr[lp][IMAG]+cos(k_dot_r)*Delta_tr[lp][IMAG]-sin(k_dot_r)*Delta_tr[lp][REAL]);
+  
+                 }
+
+                 }
+               if(j>0  && k>0)
+                 {
+                   lp=index_3d(i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
+                   k_dot_r=dk_x*kcoords[i]*xtracer + dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
+                   if(kbin<Kmax_bin){
+                     power_cross[kbin]+=(cos(k_dot_r)*Delta_tr[lp][REAL]-sin(k_dot_r)*Delta_tr[lp][IMAG]);
+//                     power_cross[kbin]+=cos(k_dot_r)*Delta_tr[lp][REAL]-sin(k_dot_r)*Delta_tr[lp][IMAG]+cos(k_dot_r)*Delta_tr[lp][IMAG]-sin(k_dot_r)*Delta_tr[lp][REAL];
+                   }
+                   }
+               if(i>0  && (j>0 || k>0))
+                 {
+                   lp=index_3d(this->params._Nft()-i,j,k,this->params._Nft(),this->params._Nft()/2+1);
+                   k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer + dk_y*kcoords[j]*ytracer + dk_z*kcoords[k]*ztracer;
+                   if(kbin<Kmax_bin){
+                       power_cross[kbin]+=(cos(k_dot_r)*Delta_tr[lp][REAL]-sin(k_dot_r)*Delta_tr[lp][IMAG]);
+//                       power_cross[kbin]+=(cos(k_dot_r)*Delta_tr[lp][REAL]-sin(k_dot_r)*Delta_tr[lp][IMAG]+cos(k_dot_r)*Delta_tr[lp][IMAG]-sin(k_dot_r)*Delta_tr[lp][REAL]);
+                 }
+               }
+                 if(i>0  && j>0  && k>0)
+                 {
+                   lp=index_3d(this->params._Nft()-i,this->params._Nft()-j,k,this->params._Nft(),this->params._Nft()/2+1);
+                   k_dot_r=dk_x*kcoords[new_Nft-i]*xtracer+dk_y*kcoords[new_Nft-j]*ytracer + dk_z*kcoords[k]*ztracer;
+                   if(kbin<Kmax_bin)
+                   {
+                       power_cross[kbin]+=(cos(k_dot_r)*Delta_tr[lp][REAL]-sin(k_dot_r)*Delta_tr[lp][IMAG]);
+//                     power_cross[kbin]+=(cos(k_dot_r)*Delta_tr[lp][REAL]-sin(k_dot_r)*Delta_tr[lp][IMAG]+cos(k_dot_r)*Delta_tr[lp][IMAG]-sin(k_dot_r)*Delta_tr[lp][REAL]);
+
+                 }
+               }
+           }
+        real_prec power_hm=0;
+        real_prec power_hmt=0;
+        real_prec power_hm2=0;
+        real_prec power_hm3=0;
+        real_prec p_dm=0;
+        real_prec p_t=0;
+        real_prec p_dm2=0;
+        real_prec p_dm3=0;
+        real_prec power_hm_s=0;
+        real_prec gama=0;
+        for(ULONG i=initial_mode; i< power_cross.size();++i)
+          {
+            power_hm+=power_cross[i]; // *** here it must be nmodes*(<power>_av)= nmodes*(power/nmodes)=power. That's why I do not need nmodes
+            p_dm+=power_dmat[i];
+
+        }
+        real_prec hb=(power_hm/p_dm)*(this->params._NGRID());
+        tracer_cat[itr].bias_squared=hb;
+        lss_bias_halo+=hb;
+   }
+   lss_bias_halo/=static_cast<real_prec>(tracer_cat.size());
+   So.message_screen("\tMean large-scale bias from individual bias squared  =", sqrt(lss_bias_halo));
+   So.DONE();
+ }
+
+
+
+
+
+
+
+ ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  void PowerSpectrumF::object_by_object_qbias(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field){
    this->So.enter(__PRETTY_FUNCTION__);
@@ -5780,6 +6012,15 @@ void PowerSpectrumF::object_by_object_bias(vector<s_Halo>& tracer_cat, vector<re
    So.DONE();
    So.message_screen("\tMean quadratic bias from individual bias =", lss_bias_halo);
  }
+
+
+
+
+
+
+
+
+
  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  //#define paired
