@@ -1,7 +1,42 @@
 //////////////////////////////////////////////////////////
 /**
  * @class <PowerSpectrumF>
- * @brief Header file for the class PowerSpectrum
+ * @note Header file for the class PowerSpectrum.
+ * The spectral analysis of cosmological probes aims at extracting most of the cosmological information by decomposing 
+ * the signal of the perturbations in a given observable (e.g, CMB temperature, spatial distribution of galaxies). 
+ * A motivation for this type of analysis comes from the behavior of early density fluctuations, which, evolving in a 
+ * linear regime, acquired independent equations of evolution once decomposed in plane-waves. As such, spectral analysis of density perturbations is typically expressed in terms of Fourier decomposition.  Plane-waves are not the only possible basis on which the density fluctuations can be expanded. Despite of being ideal for analysis of $N$-body simulations (in which periodic boundary conditions are assumed) and for small area covered by redshift surveys, the analysis if wide area surveys imposes the need to extract the cosmological information by using different basis. In this section we will briefly motivate three different basis, each of which will be exposed in more detail later in this chapter. 
+ *
+ *The Fourier analysis consists in the harmonic decomposition based on plane waves as basis, that is
+ * \f[
+ * \langle \textbf{r}|\textbf{k}\rangle=e^{i\textbf{k}\cdot\textbf{r}},
+ * \f]
+ * where the orthogonality conditions in Fourier and configuration space are respectively
+ * \f[
+ * \langle \textbf{k}'|\textbf{k}\rangle=(2\pi)^{3}\delta^{3}(\textbf{k}-\textbf{k}')
+ * \,\,\,\,\,\,\,\,\,\,\,\,\langle \textbf{r}'|\textbf{r}\rangle=\delta^{3}(\textbf{r}-\textbf{r}').
+ * \f]
+ * This provides the definition of the Fourier transform of the overdensity field \f$ \delta(\textbf{r}) \f$:
+ * \f[ 
+ * \delta(\textbf{k})=\int_{V} d^{3}\textbf{r}\, \delta(\textbf{r}){\mathrm e}^{-i\textbf{k}\cdot \textbf{r}}. 
+ * \f]
+ * If the field \f$\delta(\textbf{k})\f$ is a random variable, given that the Fourier transform \f$\delta(\textbf{k})\f$, being a linear superposition of random fields, is also a random field. By assuming periodicity over a volume $L^{3}$, the resulting Fourier space is accessed only by a set of discrete wavenumbers, multiples of the \emph{fundamental mode}\index{Fundamental mode} $\Delta k=2\pi /L$ (this is the \emph{harmonic boundary condition})
+ * \f[
+ * \textbf{k}_{n}=\left(\frac{2\pi}{L}\right)\textbf{n}=\Delta k\textbf{n}\,,\hspace{0.8cm}\textbf{n}=(n_{x},n_{y},n_{y},\cdots),
+ * \f]
+ * where \f$n_{x,y,z}\f$ are integer numbers (later we will find that a different boundary condition expressed in a different basis are also used, leading clearly to a different spectrum). Due to the discreteness of the $k-$space, the inverse relation reads as
+ * \f[
+ * \delta(\textbf{r})=\frac{1}{V}\sum_{k_{n}} \delta(\textbf{k}_{n}){\mathrm e}^{i\textbf{k}_{n}\cdot \textbf{r}}.
+ * \f]
+ * In the continuous limit (take \f$V\to \infty\f$), we can write the integral form:
+ * \f[
+ * \delta(\textbf{r})=\int \frac{d^{3}\textbf{k}}{(2\pi)^{3}}\, \delta(\textbf{k}){\mathrm e}^{i\textbf{k}\cdot \textbf{r}}.
+ * \f]
+ * Notice that, if the random variable \f$\delta(\textbf{r})\f$ is real, then the Hermit condition is fulfilled,  
+ * \f$\tilde{\delta}(\textbf{k})=\tilde{\delta}^{*}(-\textbf{k})\f$. This implies that all the information of the 
+ * Fourier transform of a real field \f$\delta(\textbf{r})\f$ is located in the first quadrant in the \f$k-\f$ space. We can understand 
+ * the properties of the harmonic decomposition by recalling that, as in quantum mechanics, the wave function written in Cartesian coordinates for a free particle can be represented by plane-waves. In other words, plane-waves represent the eigenstates of the momentum operator, $\hat{p}|\textbf{k}\rangle=k|\textbf{k}\rangle$. Indeed, as a free particle, it's linear momentum is conserved. Keeping in mind that the linear momentum is the generator of translations in space, 
+ * its conservation encodes a symmetry : this corresponds to the symmetry of isotropy.
  * @file PowerSpectrumF.h
  * @author Andres Balaguera-Antolínez
  * @callgraph
@@ -508,7 +543,7 @@ void add_catalogues(int, int, int);
    *  along with (if defined in parameter file) a file with smoothed nbar tabulated
    * @details This method reads input files and get power inside loops of bins of different properties specified in the parameter file
    * make any binning in any property.
-   * @note This method is only applicabble for input catalogs (not for input inteprolated fields). See the description in this->compute_power_spectrum (bool, bool) to understand the steps
+   * @note This method is only applicabble for input catalogs (not for input inteprolated fields). See the description in `PowerSpectrumF.compute_power_spectrum()` to understand the steps
    * @warning This method contains explicit definitions that must be in agreement with the method Catalog::read_catalog().
    * Measurement of power spectrum of tracer catalog, with a random catalog and in bins of galaxy properties
    * The method is meant to be used whern bins in galaxy properties are to be done to mesaure power:  loops over bins, read data, select, compute.
@@ -739,13 +774,29 @@ void add_catalogues(int, int, int);
   //////////////////////////////////////////////////////////
   /**
    * @brief Computes the window matrix 
-   *@details  This function provides the window matrix which in reality is a tensor of 4 indices:
+    *@details  This function provides the window matrix which in reality is a tensor of 4 indices:
    * two indices for multipoles l, l': these can be from 0 to 4, usually 0,2,4
    * two indices for wavenumber modes, k and k': k runs over the bins used in the measurements, 
    * while k' runs oer the modes implemented in the Gauss -legendre integration.
-   * This computation involves a double rum over the random catalog.
-   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
-  */
+   * @note This approach uses the randoms catalog to perform a MonteCarlo integration:
+   *\f[
+   * W(\textbf{k})=\frac{1}{N}\int d^{3}\textbf{r}\, w_{\rm FKP}(\textbf{r})\bar{n}(\textbf{r}){\rm e}^{i\textbf{k} \cdot \textbf{r}} \approx \frac{\alpha}{N}\sum _{\alpha=1}^{N_{\rm ran}}w_{\rm FKP}(\textbf{r}_{i}){\rm e}^{i\textbf{k} \cdot \textbf{r}_{\alpha}}
+   * \f] 
+   * where \f$\alpha\sim N_{\rm gal}/N_{\rm ran}\f$ and \f$N\f$ is a normalization constant. With this, we can write
+   * \f[
+   * |W(\textbf{k}- \textbf{k}')|^{2}=\frac{\alpha^{2}}{N^{2}}\sum_{\alpha,\beta(\alpha\neq \beta)}^{N_{\rm ran}}w_{\rm FKP}(\textbf{r}_{\alpha})w_{\rm FKP}(\textbf{r}_{\beta}){\rm e}^{i\textbf{k} \cdot \Delta \textbf{r}_{\alpha\beta}-i\textbf{k}' \cdot \Delta \textbf{r}_{\alpha\beta}}
+   * \f]
+   * where \f$\Delta \textbf{r}_{\alpha\beta}=\textbf{r}_{\alpha}-\textbf{r}_{\beta}\f$. Using the Reyleigh expansion of the two plane-waves involved and converting the integral over \f$k'\f$ into a sum using the Gauss-Legendre method, it can be shown that the mixing matrix takes for form 
+   *\f[
+   * \mathcal{W}_{\ell,\ell'} (k,k_{j}) = \frac{2\alpha^{2}}{N^{2}}(2\ell +1)i^{\ell}(-i)^{\ell'}w_{GL}(k_{j})k_{j}^{2} 
+   * \times  \sum_{\alpha,\beta (\alpha \neq \beta)}^{N_{\rm ran}}w_{\rm FKP}(\textbf{r}_{\alpha})w_{\rm FKP}(\textbf{r}_{\beta})\bar{J}_{\ell}(k_{i},|\Delta \textbf{r}_{\alpha\beta}|)j_{\ell'}(k_{
+   *    j}|\Delta \textbf{r}|_{\alpha\beta})\mathcal{L}_{\ell}(\Delta \hat{\textbf{r}}_{\alpha\beta}\cdot \hat{n}_{\alpha\beta})\mathcal{L}_{\ell'}(\Delta \hat{\textbf{r}}_{\alpha\beta}\cdot \hat{n}_{\alpha\beta}).
+   * \f]
+   * where
+   * \f[
+   *  \bar{J}_{\ell}(k_{i},\Delta \textbf{r})\equiv \frac{1}{\Delta k}\int _{k_{i}-\Delta k/2}^{k_{i}+\Delta k/2}j_{\ell}(k\Delta r)dk.
+   * \f]
+   */
   void get_window_matrix_multipole();
   //////////////////////////////////////////////////////////
   /**
@@ -776,9 +827,19 @@ void add_catalogues(int, int, int);
    * @param dm_field Dark matter density field intepolated on a mesh
    * @param tracer_field tracer density field intepolated on a mesh
    * @details The power spectrum of the DM has been computed before the call of this method  and is still allocated in the container this->pk0
-   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   * @warning This can be implemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
   void object_by_object_bias(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field,vector<real_prec>& tracer_field);
+  //////////////////////////////////////////////////////////
+  /**
+  *  @brief Method to assign effective bias squared to tracers
+   * @param tracer_cat Catalog of dark matter tracers
+   * @param dm_field Dark matter density field intepolated on a mesh
+   * @param tracer_field tracer density field intepolated on a mesh
+   * @details The power spectrum of the DM has been computed before the call of this method  and is still allocated in the container this->pk0
+   * @warning This can be implemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   */
+  void object_by_object_bias_squared(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field,vector<real_prec>& tracer_field);
   //////////////////////////////////////////////////////////
   /**
    * @brief Assignment of the object-by-object relative_bias.
