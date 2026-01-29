@@ -96,7 +96,7 @@ TARGET_CW = cosmicweb.exe
 # par
 OBJS_PA = ../codes/paramsr.o 
 SRCS_PA = $(OBJS_PA:.o=.cpp)
-TARGET_PA = params
+TARGET_PA = params.exe
 
 # make will execute this rule by default
 all: $(TARGET_BMT) 
@@ -108,7 +108,7 @@ gtools: $(TARGET_GT)
 htools: $(TARGET_HT)
 cosmolib: $(TARGET_CLib)
 cosmicweb: $(TARGET_CW)
-params: $(TARGET_PA)
+par: $(TARGET_PA)
 
 #########################################################################
 $(TARGET_CLib): $(OBJS_CL) 
@@ -195,15 +195,17 @@ $(TARGET_HT): $(OBJS_HT)
 
 #########################################################################
 $(TARGET_PA): $(OBJS_PA) 
-	@echo "*******************************************"
-	@echo "*******************************************"
-	@echo "Compiling Params"
+	@echo "$(GREEN)*******************************************"
+	@echo "$(GREEN)*******************************************"
+	@echo "$(BLUE)Compiling Params"
 	@date  
-	@echo "*******************************************"
+	@echo "$(GREEN)*******************************************$(YELLOW)"
 # Este orden es de llamado a las librerias es importantisimo:
 	@echo "*******************************************"         
 	$(CXX) $(CXXFLAGS) $(SRCS_PA)  $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_PA) $(LIBS_GSL)
-	@echo "Done!"
+	@echo "$(GREEN)Done"
+	@echo "$(GREEN)Execute with ./params.exe -n PAR_NAME to know about a PARameter"
+	@echo "$(GREEN)Execute with ./params.exe -s parameter_file to show parameters"
 
 
 clean:
@@ -231,7 +233,7 @@ help:
 	@echo "	  execute with ./htools.exe parameter_file (this is different from otopns 1-4). This is still under merging stages: merged with class::Catalog"		
 	@echo "-make cosmicweb: creates executable for the cosmic web analysis ased on tracer catalos"
 	@echo "	  execute with ./cosmicweb.exe parameter_file"		
-	@echo "-make par: creates executable for the paramsr "
+	@echo "-make params: creates executable for the paramsr "
 	@echo "	  execute with ./params.exe parameter_file"		
 
 
