@@ -785,20 +785,44 @@ public:
   real_prec get_max(string prop);
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Define intervals with the smae number of tracers
    */
   void get_intervals_equal_number(string prop,vector<real_prec>&min_aux,vector<real_prec>&max_aux);
   //////////////////////////////////////////////////////////
   /**
    * @brief Main function used to analyze catalog
-   * @param read true  if read catalog, false: do no read: do tasks from input dens fields
-   * @note Check the function while develpment: there are methods expecting orders from parameter file
-   * @warning Ascii files are expected. Biinary files alre also expected with data_scheme as in BAM
+   * @param read `true`  if read catalog, `false`: do not read: do tasks from input dens fields
+   * @details Once the catalog has been read and stored in `std::vector<s_Halo> Halo`
+   * this method computes the following quantities:
+   * - Mach number, subject to the condition `true==Params._Get_cell_local_mach_number()`. In this case, mach number is assigned to each tracer by invoking the method `Catalog.get_local_mach_number()`
+   * - Distribution of minimum separations in the tracer catalog, subject to the condition `true==Params._get_distribution_min_separations()`.
+   * - Mass function subject to the conditions `true==this->params._Get_prop_function_tracer() || true == Params._Get_tracer_mean_number_density()`.
+   * - Mass fnuction in cosmic web types, subject to the condition `true==this->params._Get_prop_function_tracer_cwt()`.
+   * - Assings an interpolation of the mean number density to each halo, according to their masses and mass function, subject to the condition `true == Params._Get_tracer_mean_number_density()`.
+   * - Tracer number counts, on the mesh, subject to the condition `true==this->params._Get_tracer_number_counts()`.
+   * - Tracer mass field (mass-weighted number counts on the mesh), subject to the condition `true==Params._Get_tracer_mass_field()` and provided that `Params._i_mass_g()>0 && this->params._i_mass_g()<Catalog.NCOLS`.
+   * - Tracer vmax field (vmax-weighted number counts on the mesh), subject to the condition `true==Params._Get_tracer_vmax_field()` and provided that `Params._i_vmax_g()>0 && this->params._i_vmax_g()<Catalog.NCOLS`.
+   * - Tracer spin field (spin-weighted number counts on the mesh), subject to the condition `true==Params._Get_tracer_spin_field()` and provided that `Params._i_spin_g()>0 && Params._i_spin_g()<Catalog.NCOLS`.
+   * - Tracer bias field (bias-weighted number counts on the mesh), subject to the condition `true==Params._Get_tracer_bias_field()`. In this case, individual bias is assigned to each tracer by invoking the function `object_by_object_bias()`, which is defined in `Miscelaneous.cpp` and is a copy of the method of the same name, in `PowerSpectrumF.cpp`.
+   * - In each calculations, aan output file is written in `param.Output_directory()`.
+   * @note This method is mainly called in the external code `codes/analyze_halo_catalog.cpp` 
+   * @code 
+      string par_file = argv[2];
+      Params params(par_file);
+      Catalog catalog(params);
+      catalog.analyze_cat(true);
+      So.message_time(start_all);
+   * @endcode
+   * @warning 
+   * -Check the function while develpment: there are calculations commented, expecting orders from parameter file.
+   * -Ascii files are expected by default. Biinary files alre also supported with data_scheme as in BMT
+   * @author ABA 
    */
   void analyze_cat(bool read);
   //////////////////////////////////////////////////////////
   /**
    * @brief Writes catalog with N_PROP columns (see def.h) to a binary file
+   * @author ABA 
    */
   void write_catalog_bin(string output_file);
   //////////////////////////////////////////////////////////
@@ -866,7 +890,18 @@ public:
   void Get_SO_tracer();
   //////////////////////////////////////////////////////////
   /**
-   * @brief Reads particle catalog in ascii format.
+   * @brief Reads particle catalog in ascii format. 
+   * @details This method reads the ascii file containing the catalog (with columns specified in the parameter file) and assigns it to the public member vector of structures 
+   * @code vector<s_Halo> Halo @endcode 
+   * Then computes the following quantities and assign it to the tracers:
+   *
+   * -Grid ID : The column major index of the cell where the halo is located in the box (simulation box).  
+   *
+   * @pre This is done when the condition `this->params._sys_of_coord_g()==0` is satisfied.
+   * 
+   * When assining these properties to the container `std::vector<s_Halo> Halo` the code computes minimums and maximums of the different halo properties. The method also computes levels for MULTISCALING property assignment.
+   *
+   * @warning Cosmic-web classification applied to the tracers must be done using other method or external function, such as `void Catalog::assign_cwc_to_tracers(vector<ULONG>&cwc)` 
    */
 #ifdef _USE_MASS_CUTS_PK_
   void read_catalog(string input_file, real_prec mcut);
@@ -1676,6 +1711,26 @@ public:
    * @brief
    */
   void get_superclusters(string, string);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Assign ID grid to tracers
+   * @details This can be  use in case the method @code read_catalog @endcode doues not assign this number (because POWER is not defined).
+   */
+  void assign_idgrid_to_tracers();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Assign cwc grid to tracers
+   * @param cwc is a vector over the mesh containing the cw classification
+   * @details Use this method to assign an integer to each tracer with the cwc encoded in the input container. The method assings the cwc to the ith tracer at the slot @code  Halo[i].cwt_gal @endcode using also the private structure @code box @endcode.
+   */
+  void assign_cwc_to_tracers(vector<ULONG>&cwc);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Assign cwc grid to tracers
+   * @param cwc is a vector over the mesh containing the cw classification
+   * @details Use this method to assign an integer to each tracer with the cwc encoded in the input container. The method assings the cwc to the ith tracer at the slot @code  Halo[i].cwt_gal @endcode using also the private structure @code box @endcode.
+   */
+  void assign_tidal_anisotropy_to_tracers(vector<real_prec>&tidal, bool);
   //////////////////////////////////////////////////////////
   /**
    * @brief Object of type s_params_box_mas
