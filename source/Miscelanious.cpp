@@ -3049,9 +3049,9 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
 
  }
 
-
-
- void print_catalog(vector<s_Halo>&Halo, string file){
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ void print_catalog(vector<s_Halo>&Halo, string file, bool bias){
  
    ofstream rcat;
    rcat.open(file.c_str());
@@ -3059,12 +3059,26 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
    rcat.setf(ios::showpoint);
    rcat.setf(ios::scientific);
    ULONG counter=0;
+   if(true==bias)
+   {
    for(ULONG i=0;i<Halo.size();++i)
      {
-      rcat<<log10(Halo[i].mass)<<"\t"<<log10(Halo[i].rs)<<"\t"<<log10(Halo[i].concentration)<<"\t"<<log10(Halo[i].spin_bullock)<<"\t"<<Halo[i].bias<<"\t";
+      rcat<<log10(Halo[i].mass)<<"\t"<<log10(Halo[i].rs)<<"\t"<<log10(Halo[i].concentration)<<"\t"<<log10(Halo[i].spin_bullock)<<"\t"<<Halo[i].tidal_anisotropy_dm<<"\t"<<Halo[i].tidal_anisotropy<<"\t"<<Halo[i].bias<<"\t"<<Halo[i].bias_squared<<"\t"<<Halo[i].gal_cwt<<"\t";
       for(int il=0;il<Halo[i].bias_multipole.size();++il)rcat<<Halo[i].bias_multipole[il]<<"\t";
       rcat<<endl;
     }
+  }
+  else{
+   for(ULONG i=0;i<Halo.size();++i)
+     {
+      rcat<<log10(Halo[i].mass)<<"\t"<<log10(Halo[i].rs)<<"\t"<<log10(Halo[i].concentration)<<"\t"<<log10(Halo[i].spin_bullock)<<"\t"<<Halo[i].tidal_anisotropy_dm<<"\t"<<Halo[i].tidal_anisotropy<<"\t"<<Halo[i].bias<<"\t"<<Halo[i].gal_cwt<<endl;
+    }
+
+
+
+  }
    rcat.close();
    cout<<"\tWritting downsample catalog in file "<< file<<endl;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
