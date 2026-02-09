@@ -143,7 +143,6 @@ int FileOutput::read_file_one(string fname, vector<real_prec> &prop_ob){
   cout<<"Input file "<<fname<<endl;
   int number_of_lines = -1;
   
-  //  ifstream inputf(fname.c_str());
   in.open(fname.c_str());
   if (in.fail()) 
     this->So.message_error_file(fname);

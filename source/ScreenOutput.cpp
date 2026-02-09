@@ -582,10 +582,6 @@ void  ScreenOutput::message(time_t start_all)
 #else
   std::cout<<"\t*****************************************************************"<<endl;
   std::cout<<"\t*****************************************************************"<<endl;
-#if (defined _GET_BiasMT_REALIZATIONS_ || defined _USE_LPT_ ) && defined _UNITSIM_
-  std::cout<<"\tBiasMT. Realization "<<this->params._realization()<<"\t p-index (Unitsim) "<<this->params._unitsim_plabel()<<endl;
-#endif
-  std::cout<<"\t*****************************************************************"<<endl;
 #endif
 
   ofstream log; log.open(this->logfile.c_str(), ios_base::app);
@@ -593,7 +589,7 @@ void  ScreenOutput::message(time_t start_all)
   log<<"\t*****************************************************************"<<endl;
   log<<"\tBiasMT. Launched at "<<__DATE__<<"\t at "<<__TIME__<<endl;
 #if (defined _GET_BiasMT_REALIZATIONS_ || defined _USE_LPT_ ) && defined _UNITSIM_
-  log<<"\tBiasMT. Realization "<<this->params._realization()<<"\t p-index (Unitsim) "<<this->params._unitsim_plabel()<<endl;
+  log<<"\tBiasMT. Realization "<<this->params._realization()<<endl;
 #endif
   log<<"\t*****************************************************************"<<endl;
   log<<"\t*****************************************************************"<<endl;
@@ -617,14 +613,14 @@ void  ScreenOutput::message_BiasMT(time_t start_all)
 #endif
   std::cout<<"\t*****************************************************************"<<endl;
 #if (defined _GET_BiasMT_REALIZATIONS_ || defined _USE_LPT_ ) && defined _UNITSIM_
-  std::cout<<"\tBiasMT. Realization "<<this->params._realization()<<"\t p-index (Unitsim) "<<this->params._unitsim_plabel()<<endl;
+  std::cout<<"\tBiasMT. Realization "<<this->params._realization()<<"\t p-index (Unitsim)"<<endl;
 #endif
   std::cout<<RESET<<endl;
 #else
   std::cout<<"\t*****************************************************************"<<endl;
   std::cout<<"\t*****************************************************************"<<endl;
 #if (defined _GET_BiasMT_REALIZATIONS_ || defined _USE_LPT_ ) && defined _UNITSIM_
-  std::cout<<"\tBiasMT. Realization "<<this->params._realization()<<"\t p-index (Unitsim) "<<this->params._unitsim_plabel()<<endl;
+  std::cout<<"\tBiasMT. Realization "<<this->params._realization()<<"\t p-index (Unitsim) "<<endl;
 #endif
   std::cout<<"\t*****************************************************************"<<endl;
 #endif
@@ -634,7 +630,7 @@ void  ScreenOutput::message_BiasMT(time_t start_all)
   log<<"\t*****************************************************************"<<endl;
   log<<"\tBiasMT. Launched at "<<__DATE__<<"\t at "<<__TIME__<<endl;
 #if (defined _GET_BiasMT_REALIZATIONS_ || defined _USE_LPT_ ) && defined _UNITSIM_
-  log<<"\tBiasMT. Realization "<<this->params._realization()<<"\t p-index (Unitsim) "<<this->params._unitsim_plabel()<<endl;
+  log<<"\tBiasMT. Realization "<<this->params._realization()<<"\t p-index (Unitsim) "<<endl;
 #endif
   log<<"\t*****************************************************************"<<endl;
   log<<"\t*****************************************************************"<<endl;

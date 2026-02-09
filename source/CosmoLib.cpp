@@ -9,7 +9,9 @@
  */
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# include "../headers/CosmoLib.h"
+
+#include "CosmoLib.h"
+
 using namespace std;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void message(string mess){
@@ -350,6 +352,7 @@ void CosmoLib::get_cosmolib(){
   So.message_screen("Halo-dynamical time =", halo_dynamical_time/1e9, "Gyr/h");
   So.message_screen("Critical overdensity linearly extrapolated =", critical_density);
   So.message_screen("Top-hat density contrast at virial =",density_contrast_top_hat);
+  cout<<""<<endl;
   // ***********************************************************************************************
   // Compute tables to perform integrals using GL weights
   this->Cs.compute_int_table_wavenumber(this->params._kmin_ps(),this->params._kmax_ps());
@@ -588,7 +591,7 @@ bout.close();
 #endif
   // ***********************************************************************************************
   // ***********************************************************************************************
-#ifdef _GET_CORRELATION_FUNCTION_
+//#ifdef _GET_CORRELATION_FUNCTION_
   // ***********************************************************************************************
   // CORRELATION FUNCTION
   CorrelationFunctionTH SCf(1000, 1.);  // Check NumericalMethods to understand these inputs
@@ -612,7 +615,7 @@ bout.close();
       File.write_to_file(params._non_linear_matter_cf_halo_fit_output_file(),v_r_cf,v_nl_correlation_function);
       So.DONE();
   }
-#endif
+//#endif
   // ***********************************************************************************************
   // ***********************************************************************************************
   // ***********************************************************************************************

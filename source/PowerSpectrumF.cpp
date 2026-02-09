@@ -151,7 +151,7 @@ void PowerSpectrumF::add_catalogues(real_prec mcut)
     {
         this->random_cat.set_params(this->params);// this must come first than set_type_of_object
         this->random_cat.set_type_of_object("RANDOM");
-        this->random_cat.read_catalog(this->params._Input_dir_cat()+this->file_random, mcut);
+        this->random_cat.read_catalog(this->params._Input_dir_cat_random()+this->file_random, mcut);
         this->N_random=this->random_cat._NOBJS();
     }
 }
@@ -2596,7 +2596,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
    // We can here read the dark matter density field and determine the CWC
    this->cwclass.set_params(this->params);
    this->cwclass.get_CWC(DM_OVERDENSITY_FIELD);
-   string file_cwc = this->params._Output_directory()+"CWC_vf_lambdath"+to_string(this->params._lambdath())+"_p"+to_string(this->params._unitsim_plabel())+"_Nft"+to_string(this->params._Nft())+".txt";
+   string file_cwc = this->params._Output_directory()+"CWC_vf_lambdath"+to_string(this->params._lambdath())+"_Nft"+to_string(this->params._Nft())+".txt";
    ofstream cwcf; cwcf.open(file_cwc.c_str());
    cwcf<<this->params._lambdath()<<"\t"<<this->cwclass._knots_fraction()<<"\t"<<this->cwclass._filaments_fraction()<<"\t"<<this->cwclass._sheets_fraction()<<"\t"<<this->cwclass._voids_fraction()<<endl;
    cwcf.close();
@@ -3316,7 +3316,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          nname="nubin";
 #endif
         So.message_screen("Identifying bins of secondary properties");
-         string file_bins_log = this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".log";
+         string file_bins_log = this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".log";
          So.message_screen("Writing bining scheme in file ", file_bins_log );
          ofstream binn_l;binn_l.open(file_bins_log.c_str());
          ofstream binn;
@@ -3364,7 +3364,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==bvmax)
            {
 
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[1];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[1];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
              binn_l<<"#Vmax:"<<endl;
@@ -3378,7 +3378,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
 #endif
          if(true==used_prop[label_rs])
            {
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[2];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[2];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
          binn_l<<"#RS:"<<endl;
@@ -3391,7 +3391,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
         }
          if(true==used_prop[label_rvir])
            {
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[3];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[3];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
          binn_l<<"#RVIR:"<<endl;
@@ -3404,7 +3404,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          }
          if(true==used_prop[label_concentration])
            {
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[4];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[4];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
          binn_l<<"#CONCENTRATION:"<<endl;
@@ -3417,7 +3417,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
         }
          if(true==used_prop[label_spin])
            {
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[5];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[5];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
          binn_l<<"#SPIN:"<<endl;
@@ -3431,7 +3431,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==used_prop[label_spin_bullock])
            {
              binn_l<<"#SPIN_BULLOCK:"<<endl;
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[6];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[6];
              binn.open(file_bins.c_str());
              So.message_screen("Writing bining scheme in file ", file_bins );
           tracer_aux.get_intervals_equal_number_aux("_SPIN_BULLOCK_");
@@ -3444,7 +3444,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==used_prop[label_vrms])
            {
          binn_l<<"#VRMS:"<<endl;
-         file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[7];
+         file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[7];
          binn.open(file_bins.c_str());
          So.message_screen("Writing bining scheme in file ", file_bins );
          tracer_aux.get_intervals_equal_number_aux("_VRMS_");
@@ -3457,7 +3457,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==used_prop[label_virial])
            {
          binn_l<<"#VIRIAL:"<<endl;
-         file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[8];
+         file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[8];
          binn.open(file_bins.c_str());
          So.message_screen("Writing bining scheme in file ", file_bins );
          tracer_aux.get_intervals_equal_number_aux("_VIRIAL_");
@@ -3470,7 +3470,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==used_prop[label_btoa])
            {
          binn_l<<"#B_TO_A:"<<endl;
-         file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[9];
+         file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[9];
          binn.open(file_bins.c_str());
          So.message_screen("Writing bining scheme in file ", file_bins );
          tracer_aux.get_intervals_equal_number_aux("_BTOA_");
@@ -3483,7 +3483,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==used_prop[label_ctoa])
            {
          binn_l<<"#C_TO_A:"<<endl;
-         file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[10];
+         file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[10];
          binn.open(file_bins.c_str());
          So.message_screen("Writing bining scheme in file ", file_bins );
          tracer_aux.get_intervals_equal_number_aux("_CTOA_");
@@ -3496,7 +3496,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==mach)
            {
              binn_l<<"#MACH:"<<endl;
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[11];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[11];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
              tracer_aux.get_intervals_equal_number_aux("_MACH_");
@@ -3509,7 +3509,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==tbias)
            {
              binn_l<<"#BIAS:"<<endl;
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[12];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[12];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
              tracer_aux.get_intervals_equal_number_aux("_BIAS_");
@@ -3522,7 +3522,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==tlc)
            {
              binn_l<<"#LC:"<<endl;
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[13];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[13];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
              tracer_aux.get_intervals_equal_number_aux("_LOCAL_OVERDENSITY_");
@@ -3535,7 +3535,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==bta)
            {
              binn_l<<"#TA:"<<endl;
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[14];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[14];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
              tracer_aux.get_intervals_equal_number_aux("_TIDAL_ANISOTROPY_");
@@ -3549,7 +3549,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==bph)
            {
              binn_l<<"#PH:"<<endl;
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[15];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[15];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
              tracer_aux.get_intervals_equal_number_aux("_PEAK_HEIGHT_");
@@ -3564,7 +3564,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==dach)
            {
              binn_l<<"#DACH:"<<endl;
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[16];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[16];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
              tracer_aux.get_intervals_equal_number_aux("_DACH_");
@@ -3577,7 +3577,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
          if(true==dm_local)
            {
              binn_l<<"#lDM:"<<endl;
-             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+"_p"+to_string(this->params._unitsim_plabel())+".txt"+prop_name[17];
+             file_bins=this->params._Output_directory()+"BINNING_"+nname+to_string(im_primary)+"_cwt"+to_string(icw)+".txt"+prop_name[17];
              So.message_screen("Writing bining scheme in file ", file_bins );
              binn.open(file_bins.c_str());
              tracer_aux.get_intervals_equal_number_aux("_LOCALDM_");

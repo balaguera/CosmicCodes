@@ -1419,7 +1419,7 @@ void BiasMT::read_BiasMT_files(string file_X, string file_Y, string file_Y_HR, s
   this->delta_X.resize(NGRID_NEW,0);
   this->delta_X_ini.resize(NGRID_NEW,0);
   this->File.read_array(file_X,this->delta_X);
-  if(this->params._Quantity()=="DELTA")
+  if(this->params._Name_Property_X()=="DELTA")
     for(ULONG i=0;i<this->params._NGRID();++i)
     this->delta_X[i]*=pow(256,3)/(this->params._Lbox(),3)*(1+this->delta_X[i]);
 #ifdef _DISPLACEMENTS_
@@ -1563,7 +1563,7 @@ void BiasMT::analyze_input()
 
       if(true==this->params._Write_PDF_number_counts())
         {
-          string fileX=this->params._Output_directory()+"PDF_NC"+"_X_"+this->params._XNAME()+"_"+this->params._Name_Property_X()+"_MASX"+to_string(this->params._iMAS_X())+"_Nft"+to_string(this->params._Nft())+"_SmoothingScale"+to_string(this->params._smscale())+"_z"+to_string(this->params._redshift())+"_LambdaTH"+to_string(this->params._lambdath())+"_CW"+to_string(this->tstruct)+"_CWclass.txt";
+          string fileX=this->params._Output_directory()+"PDF_NC"+"_X_"+this->params._XNAME()+"_"+this->params._Name_Property_X()+"_MASX"+to_string(this->params._iMAS_X())+"_Nft"+to_string(this->params._Nft())+"_z"+to_string(this->params._redshift())+"_LambdaTH"+to_string(this->params._lambdath())+"_CW"+to_string(this->tstruct)+"_CWclass.txt";
           this->File.write_to_file_i(fileX,this->PDF_NC_X);
         }
       this->nmax_x_onecell=NPART;
@@ -10941,7 +10941,6 @@ struct s_particle_neighbours
 #elif defined _ASSIGN_PROPERTIES_TO_REFERENCE_ && !defined (_ASSIGN_PROPERTIES_TO_NEW_REFERENCE_)
          this->fnameMOCK=this->params._Input_Directory_Y()+this->params._Name_Catalog_Y();
 #elif defined (_ASSIGN_PROPERTIES_TO_MOCK_)
-	 //         this->fnameMOCK=this->params._Output_directory()+"MOCK_TR_Realization"+to_string(this->params._realization())+"_p"+to_string(this->params._unitsim_plabel())+"_TWEB_Nft"+to_string(this->params._Nft());
 	 this->fnameMOCK=this->params._Output_directory()+"MOCK_TR_Realization"+to_string(this->params._realization())+"_MASY0_Nft"+to_string(this->params._Nft());
 #endif
 #ifdef _GET_BiasMT_CAT_
