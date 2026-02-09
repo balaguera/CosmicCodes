@@ -11,6 +11,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include <fstream>
 #include <iostream>
+#include <set>
+#include <stdexcept>
 #include <vector>
 #include <algorithm>
 #include <math.h>
@@ -19,41 +21,53 @@
 #include <iomanip>
 #include <typeinfo>
 #include <variant>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 using namespace std;
 #include "NumericalMethods.h"  // def.h is included in the NumericalMethods.h file
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-struct s_message_pars{
-  string par_name;
-  string description;
-  string options;  
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+struct s_properties_params{
+  std::string par_name;
+  std::string par_name_in_code;
+  std::string description;
+  std::string loading_sections;
+  std::string options;  
   real_prec default_f;
-  string default_s;
+  std::string default_s;
   variant<ULONG, int, float, double, string> default_value;
-
-  void set_par_name(const string &np){par_name=np;}
-  void set_par_description(const string &np){description=np;}
-  void set_par_option(const string &np){options=np;}
   template <typename T>void set_par_default(const T& np){default_value=np;}
   void show()
   {
-    cout<<BLUE<<"Parameter:"<<CYAN<<"\t"<<par_name<<RESET<<endl;
-    cout<<BLUE<<"Description:"<<CYAN<<"\t"<<description<<RESET<<endl;
-    cout<<BLUE<<"Options:"<<CYAN<<"\t"<<options<<RESET<<endl;
-    cout << BLUE << "Default:" << CYAN << "\t";
-    std::visit([](const auto& val) {cout << val;}, default_value);
+    cout << ""<< endl;
+    cout<<BLUE<<"Parameter in json:     "<<CYAN<<"\t"<<par_name<<RESET<<endl;
+    cout<<BLUE<<"Loaded in json-section "<<CYAN<<"\t"<<loading_sections<<RESET<<endl;
+    cout<<BLUE<<"Name in code:          "<<CYAN<<"\t"<<par_name_in_code<<RESET<<endl;
+    cout<<BLUE<<"Description:           "<<CYAN<<"\t"<<description<<RESET<<endl;
+    cout<<BLUE<<"Options:               "<<CYAN<<"\t"<<options<<RESET<<endl;
+//    std::visit([](const auto& val) {cout << val;}, default_value);
     cout << RESET << endl;
+    cout << ""<< endl;
   }
+
 };
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 class Params
 {
 
 private :
   //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  vector<string> enabled_sections;
   /**
    *  @name input/output
    */
@@ -77,8 +91,27 @@ private :
   /**
    *  @name input/output
    */
+  vector<pair<string,vector<ULONG>>> parameter_uvectors;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  vector<pair<string,vector<int>>> parameter_ivectors;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
   vector<pair<string,vector<string>>> parameter_vector_string;
-
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  vector<s_properties_params> parameter_properties;
+  //////////////////////////////////////////////////////////
+ /**
+   *  @name input/output
+   */
+   s_properties_params mpars;
   //////////////////////////////////////////////////////////
   /**
    * @brief Statistics to be measured from a tracer catalog
@@ -103,6 +136,12 @@ private :
    * @details Read from input parameter file.
    **/
   string Input_dir_cat;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief input directory where the tracers, dm and random catalogues are stored
+   * @details Read from input parameter file.
+   **/
+  string Input_dir_cat_random;
   //////////////////////////////////////////////////////////
   /**
    * @brief input directory where the a new reference catalog aimed to be assigned properties is located
@@ -769,7 +808,8 @@ private :
   int Nbins_Mstellar;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Choose an estimator for the luminosity function. Options are Vmax_dc, Vmax_o, Vmax
+   * @brief Choose an estimator for the luminosity function. 
+   * @details Options are Vmax_dc (density dependent), Vmax_o (original), Vmax (row)
    * @details Read from input parameter file.
    */
   string LF_estimator;
@@ -1714,11 +1754,6 @@ private :
   real_prec ldelta_X_min;
   //////////////////////////////////////////////////////////
   /*
-   * @brief Identification of the input density field (density, delta)
-   */
-  string Quantity;
-  //////////////////////////////////////////////////////////
-  /*
    * @brief Number of bins to measure property function for interpolation
    */
   ULONG NMASSbins;
@@ -1731,7 +1766,7 @@ private :
   /*
    * @brief Number of mass bins to mesure power spectrum
    */
-  int NMASSbins_power;
+  ULONG NMASSbins_power;
   //////////////////////////////////////////////////////////
   /*
    * @brief
@@ -1839,11 +1874,6 @@ private :
    */
   real_prec redshift;
 
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief To be deprecated
-   */
-  real_prec smscale;
   //////////////////////////////////////////////////////////
   /**
    * @brief Identification for a realization
@@ -2804,7 +2834,6 @@ private :
    * @details Read from input parameter file.
    */
   int i_spin_bullock_g;
-
   //////////////////////////////////////////////////////////
   /**
    * @brief Identify the column in the ASCII file of the tracer where the information of the \textbf{mean number density} tabulated at each position of the tracer is allocated. If no information on this quantities is provided or is not aimed to be used, set a negative value. This quantity is expected in units of $($Mpc$\,h^{-1})^{-3}$.
@@ -2955,11 +2984,6 @@ private :
    * @brief 
    */  
   ULONG Nnp_window;
-  //////////////////////////////////////////////////////////
-  /*
-   * @brief 
-   */  
-  int Unitsim_plabel;
   //////////////////////////////////////////////////////////
   /*
    * @brief 
@@ -3583,7 +3607,8 @@ public:
   Params(string _par_file):par_file (_par_file)
   {
     this->init_pars();
-    this->read_pars(par_file);
+    this->read_pars_json(par_file);
+    this->read_pars(par_file);//this has enabled the reading of input file, and leave only post-proc opoerations
     this->derived_pars();
   }
   //////////////////////////////////////////////////////////
@@ -3615,16 +3640,33 @@ public:
   void init_pars();
   //////////////////////////////////////////////////////////
   /**
+   * @brief Initialize all the parameteres defined as private variables of the class Params.
+   **/
+  void collect_params_info(string&, string&, string&, string&, string&);
+  //////////////////////////////////////////////////////////
+  /**
    * @brief Explanation of all parameters
    **/
   void explain_pars(string);
 
   //////////////////////////////////////////////////////////
   /**
-   * @brief Read input parameter file and allocate var as private variables of Params class.
+   * @brief Read input parameter file and allocate parameters as private members of Params class.
+   * @details THese private members are to be recoverd using get_ methods of this class
    **/
   void read_pars(string );
-
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Read input parameter file and allocate parameters as private members of Params class.
+   * @details THese private members are to be recoverd using get_ methods of this class
+   **/
+  void forbid_unknown_keys(const json& ,const std::set<std::string>& allowed,const std::string& path);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Read input parameter in json format file and allocate parameters as private members of Params class.
+   * @details THese private members are to be recoverd using get_ methods of this class
+   **/
+  void read_pars_json(string );
   //////////////////////////////////////////////////////////
   /**
    * @brief Computation of derived parameters based on imput params.
@@ -3932,12 +3974,6 @@ public:
    *  @brief Get the value of the private member
    *  @return
    */
-  string _Quantity(){return this->Quantity;}
-  //////////////////////////////////////////////////////////
-  /**
-   *  @brief Get the value of the private member
-   *  @return
-   */
   ULONG _NMASSbins(){return this->NMASSbins;}
   //////////////////////////////////////////////////////////
   /**
@@ -4100,12 +4136,6 @@ public:
    */
   real_prec _redshift(){return this->redshift;}
   void set_redshift(real_prec new_redshift){this->redshift=new_redshift;}
-  //////////////////////////////////////////////////////////
-  /**
-   *  @brief Get the value of the private member
-   *  @return
-   */
-  real_prec _smscale(){return this->smscale;}
   //////////////////////////////////////////////////////////
   /**
    *  @brief Get the value of the private member
@@ -4309,6 +4339,12 @@ public:
    *  @brief Get the value of the private member Input_dir_cat
    *  @return Input_dir_cat
    */
+  string _Input_dir_cat_random () {return this->Input_dir_cat_random;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member Input_dir_cat
+   *  @return Input_dir_cat
+   */
   string _Input_dir_cat_TWO () {return this->Input_dir_cat_TWO;}
   //////////////////////////////////////////////////////////
   /**
@@ -4392,6 +4428,23 @@ public:
    *  @return none
    */
   void set_Input_dir_cat (string _Input_dir_cat) {Input_dir_cat = _Input_dir_cat;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief set the value of the private member Input_dir_cat
+   *  @param _Input_dir_cat input directory where the object and random
+   *  catalogues are stored
+   *  @return none
+   */
+
+  void set_Input_dir_cat_random (string _Input_dir_cat) {Input_dir_cat_random = _Input_dir_cat;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief set the value of the private member Input_dir_cat
+   *  @param _Input_dir_cat input directory where the object and random
+   *  catalogues are stored
+   *  @return none
+   */
+
   void set_Input_dir_cat_new_ref (string _Input_dir_cat) {Input_dir_cat_new_ref = _Input_dir_cat;}
   //////////////////////////////////////////////////////////
   /**
@@ -6680,7 +6733,7 @@ public:
   void set_PropThreshold_MultiLevels(int il, real_prec val){this->list_Props_Threshold_MultiLevels[il]=val;}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief 
+   *  @brief Method implemented to show parameters read from parameter file.
    *  @return
    */
   void show_params();
@@ -6987,13 +7040,6 @@ public:
    *  @return
    */
   string _rbin_type(){return this->rbin_type;}
-
-  ///////////////////////////////////////////////////////// 
-  /**
-   *  @brief 
-   *  @return
-   */
-  int _unitsim_plabel(){return this->Unitsim_plabel;}
 
   ///////////////////////////////////////////////////////// 
   /**

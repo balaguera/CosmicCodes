@@ -32,12 +32,12 @@ using namespace std;
 //////////////////////////////////////////////////////////
  /**
  /**
-   * @brief Convert cartessian coordinates  to equatorial coordinates. 
+   * @brief Convert cartessian coordinates  to equatorial coordinates.  Output in radians
    */
   void cartesian_to_equatorial(real_prec, real_prec, real_prec, real_prec &, real_prec &, real_prec &);
 //////////////////////////////////////////////////////////
  /**
-   * @brief Convert cartessian coordinates  to spherical coordinates. 
+   * @brief Convert cartessian coordinates  to spherical coordinates. Output in radians
    */
   void cartesian_to_spherical(real_prec, real_prec, real_prec, real_prec &, real_prec &, real_prec &);
 ///////////////////////////////////////////////////////

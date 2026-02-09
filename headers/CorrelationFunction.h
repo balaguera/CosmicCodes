@@ -8,8 +8,12 @@
 # include <cctype>
 # include <stdio.h>
 # include <fstream>
-
+# include "NumericalMethods.h"
 # include "CosmologicalFunctions.h"
+# include "BiasFunctions.h"
+# include "Hod.h"
+# include "DensityProfiles.h"
+# include "ScreenOutput.h"
 # include "PowerSpectrumTH.h"
 
 
