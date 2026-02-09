@@ -4,7 +4,9 @@
  *  @brief Uses the ComiCalc library and the file BiasMappingTechnique
  *  @authors Andrés Balaguera-Antolinez
  */
-# include "CosmiCalcLIB.h"
+
+# include "../headers/CosmiCalcLIB.h"
+
 ////////////////////////////////////////////////////////////////////////////
 using namespace std;
 ////////////////////////////////////////////////////////////////////////////

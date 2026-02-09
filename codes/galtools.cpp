@@ -19,6 +19,7 @@
 # include <sstream>
 # include <iomanip>
 # include <string>
+# include "../headers/CosmiCalcLIB.h"
 # include "../headers/Galaxy.h"
 using namespace std;
 

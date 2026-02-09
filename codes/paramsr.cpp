@@ -31,13 +31,13 @@ int main(int argc, char *argv[]){
       else if(temp=='n') // displays input parameters
         {
           string par_name = argv[2];
-          Params params;
+          Params params("default.json");
           params.explain_pars(par_name);
         }
       else if(temp=='s') // displays input parameters
         {
-          string par_name = argv[2];
-          Params params(par_name);
+          string par_file = argv[2];
+          Params params(par_file);
           params.show_params();
         }
     }

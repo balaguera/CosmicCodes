@@ -5,7 +5,7 @@
  *  @authors Andrés Balaguera-Antolinez
  */
 #include "../headers/def.h"
-#include "CosmiCalcLIB.h"
+#include "../headers/CosmiCalcLIB.h"
 ////////////////////////////////////////////////////////////////////////////
 using namespace std;
 ////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
       So.message(start_all);
       par_file_BiasMT = argv[2];
       Params params(par_file_BiasMT);
-      Catalog catalog(params); // this is redundant
+      Catalog catalog(params); 
       catalog.analyze_cat(true);
       So.message_time(start_all);
     }
@@ -85,7 +85,6 @@ int main(int argc, char *argv[])
         dm_field_f[i] = static_cast<real_prec>(dm_field[i]);
       dm_field.clear();
       dm_field.shrink_to_fit();
-      //          exit(0);
       PowerSpectrumF power(params);
       power.object_by_object_bias(cat.Halo, dm_field_f);
     }
@@ -110,8 +109,8 @@ int main(int argc, char *argv[])
       dm_field.shrink_to_fit();
       PowerSpectrumF power(params);
       power.object_by_object_bias(cat.Halo, dm_field_f);
-#else
       So.message_screen("Reading bias from file file", out_bias);
+#else
       string out_bias = params._Output_directory() + "individual_bias_invPhase.txt";
       ifstream bout;
       bout.open(out_bias.c_str());
