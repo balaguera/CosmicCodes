@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
     exit(1);
   }
 
-  while((temp =  getopt(argc, argv, "hadi:b:")) != -1)
+  while((temp =  getopt(argc, argv, "had:b:")) != -1)
     {
       if(temp=='h')
         So.usage(argv[0]);
@@ -35,12 +35,6 @@ int main(int argc, char *argv[]){
       else if (temp=='a')  // Show authors
         So.author();
 
-      else if(temp=='i') // displays input parameters
-        {
-          par_file_BiasMT = argv[2];
-          Params params(par_file_BiasMT);
-          params.show_params();
-        }
       else if(temp=='d') // displays input parameters
         {
           So.show_preproc();
