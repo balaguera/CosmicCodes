@@ -251,6 +251,13 @@ class Cosmology{
   /** 
    * @public
    * @param z Cosmological Redshift
+   * @return Comoving_angular_diameter_distance at the input redshift
+   */
+  real_prec Kaiser_factor(real_prec&, real_prec& growth);
+  //////////////////////////////////////////////////////////
+  /** 
+   * @public
+   * @param z Cosmological Redshift
    * @return Proper_angular_diameter_distance to be interpolated
    */
   real_prec inter_proper_angular_diameter_distance(real_prec z);

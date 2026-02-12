@@ -117,6 +117,7 @@ public:
   Statistics(real_prec m1, real_prec m2, int Np){
      compute_int_table_mass(m1,m2, Np);
   }
+
   //////////////////////////////////////////////////////////
   /**
    * @brief
@@ -125,7 +126,7 @@ public:
   ~Statistics(){}
   //////////////////////////////////////////////////////////
   /**
-   * @brief Vairnce of mass fluctuations
+   * @brief Variance of mass fluctuations
    * @arg mass, log10(M),
    * @arg reds, Cosmological redshift,
   */

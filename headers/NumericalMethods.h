@@ -24,6 +24,7 @@
 # include <cassert>
 # include <sstream>
 # include <fftw3.h>
+# include <getopt.h>
 # include <gsl/gsl_sf_gamma.h>
 # include <gsl/gsl_bspline.h>
 # include <gsl/gsl_multifit.h>
@@ -977,4 +978,3 @@ template <typename Type> void check_if_negative_number(Type a){
         throw std::domain_error( "Received positive value" );
 }
 #endif
-////////////////////////////////////////////////////////////////////////////

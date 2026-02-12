@@ -2707,6 +2707,13 @@ private :
    * @details Read from input parameter file.
    */  
   string Output_directory;
+
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Path to output directory for cosmiclib calculations
+   */  
+  string cosmo_output;
+
   //////////////////////////////////////////////////////////
   /**
    * @brief 
@@ -3206,6 +3213,32 @@ private :
    *  @name input/output
    */
   string mass_function_fit;
+
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool show_mass_function_plot;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool show_halo_mass_bias_plot;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool show_power_spectrum_plot;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool show_density_profile_r_plot;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool show_density_profile_k_plot;
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
@@ -3396,12 +3429,27 @@ private :
   /**
    *  @name input/output
    */
-  bool compute_output_linear_power_spectrum;
+  bool compute_linear_power_spectrum;
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
-  bool compute_output_non_linear_power_spectrum;
+  bool compute_non_linear_power_spectrum_halofit;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool compute_non_linear_power_spectrum_pt;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool compute_halo_model_galaxy_power_spectrum;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool compute_halo_model_galaxy_correlation_function;
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
@@ -3436,6 +3484,16 @@ private :
   /**
    *  @name input/output
    */
+  string galaxy_ps_halo_model_output_file;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  string galaxy_cf_halo_model_output_file;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
   string non_linear_matter_ps_pt_output_file;
   //////////////////////////////////////////////////////////
   /**
@@ -3447,16 +3505,6 @@ private :
    *  @name input/output
    */
   real_prec coef_concentration;
-  //////////////////////////////////////////////////////////
-  /**
-   *  @name input/output
-   */
-  string galaxy_power_spectrum_halo_model_output_file;
-  //////////////////////////////////////////////////////////
-  /**
-   *  @name input/output
-   */
-  string galaxy_correlation_function_halo_model_output_file;
   //////////////////////////////////////////////////////////
   /**
    *  @name Theoretical Power Spectrum
@@ -3481,12 +3529,17 @@ private :
   /**
    *  @name Theoretical Power Spectrum
    */
-  bool compute_output_linear_correlation_function;
+  bool compute_linear_correlation_function;
   //////////////////////////////////////////////////////////
   /**
    *  @name Theoretical Power Spectrum
    */
-  bool compute_output_non_linear_correlation_function;
+  bool compute_non_linear_correlation_function_halofit;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name Theoretical Power Spectrum
+   */
+  bool compute_non_linear_correlation_function_pt;
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
@@ -3717,6 +3770,16 @@ public:
    */
   string _Output_directory(){return this->Output_directory;}
   void set_Output_directory(string new_Output_directory){this->Output_directory=new_Output_directory;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief get/set the value of the private member
+   *  @return
+   */
+  void set_cosmo_output(string utput){this->cosmo_output=utput;}
+
+
+
+
   //////////////////////////////////////////////////////////
   /**
    *  @brief Get the value of the private member
@@ -7504,6 +7567,31 @@ public:
   /**
    *  @name input/output
    */
+  bool _show_mass_function_plot() {return this->show_mass_function_plot;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool _show_halo_mass_bias_plot() {return this->show_halo_mass_bias_plot;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool _show_power_spectrum_plot() {return this->show_power_spectrum_plot;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool _show_density_profile_r_plot() {return this->show_density_profile_r_plot;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool _show_density_profile_k_plot() {return this->show_density_profile_k_plot;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
   real_prec _sigma_ln() {return this->sigma_ln;}
   //////////////////////////////////////////////////////////
   /**
@@ -7604,16 +7692,6 @@ public:
   /**
    *  @name input/output
    */
-  string _galaxy_power_spectrum_halo_model_output_file(){return galaxy_power_spectrum_halo_model_output_file;}
-  //////////////////////////////////////////////////////////
-  /**
-   *  @name input/output
-   */
-  string _galaxy_correlation_function_halo_model_output_file(){return galaxy_correlation_function_halo_model_output_file;}
-  //////////////////////////////////////////////////////////
-  /**
-   *  @name input/output
-   */
   real_prec _M_min_effective() {return M_min_effective;}
   //////////////////////////////////////////////////////////
   /**
@@ -7649,6 +7727,7 @@ public:
    *  @name input/output
    */
   string _mass_function_output_file() {return mass_function_output_file ;}
+  void set_mass_function_output_file(string ss){mass_function_output_file=ss;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
@@ -7658,27 +7737,45 @@ public:
   /**
    *  @name input/output
    */
-  string _halo_mass_bias_output_file() {return halo_mass_bias_output_file ;}
+  string _halo_mass_bias_output_file() {return this->halo_mass_bias_output_file ;}
+  void set_halo_mass_bias_output_file(string ss) {this->halo_mass_bias_output_file=ss;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
-  string _effective_halo_mass_bias_output_file() {return effective_halo_mass_bias_output_file ;}
+  string _effective_halo_mass_bias_output_file() {return this->effective_halo_mass_bias_output_file ;}
+  void set_effective_halo_mass_bias_output_file(string ss) {this->effective_halo_mass_bias_output_file=ss;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
-  string _effective_halo_mean_number_density_output_file() {return effective_halo_mean_number_density_output_file ;}
+  string _effective_halo_mean_number_density_output_file() {return this->effective_halo_mean_number_density_output_file ;}
+  void set_effective_halo_mean_number_density_output_file(string ss) {this->effective_halo_mean_number_density_output_file=ss ;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
-  bool _compute_output_linear_power_spectrum() {return compute_output_linear_power_spectrum ;}
+  bool _compute_linear_power_spectrum() {return this->compute_linear_power_spectrum ;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
-  bool _compute_output_non_linear_power_spectrum() {return compute_output_non_linear_power_spectrum  ;}
+  bool _compute_non_linear_power_spectrum_halofit() {return this->compute_non_linear_power_spectrum_halofit ;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool _compute_non_linear_power_spectrum_pt() {return this->compute_non_linear_power_spectrum_pt ;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool _compute_halo_model_galaxy_power_spectrum() {return this->compute_halo_model_galaxy_power_spectrum;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool _compute_halo_model_galaxy_correlation_function() {return this->compute_halo_model_galaxy_correlation_function;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
@@ -7709,16 +7806,19 @@ public:
    *  @name input/output
    */
   string _linear_matter_ps_output_file() {return linear_matter_ps_output_file  ;}
+  void set_linear_matter_ps_output_file(string ss){this->linear_matter_ps_output_file=ss;} 
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
   string _non_linear_matter_ps_halo_fit_output_file() {return non_linear_matter_ps_halo_fit_output_file ;}
+  void set_non_linear_matter_ps_halo_fit_output_file(string ss){this->non_linear_matter_ps_halo_fit_output_file=ss;} 
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
   string _non_linear_matter_ps_pt_output_file() {return non_linear_matter_ps_pt_output_file ;}
+  void set_non_linear_matter_ps_pt_output_file(string ss){this->non_linear_matter_ps_pt_output_file=ss;} 
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
@@ -7734,11 +7834,25 @@ public:
    *  @name input/output
    */
   string _linear_matter_cf_output_file() {return linear_matter_cf_output_file ;}
+  void set_linear_matter_cf_output_file(string ss) {this->linear_matter_cf_output_file=ss;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  string _galaxy_cf_halo_model_output_file() {return this->galaxy_cf_halo_model_output_file ;}
+  void set_galaxy_cf_halo_model_output_file(string ss) {this->galaxy_cf_halo_model_output_file=ss;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
   string _non_linear_matter_cf_halo_fit_output_file() {return non_linear_matter_cf_halo_fit_output_file ;}
+  void set_non_linear_matter_cf_halo_fit_output_file(string ss) {non_linear_matter_cf_halo_fit_output_file=ss;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  string _galaxy_ps_halo_model_output_file() {return this->galaxy_ps_halo_model_output_file ;}
+  void set_galaxy_ps_halo_model_output_file(string ss) {this->galaxy_ps_halo_model_output_file=ss;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
@@ -7769,6 +7883,7 @@ public:
    *  @name input/output
    */
   string _density_profile_r_output_file() {return density_profile_r_output_file ;}
+  void  set_density_profile_r_output_file(string ss) {this->density_profile_r_output_file=ss;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
@@ -7794,16 +7909,22 @@ public:
    *  @name input/output
    */
   string _density_profile_k_output_file(){return density_profile_k_output_file ;}
+  void  set_density_profile_k_output_file(string ss) {this->density_profile_k_output_file=ss;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
-  bool _compute_output_linear_correlation_function(){return compute_output_linear_correlation_function;}
+  bool _compute_linear_correlation_function(){return compute_linear_correlation_function;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output
    */
-  bool _compute_output_non_linear_correlation_function(){return compute_output_non_linear_correlation_function;}
+  bool _compute_non_linear_correlation_function_pt(){return compute_non_linear_correlation_function_pt;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  bool _compute_non_linear_correlation_function_halofit(){return compute_non_linear_correlation_function_halofit;}
   //////////////////////////////////////////////////////////
   /**
    *  @name input/output

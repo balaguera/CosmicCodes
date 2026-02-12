@@ -14,9 +14,9 @@
 // Pre-proc directives for COSMO-LIB
 //#define TIME
 //#define _GET_EFF_BIAS_REDSHIFT_
-#define _GET_ONLY_MASS_FUNCTION_
-#define _GET_POWER_SPECTRUM_
-#define _GET_NL_POWER_SPECTRUM_
+//#define _GET_ONLY_MASS_FUNCTION_
+//#define _GET_POWER_SPECTRUM_
+//#define _GET_NL_POWER_SPECTRUM_
 //#define _GET_NL_PT_POWER_SPECTRUM_
 
 #ifdef _GET_NL_POWER_SPECTRUM_
@@ -60,276 +60,255 @@ class CosmoLib{
  private:
     //////////////////////////////////////////////////////////
     /**
-     *  @brief get the value of the the private member type_of_lbinning
-     *  @return type_of_lbinning
+     *  @brief Object of type Cosmology
+     *  @return 
      */
-
     Cosmology Cf;
     //////////////////////////////////////////////////////////
     /**
-     *  @brief get the value of the the private member type_of_lbinning
-     *  @return type_of_lbinning
+     *  @brief Object of type FileManager
      */
     FileOutput File;
     //////////////////////////////////////////////////////////
     /**
-     *  @brief get the value of the the private member type_of_lbinning
-     *  @return type_of_lbinning
+     *  @brief Object of type Statistics
      */
     Statistics Cs;
     //////////////////////////////////////////////////////////
     /**
-     *  @brief get the value of the the private member type_of_lbinning
-     *  @return type_of_lbinning
+     *  @brief Object of type PowerSpectrum
      */
     PowerSpectrum Ps;
     //////////////////////////////////////////////////////////
     /**
-     *  @brief get the value of the the private member type_of_lbinning
-     *  @return type_of_lbinning
+     *  @brief Object of type CorrelationFunction
+     */
+    CorrelationFunctionTH SCf;
+    //////////////////////////////////////////////////////////
+    /**
+     *  @brief Object of type ScreenOutput
      */
     ScreenOutput So;
 
 // ---------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------------------------------------------------------------------------
 public:
     //////////////////////////////////////////////////////////
     /**
-     *  @brief get the value of the the private member type_of_lbinning
-     *  @return type_of_lbinning
+     *  @brief Default constructor of the CosmoLib class
      */
-
-  CosmoLib(){}  // Default constructor
+  CosmoLib(){} 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Constructor passed the impot parameter file to
+   *  @brief Constructor passing an object of type Params 
    *  @return 
    */
-  CosmoLib(Params _param) : params(_param) , s_cosmo_par(_param.s_cosmo_pars) {
+  CosmoLib(Params _param) : 
+    params(_param) ,
+    s_cosmo_par(_param.s_cosmo_pars),  
+    Cs(_param._M_min_effective(), _param._M_max_effective(), _param._npoints_mf()), 
+    Ps(_param.s_cosmo_pars,_param._kmin_integration() ,_param._kmax_integration() , _param._npoints_dp_k(),10, _param._M_min_mf(),_param._M_max_mf(), _param._npoints_mf()),
+    SCf(_param)
+   {
     this->Cf.set_cosmo_pars(this->s_cosmo_par);
     this->Cf.check_cosmo_pars();
-    Statistics Csa(this->params._M_min_mf(), this->params._M_max_mf(), this->params._npoints_mf());
-    this->Cs=Csa;
-    PowerSpectrum Psa(this->s_cosmo_par,this->params._kmin_integration() ,this->params._kmax_integration() ,this->params._npoints_dp_k(),10, this->params._M_min_mf(),params._M_max_mf(),params._npoints_mf());
-    this->Ps=Psa;
+
+    // Compute tables to perform integrals using GL weights
+    this->Cs.compute_int_table_wavenumber(this->params._kmin_ps(),this->params._kmax_ps());
+
+    // Compute tables to perform integrals using GL weights
+    this->Cs.compute_int_table_mass(this->params._M_min_effective(), this->params._M_max_effective());
   }
    //////////////////////////////////////////////////////////
    /**
-    *  @brief get the value of the the private member type_of_lbinning
-    *  @return type_of_lbinning
-    */
+    *  @brief Default destructor
+   */
   ~CosmoLib(){}
   //////////////////////////////////////////////////////////
   /**
-   *  @brief 
-   *  @return 
+   *  @brief Object of type Parms.
    */
    Params params;
    //////////////////////////////////////////////////////////
    /**
-    *  @brief get the value of the the private member type_of_lbinning
-    *  @return type_of_lbinning
+    *  @brief Strcucure of type s_CosmologicalParameters
     */
    s_CosmologicalParameters s_cosmo_par;
    //////////////////////////////////////////////////////////
    /**
-    *  @brief get the value of the the private member type_of_lbinning
-    *  @return type_of_lbinning
+    *  @brief Container for masses
     */
   vector<gsl_real> v_mass;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for mass dispersion
    */
   vector<gsl_real> v_sigma_mass;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for halo mass function
    */
   vector<gsl_real> v_mass_function;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for halo mass 
    */
   vector<gsl_real> v_halo_mass_bias;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for effective halo mass 
    */
   vector<gsl_real> v_effective_halo_mass_bias;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for effective halo mena number density
    */
   vector<gsl_real> v_effective_halo_mean_number_density;
 
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  Container for power spectrum
    */
   vector<gsl_real> v_k_ps;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief   Container for non linear power spectrum 
    */
-  vector<gsl_real> v_nl_power_spectrum;
+  vector<gsl_real> v_nl_power_spectrum_halofit;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  Container for non linear power spectrum derived from perturbation theory
    */
   vector<gsl_real> v_nl_power_spectrum_pt;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  Container for non linear power spectrum derived from EH fitting formulae
    */
 
   vector<gsl_real> v_l_power_spectrum;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  
    */
-
   vector<gsl_real>pk_aux;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  
    */
   vector<gsl_real>kk_aux;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  
    */
   vector<real_prec> v_r_cf;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for non linear correlation function derived from halo fit
    */
-  vector<real_prec> v_nl_correlation_function;
+  vector<real_prec> v_nl_correlation_function_halofit;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for non linear correlation function derived from perturbation theory
+
+   */
+  vector<real_prec> v_nl_correlation_function_pt;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Container for linear correlation function 
+
    */
   vector<real_prec> v_l_correlation_function;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  
+
    */
   vector<real_prec> v_r_dp;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  Container for density profile in real space
+
    */
   vector<real_prec> v_density_profile_r;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  
    */
   vector<gsl_real> v_k_dp;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  Container for density profile in Fourier space
    */
   vector<gsl_real> v_density_profile_k;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for the satellite-satellite power spectrum
    */
   vector<gsl_real> v_galaxy_power_1h_ss;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for the satellite-central power spectrum
    */
   vector<gsl_real> v_galaxy_power_1h_sc;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  Container for the 2-h term power spectrum
    */
   vector<gsl_real> v_galaxy_power_2h;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  Container for galaxy-matter bias
    */
   vector<gsl_real> v_galaxy_matter_bias;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  Container for the total galaxy power spectrum
    */
   vector<gsl_real> v_galaxy_power_spectrum;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for the satellite-satellite correlation function
    */
   vector<real_prec> v_galaxy_correlation_1h_ss;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for the satellite-central correlation function 
    */
   vector<real_prec> v_galaxy_correlation_1h_sc;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief Container for the 2h term correlation function
    */
   vector<real_prec> v_galaxy_correlation_2h;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  Container for the total galaxy correlation function
    */
   vector<real_prec> v_galaxy_correlation;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief get the value of the the private member type_of_lbinning
-   *  @return type_of_lbinning
+   *  @brief  
    */
-
   void show_cosmo_struct();
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Compute cosmological obserrvables
-   *  @return
+   *  @brief Compute cosmological observables
+   *  @details Observables are computed at a fixed redshift (given in the parameter file)
    */
-  void get_cosmolib();
+  void get_hmodel();
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Compute cosmological observables
+   *  @details Observables are computed at a fixed redshift (given in the parameter file)
+   */
+  void get_cosmological_information();
   //////////////////////////////////////////////////////////
   /**
    *  @brief Compute dNdz for galaxies
    *  @return
    */
   void get_dndz_gal();
-  //////////////////////////////////////////////////////////
-  /**
-   *  @brief This does the same as the constructor above, but as an object of the type CosmoLib
-   *  @return
-   */
-  void set_par_file(string);
-
 
 };
 

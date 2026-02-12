@@ -246,6 +246,12 @@ class FileOutput{
    *@brief   Write output
    */
   void write_to_file(string fname, vector<real_prec> &kve, vector< real_prec> &bis, vector< real_prec> &sn_bis, vector<int> &mod);
+
+  //////////////////////////////////////////////////////////  
+  /** 
+   *@brief   Write output
+   */
+  void write_to_file(const std::string& fname,const std::vector<std::vector<real_prec>>& columns);
   //////////////////////////////////////////////////////////
   /** 
    *@brief   Write output
@@ -443,6 +449,11 @@ template<class Type> void read_array_t(string fname, vector<Type>&OUT){
    *@brief  Write output
    */
   void write_to_file(string fname, vector<gsl_real>& kve, vector<gsl_real> &pk, vector<gsl_real> &pkk,vector<gsl_real> &pkkk, vector<gsl_real> &si, vector<gsl_real>& nmod);
+  //////////////////////////////////////////////////////////
+  /** 
+   *@brief  Write output
+   */
+  void write_to_file(string fname, vector<gsl_real>&, vector<gsl_real> &, vector<gsl_real> &,vector<gsl_real> &, vector<gsl_real> &, vector<gsl_real>&,vector<gsl_real>& );
   //////////////////////////////////////////////////////////
   /** 
    *@brief   Write output
