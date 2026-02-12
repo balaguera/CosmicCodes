@@ -33,7 +33,7 @@ void Params::explain_pars(string par_name)
   std::cout<<GREEN<<"CosmicCodes. Paramater Info. "<<par_name<<std::endl;
   for(int i=0; i<this->parameter_properties.size();++i)
   {
-    if(parameter_properties[i].par_name==par_name)
+    if(parameter_properties[i].par_name==par_name || parameter_properties[i].par_name_in_code==par_name)
       parameter_properties[i].show();
   }
 }
@@ -3781,7 +3781,7 @@ void Params::read_pars_json(std::string file){
     this->Output_directory = CosmologicalLibrary.value(pname, "null");
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_string.emplace_back(pname, this->Output_directory);
-
+    this->set_cosmo_output(this->Output_directory);
     // cosmological_redshift
     pname = "cosmological_redshift";
     pname_c = "redshift";
@@ -3841,7 +3841,8 @@ void Params::read_pars_json(std::string file){
             "mass_scaling" ,
             "number_values_mass_function" , 
             "use_external_power_spectrum_file" ,
-            "external_linear_power_spectrum_file"
+            "external_linear_power_spectrum_file",
+            "show_plot"
         },
       "MassFunctionTH");
 
@@ -3937,14 +3938,36 @@ void Params::read_pars_json(std::string file){
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_string.emplace_back(pname, this->file_power);
 
+    // external_linear_power_spectrum_file
+    pname = "show_plot";
+    pname_c = "show_mass_function_plot";
+    description = "Show the mass function plot with python";
+    options = "BOOL";
+    this->show_mass_function_plot = MassFunctionTH.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->show_mass_function_plot);
+
+
+
 
     //-----------
     const auto &HaloBiasTH = CosmologicalLibrary.at("HaloBiasTH");
     this_section="HaloBiasTH";
     this->forbid_unknown_keys(HaloBiasTH, 
-         {"halo_bias_fit"
+         {"halo_bias_fit",
+          "show_plot"
          },
       "HaloBiasTH");
+
+// external_linear_power_spectrum_file
+    pname = "show_plot";
+    pname_c = "show_halo_mass_bias_plot";
+    description = "Show the mass function plot with python";
+    options = "BOOL";
+    this->show_halo_mass_bias_plot = HaloBiasTH.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->show_halo_mass_bias_plot);
+
 
     this->halo_mass_bias_fit = HaloBiasTH.value("halo_bias_fit", "Tinker");
     this->parameter_string.push_back(make_pair("halo_bias_fit", this->halo_mass_bias_fit));
@@ -3965,10 +3988,12 @@ void Params::read_pars_json(std::string file){
             "number_rvalues_density_profile", 
             "coef_concentration_amp",
             "coef_concentration" ,
+            "show_plot_r",
             "min_kvalue_dp" ,
             "max_kvalue_dp"  ,
             "kval_dp_scaling" ,
-            "number_kvalues_density_profile"
+            "number_kvalues_density_profile",
+            "show_plot_k"
          },
       "DarkMatterHaloDensityProfile");
 
@@ -4093,6 +4118,23 @@ void Params::read_pars_json(std::string file){
 
     this->density_profile_k_output_file = DarkMatterHaloDensityProfile.value("density_profile_k_output_file", "density_profile_k");
     
+
+    pname = "show_plot_r";
+    pname_c = "show_density_profile_r";
+    description = "Show the halo density profile with python";
+    options = "BOOL";
+    this->show_density_profile_r_plot= DarkMatterHaloDensityProfile.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->show_density_profile_r_plot);
+
+    pname = "show_plot_k";
+    pname_c = "show_density_profile_k";
+    description = "Show the halo density in Fourier profile with python";
+    options = "BOOL";
+    this->show_density_profile_k_plot = DarkMatterHaloDensityProfile.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->show_density_profile_k_plot);
+
     //------------
     index_rel=0;
     const auto &HOD = CosmologicalLibrary.at("HOD");
@@ -4163,13 +4205,16 @@ void Params::read_pars_json(std::string file){
     this->forbid_unknown_keys(PowerSpectrumTH, 
          {
             "compute_linear_power_spectrum",
-            "compute_nonlinear_power_spectrum",
+            "compute_non_linear_power_spectrum_halofit",
+            "compute_non_linear_power_spectrum_pt",
+            "compute_halo_model_galaxy_power_spectrum",
             "min_kvalue_power_spectrum",
             "max_kvalue_power_spectrum",
             "kval_scaling",
             "min_kvalue_for_integration",
             "max_kvalue_for_integration",
-            "number_of_values_power_spectrum"        
+            "number_of_values_power_spectrum",
+            "show_plot"        
          },
       "PowerSpectrumTH");
 
@@ -4177,23 +4222,43 @@ void Params::read_pars_json(std::string file){
 
     // compute_linear_power_spectrum
     pname = "compute_linear_power_spectrum";
-    pname_c = "compute_output_linear_power_spectrum";
+    pname_c = "compute_linear_power_spectrum";
     description = "Compute the linear matter power spectrum.";
     options = "BOOL";
-    this->compute_output_linear_power_spectrum =
+    this->compute_linear_power_spectrum =
         PowerSpectrumTH.value(pname, false);
     this->collect_params_info(pname, pname_c, this_section, description, options);
-    this->parameter_boolean.emplace_back(pname, this->compute_output_linear_power_spectrum);
+    this->parameter_boolean.emplace_back(pname, this->compute_linear_power_spectrum);
 
     // compute_nonlinear_power_spectrum
-    pname = "compute_nonlinear_power_spectrum";
-    pname_c = "compute_output_non_linear_power_spectrum";
-    description = "Compute the nonlinear matter power spectrum.";
+    pname = "compute_non_linear_power_spectrum_halofit";
+    pname_c = "compute_non_linear_power_spectrum_halofit";
+    description = "Compute the non-linear matter power spectrum using halo fit algorithm";
     options = "BOOL";
-    this->compute_output_non_linear_power_spectrum =
-        PowerSpectrumTH.value("compute_nonlinear_power_spectru", false); // note key typo preserved
+    this->compute_non_linear_power_spectrum_halofit =
+        PowerSpectrumTH.value(pname, false); // note key typo preserved
     this->collect_params_info(pname, pname_c, this_section, description, options);
-    this->parameter_boolean.emplace_back(pname, this->compute_output_non_linear_power_spectrum);
+    this->parameter_boolean.emplace_back(pname, this->compute_non_linear_power_spectrum_halofit);
+
+    // compute_nonlinear_power_spectrum using pt
+    pname = "compute_non_linear_power_spectrum_pt";
+    pname_c = "compute_non_linear_power_spectrum_pt";
+    description = "Compute the non-linear matter power spectrum using eulerian perturbation theory. This is available when the halo fit power is computed.";
+    options = "BOOL";
+    this->compute_non_linear_power_spectrum_pt = PowerSpectrumTH.value(pname, false); // note key typo preserved
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->compute_non_linear_power_spectrum_pt);
+
+    // compute_nonlinear_power_spectrum using pt
+    pname = "compute_halo_model_galaxy_power_spectrum";
+    pname_c = "compute_halo_model_galaxy_power_spectrum";
+    description = "Compute the non-linear galaxy power spectrum using Halo Model.";
+    options = "BOOL";
+    this->compute_halo_model_galaxy_power_spectrum = PowerSpectrumTH.value(pname, false); // note key typo preserved
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->compute_halo_model_galaxy_power_spectrum);
+
+
 
     // min_kvalue_power_spectrum
     pname = "min_kvalue_power_spectrum";
@@ -4240,18 +4305,17 @@ void Params::read_pars_json(std::string file){
     pname_c = "linear_matter_ps_output_file";
     description = "Output file for linear matter power spectrum.";
     options = "STRING";
-    this->linear_matter_ps_output_file =
-        PowerSpectrumTH.value(pname, "linear_matter_power_spectrum_EH");
+    this->linear_matter_ps_output_file =PowerSpectrumTH.value(pname, "linear_matter_power_spectrum_EH");
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_string.emplace_back(pname, this->linear_matter_ps_output_file);
 
     // output_file_non_linear_hm_power_spectrum
-    pname = "output_file_non_linear_hm_power_spectrum";
+    pname = "output_file_non_linear_halo_fit_power_spectrum";
     pname_c = "non_linear_matter_ps_halo_fit_output_file";
     description = "Output file for nonlinear matter power spectrum from halo model.";
     options = "STRING";
     this->non_linear_matter_ps_halo_fit_output_file =
-        PowerSpectrumTH.value(pname, "non_linear_matter_power_spectrum_hm");
+        PowerSpectrumTH.value(pname, "non_linear_matter_power_spectrum_hf");
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_string.emplace_back(pname, this->non_linear_matter_ps_halo_fit_output_file);
 
@@ -4266,14 +4330,23 @@ void Params::read_pars_json(std::string file){
     this->parameter_string.emplace_back(pname, this->non_linear_matter_ps_pt_output_file);
 
     // galaxy_power_spectrum_halo_model_output_file
-    pname = "galaxy_power_spectrum_halo_model_output_file";
-    pname_c = "galaxy_power_spectrum_halo_model_output_file";
+    pname = "galaxy_ps_halo_model_output_file";
+    pname_c = "galaxy_ps_halo_model_output_file";
     description = "Output file for galaxy power spectrum from halo model.";
     options = "STRING";
-    this->galaxy_power_spectrum_halo_model_output_file =
-        PowerSpectrumTH.value(pname, "galaxy_power_spectrum_halo_model");
+    this->galaxy_ps_halo_model_output_file =
+        PowerSpectrumTH.value(pname, "galaxy_ps_halo_model");
     this->collect_params_info(pname, pname_c, this_section, description, options);
-    this->parameter_string.emplace_back(pname, this->galaxy_power_spectrum_halo_model_output_file);
+    this->parameter_string.emplace_back(pname, this->galaxy_ps_halo_model_output_file);
+
+ // external_linear_power_spectrum_file
+    pname = "show_plot";
+    pname_c = "show_power_spectrum_plot";
+    description = "Show the halo model galaxy power spectrum";
+    options = "BOOL";
+    this->show_power_spectrum_plot = PowerSpectrumTH.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->show_power_spectrum_plot);
 
 //-----------
     const auto &CorrelationFunctionTH = CosmologicalLibrary.at("CorrelationFunctionTH");
@@ -4282,7 +4355,9 @@ void Params::read_pars_json(std::string file){
     this->forbid_unknown_keys(CorrelationFunctionTH, 
          {
             "compute_linear_correlation_function",
-            "compute_non_linear_correlation_function",
+            "compute_non_linear_correlation_function_halofit",
+            "compute_non_linear_correlation_function_pt",
+            "compute_halo_model_galaxy_correlation_function",
             "min_r_value_correlation_function",
             "max_r_value_correlation_function",
             "separation_scaling",
@@ -4294,21 +4369,40 @@ void Params::read_pars_json(std::string file){
 
     // compute_linear_correlation_function
     pname = "compute_linear_correlation_function";
-    pname_c = "compute_output_linear_correlation_function";
+    pname_c = "compute_linear_correlation_function";
     description = "Compute linear correlation function.";
     options = "BOOL";
-    this->compute_output_linear_correlation_function = CorrelationFunctionTH.value(pname, false);
+    this->compute_linear_correlation_function = CorrelationFunctionTH.value(pname, false);
     this->collect_params_info(pname, pname_c, this_section, description, options);
-    this->parameter_boolean.emplace_back(pname, this->compute_output_linear_correlation_function);
+    this->parameter_boolean.emplace_back(pname, this->compute_linear_correlation_function);
 
     // compute_non_linear_correlation_function
-    pname = "compute_non_linear_correlation_function";
-    pname_c = "compute_output_non_linear_correlation_function";
-    description = "Compute non-linear correlation function.";
+    pname = "compute_non_linear_correlation_function_halofit";
+    pname_c = "compute_non_linear_correlation_function_halofit";
+    description = "Compute non-linear correlation function using the halo fit power spectrum";
     options = "BOOL";
-    this->compute_output_non_linear_correlation_function = CorrelationFunctionTH.value(pname, false);
+    this->compute_non_linear_correlation_function_halofit = CorrelationFunctionTH.value(pname, false);
     this->collect_params_info(pname, pname_c, this_section, description, options);
-    this->parameter_boolean.emplace_back(pname, this->compute_output_non_linear_correlation_function);
+    this->parameter_boolean.emplace_back(pname, this->compute_non_linear_correlation_function_halofit);
+
+    // compute_non_linear_correlation_function
+    pname = "compute_non_linear_correlation_function_pt";
+    pname_c = "compute_non_linear_correlation_function_pt";
+    description = "Compute non-linear correlation function using the halo fit power spectrum";
+    options = "BOOL";
+    this->compute_non_linear_correlation_function_pt = CorrelationFunctionTH.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->compute_non_linear_correlation_function_pt);
+
+    // compute_non_linear_correlation_function
+    pname = "compute_halo_model_galaxy_correlation_function";
+    pname_c = "compute_halo_model_galaxy_correlation_function";
+    description = "Compute galaxy correlation function using the halo model";
+    options = "BOOL";
+    this->compute_halo_model_galaxy_correlation_function = CorrelationFunctionTH.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->compute_halo_model_galaxy_correlation_function);
+
 
     // min_r_value_correlation_function
     pname = "min_r_value_correlation_function";
@@ -4346,6 +4440,37 @@ void Params::read_pars_json(std::string file){
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->npoints_cf);
 
+
+
+// output_file_linear_power_spectrum
+    pname = "output_file_linear_correlation_function";
+    pname_c = "linear_matter_cf_output_file";
+    description = "Output file for linear matter correlation function";
+    options = "STRING";
+    this->linear_matter_cf_output_file =CorrelationFunctionTH.value(pname, "linear_matter_correlation_function_EH");
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_string.emplace_back(pname, this->linear_matter_ps_output_file);
+
+    // output_file_non_linear_hm_power_spectrum
+    pname = "output_file_non_linear_halo_fit_correlation function";
+    pname_c = "non_linear_matter_cf_halo_fit_output_file";
+    description = "Output file for nonlinear matter power spectrum from halo model.";
+    options = "STRING";
+    this->non_linear_matter_cf_halo_fit_output_file =
+      CorrelationFunctionTH.value(pname, "non_linear_matter_correlation_function_hf");
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_string.emplace_back(pname, this->non_linear_matter_ps_halo_fit_output_file);
+
+
+  // galaxy_power_spectrum_halo_model_output_file
+    pname = "galaxy_cf_halo_model_output_file";
+    pname_c = "galaxy_cf_halo_model_output_file";
+    description = "Output file for galaxy correlation function from halo model.";
+    options = "STRING";
+    this->galaxy_cf_halo_model_output_file =
+        CorrelationFunctionTH.value(pname, "galaxy_cf_halo_model");
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_string.emplace_back(pname, this->galaxy_cf_halo_model_output_file);
 
     //-----------
     const auto &CosmologicalParameters = CosmologicalLibrary.at("CosmologicalParameters");
@@ -7459,26 +7584,26 @@ void Params::read_pars(string file)
       else if (par_name == "halo_mass_bias_output_file")halo_mass_bias_output_file = par_value.c_str();
       else if (par_name == "effective_halo_mass_bias_output_file")effective_halo_mass_bias_output_file = par_value.c_str();
       else if (par_name == "effective_halo_mean_number_density_output_file") effective_halo_mean_number_density_output_file=par_value.c_str();
-      else if (par_name == "compute_output_linear_correlation_function")
+      else if (par_name == "compute_linear_correlation_function")
 	     {
-	       if(par_value=="true")compute_output_linear_correlation_function=true;
-	       else if(par_value=="false")compute_output_linear_correlation_function=false;
+	       if(par_value=="true")compute_linear_correlation_function=true;
+	       else if(par_value=="false")compute_linear_correlation_function=false;
 	    }
-      else if (par_name == "compute_output_non_linear_correlation_function"){
-        if(par_value=="true")compute_output_non_linear_correlation_function=true;
-        else if(par_value=="false")compute_output_non_linear_correlation_function=false;
+      else if (par_name == "compute_non_linear_correlation_function"){
+        if(par_value=="true")compute_non_linear_correlation_function=true;
+        else if(par_value=="false")compute_non_linear_correlation_function=false;
       }
-      else if (par_name == "compute_output_linear_power_spectrum"){
-        if(par_value=="true")compute_output_linear_power_spectrum=true;
-        else if(par_value=="false")compute_output_linear_power_spectrum=false;
+      else if (par_name == "compute_linear_power_spectrum"){
+        if(par_value=="true")compute_linear_power_spectrum=true;
+        else if(par_value=="false")compute_linear_power_spectrum=false;
       }
       else if (par_name == "use_file_power"){
         if(par_value=="true")use_file_power=true;
         else if(par_value=="false")use_file_power=false;
       }
-      else if (par_name == "compute_output_non_linear_power_spectrum"){
-        if(par_value=="true")compute_output_non_linear_power_spectrum=true;
-        else if(par_value=="false")compute_output_non_linear_power_spectrum=false;
+      else if (par_name == "compute_non_linear_power_spectrum"){
+        if(par_value=="true")compute_non_linear_power_spectrum=true;
+        else if(par_value=="false")compute_non_linear_power_spectrum=false;
       }
       else if (par_name == "scale_ps")scale_ps = par_value.c_str();
       else if (par_name == "kmin_ps")kmin_ps = static_cast<real_prec>(atof(par_value.c_str()));
@@ -8061,20 +8186,19 @@ void Params::read_pars(string file)
   string dat = ".txt";
   string ll = "_";
   string zr = "_redshift_"+ std::to_string(static_cast<float>(redshift));
-  string output = "../output_cosmolib/";
-  this->mass_function_output_file = output+mass_function_output_file+ll+mass_function_fit+zr+dat;
-  this->halo_mass_bias_output_file = output+halo_mass_bias_output_file+ll+halo_mass_bias_fit+zr+dat;
-  this->effective_halo_mass_bias_output_file = output+effective_halo_mass_bias_output_file+ll+halo_mass_bias_fit+ll+mass_function_fit+zr+dat;
-  this->effective_halo_mean_number_density_output_file=output+effective_halo_mean_number_density_output_file+ll+mass_function_fit+zr+dat;
-  this->galaxy_power_spectrum_halo_model_output_file=output+galaxy_power_spectrum_halo_model_output_file+ll+halo_mass_bias_fit+ll+mass_function_fit+zr+dat;
-  this->galaxy_correlation_function_halo_model_output_file=output+galaxy_correlation_function_halo_model_output_file+ll+halo_mass_bias_fit+ll+mass_function_fit+zr+dat;
-  this->linear_matter_cf_output_file= output+linear_matter_cf_output_file+zr+dat;
-  this->non_linear_matter_cf_halo_fit_output_file=output+non_linear_matter_cf_halo_fit_output_file+zr+dat;
-  this->linear_matter_ps_output_file=output+linear_matter_ps_output_file+zr+dat;
-  this->non_linear_matter_ps_halo_fit_output_file=output+non_linear_matter_ps_halo_fit_output_file+zr+dat;
-  this->non_linear_matter_ps_pt_output_file=output+non_linear_matter_ps_pt_output_file+zr+dat;
-  this->density_profile_r_output_file=output+density_profile_r_output_file+ll+density_profile+zr+dat;
-  this->density_profile_k_output_file=output+density_profile_k_output_file+ll+density_profile+zr+dat;
+  this->set_mass_function_output_file(this->cosmo_output+mass_function_output_file+ll+mass_function_fit+zr+dat);
+  this->set_halo_mass_bias_output_file(this->cosmo_output+halo_mass_bias_output_file+ll+halo_mass_bias_fit+zr+dat);
+  this->set_effective_halo_mass_bias_output_file(this->cosmo_output+effective_halo_mass_bias_output_file+ll+halo_mass_bias_fit+ll+mass_function_fit+zr+dat);
+  this->set_effective_halo_mean_number_density_output_file(this->cosmo_output+effective_halo_mean_number_density_output_file+ll+mass_function_fit+zr+dat);
+  this->set_linear_matter_cf_output_file(this->cosmo_output+linear_matter_cf_output_file+zr+dat);
+  this->set_non_linear_matter_cf_halo_fit_output_file(this->cosmo_output+non_linear_matter_cf_halo_fit_output_file+zr+dat);
+  this->set_linear_matter_ps_output_file(this->cosmo_output+linear_matter_ps_output_file+zr+dat);
+  this->set_non_linear_matter_ps_halo_fit_output_file(this->cosmo_output+non_linear_matter_ps_halo_fit_output_file+zr+dat);
+  this->set_non_linear_matter_ps_pt_output_file(this->cosmo_output+non_linear_matter_ps_pt_output_file+zr+dat);
+  this->set_density_profile_r_output_file(this->cosmo_output+density_profile_r_output_file+ll+density_profile+zr+dat);
+  this->set_galaxy_ps_halo_model_output_file(this->cosmo_output+galaxy_ps_halo_model_output_file+zr+dat);
+  this->set_density_profile_k_output_file(this->cosmo_output+density_profile_k_output_file+ll+density_profile+zr+dat);
+  this->set_galaxy_cf_halo_model_output_file(this->cosmo_output+galaxy_cf_halo_model_output_file+zr+dat);
  //--------------------------------------------------------------------------
    this->warnings();
 }

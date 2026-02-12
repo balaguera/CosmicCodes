@@ -473,13 +473,18 @@ real_prec PowerSpectrum::Galaxy_power_spectrum_h1_ss(real_prec k, real_prec z){
     struct A1 * sA1= (struct A1 *)p;
     s_CosmologicalParameters *scp = sA1->s_cp;
     HOD Shod;
-    DensityProfiles Dp;
     real_prec M=pow(10,m);
+    DensityProfiles Dp(*scp);
+    if(scp->density_profile=="nfw")
+      Dp.nfw_parameters(M);
+    else  if(scp->density_profile=="einasto")
+      Dp.einasto_parameters(M);
     real_prec z=sA1->aux_z;
     real_prec k=sA1->aux_k;
     real_prec jacobian=(log(10.0)*M);
-    real_prec uden=Dp.density_k(k,M,z, scp);
-    return static_cast<gsl_real>(jacobian*gsl_inter_new(sA1->MASS, sA1->MASS_FUNCTION,m)*pow(Shod.SATELLITE(M)*uden,2));
+    real_prec uden=Dp.density_k(k)/M;
+    real_prec massf=gsl_inter_new(sA1->MASS, sA1->MASS_FUNCTION,m);
+    return static_cast<gsl_real>(jacobian*massf*pow(Shod.SATELLITE(M)*uden,2));
   }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -501,13 +506,17 @@ gsl_real PowerSpectrum::i_Galaxy_power_spectrum_h1_sc(gsl_real m, void *p)
     struct A1 * sA1= (struct A1 *)p;
     s_CosmologicalParameters *scp = sA1->s_cp;
     HOD Shod(*scp);
-    DensityProfiles Dp;
-//    MARKS Smark;
     real_prec M=pow(10,m);
+    DensityProfiles Dp(*scp);
+    if(scp->density_profile=="nfw")
+      Dp.nfw_parameters(M);
+    else  if(scp->density_profile=="einasto")
+      Dp.einasto_parameters(M);
+//    MARKS Smark;
     real_prec z=sA1->aux_z;
     real_prec k=sA1->aux_k;
     real_prec jacobian=(log(10.0)*M);
-    real_prec uden=Dp.density_k(k,M,z,scp);
+    real_prec uden=Dp.density_k(k)/M;
     return static_cast<gsl_real>(jacobian*2.0*Shod.CENTRAL(M)*Shod.SATELLITE(M)*gsl_inter_new(sA1->MASS, sA1->MASS_FUNCTION,m)*uden);
   }
 ////////////////////////////////////////////////////////////////////////////
@@ -528,12 +537,16 @@ real_prec PowerSpectrum::Galaxy_matter_bias(real_prec k, real_prec z){
     struct A1 * sA1= (struct A1 *)p;
     s_CosmologicalParameters *scp = sA1->s_cp;
     HOD Shod(*scp);
-    DensityProfiles Dp;
     real_prec M=pow(10,m);
+    DensityProfiles Dp(*scp);
+    if(scp->density_profile=="nfw")
+      Dp.nfw_parameters(M);
+    else  if(scp->density_profile=="einasto")
+      Dp.einasto_parameters(M);
     real_prec k=sA1->aux_k;
     real_prec z=sA1->aux_z;
     real_prec jacobian=(log(10.0)*M);
-    real_prec uk=Dp.density_k(k,M,z,scp);
+    real_prec uk=Dp.density_k(k)/M;
     return static_cast<gsl_real>(jacobian*(Shod.CENTRAL(M)+Shod.SATELLITE(M)*uk)*gsl_inter_new(sA1->MASS, sA1->MASS_BIAS,m)*gsl_inter_new(sA1->MASS, sA1->MASS_FUNCTION,m));
   }
 ////////////////////////////////////////////////////////////////////////////

@@ -3082,3 +3082,32 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void comp_time_MH(time_t start, long full, long step, real_prec H){
+  std::cout<<RED;
+  real_prec fraction=100.0*((real_prec)(step+1))/((real_prec)full);
+  time_t end;
+  time(&end);
+  real_prec lapse=difftime(end,start);
+  if(lapse<=60)cout<<"\r "<<fraction<<" % completed. Time elapsed: "<<lapse<<"  secs.  H(q,p) = "<<H<<"\r";cout.flush();
+  if(lapse>60)cout<<"\r "<<fraction<<" % completed. Time elapsed: "<<lapse/60<<"  secs.  H(q,p) = "<<H<<"\r";cout.flush();
+  if(lapse>3600)cout<<"\r "<<fraction<<" % completed. Time elapsed: "<<lapse/3600<<"  secs.  H(q,p) = "<<H<<"\r";cout.flush();
+  std::cout<<RESET;
+  if (fraction==25) cout <<"\r  ..25% completed \r";cout.flush();
+  if (fraction==50) cout <<"\r  ..50% completed \r";cout.flush();
+  if (fraction==75) cout <<"\r  ..75% completed \r";cout.flush();
+  if (fraction==100) cout<<"\r ..100% completed \r";cout.flush();
+}
+////////////////////////////////////////////////////////////////////////////
+void comp_time(time_t start, long full, long step){
+  real_prec fraction=100.0*((real_prec)(step+1))/((real_prec)full);
+  time_t end;
+  time(&end);
+  real_prec lapse=difftime(end,start);
+  if(lapse<=60)cout<<"\r "<<fraction<<" % completed. Time elapsed: "<<lapse<<"  secs \r";cout.flush();
+  if(lapse>60)cout<<"\r "<<fraction<<" % completed. Time elapsed: "<<lapse/60.<<"  mins \r";cout.flush();
+  if(lapse>3600)cout<<"\r "<<fraction<<" % completed. Time elapsed: "<<lapse/3600.<<"  hrs \r";cout.flush();
+  if (fraction==25) cout <<"\r  ..25% completed \r";cout.flush();
+  if (fraction==50) cout <<"\r  ..50% completed \r";cout.flush();
+  if (fraction==75) cout <<"\r  ..75% completed \r";cout.flush();
+  if (fraction==100) cout<<"\r ..100% completed \r";cout.flush();
+}

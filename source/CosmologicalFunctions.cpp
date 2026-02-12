@@ -8,7 +8,7 @@
  */
 //////////////////////////////////////////////////////////
 
-#include "CosmologicalFunctions.h"
+#include "../headers/CosmologicalFunctions.h"
 
 ////////////////////////////////////////////////////////////////////////////
 real_prec scale_factor(real_prec z){
@@ -172,6 +172,12 @@ real_prec Cosmology::omega_curvature(real_prec redshift){
 real_prec Cosmology::omega_dark_energy(real_prec redshift){
   return this->s_cosmo_pars.Om_vac*pow(1+redshift,3.*(1+this->s_cosmo_pars.wde_eos))*pow(Hubble_function(redshift)/this->s_cosmo_pars.Hubble,-2);
 }
+
+
+////////////////////////////////////////////////////////////////////////////
+real_prec Cosmology::Kaiser_factor(real_prec &bias, real_prec &growth_index){
+  return 1.+(2./3.)*(growth_index/bias)+(1./5.)*pow(growth_index/bias,2);
+}
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology:: Distance_Modulus(real_prec redshift){
   // ***************************
@@ -182,9 +188,7 @@ real_prec Cosmology:: Distance_Modulus(real_prec redshift){
 }
 ////////////////////////////////////////////////////////////////////////////
 real_prec Cosmology:: inter_Distance_Modulus(real_prec redshift){
-  // ***************************
   // DISTANCE MODULUS
-  // ***************************
   return 25.+5.0*log10(inter_luminosity_distance(redshift));
 }
 ////////////////////////////////////////////////////////////////////////////

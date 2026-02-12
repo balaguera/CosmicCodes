@@ -9867,7 +9867,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
         standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=(log10(this->Halo[i].mass)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("\\$\log_{10} M_{vir}$\\");
+      names_used.push_back("\\$\\log_{10} M_{vir}$\\");
   }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -9878,7 +9878,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
         standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=(log10(this->Halo[i].vmax)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\log_{10} V_{max}$");
+      names_used.push_back("$\\log_{10} V_{max}$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -9900,7 +9900,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
         standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=(log10(this->Halo[i].rvir)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\log_{10}Rvir$");
+      names_used.push_back("$\\log_{10}Rvir$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -9911,7 +9911,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
         standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=(log10(this->Halo[i].concentration)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\log_{10}c$");
+      names_used.push_back("$\\log_{10}c$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -9922,7 +9922,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
         standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=(log10(this->Halo[i].spin)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\log_{10}\lambda$");
+      names_used.push_back("$\\log_{10}\\lambda$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -9933,7 +9933,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
         standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=(log10(this->Halo[i].spin_bullock)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\log_{10}\lambda_b$");
+      names_used.push_back("$\\log_{10}\\lambda_b$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -9944,7 +9944,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
         standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=(log10(this->Halo[i].vrms)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\log_{10} \sigma_{v}$");
+      names_used.push_back("$\\log_{10} \\sigma_{v}$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -9955,7 +9955,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
     standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=((this->Halo[i].virial)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\mathcal{V}$");
+      names_used.push_back("$\\mathcal{V}$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -9966,7 +9966,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
     standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=((this->Halo[i].b_to_a)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\mathcal{T}$");
+      names_used.push_back("$\\mathcal{T}$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -9977,7 +9977,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
     standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=((this->Halo[i].c_to_a)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\mathcal{E}$");
+      names_used.push_back("$\\mathcal{E}$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -9988,7 +9988,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
     standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=((this->Halo[i].mach_number)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\mathcal{M}");
+      names_used.push_back("$\\mathcal{M}");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -10010,7 +10010,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
     standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=((this->Halo[i].local_overdensity)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\delta_{R}$");
+      names_used.push_back("$\\delta_{R}$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -10021,7 +10021,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
     standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=((this->Halo[i].tidal_anisotropy)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\mathcal{T}_{A}$");
+      names_used.push_back("$\\mathcal{T}_{A}$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -10032,7 +10032,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
     standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=((this->Halo[i].peak_height)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\nu$");
+      names_used.push_back("$\\nu$");
     }
   ip_label++;
   if(true==used_prop[ip_label])
@@ -10043,7 +10043,7 @@ void Catalog::PCA(vector<string>&name_props, vector<bool>&used_prop, string extr
       for(ULONG i=0; i<this->NOBJS;++i)
     standarized_data[index_2d(ip_label_used,i,this->NOBJS)]=((this->Halo[i].dach_number)-mean[ip_label])/sigma[ip_label];
       ip_label_used++;
-      names_used.push_back("$\mathcal{D}$");
+      names_used.push_back("$\\mathcal{D}$");
     }
   ip_label++;
 
