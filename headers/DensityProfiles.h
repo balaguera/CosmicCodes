@@ -32,6 +32,12 @@ private:
   //////////////////////////////////////////////////////////
    /**
     * @private
+    * @brief 
+    */
+  real_prec alpha;
+  //////////////////////////////////////////////////////////
+   /**
+    * @private
     * @brief
     */
   real_prec rvir;
@@ -105,7 +111,7 @@ private:
    /**
     * @brief 
     */
-  real_prec density_r(real_prec,real_prec, real_prec, void *);
+  real_prec density_r(real_prec);
   //////////////////////////////////////////////////////////
    /**
     * @brief NFW Density profile
@@ -135,22 +141,27 @@ private:
    /**
     * @brief 
     */
-  real_prec density_k(real_prec,real_prec, real_prec,  s_CosmologicalParameters *);
+  real_prec density_k(real_prec);
   //////////////////////////////////////////////////////////
    /**
     * @brief 
     */
-  real_prec density_kc(real_prec,real_prec, real_prec, void *);
+  real_prec density_kc(real_prec,real_prec, real_prec);
   //////////////////////////////////////////////////////////
    /**
     * @brief 
     */
-  void einasto_parameters(real_prec, real_prec, real_prec *, real_prec *, real_prec *,real_prec *,real_prec *, void *);
+  void einasto_parameters(real_prec, real_prec, real_prec *, real_prec *, real_prec *,real_prec *,real_prec *);
   //////////////////////////////////////////////////////////
    /**
     * @brief 
     */
-  void nfw_parameters(real_prec , real_prec, real_prec *, real_prec *,real_prec *,real_prec *,real_prec *, void*);
+  void einasto_parameters(real_prec);
+  //////////////////////////////////////////////////////////
+   /**
+    * @brief 
+    */
+  void nfw_parameters(real_prec , real_prec, real_prec *, real_prec *,real_prec *,real_prec *,real_prec *);
   //////////////////////////////////////////////////////////
    /**
     * @brief 
@@ -161,6 +172,21 @@ private:
     * @brief 
     */
   real_prec _rvir(){return this->rvir;}
+  //////////////////////////////////////////////////////////
+   /**
+    * @brief 
+    */
+  real_prec _concentration(){return this->concentration;}
+  //////////////////////////////////////////////////////////
+   /**
+    * @brief 
+    */
+  real_prec _rhos(){return this->rhos;}
+  //////////////////////////////////////////////////////////
+   /**
+    * @brief 
+    */
+  real_prec _rs(){return this->rs;}
 
 };
 

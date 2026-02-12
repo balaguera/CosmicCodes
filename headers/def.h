@@ -99,7 +99,7 @@
 //#define _USE_GNUPLOT_ABUNDANCE_SPIN_PLOT_
 #endif // endif use_gnuplot
 // ****************************************************************************************
-#undef _USE_PYTHON_
+#define _USE_PYTHON_
 // ****************************************************************************************
 //#define _MG_
 //#define _SLICS_  
