@@ -4,248 +4,158 @@ GREEN=\033[0;32m
 BLUE=\033[0;34m
 YELLOW=\033[0;33m
 RED=\033[0;31m
-##################################################################################
-# Makefile to compile COSMICATLASS
-##################################################################################
+
+##########################################################################
+# COSMICATLASS Makefile - clean, object-based compilation
+# Copyright (c) 2013-2024 A Balaguera
+##########################################################################
+
+# Compiler
 CXX = g++
-CXXFLAGS = --std=c++17 -fopenmp -fPIC -g3 -unroll
-#-Wno-deprecated -Wno-write-strings -Wextra -msse -msse2 -msse4.1 -mfpmath=sse 
-# Use CFLAGS to point out warnings
-#CXXFLAGS += -Wall -Wextra -pedantic -Wno-deprecated -Wno-write-strings -Wall -Wextra -Wunused-variable -Wsign-compare -Wmisleading-indentation
-##################################################################################
-# Use /net/vaina if the library is to be used in diode, diosa or dardo
-#AUX_DIR = ../Lib/
+CXXFLAGS = --std=c++17 -fopenmp -fPIC -g3 -funroll-loops
+
+# Paths
 AUX_DIR = ../external_libs/
-##################################################################################
-# math and gsl libraries
-LIBS_GSL = -lgsl -lgslcblas -lutil -lboost_iostreams -lboost_system -lboost_filesystem -lm
-#########################################################################
-PYTHON = /usr/include/python3.8/
-#########################################################################
-# fftw libraries
-dir_FFTW =  /usr/local/lib
-dir_FFTW_INC = /usr/local/include/
-LIBS_FFTW = -L$(dir_FFTW) -lfftw3 -lfftw3f -lfftw3f_omp -lfftw3_omp 
-#########################################################################
-# CFITSIO libraries
-dir_CFITSIO_LIB=$(AUX_DIR)cfitsio/
-#########################################################################
-# healpix libraries
-dir_HEALPIX_INC=$(AUX_DIR)Healpix_3.31/src/cxx/generic_gcc/include/
-dir_HEALPIX_LIB=$(AUX_DIR)Healpix_3.31/src/cxx/generic_gcc/lib/
-LIBS_HEALPIX = $(LIBS_GSL) -L$(dir_CFITSIO_LIB) -L$(dir_HEALPIX_LIB) -lhealpix_cxx -lcxxsupport -lsharp -lc_utils  -lfftpack -lcfitsio -lgomp
-#########################################################################
-#CCFITS libraries3
-dir_CCFITS_LIB = $(AUX_DIR)CCfits-2.6/lib/
-dir_CCFITS_INC = $(AUX_DIR)CCfits-2.6/include/CCfits/ 
-LIBS_CCFITS =  -L$(dir_CFITSIO_LIB)  -L$(dir_HEALPIX_LIB) -L$(dir_CCFITS_LIB) -lCCfits
-#########################################################################
-#CosmiCalc Library
-LCOSMO_DIR = ../lib
-LCOSMO = -Wl,-rpath,$(LCOSMO_DIR) -L$(LCOSMO_DIR) -lCosmiCalCpp 
-#########################################################################
 SOURCE_DIR = ../source/
 HEADER_DIR = ../headers/
-#########################################################################
-CXXFLAGS += -I$(dir_HEALPIX_INC) -I$(dir_FFTW_INC) -I$(HEADER_DIR)
-#########################################################################
-# These dependencies are compiled by make using the implicit variables and CXXFLAGS
-# Here I did not write a rule for compiling every dependency. Make does it when asking these dependencies
-.PHONY: clean
-#########################################################################
+LCOSMO_DIR = ../lib
+dir_CFITSIO_LIB=$(AUX_DIR)cfitsio/
+# Libraries
+PYTHON_INC := $(shell python3-config --embed --includes)
+PYTHON_LIB := $(shell python3-config --embed  --ldflags)
+LIBS_GSL     = -lgsl -lgslcblas -lopenblas -lutil -lboost_iostreams -lboost_system -lboost_filesystem -lm $(PYTHON_LIB)
+LIBS_FFTW    = -L/usr/local/lib -lfftw3 -lfftw3f -lfftw3f_omp -lfftw3_omp
+LIBS_HEALPIX =  -L$(dir_CFITSIO_LIB) -L$(AUX_DIR)Healpix_3.31/src/cxx/generic_gcc/lib/ -lhealpix_cxx -lcxxsupport -lsharp -lc_utils -lfftpack -lcfitsio -lgomp
+LCOSMO       = -Wl,-rpath,$(LCOSMO_DIR) -L$(LCOSMO_DIR) -lCosmiCalCpp
 
-#########################################################################
-# BMT
-OBJS_CL = ../codes/cosmolib.o  ../source/CosmoLib.o
-SRCS_CL = $(OBJS_CL:.o=.cpp)
+# Include paths
+INCLUDE = -I$(AUX_DIR)Healpix_3.31/src/cxx/generic_gcc/include/ -I/usr/local/include/ -I$(HEADER_DIR) $(PYTHON_INC)
+
+# Pattern rule to compile any .cpp -> .o
+%.o: %.cpp $(HEADER_DIR)/*.h
+	@echo "Compiling $<"
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
+
+# Executables and object files
 TARGET_CLib = cosmolib.exe
-#########################################################################
-# BMT
-OBJS = ../codes/bmt.o ../source/BiasMappingTechnique.o 
-SRCS = $(OBJS:.o=.cpp)
-TARGET_BMT = bmt.exe
-#########################################################################
-# power_spectrum
-OBJS_PS = ../codes/power_spectrum.o 
-SRCS_PS = $(OBJS_PS:.o=.cpp)
-TARGET_PS = power.exe
-#########################################################################
-# power_spectrum
-OBJS_SB = ../codes/secbias.o 
-SRCS_SB = $(OBJS_SB:.o=.cpp)
-TARGET_SB = secbias.exe
-#########################################################################
-# power_spectrum
-OBJS_GT = ../codes/galtools.o ../source/Galaxy.o
-SRCS_GT = $(OBJS_GT:.o=.cpp)
-TARGET_GT = gtools.exe
-#########################################################################
-#########################################################################
-# power_spectrum
-OBJS_HT = ../codes/analysis_halo_catalogs.o 
-SRCS_HT = $(OBJS_HT:.o=.cpp)
-TARGET_HT = htools.exe
-#########################################################################
+OBJS_CL     = ../codes/cosmolib.o 
 
-#########################################################################
-# cosmic_web
-OBJS_CW = ../codes/cosmic_web.o 
-SRCS_CW = $(OBJS_CW:.o=.cpp)
-TARGET_CW = cosmicweb.exe
-#########################################################################
-# par
-OBJS_PA = ../codes/paramsr.o 
-SRCS_PA = $(OBJS_PA:.o=.cpp)
-TARGET_PA = params.exe
+TARGET_BMT  = bmt.exe
+OBJS_BMT    = ../codes/bmt.o 
 
-# make will execute this rule by default
-all: $(TARGET_BMT) 
-##################################################################################
-bmt: $(TARGET_BMT)
-power: $(TARGET_PS)
-secbias: $(TARGET_SB)
-gtools: $(TARGET_GT)
-htools: $(TARGET_HT)
+TARGET_PS   = power.exe
+OBJS_PS     = ../codes/power_spectrum.o
+
+TARGET_SB   = secbias.exe
+OBJS_SB     = ../codes/secbias.o
+
+TARGET_GT   = gtools.exe
+OBJS_GT     = ../codes/galtools.o 
+
+TARGET_HT   = htools.exe
+OBJS_HT     = ../codes/analysis_halo_catalogs.o
+
+TARGET_CW   = cosmicweb.exe
+OBJS_CW     = ../codes/cosmic_web.o
+
+TARGET_PA   = params.exe
+OBJS_PA     = ../codes/paramsr.o
+
+# Default target
+all: $(TARGET_BMT)
+
+##########################################################################
+# Linking rules
+$(TARGET_CLib): $(OBJS_CL)
+	@echo "Linking $@"
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_CL) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
+
+$(TARGET_BMT): $(OBJS_BMT)
+	@echo "Linking $@"
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_BMT) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
+
+$(TARGET_PS): $(OBJS_PS)
+	@echo "Linking $@"
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_PS) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
+
+$(TARGET_SB): $(OBJS_SB)
+	@echo "Linking $@"
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_SB) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
+
+$(TARGET_GT): $(OBJS_GT)
+	@echo "Linking $@"
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_GT) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
+
+$(TARGET_HT): $(OBJS_HT)
+	@echo "Linking $@"
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_HT) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
+
+$(TARGET_CW): $(OBJS_CW)
+	@echo "Linking $@"
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_CW) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
+
+$(TARGET_PA): $(OBJS_PA)
+	@echo "Linking $@"
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_PA) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
+
+##########################################################################
+# Aliases
 cosmolib: $(TARGET_CLib)
+bmt:     $(TARGET_BMT)
+power:   $(TARGET_PS)
+secbias: $(TARGET_SB)
+gtools:  $(TARGET_GT)
+htools:  $(TARGET_HT)
 cosmicweb: $(TARGET_CW)
-par: $(TARGET_PA)
+params:    $(TARGET_PA)
 
-#########################################################################
-$(TARGET_CLib): $(OBJS_CL) 
-	@echo "*******************************************"
-	@echo "*******************************************"
-	@echo "Compiling CosmoLib"
-	@date  
-	@echo "*******************************************"
-# Este orden es de llamado a las librerias es importantisimo:
-	@echo "*******************************************"         
-	$(CXX) $(CXXFLAGS) $(SRCS_CL) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_CLib) $(LIBS_GSL)
-	@echo "Done!"
-
-#########################################################################
-$(TARGET_BMT): $(OBJS) 
-	@echo "*******************************************"
-	@echo "*******************************************"
-	@echo "Compiling BMT"
-	@date  
-	@echo "*******************************************"
-# Este orden es de llamado a las librerias es importantisimo:
-	@echo "*******************************************"         
-	$(CXX) $(CXXFLAGS) $(SRCS) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_BMT) $(LIBS_GSL)
-	@echo "Done!"
-#########################################################################
-$(TARGET_PS): $(OBJS_PS) 
-	@echo "*******************************************"
-	@echo "*******************************************"
-	@echo "Compiling Power"
-	@date  
-	@echo "*******************************************"
-# Este orden es de llamado a las librerias es importantisimo:
-	@echo "*******************************************"         
-	$(CXX) $(CXXFLAGS) $(SRCS_PS) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_PS) $(LIBS_GSL)
-	@echo "Done!"
-#########################################################################
-$(TARGET_SB): $(OBJS_SB) 
-	@echo "*******************************************"
-	@echo "*******************************************"
-	@echo "Compiling Power"
-	@date  
-	@echo "*******************************************"
-# Este orden es de llamado a las librerias es importantisimo:
-	@echo "*******************************************"         
-	$(CXX) $(CXXFLAGS) $(SRCS_SB) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_SB) $(LIBS_GSL)
-	@echo "Done!"
-#########################################################################
-$(TARGET_GT): $(OBJS_GT) 
-	@echo "*******************************************"
-	@echo "*******************************************"
-	@echo "Compiling Gtools"
-	@date  
-	@echo "*******************************************"
-# Este orden es de llamado a las librerias es importantisimo:
-	@echo "*******************************************"         
-	$(CXX) $(CXXFLAGS) $(SRCS_GT)  $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_GT) $(LIBS_GSL)
-	@echo "Done!"
-
-#########################################################################
-$(TARGET_CW): $(OBJS_CW) 
-	@echo "$(GREEN)*******************************************"
-	@echo "$(GREEN)*******************************************"
-	@echo "$(BLUE)Compiling CWtools:"
-	@date  
-	@echo "$(GREEN)*******************************************"
-# Este orden es de llamado a las librerias es importantisimo:
-	@echo "$(GREEN)*******************************************$(YELLOW)"         
-	$(CXX) $(CXXFLAGS) $(SRCS_CW)  $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_CW) $(LIBS_GSL)
-	@echo "$(GREEN)Done"
-	@echo "$(GREEN)Execute with ./cosmicweb.exe -h for compiling options"
-
-#########################################################################
-$(TARGET_HT): $(OBJS_HT) 
-	@echo "*******************************************"
-	@echo "*******************************************"
-	@echo "Compiling Htools"
-	@date  
-	@echo "*******************************************"
-# Este orden es de llamado a las librerias es importantisimo:
-	@echo "*******************************************"         
-	$(CXX) $(CXXFLAGS) $(SRCS_HT)  $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_HT) $(LIBS_GSL)
-	@echo "Done!"
-
-
-#########################################################################
-$(TARGET_PA): $(OBJS_PA) 
-	@echo "$(GREEN)*******************************************"
-	@echo "$(GREEN)*******************************************"
-	@echo "$(BLUE)Compiling Params"
-	@date  
-	@echo "$(GREEN)*******************************************$(YELLOW)"
-# Este orden es de llamado a las librerias es importantisimo:
-	@echo "*******************************************"         
-	$(CXX) $(CXXFLAGS) $(SRCS_PA)  $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) -o $(TARGET_PA) $(LIBS_GSL)
-	@echo "$(GREEN)Done"
-	@echo "$(GREEN)Execute with ./params.exe -n PAR_NAME to know about a PARameter"
-	@echo "$(GREEN)Execute with ./params.exe -s parameter_file to show parameters"
-
-
+##########################################################################
+# Clean
 clean:
-	@echo "Cleaning:"
-	rm -f  core.* *o *exe *~ 
+	@echo "Cleaning..."
+	rm -f $(OBJS_CL) $(OBJS_BMT) $(OBJS_PS) $(OBJS_SB) $(OBJS_GT) \
+	      $(OBJS_HT) $(OBJS_CW) $(OBJS_PA) *.exe core.* *~ 
+
+##########################################################################
+.PHONY: all clean cosmolib bmt power secbias gtools htools cosmicweb params
+
 #########################################################################
 help:
-	@echo "·········································································································"
-	@echo "·········································································································"
-	@echo "CosmiCalc compiling options"
-	@echo "-make cosmolib: creates executable for Cosmlolib"
-	@echo "   execute with ./cosmolib.exe -c parameter_file" for z-fixed numbers and cosmological observables
+	@echo "$(GREEN)CosmicCodes compiling options"
 	@echo ""
-	@echo "-make bmt: creates executable for the Bias Mapping Technique"
-	@echo "	  execute with ./bmt.exe -b parameter_file"
-	@echo "	  execute with ./bmt.exe -d to check preprocessor directives"
-	@echo "	  execute with ./bmt.exe -i parameter_file to check input parameters directives"	
+	@echo "$(BLUE)make params: $(GREEN)creates executable for the params code "
+	@echo "	  $(GREEN)execute with $(BLUE)./params.exe -n name_of_parameter $(GREEN)to get information on a given parameter of the json parameter file"		
+	@echo "	  $(GREEN)execute with $(BLUE)./params.exe -s parameter_file.json $(GREEN)to get information of the set of parameters present in the json parameter file"		
 	@echo ""
-	@echo "-make power: creates executable for the power spectrum and related operations"
-	@echo "	  execute with ./power.exe -p parameter_file to measure power (see documentation)"
-	@echo "	  execute with ./power.exe -w parameter_file to measure window matrix"
-	@echo "	  execute with ./power.exe -g parameter_file to obtain GRF"
-	@echo "	  execute with ./power.exe -s parameter_file for low pass filter"		
+	@echo "$(BLUE)make cosmolib: $(GREEN)creates executable for the Cosmolib code "
+	@echo "	  $(GREEN)execute with $(BLUE)./cosmolib.exe --hmodel parameter_file.json $(GREEN)to get halo model outputs (with plots)"
 	@echo ""
-	@echo "-make secbias: creates executable for the analysis of secondary bias"
-	@echo "	  execute with ./secbias.exe -s parameter_file for low pass filter"		
+	@echo "$(BLUE)make bmt: $(GREEN)creates executable for the Bias Mapping Technique"
+	@echo "	  $(GREEN)execute with $(BLUE)./bmt.exe -b parameter_file.json"
+	@echo "	  $(GREEN)execute with $(BLUE)./bmt.exe -d to check preprocessor directives"
 	@echo ""
-	@echo "-make gtools: creates executable for the analysis of galaxy samples "
-	@echo "	  execute with ./gtools.exe parameter_file (this is different from otopns 1-4). This is still under merging stages: merged with class::Catalog"		
+	@echo "$(BLUE)make power: $(GREEN)creates executable for the power spectrum and related operations"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -p parameter_file.json $(GREEN)to measure power (see documentation)"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -w parameter_file.json $(GREEN)to measure window matrix"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -g parameter_file.json $(GREEN)to obtain GRF"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -s parameter_file.json $(GREEN)for low pass filter"		
 	@echo ""
-	@echo "-make htools: creates executable for the analysis of halo catalogs "
-	@echo "	  execute with ./htools.exe parameter_file (this is different from otopns 1-4). This is still under merging stages: merged with class::Catalog"		
+	@echo "$(BLUE)make secbias: $(GREEN)creates executable for the analysis of secondary bias"
+	@echo "	  $(GREEN)execute with $(BLUE)./secbias.exe -s parameter_file.json" 
 	@echo ""
-	@echo "-make cosmicweb: creates executable for the cosmic web analysis ased on tracer catalos"
-	@echo "	  execute with ./cosmicweb.exe parameter_file"		
+	@echo "$(BLUE)make gtools: $(GREEN)creates executable for the analysis of galaxy samples "
+	@echo "	  $(GREEN)execute with $(BLUE)./gtools.exe parameter_file.json"
+	@echo "$(RED)Note: This is still under merging stages: merged with class::Catalog"		
 	@echo ""
-	@echo "-make params: creates executable for the paramsr "
-	@echo "	  execute with ./params.exe parameter_file"		
-
-
-	@echo "·········································································································"
-	@echo "·········································································································"
+	@echo "$(BLUE)make htools: $(GREEN)creates executable for the analysis of halo catalogs "
+	@echo "	  $(GREEN)execute with $(BLUE)./htools.exe parameter_file.json" 
+	@echo "$(RED)Note: This is still under merging stages: merged with class::Catalog"		
+	@echo ""
+	@echo "$(BLUE)make cosmicweb: $(GREEN)creates executable for the cosmic web analysis ased on tracer catalogues"
+	@echo "	  $(GREEN)execute with $(BLUE)./cosmicweb.exe parameter_file.json"		
+	@echo ""
+	@echo "$(BLUE)make params: $(GREEN)creates executable $(GREEN)for the params code "
+	@echo "	  $(GREEN)execute with $(BLUE)./params.exe -n name_of_parameter $(GREEN)to get information on a given parameter of the json parameter file"		
+	@echo "	  $(GREEN)execute with $(BLUE)./params.exe -s parameter_file.json $(GREEN)to get information of the set of parameters present in the json parameter file"		
+	@echo ""
 
