@@ -10,7 +10,7 @@
 #ifndef _HOD__
 #define _HOD__
 # include "NumericalMethods.h"
-# include "Parameters_CosmoLib.h"
+# include "Params.h"
 ////////////////////////////////////////////////////////////////////////////
 /**
  *@brief
@@ -29,7 +29,7 @@ struct s_hods_par{
 class HOD{
  private:
     s_CosmologicalParameters s_cosmo_pars;
-    ParametersCosmolib params;
+    Params params;
  public:
     ////////////////////////////////////////////////////////////////////////////
 /**
@@ -40,7 +40,7 @@ class HOD{
   /**
   * @brief Default constructor passing an intance of the class Params
   */
-  HOD(ParametersCosmolib par){
+  HOD(Params par){
       this->params=par;
   };
   ////////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ real_prec CENTRAL(real_prec M);
   /**
   * @brief
   */
-  void set_pars(ParametersCosmolib s_pars){this->params=s_pars;}
+  void set_pars(Params s_pars){this->params=s_pars;}
 ////////////////////////////////////////////////////////////////////////////
 };
 #endif

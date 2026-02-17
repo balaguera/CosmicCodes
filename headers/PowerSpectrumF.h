@@ -351,6 +351,27 @@ class PowerSpectrumF{
    *  @brief 
    */
   string file_bispectrum;
+
+   //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */  
+  string file_power_grf;
+   //////////////////////////////////////////////////////////
+  /**
+   * @brief Output file for overdenity field with gaussian fluctuations 
+   */  
+  string output_file_grf;
+   //////////////////////////////////////////////////////////
+  /**
+   * @brief Output file for overdenity field with gaussian and fixed amplitude fluctuations according to the value of \f$k_{fa}\f$ given in the parameter file.
+   */  
+  string output_file_mixed_grf_fa;
+   //////////////////////////////////////////////////////////
+  /**
+   * @brief Output file for overdenity field with fixed amplitude fluctuations. 
+   */  
+  string output_file_fa;
   //////////////////////////////////////////////////////////
   /**
    *  @brief 
@@ -513,7 +534,7 @@ void add_catalogues(int, int, int);
    *  (FKP, Yamamoto and their multipole decomposition) and the Bispectrum
    *  (using FKP). This method is aimed for realistic surveys in which a random file is expected to be provided
    *  along with (if defined in parameter file) a file with smoothed nbar tabulated
-   * @param verbose: use dto write on screen
+   * @param verbose: used to write on screen
    * @param verbose: true or false to whether cuts in mass is to be done, to be deprecated.
    * @details This method reads input files and get power without touching the data, i-.e, does not make any binning in any property. It accepts catalogs as well as density fields.
    * @note This methood has been adapted to the case in which the random catalogs are too large to be kept in memmory or they come in chunks of randoms
@@ -526,15 +547,21 @@ void add_catalogues(int, int, int);
    * 6 Get window matrix if requested.
    * 7 Release memmory from the catalog.
    * If random file is too large, a loop over the chunks is done.
-   * The a new box size is requested, the size of the box is computed from the randoms, and in particular, from the first chunk, such that the parameters in the PowerSpectrumF and FfftwFunctions are updatred with
+   * The a new box size is requested, the size of the box is measured from the randoms, and in particular, from the first chunk, such that the parameters in the PowerSpectrumF and FfftwFunctions are updatred with
    * @code
      this->set_params(this->random_cat.params);
      this->fftw_functions.set_params(this->random_cat.params);
    * @endcode
+   * @return Interpolated tracer field. 
+   * \image html interpolated_tracer.png
+   * @return Tracer power spectrum in real 
+   * \image html power_realspace.png
+   * @return Tracer power spectrum in redshift space 
+   * \image html power_redshiftspace.png
    * @warning No variance for Yammoto estimator have been coded.
    * @author ABA
 */
-  void compute_power_spectrum (bool verbose, bool mcuts);
+  void measure_power_spectrum (bool verbose, bool mcuts);
   //////////////////////////////////////////////////////////
   /**
    * @brief Measurements of power spectrum
@@ -543,35 +570,37 @@ void add_catalogues(int, int, int);
    *  along with (if defined in parameter file) a file with smoothed nbar tabulated
    * @details This method reads input files and get power inside loops of bins of different properties specified in the parameter file
    * make any binning in any property.
-   * @note This method is only applicabble for input catalogs (not for input inteprolated fields). See the description in `PowerSpectrumF.compute_power_spectrum()` to understand the steps
+   * @note This method is only applicabble for input catalogs (not for input inteprolated fields). See the description in `PowerSpectrumF.measure_power_spectrum()` to understand the steps
    * @warning This method contains explicit definitions that must be in agreement with the method Catalog::read_catalog().
    * Measurement of power spectrum of tracer catalog, with a random catalog and in bins of galaxy properties
-   * The method is meant to be used whern bins in galaxy properties are to be done to mesaure power:  loops over bins, read data, select, compute.
-   * This is desiged in this way as for large catalogs, these cannot be kept in the ram, otherwise one can do read bin compute, as it happens for the secondary bias analysi
+   * The method is meant to be used whern bins in galaxy properties are to be done to mesaure power:  loops over bins, read data, select, measure.
+   * This is desiged in this way as for large catalogs, these cannot be kept in the ram, otherwise one can do read bin measure, as it happens for the secondary bias analysis
    * Output file, keep roor in case intervals are used
    * Assumes that sys_of_coord is either I_EQZ or I_EQRZ
    * No window matrix omputation available
    * @author ABA
 */
-  void compute_power_spectrum ();
+  void measure_power_spectrum ();
   //////////////////////////////////////////////////////////
  /**
   * @brief Measrements of th window matrix
   * @details This function generates the elements of the window matrix of power spectrum, for differnet multipoles
-  * and computed using the random catalog. Must be called inside the method compute_power_spectrum(bool, bool).
+  * and measured using the random catalog. Must be called inside the method measure_power_spectrum(bool, bool).
   * @note  This function is to be read from the cosmicatlas.cpp main function: verbose is to show detailed information, mcut is to force the analysis to have a minium cut in a given property
   depending on w. This method can be accesed from compilation with the -w option.
+   * @author ABA
 
 */
-  void compute_window_function ();
+  void measure_window_function ();
   //////////////////////////////////////////////////////////
   /**
    * @brief Measurements of power spectrum
    * @details This method has as input the tracer catalog in a box to measure the power once it has been read and allocated before in a Halo vector.
    * @details  This is meant for the case in which NO RANDOMS ARE USED AND IS NOT READY TO USE MASS CUTS
    * @details Assumed sys_of_coords = 0 and FKP
+   * @author ABA
 */
-  void compute_power_spectrum (bool verbose, vector<s_Halo>&tracer);
+  void measure_power_spectrum (bool verbose, vector<s_Halo>&tracer);
   //////////////////////////////////////////////////////////
   /**
    * @brief Measurements of power spectrum
@@ -580,7 +609,7 @@ void add_catalogues(int, int, int);
    * @param space: "real space" or ·"redshift space"
    * @param property : "_MASS_", or "_VMAX_". No more properties of the catalog are allowed at this function
 */
-  void compute_power_spectrum(vector<s_Halo>&tracer, string space, string property);
+  void measure_power_spectrum(vector<s_Halo>&tracer, string space, string property);
   //////////////////////////////////////////////////////////
   /**
    * @brief Analysis of secondary bias
@@ -593,45 +622,46 @@ void add_catalogues(int, int, int);
   void halo_bias_analysis(string space);
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief Measure marked correlation function-
   */
-  void compute_marked_correlation_function ();
+  void measure_marked_correlation_function ();
   //////////////////////////////////////////////////////////
   /**
-   * @brief
+   * @brief Measure power spectrum using an interpolated field as input.
+   * @details Calls calass mebbers fields.
   */
-  void compute_power_spectrum_grid();
+  void measure_power_spectrum_grid();
   //////////////////////////////////////////////////////////
   /**
-   * @brief Compute the Power_Spectrum and/or the Bispectrum
+   * @brief measure the Power_Spectrum and/or the Bispectrum
    * @details This function generates the estiametes of power spectrum ()
    *  (FKP, Yamamoto and their multipole decomposition) and the Bispectrum
    *  (using FKP).
-   *  @note Used specifically in case we supply grids 1+delta1 and 1+delta2 and we want to compute the auto and cross power threof
+   *  @note Used specifically in case we supply grids 1+delta1 and 1+delta2 and we want to measure the auto and cross power threof
    */
-  void compute_power_spectrum_grid(const vector<real_prec>&, bool);
+  void measure_power_spectrum_grid(const vector<real_prec>&, bool);
   //////////////////////////////////////////////////////////
   /**
-   * @brief Compute the Power_Spectrum from a grid density
-   * @details explicitely dedicatd to the case in which tracer bias is to be computed   */
-  void compute_power_spectrum_grid(const vector<real_prec>&);
+   * @brief measure the Power_Spectrum from a grid density
+   * @details explicitely dedicatd to the case in which tracer bias is to be measured   */
+  void measure_power_spectrum_grid(const vector<real_prec>&);
   //////////////////////////////////////////////////////////
   /**
-   * @brief Compute the Marked Power_Spectrum
+   * @brief measure the Marked Power_Spectrum
    */
-  void compute_marked_power_spectrum_grid(const vector<real_prec>&, const vector<real_prec>&);
+  void measure_marked_power_spectrum_grid(const vector<real_prec>&, const vector<real_prec>&);
   //////////////////////////////////////////////////////////
   /**
-   * @brief Compute the cross power spectrum between fields X and Y
-    * @param dm bool set to true if X is dark matter so no shot-noise is computed for that component
+   * @brief measure the cross power spectrum between fields X and Y
+    * @param dm bool set to true if X is dark matter so no shot-noise is measured for that component
  */
-  void compute_cross_power_spectrum_grid(bool dm, vector<real_prec>&X,vector<real_prec>&Y, bool get_cross);
+  void measure_cross_power_spectrum_grid(bool dm, vector<real_prec>&X,vector<real_prec>&Y, bool get_cross);
   //////////////////////////////////////////////////////////
   /**
-   * @brief Compute the cross power spectrum between fields X and Y
-    * @param dm bool set to true if X is dark matter so no shot-noise is computed for that component
+   * @brief measure the cross power spectrum between fields X and Y
+    * @param dm bool set to true if X is dark matter so no shot-noise is measured for that component
  */
-  void compute_cross_power_spectrum_grid(bool dm, string file_X,string file_Y,bool get_cross);
+  void measure_cross_power_spectrum_grid(bool dm, string file_X,string file_Y,bool get_cross);
   //////////////////////////////////////////////////////////
   /**
  * @brief Large-scale bias from power spectra
@@ -640,7 +670,7 @@ void add_catalogues(int, int, int);
  * If the power spectra involved come from Gaussian initial conditions (IC),
  * we need to use the error bars from the Gaussian approximation on large scales.
  *
- * The bias is computed using:
+ * The bias is measured using:
  * \f[
  * \langle b \rangle = \frac{\sum \left( b_k / \sigma_{b_k}^2 \right)}{\sum \left( 1 / \sigma_{b_k}^2 \right)}
  * \f]
@@ -670,7 +700,7 @@ void add_catalogues(int, int, int);
  * \f[
  * \sigma_{b_k}^2 = \frac{b_k^2}{N_k} = \frac{1}{\sum (N_k / b_k^2)}
  * \f]
- * If we use fixed-amplitude fields, the average bias is computed as a simple mean,
+ * If we use fixed-amplitude fields, the average bias is measured as a simple mean,
  * and its error follows from the standard deviation.
  *
  * @note Ojo
@@ -703,7 +733,7 @@ void add_catalogues(int, int, int);
   //////////////////////////////////////////////////////////
   /** 
    * @brief Write output of power spectrum and/or bispectrum 
-   * @details computed in the function compute_power_spectrum()
+   * @details measured in the function measure_power_spectrum()
    */
   void write_power_spectrum_grid(string);
   //////////////////////////////////////////////////////////
@@ -773,7 +803,7 @@ void add_catalogues(int, int, int);
   real_prec _sigma_fkp (int i) { return sigma_fkp[i]; }
   //////////////////////////////////////////////////////////
   /**
-   * @brief Computes the window matrix 
+   * @brief measures the window matrix 
     *@details  This function provides the window matrix which in reality is a tensor of 4 indices:
    * two indices for multipoles l, l': these can be from 0 to 4, usually 0,2,4
    * two indices for wavenumber modes, k and k': k runs over the bins used in the measurements, 
@@ -800,8 +830,24 @@ void add_catalogues(int, int, int);
   void get_window_matrix_multipole();
   //////////////////////////////////////////////////////////
   /**
-   * @brief Compute GRF
-   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   * @brief This method generates a gaussian random field in Fourier space.
+   * @param Input power spectrum \f$ P(k=|\vec{k}|, z_{\mathrm{ini}}() \f$: some theoretical linear power spectrum normalized at some redshift.
+   * @param kmax \f$k_{fa}\f$ for fixed amplitude. Flucuations aove this kmax will be derived from gaussian random fileds. Scales belo kmax will have fixed amplitude (FA) fluctuations.
+   * @details GRF: For modes  \f$ |\vec{k}|>k_{fa}\f$, the gaussian random field is a realization of an overdensity distribution  \f$ \delta_{\vec{k}} = A_{\vec{k}}e^{i\phi_{\vec{k}}}\f$ which values, both real and imaginary, in Fourier space, follows the distribution
+   * \f[
+   * \mathcal{P}(\delta)d \delta=\mathcal{P}(A_{\vec{k}},\phi)A_{\vec{k}}d A_{\vec{k}}d \phi=\left(\frac{2A_{\vec{k}}}{\sigma_{\vec{k}}^{2}} \exp \left[-\frac{A_{\vec{k}}^{2}}{\sigma_{\vec{k}}^{2}}\right]d A_{\vec{k}} \right) \left[ \frac{d \phi}{2\pi} \right].
+   * \f]
+   * That is, the amplitude \f$ A_{\vec{k}}\f$ of the fluctuations follows a Reyleight distribution, while the phases follow a random distribution. The input power spectrum is implemented as 
+   * the variance opf the amplitudes, \f$ \sigma^{2}_{\vec{k}} = P_{th}(|\vec{k}|,z_{\mathrm{ini}})/2 \f$
+   * @details FA: For modes  \f$ |\vec{k}|<k_{fa}\f$, the amplitude of the Fourier modes follow the distribution
+   * \f[
+   * \mathcal{P}(\delta)d \delta=\mathcal{P}(A_{\vec{k}},\phi)A_{\vec{k}}d A_{\vec{k}}d \phi= \delta_{D}\left( A_{\vec{k}}-\sqrt{P(k=|\vec{k}|, z_{\mathrm{ini}})}\right) d A_{\vec{k}} \left[ \frac{d \phi}{2\pi} \right].
+   * \f]
+   * @details For the purpose of generating initial conditions for N-body simulations, this overdensity field must be rescaled with the growth factor computed at the initial redshift (e.g, z=99, see \ref CosmoLib). This filed is then used to compute the initial gravitational potential, which will be in turn used to displace the initially randomly displaced tracers, using, for example, Zeldovich approximation or Lagrangian perturbation theory.
+   * Using the code \ref power_spectrum, we can generate an example of the three outputs for a box of 500 Mpc/h and a kmaxof 0.3 h/Mpc   
+   * \image html GRF.png
+   * @note This can be imlemented as an external function (e.g. in Miscelaneous.cpp). 
+   * @return Overdensity field (in configuration space) with fluctutions following an input theoretical power spectrum and linear (decoupled) Fourier modes. Three fields are generated: full GRF, full FA and mixed, according to the value \f$k_{fa}\f$.
    */
   void get_GaussianRandomField();
   //////////////////////////////////////////////////////////
@@ -809,7 +855,7 @@ void add_catalogues(int, int, int);
    * @brief Method to assign effective bias to tracers
    * @param tracer_cat Catalog of dark matter tracers
    * @param dm_field Dark matter density field intepolated on a mesh
-   * @details The individual bias is computed as 
+   * @details The individual bias is measured as 
    * \f[
    * b^{(i)}_{hm}=\frac{\sum_{j,k_{j}<k_{max}}N^{j}_{k}\langle {\rm e}^{-i\textbf{k} \cdot \textbf{r}_{i}} \delta_{\mathrm{dm}}^{*}(\textbf{k}) \rangle_{k_{j}}}{\sum_{j,k_{j}<k_{max}} N^{j}_{k}P_{\rm dm}(k_{j})},
    * \f]
@@ -826,7 +872,7 @@ void add_catalogues(int, int, int);
    * @param tracer_cat Catalog of dark matter tracers
    * @param dm_field Dark matter density field intepolated on a mesh
    * @param tracer_field tracer density field intepolated on a mesh
-   * @details The power spectrum of the DM has been computed before the call of this method  and is still allocated in the container this->pk0
+   * @details The power spectrum of the DM has been measured before the call of this method  and is still allocated in the container this->pk0
    * @warning This can be implemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
   void object_by_object_bias(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field,vector<real_prec>& tracer_field);
@@ -836,14 +882,14 @@ void add_catalogues(int, int, int);
    * @param tracer_cat Catalog of dark matter tracers
    * @param dm_field Dark matter density field intepolated on a mesh
    * @param tracer_field tracer density field intepolated on a mesh
-   * @details The power spectrum of the DM has been computed before the call of this method  and is still allocated in the container this->pk0
+   * @details The power spectrum of the DM has been measured before the call of this method  and is still allocated in the container this->pk0
    * @warning This can be implemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
   void object_by_object_bias_squared(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field,vector<real_prec>& tracer_field);
   //////////////////////////////////////////////////////////
   /**
    * @brief Assignment of the object-by-object relative_bias.
-   * @details Included in compute_power_spectrum meant to do that task in a realiztic sample. This method is meant to assign rbias for a realistic sample which imvolves the computation of the window fnuction * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   * @details Included in measure_power_spectrum meant to do that task in a realiztic sample. This method is meant to assign rbias for a realistic sample which imvolves the computation of the window fnuction * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
    */
   void object_by_object_rbias();
   //////////////////////////////////////////////////////////
@@ -858,7 +904,7 @@ void add_catalogues(int, int, int);
    * @param tracer_cat Catalog of dark matter tracers
    * @param dm_field Dark matter density field intepolated on a mesh
    * @param lmax_bias Maximum multipole
-   * @details The individual bias is computed as 
+   * @details The individual bias is measured as 
    * \f[
    * b_{\ell}^{(i)}= \frac{1}{2\ell +1} \sum_{m=-\ell}^{m=\ell} \frac{\sum_{j,k_{j}<k_{max}}N^{j}_{k}\langle {\rm e}^{-i\textbf{k} \cdot \textbf{r}_{i}} \delta_{\mathrm{dm}}^{*}(\textbf{k})Y_{\ell m}(\hat{\textbf{k}}) \rangle_{k_{j}}}{\sum_{j,k_{j}<k_{max}} N^{j}_{k}P_{\rm dm}(k_{j})},
    * \f]
@@ -872,7 +918,7 @@ void add_catalogues(int, int, int);
   void object_by_object_bias_lm(vector<s_Halo>& tracer_cat, vector<real_prec>& dm_field, int lmax);
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Compute cross correlatio.
+   *  @brief measure cross correlatio.
    */
   void get_cross_correlation_config_space(vector<real_prec>&, vector<real_prec>& , vector<real_prec>&);
   //////////////////////////////////////////////////////////
@@ -905,7 +951,7 @@ void add_catalogues(int, int, int);
   //////////////////////////////////////////////////////////
   /**
    * @brief Write output of power spectrum and/or bispectrum
-   * @details computed in the function compute_power_spectrum()
+   * @details measured in the function measure_power_spectrum()
    */
   void write_power_spectrum ();
   //////////////////////////////////////////////////////////
@@ -913,6 +959,54 @@ void add_catalogues(int, int, int);
    * @brief Write log filw with numbers used and derived in the measuremetn of power
    */
   void write_fftw_parameters();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Write log file with numbers used and derived in the measuremetn of power
+   */
+  string _file_power(){return this->file_power;}
+
+ //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member file_power_grf
+   */
+  string _file_power_grf () {return this->file_power_grf;}
+
+  /**
+   *  @brief Set the value of the private member file_power_grf
+   */
+  void set_file_power_grf (string new_f) {this->file_power_grf=new_f;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member output_file_grf
+   */
+  string _output_file_grf () {return this->output_file_grf;}
+
+  /**
+   *  @brief Set the value of the private member output_file_grf
+   */
+  void set_output_file_grf (string new_f) {this->output_file_grf=new_f;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member output_file_grf
+   */
+  string _output_file_mixed_grf_fa () {return this->output_file_mixed_grf_fa;}
+
+  /**
+   *  @brief Set the value of the private member output_file_grf
+   */
+  void set_output_file_mixed_grf_fa (string new_f) {this->output_file_mixed_grf_fa=new_f;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member output_file_grf
+   */
+  string _output_file_fa () {return this->output_file_fa;}
+
+  /**
+   *  @brief Set the value of the private member output_file_grf
+   */
+  void set_output_file_fa (string new_f) {this->output_file_fa=new_f;}
+  //////////////////////////////////////////////////////////
+
 
 
 };

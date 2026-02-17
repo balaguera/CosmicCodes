@@ -189,17 +189,17 @@ public:
   vector<gsl_real> v_l_power_spectrum;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief  
+   *  @brief  Auxiliary container
    */
   vector<gsl_real>pk_aux;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief  
+   *  @brief  Auxiliary container
    */
   vector<gsl_real>kk_aux;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief  
+   *  @brief  Container for separations in CF analysis
    */
   vector<real_prec> v_r_cf;
   //////////////////////////////////////////////////////////
@@ -288,13 +288,19 @@ public:
   vector<real_prec> v_galaxy_correlation;
   //////////////////////////////////////////////////////////
   /**
-   *  @brief  
+   *  @brief   Shows in the shell the cosmological parameters
    */
   void show_cosmo_struct();
   //////////////////////////////////////////////////////////
   /**
-   *  @brief Compute cosmological observables
-   *  @details Observables are computed at a fixed redshift (given in the parameter file)
+   *  @brief Compute the elements of galaxy power spectrum in the framwork of the Halo Model.
+   *  @details Observables are computed at a fixed redshift (given in the parameter file) and according to the HOD model selected in the parameter file.
+   *  @return Halo mass function. 
+   *  \image html halo_mass_function.png 
+   *  @return Halo mass bias. 
+   *  \image html halo_mass_bias.png
+   *  @return File with the different components of halo model galaxy power spectrum, 
+   *  \image html galaxy_power_halo_model.png
    */
   void get_hmodel();
   //////////////////////////////////////////////////////////
@@ -306,6 +312,7 @@ public:
   //////////////////////////////////////////////////////////
   /**
    *  @brief Compute dNdz for galaxies
+   *  @warning TO b finished.
    *  @return
    */
   void get_dndz_gal();

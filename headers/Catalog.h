@@ -1758,13 +1758,42 @@ public:
   void get_mean_number_density(real_prec alpha, vector<gsl_real>&, vector<gsl_real>&, vector<gsl_real>&, vector<gsl_real>&);
   //////////////////////////////////////////////////////////
   /**
-   * @brief Assignment of a halo property prop based on mass
+   * @brief Interpolation of tracer density field on a mesh
+   * @details This method is meant for redshift space OR real.
+   * @details If enabled, it still relies on the parameter \ref Params::redshift_space_coords_g, since, if the latter is true, (is, we have a galaxy redshift survey), no velocities are available and hence no x+vx is possible.
+   * @details Sampling of the random or real catalog and interpolation of the object density field into a grid. This method expects the coordinates of the input catalogue already transformed into cartessian,
+   * @details  with the information of the mean number density written in the corresponding slot as specified in the parameter file or computed from the box.
+   * @details Used in the measuremetns of power spectrum.
+   * @param marked: bool, asking for weighting each tracer with a property.
+   * @param property: string, name of the property to use as weight. If non, "any" is enough.
+   * @return class member container \ref Catalog::field_external" (or \ref Catalog::field_external_marked). Notice that the output is not with _s (for redshift space), as we can select real or redshift space according to \ref REDSHIFT_SPACE_
    */
 #ifdef  _USE_SEVERAL_RANDOM_FILES_
   void get_interpolated_density_field(bool marked, string property, int ); // meant for redshift space
 #else
-  void get_interpolated_density_field(bool marked, string property); // meant for redshift space
+  void get_interpolated_density_field(bool marked, string property); 
 #endif
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Interpolation of tracer density field on a mesh, in real space
+   * @details This method does not ask for velocities.
+   * @param marked: bool, asking for weighting each tracer with a property
+   * @param property: string, name of the property to use as weight. If non, "any" is enough.
+   * @return class member container \ref Catalog::field_external" (or \ref Catalog::field_external_marked)
+   */
+
+  void get_interpolated_density_field_real_space(bool marked, string property);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Interpolation of tracer density field on a mesh both in real and redshift space
+   * @details Although this computes the interpolation for redshift space, it relies on the parameter \ref params._redshift_space_coords_g() to perfirm these calculations
+   * @details Used in the analisis of halo properties.
+   * @param marked: bool, asking for weighting each tracer with a property
+   * @param property: string, name of the property to use as weight. If non, "any" is enough.
+   * @return class member container \ref Catalog::field_external" (or \ref Catalog::field_external_marked) for real space, and \ref Catalog::field_external_s" (or \ref Catalog::field_external_marked_s) for redshift space.
+   */
+  void get_interpolated_density_field_real_and_redshift_space(bool marked, string property);
+
   //////////////////////////////////////////////////////////
   /**
    * @brief THis method computes bias from individual asignment as a function of a property
@@ -1780,17 +1809,7 @@ public:
    * @brief Define intervals in property once the Nft levels are defined
    */
   void get_intervals_multiscale(string prop);
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief Assignment of a halo property prop based on mass
-   */
-
-  void get_interpolated_density_field_real_space(bool marked, string property);
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief Assignment of a halo property prop based on mass
-   */
-  void get_interpolated_density_field_real_and_redshift_space(bool marked, string property);
+  
   //////////////////////////////////////////////////////////
   /**
    * @brief Assignment of a halo property prop based on mass

@@ -65,58 +65,80 @@ class Params
 private :
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Container to allocate the name of the enabled sections in the input json file. 
    */
   vector<string> enabled_sections;
+  //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Container to allocate input parameters from json file
    */
   vector<pair<string, real_prec>> parameter_number;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Container to allocate input parameters from json file
    */
   vector<pair<string, string>> parameter_string;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Container to allocate input parameters from json file
    */
   vector<pair<string, bool>> parameter_boolean;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Container to allocate input parameters from json file
    */
   vector<pair<string,vector<real_prec>>> parameter_vectors;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Container to allocate input parameters from json file
    */
   vector<pair<string,vector<ULONG>>> parameter_uvectors;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Container to allocate input parameters from json file
    */
   vector<pair<string,vector<int>>> parameter_ivectors;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Container to allocate input parameters from json file
    */
   vector<pair<string,vector<string>>> parameter_vector_string;
   //////////////////////////////////////////////////////////
   /**
-   *  @name input/output
+   *  @brief Vector of strucrures used to allocate definitions and properties of parameters.
    */
   vector<s_properties_params> parameter_properties;
   //////////////////////////////////////////////////////////
  /**
-   *  @name input/output
+   *  @brief Object of type structure used to allocate properties of input parameters.
    */
    s_properties_params mpars;
   //////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
   /**
-   * @brief Statistics to be measured from a tracer catalog
-   * @details Read from input parameter file.
-   */
+   *  @brief statisticts to compute 
+   *
+   *  possible options are
+   *
+   *  - Pk_fkp &rarr; power spectrum using the FKP estimator 
+   *
+   *  - Bk_fkp &rarr; bispectrum using the FKP estimator
+   *
+   *  - Pk_ys &rarr; moment decomposition of the 3D power spectrum
+   *    using the Yamamoto-Blake estimator with the Hexadecapole as
+   *    estimated by Scoccimarro. 
+   *
+   *  - Pk_yb &rarr; moment decomposition of the 3D power spectrum using the
+   *    Yamamoto-Blake estimator with the Hexadecapole as estimated by
+   *    Bianchi et al.  
+   *
+   *  - Pk_y_ds &rarr; moment decomposition of the 3d power spectrum
+   *    using the Yamamoto-Blake estimator with direct sum over
+   *    galaxies. (SLOW!)
+   *
+   *
+   *  
+   */  
   string statistics;
   //////////////////////////////////////////////////////////
   /**
@@ -132,25 +154,25 @@ private :
   real_prec Initial_Redshift_SIM;
   //////////////////////////////////////////////////////////
   /**
-   * @brief input directory where the tracers, dm and random catalogues are stored
+   * @brief Input directory where the tracers, dm and random catalogues are stored
    * @details Read from input parameter file.
    **/
   string Input_dir_cat;
   //////////////////////////////////////////////////////////
   /**
-   * @brief input directory where the tracers, dm and random catalogues are stored
+   * @brief Input directory where the tracers, dm and random catalogues are stored
    * @details Read from input parameter file.
    **/
   string Input_dir_cat_random;
   //////////////////////////////////////////////////////////
   /**
-   * @brief input directory where the a new reference catalog aimed to be assigned properties is located
+   * @brief Input directory where the a new reference catalog aimed to be assigned properties is located
    * @details Read from input parameter file.
    **/
   string Input_dir_cat_new_ref;
   //////////////////////////////////////////////////////////
   /**
-   * @brief input directory where the tracers, dm and random catalogues are stored
+   * @brief Input directory where the tracers, dm and random catalogues are stored
    * @details Read from input parameter file.
    **/
   string Input_dir_cat_TWO;
@@ -185,23 +207,22 @@ private :
    * @details Read from input parameter file.
    **/
   string file_bin_z_coord;
-  /////////////////////////////////////////////////////////
-
-
-
   //////////////////////////////////////////////////////////
   /** 
    * @brief Number of tracers. This is requested for power spectrum mesurements in case Input−type = delta_grid. Otherwise unused
+   * @details Read from input parameter file.
    **/
   unsigned long ngal_delta;
   //////////////////////////////////////////////////////////
   /**
    * @brief Full path (dir plus name) to overdensity field on a mesh
+   * @details Read from input parameter file.
    **/
   string delta_grid_file;
   //////////////////////////////////////////////////////////
   /**
    * @brief Full path (dir plus name) to overdensity field on a mesh
+   * @details Read from input parameter file.
    **/
 
   string delta_grid_file2;
@@ -260,7 +281,7 @@ private :
   string file_random;
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief Flag to use ic_file instead of generating ICs.
    **/
   bool use_ic_file;
   //////////////////////////////////////////////////////////
@@ -283,16 +304,19 @@ private :
   //////////////////////////////////////////////////////////
   /**
    * @brief  Identify the column in the ASCII file of the tracer where the information of the star formation rate is available
+   * @details Read from input parameter file.
    **/
   int i_sf_g;
   //////////////////////////////////////////////////////////
   /**
-   * @brief To be deprecated.
+   * @brief Index to identify mass of dark matter particles
+   * @details Read from input parameter file.
    **/
   int i_mass_dm;
   //////////////////////////////////////////////////////////
   /**
    * @brief Identify the column in the ASCII file of the random tracer where the information of the mass is available.
+   * @details Read from input parameter file.
    **/
   int i_mass_r;
 
@@ -355,13 +379,13 @@ private :
   real_prec MASS_units;
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief Logarithm of minimum mass for halo analysis
    * @details Read from input parameter file.
    **/
   real_prec LOGMASSmin;
   //////////////////////////////////////////////////////////
   /**
-   * @brief 
+   * @brief Logarithm of maximum mass for halo analysis
    * @details Read from input parameter file.
    **/
   real_prec LOGMASSmax;
@@ -1032,7 +1056,12 @@ private :
    **/
   bool new_los;
 
-
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Space where the statistics is to be computed. Applies only for simulations
+   * @details real_space or redshift_space  
+   **/
+  string clustering_space;
   //////////////////////////////////////////////////////////
   /**
    * @brief Something to name power spectrum outputs (like institution, or experiment).
@@ -2679,10 +2708,6 @@ private :
    */
   real_prec d2_low;
   //////////////////////////////////////////////////////////
-  /*
-   * @brief Threshold value for the V-web classification
-   */
-  //////////////////////////////////////////////////////////
   /**
    * @brief Threshold value for the V-web classification
    * @details Derived parameter.
@@ -2700,20 +2725,17 @@ private :
    * @details Read from input parameter file.
    */
   bool SN_correction;
-
   //////////////////////////////////////////////////////////
   /**
    * @brief Path to output directory.
    * @details Read from input parameter file.
    */  
   string Output_directory;
-
   //////////////////////////////////////////////////////////
   /**
    * @brief Path to output directory for cosmiclib calculations
    */  
   string cosmo_output;
-
   //////////////////////////////////////////////////////////
   /**
    * @brief 
@@ -2912,19 +2934,16 @@ private :
    * @brief use the fourth weight; false &rarr; do not use the fourth weight
    */
   bool use_weight1_g;
-
   //////////////////////////////////////////////////////////
   /*
    * @brief use the fourth weight; false &rarr; do not use the fourth weight
    */
   bool use_weight2_g;
-
   //////////////////////////////////////////////////////////
   /*
    * @brief use the fourth weight; false &rarr; do not use the fourth weight
    */
   bool use_weight3_g;
-
   //////////////////////////////////////////////////////////
   /*
    * @brief use the fourth weight; false &rarr; do not use the fourth weight
@@ -2947,10 +2966,40 @@ private :
   real_prec Distance_fraction;
   //////////////////////////////////////////////////////////
   /**
-   * @brief Used to
-      interpolate the tracer (and random) density filed into the FFT grid. Options are as NGP, CIC, TSC, PSC.
+   * @brief Mass assignment Scheme
+     @details used to interpolate the tracer (and random) density filed into the FFT grid. Options are as NGP, CIC, TSC, PSC.
    */  
   string mass_assignment_scheme;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */  
+  bool output_interpolated_field;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */  
+  bool show_interpolated_field;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */  
+  bool show_power_spectrum;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */  
+  string file_power_grf;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */  
+  string output_file_grf;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */  
+  string output_file_interpolated_field;
   //////////////////////////////////////////////////////////
   /**
    * @brief Integer for mass assignment scheme
@@ -3041,6 +3090,16 @@ private :
    * @brief
    */
   bool Get_tracer_bias;
+  //////////////////////////////////////////////////////////
+  /*
+   * @brief
+   */
+  bool Get_tracer_bias_squared;
+  //////////////////////////////////////////////////////////
+  /*
+   * @brief
+   */
+  bool Get_tracer_bias_multipoles;
   //////////////////////////////////////////////////////////
   /*
    * @brief
@@ -4859,6 +4918,14 @@ public:
 
   //////////////////////////////////////////////////////////
   /**
+   *  @brief Get the value of the private member new_los
+   *  @return new_los
+   */
+  string _clustering_space() {return this->clustering_space;}
+
+
+  //////////////////////////////////////////////////////////
+  /**
    *  @brief Get the value of the private member sys_of_coord_r
    *  @return sys_of_coord_r
    */
@@ -5104,6 +5171,56 @@ public:
    */
   string _mass_assignment_scheme () {return this->mass_assignment_scheme;}
   void set_mass_assignment_scheme (string new_mass_assignment_scheme) {this->mass_assignment_scheme=new_mass_assignment_scheme;}
+
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member mass_assignment_scheme
+   *  @return mass_assignment_scheme
+   */
+  string _file_power_grf () {return this->file_power_grf;}
+  void set_file_power_grf (string new_f) {this->file_power_grf=new_f;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member mass_assignment_scheme
+   *  @return mass_assignment_scheme
+   */
+  string _output_file_grf () {return this->output_file_grf;}
+  void set_output_file_grf (string new_f) {this->output_file_grf=new_f;}
+
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member
+   *  @return output_interpolated_field
+   */
+  bool _output_interpolated_field () {return this->output_interpolated_field;}
+  void set_output_interpolated_field (bool new_output_interpolated_field) {this->output_interpolated_field=new_output_interpolated_field;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member
+   *  @return output_interpolated_field
+   */
+  bool _show_interpolated_field () {return this->show_interpolated_field;}
+  void set_show_interpolated_field (bool new_sinterpolated_field) {this->show_interpolated_field=new_sinterpolated_field;}
+
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member
+   *  @return output_interpolated_field
+   */
+  bool _show_power_spectrum () {return this->show_power_spectrum;}
+  void set_show_power_spectrum (bool new_sinterpolated_field) {this->show_power_spectrum=new_sinterpolated_field;}
+
+
+
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member
+   *  @return output_interpolated_field
+   */
+  string _output_file_interpolated_field () {return this->output_file_interpolated_field;}
+  void set_output_file_interpolated_field (string new_output) {this->output_file_interpolated_field=new_output;}
+
+
   //////////////////////////////////////////////////////////
   /**
    *  @brief Get the value of the private member mass_assignment_scheme
@@ -6889,6 +7006,16 @@ public:
   /**
    *  @brief
    */
+  bool _Get_tracer_bias_squared(){return this->Get_tracer_bias_squared;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief
+   */
+  bool _Get_tracer_bias_multipoles(){return this->Get_tracer_bias_multipoles;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief
+   */
   bool _Get_tracer_local_dm_density(){return this->Get_tracer_local_dm_density;}
   //////////////////////////////////////////////////////////
   /**
@@ -7940,5 +8067,11 @@ public:
    *  @name input/output
    */
   real_prec _area_survey(){return this->area_survey;}
+
+  //////////////////////////////////////////////////////////
+  /**
+   *  @name input/output
+   */
+  vector<string> _enabled_sections(){return this->enabled_sections;}
 };
 #endif

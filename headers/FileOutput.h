@@ -251,11 +251,6 @@ class FileOutput{
   /** 
    *@brief   Write output
    */
-  void write_to_file(const std::string& fname,const std::vector<std::vector<real_prec>>& columns);
-  //////////////////////////////////////////////////////////
-  /** 
-   *@brief   Write output
-   */
   void read_array(string, float *, ULONG);
   //////////////////////////////////////////////////////////
   /** 
@@ -408,6 +403,39 @@ template<class Type> void read_array_t(string fname, vector<Type>&OUT){
     }
 
 //////////////////////////////////////////////////////////
+  /**
+   * template<read_array_t>
+   *@brief Read binary file
+   */
+template<typename T> void write_to_file(const std::string& fname,const std::vector<std::vector<T>>& columns)
+{
+    std::ofstream out(fname, std::ios::out);
+    if (!out)
+        throw std::runtime_error("Cannot open file " + fname);
+    if (columns.empty())
+        return;
+    size_t nrows = columns[0].size();
+    size_t ncols = columns.size();
+    // Safety check
+    for (const auto& col : columns)
+        if (col.size() != nrows)
+            throw std::runtime_error("Column size mismatch");
+
+    So.message_output_file(fname, nrows, ncols);
+
+    for (size_t i = 0; i < nrows; ++i) {
+        for (size_t j = 0; j < ncols; ++j)
+            out << columns[j][i] << "\t";
+        out << "\n";
+    }
+
+    out.close();
+    So.DONE();
+}
+
+
+
+//////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
  
@@ -444,16 +472,6 @@ template<class Type> void read_array_t(string fname, vector<Type>&OUT){
    *@brief Write output
    */
   void write_to_file(string fname, vector<gsl_real>& kve, vector<gsl_real> &pk, vector<gsl_real> &pkk,vector<gsl_real> &pkkk, vector<gsl_real> &si, vector<int>& nmod);
-  //////////////////////////////////////////////////////////
-  /** 
-   *@brief  Write output
-   */
-  void write_to_file(string fname, vector<gsl_real>& kve, vector<gsl_real> &pk, vector<gsl_real> &pkk,vector<gsl_real> &pkkk, vector<gsl_real> &si, vector<gsl_real>& nmod);
-  //////////////////////////////////////////////////////////
-  /** 
-   *@brief  Write output
-   */
-  void write_to_file(string fname, vector<gsl_real>&, vector<gsl_real> &, vector<gsl_real> &,vector<gsl_real> &, vector<gsl_real> &, vector<gsl_real>&,vector<gsl_real>& );
   //////////////////////////////////////////////////////////
   /** 
    *@brief   Write output
@@ -501,6 +519,8 @@ template<class Type> void read_array_t(string fname, vector<Type>&OUT){
   bifstream inStreamp;
 #endif
 };
+
+
 
 #endif
 
