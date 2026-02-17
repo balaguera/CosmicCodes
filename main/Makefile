@@ -77,6 +77,12 @@ $(TARGET_BMT): $(OBJS_BMT)
 $(TARGET_PS): $(OBJS_PS)
 	@echo "Linking $@"
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_PS) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
+	@echo "$(BLUE)make power: $(GREEN)creates executable for the power spectrum and related operations"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -power parameter_file.json $(GREEN)to measure power (see documentation)"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -window parameter_file.json $(GREEN)to measure window matrix"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -grf parameter_file.json $(GREEN)to obtain GRF"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -lowpassfilter parameter_file.json $(GREEN)for low pass filter"		
+
 
 $(TARGET_SB): $(OBJS_SB)
 	@echo "Linking $@"
@@ -135,10 +141,10 @@ help:
 	@echo "	  $(GREEN)execute with $(BLUE)./bmt.exe -d to check preprocessor directives"
 	@echo ""
 	@echo "$(BLUE)make power: $(GREEN)creates executable for the power spectrum and related operations"
-	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -p parameter_file.json $(GREEN)to measure power (see documentation)"
-	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -w parameter_file.json $(GREEN)to measure window matrix"
-	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -g parameter_file.json $(GREEN)to obtain GRF"
-	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -s parameter_file.json $(GREEN)for low pass filter"		
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -power parameter_file.json $(GREEN)to measure power (see documentation)"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -window parameter_file.json $(GREEN)to measure window matrix"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -grf parameter_file.json $(GREEN)to obtain GRF"
+	@echo "	  $(GREEN)execute with $(BLUE)./power.exe -lowpassfilter parameter_file.json $(GREEN)for low pass filter"	
 	@echo ""
 	@echo "$(BLUE)make secbias: $(GREEN)creates executable for the analysis of secondary bias"
 	@echo "	  $(GREEN)execute with $(BLUE)./secbias.exe -s parameter_file.json" 
@@ -151,8 +157,9 @@ help:
 	@echo "	  $(GREEN)execute with $(BLUE)./htools.exe parameter_file.json" 
 	@echo "$(RED)Note: This is still under merging stages: merged with class::Catalog"		
 	@echo ""
-	@echo "$(BLUE)make cosmicweb: $(GREEN)creates executable for the cosmic web analysis ased on tracer catalogues"
-	@echo "	  $(GREEN)execute with $(BLUE)./cosmicweb.exe parameter_file.json"		
+	@echo "$(BLUE)make cosmicweb: $(GREEN)creates executable for the cosmic web analysis based on tracer catalogues"
+	@echo "	  $(GREEN)execute with $(BLUE)./cosmicweb.exe -ibias parameter_file.json $(GREEN) to assign individual bias to tracers"
+	@echo "	  $(GREEN)execute with $(BLUE)./cosmicweb.exe -cwc parameter_file.json	$(GREEN) to perform cosmic-web analysis."	
 	@echo ""
 	@echo "$(BLUE)make params: $(GREEN)creates executable $(GREEN)for the params code "
 	@echo "	  $(GREEN)execute with $(BLUE)./params.exe -n name_of_parameter $(GREEN)to get information on a given parameter of the json parameter file"		
