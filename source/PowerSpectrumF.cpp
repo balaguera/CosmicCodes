@@ -285,9 +285,9 @@ void PowerSpectrumF::write_power_spectrum()
       {
 #ifdef _WRITE_MULTIPOLES_
         if(true==this->params._FKP_error_bars())
-            File.write_to_file(file_power,this->kvector_data,this->pk0,this->pk2,this->pk4,this->sigma_fkp,this->modes_g);
+            File.write_to_file(this->file_power,this->kvector_data,this->pk0,this->pk2,this->pk4,this->sigma_fkp,this->modes_g);
         else
-            File.write_to_file(file_power,this->kvector_data,this->pk0,this->pk2,this->pk4,this->modes_g);
+            File.write_to_file(this->file_power,this->kvector_data,this->pk0,this->pk2,this->pk4,this->modes_g);
 #else
     File.write_to_file(this->file_power,this->kvector_data,this->pk0,this->modes_g);
 #endif
@@ -375,7 +375,7 @@ void PowerSpectrumF::write_power_spectrum_grid(string output_file)
   }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PowerSpectrumF::compute_marked_correlation_function()
+void PowerSpectrumF::measure_marked_correlation_function()
   {
     this->So.enter(__PRETTY_FUNCTION__);
     this->params.set_statistics("MCF");
@@ -546,7 +546,7 @@ void PowerSpectrumF::compute_marked_correlation_function()
   }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PowerSpectrumF::compute_cross_power_spectrum_grid(bool dm, vector<real_prec>&X,vector<real_prec>&Y, bool  get_cross_coeff)
+void PowerSpectrumF::measure_cross_power_spectrum_grid(bool dm, vector<real_prec>&X,vector<real_prec>&Y, bool  get_cross_coeff)
   {
     this->So.enter(__PRETTY_FUNCTION__);
     real_prec ngal_new=0;
@@ -631,7 +631,7 @@ void PowerSpectrumF::compute_cross_power_spectrum_grid(bool dm, vector<real_prec
   }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PowerSpectrumF::compute_cross_power_spectrum_grid(bool dm,string file_X, string file_Y, bool get_cross_coeff)
+void PowerSpectrumF::measure_cross_power_spectrum_grid(bool dm,string file_X, string file_Y, bool get_cross_coeff)
   {
 #ifdef _VERBOSE_POWER_
     this->So.enter(__PRETTY_FUNCTION__);
@@ -738,7 +738,7 @@ void PowerSpectrumF::compute_cross_power_spectrum_grid(bool dm,string file_X, st
   }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
+void PowerSpectrumF::measure_power_spectrum(bool verbose, bool mcut){
   So.enter(__PRETTY_FUNCTION__);
   this->So.welcome_message();
 #ifdef _USE_OMP_
@@ -749,31 +749,23 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
   string file_pow=this->file_power;
     // Initizalize number of intervals
   int N_intervals=1;
-#ifdef  _JPAS_BINS_POWER_
-#ifdef _USE_MASS_AS_OBSERVABLE_POWER_ //deprec
-  N_intervals=this->params._NMASSbins_power(); //deprec
-#elif defined _USE_VMAX_AS_PRIMARY_OBSERVABLE_POWER_ //deprec
-  N_intervals=this->params._NVMAXbins_power(); //deprec
-#endif
-#endif
-#ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_POWER_ //deprec
-  for(int i=0;i<N_intervals;++i)cout<<"Bin "<<i<<"  :"<<this->params._VMAXbins_min(i)<<"  "<<this->params._VMAXbins_max(i)<<endl;
-#elif defined _USE_MASS_AS_PRIMARY_OBSERVABLE_POWER_  //deprec
-  for(int i=0;i<N_intervals;++i)cout<<"Bin "<<i<<"  :"<<pow(10,this->params._MASSbins_min(i))<<"  "<<pow(10,this->params._MASSbins_max(i))<<endl;
-#endif
+
   if(I_EQZ==this->params._sys_of_coord_g())
     So.write_cosmo_parameters((void *)&this->params.s_cosmo_pars);
-// ***********************************************************
+
+    // ***********************************************************
 // Define some structures here
   s_data_structure s_data_struct_r; // this is defiend here for the fkp error bars need the info from the randoms. So far at this point it is only defiend but not filled
   s_data_structure_direct_sum s_data_struct_r_ds; // this is defiend here for the fkp error bars need the info from the randoms. So far at this point it is only defiend but not filled
 // ***********************************************************
   this->File.input_type=this->params._input_type();
+
 #if defined (_USE_MASS_CUTS_PK_) ||  defined (_USE_ALL_PK_)
   if(this->params._input_type()!="catalog")
     So.message_warning("Warning: expecting catalog to perform mass cuts when density field is provided");
   real_prec mm=0;
   if("catalog"==this->params._input_type())
+
 #ifdef _USE_ALL_PK_
     if(this->params._i_mass_g()>0)
       mm=pow(10,this->params._LOGMASSmin());
@@ -782,19 +774,20 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
 #else
     mm=log10(this->params._MASScuts(i));
 #endif
-  if(this->params._input_type()=="catalog")// This is a long if
-    {
-           // Tabulate r-z relation if radial coordinate is redshift
-      vector<gsl_real>vzz;
-      vector<gsl_real>vrc;
-      if(I_EQR==this->params._sys_of_coord_g() || I_EQZ==this->params._sys_of_coord_g())
-        {
-          So.message_screen("Computing comoving distances in the range",this->params._redshift_min_sample(),"<z<", this->params._redshift_max_sample());
-          vzz.resize(params._Nbins_redshift(),0);
-          vrc.resize(params._Nbins_redshift(),0);
-          this->cosmology.Comoving_distance_tabulated(this->params._redshift_min_sample(),this->params._redshift_max_sample(), vzz,vrc);
-          So.DONE();
-        }
+
+if(this->params._input_type()=="catalog")// This is a long if
+  {
+       // Tabulate r-z relation if the radial coordinate is redshift
+    vector<gsl_real>vzz;
+    vector<gsl_real>vrc;
+    if(I_EQR==this->params._sys_of_coord_g() || I_EQZ==this->params._sys_of_coord_g())
+      {
+         So.message_screen("Computing comoving distances in the range",this->params._redshift_min_sample(),"<z<", this->params._redshift_max_sample());
+         vzz.resize(params._Nbins_redshift(),0);
+         vrc.resize(params._Nbins_redshift(),0);
+         this->cosmology.Comoving_distance_tabulated(this->params._redshift_min_sample(),this->params._redshift_max_sample(), vzz,vrc);
+         So.DONE();
+      }
         // Now read the galaxy and random catalog
 #elif defined (_USE_MASS_BINS_PK_)
 #ifdef _USE_VMAX_AS_PRIMARY_OBSERVABLE_POWER_
@@ -806,14 +799,17 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
     // If applies, give a first estimate of mean number density from a box
     // in case we do not use random catalog                                                    *
     //If a random catalog is used, set this numer to 1
-    //and use the nmbar tabulated in the catalogs or computed in this code
+    //and use the nmbar tabulated in the catalogs or measured in this code
     mean_density=1.0;
+
     if(false==this->params._use_random_catalog())
         So.message_screen("Using particles in a box.");
+
     s_data_structure s_data_struct_prop;
     vector<gsl_real> z_v;
     vector<gsl_real> dndz_v;
-    bool compute_dndz=false;
+    bool measure_dndz=false;
+
     if(true==this->params._use_random_catalog())
       {
 #ifdef _USE_SEVERAL_RANDOM_FILES_
@@ -829,7 +825,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
             // The new Lbox is updated in this method into the instance params belonging to the class random_cat
             if(false==this->params._nbar_tabulated() && false==this->params._use_file_nbar())// extra security check
               {
-                 compute_dndz=true;
+                 measure_dndz=true;
 #ifdef _USE_SEVERAL_RANDOM_FILES_
                 if(0==ir)// resize only when reading the first file, For the others, we just keep on filling it.
                  {
@@ -857,7 +853,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
                z_v.resize(nzl,0);
                dndz_v.resize(nzl,0);
                real_prec fsky=this->params._area_survey()*pow(M_PI/180.0,2)/(4.0*M_PI);
-               So.message_screen("Computed f_sky", fsky);
+               So.message_screen("measured f_sky", fsky);
                for(ULONG i=0;i<nzl;++i)
                 {
                   z_v[i]=nb[i*ncols_nb];  // central redshift, assumed to be in the first column of the dNdz file
@@ -882,7 +878,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
             }
            s_data_struct_prop={
               mean_density,
-              compute_dndz,
+              measure_dndz,
               z_v,
               dndz_v,
               vzz,
@@ -902,7 +898,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
                   this->random_cat._NCOLS(),
                   this->random_cat._type_of_object(),
                   mean_density,
-                  compute_dndz,
+                  measure_dndz,
                   z_v,
                   dndz_v,
                   vzz,
@@ -926,7 +922,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
                 //mesh onto whcih the rest will be interpolated! This is important
 #endif
                 // ############################# This is important ################################################################################################
-                // update even if no new_Lbox is requested, as in any case the offsets are to be computed and used by the fftwfunctions' methods (multipoles mainly)
+                // update even if no new_Lbox is requested, as in any case the offsets are to be measured and used by the fftwfunctions' methods (multipoles mainly)
                this->set_params(this->random_cat.params);                // Update the instance parms in this class from the instance params in random_cat
                this->fftw_functions.set_params(this->random_cat.params); //Update the instance parms  in the class fftw_functions from the instance params in random_cat
                 // ############################# This is important ################################################################################################
@@ -934,7 +930,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
            }
 #endif
 #ifndef _USE_SEVERAL_RANDOM_FILES_
-            // 6 Compute window matrix with the randoms, only if read from one random file
+            // 6 measure window matrix with the randoms, only if read from one random file
             if(true==this->params._get_window_matrix())
               {
                 So.message_screen("Computing mixing matrix");
@@ -954,13 +950,16 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
 #ifdef _USE_SEVERAL_RANDOM_FILES_
            this->So.message_screen("\tTotal number of randoms = ", get_nobjects(this->random_cat.field_external));
 #endif
-        // *****************************************************************************************
+
+
+// *****************************************************************************************
         // Dark matter tracers: Steps are
         // 1 Read catalog
         // 3 Transform to cartessian coord (assigning nbar if needed and searching for box side lenght, offsets and mins)
         // 4 Interpolate on the mesh
         // 5 Update params
-        // 6 Release memmory from the catalog if relative bias is not to be computed.
+        // 6 Release memmory from the catalog if relative bias is not to be measured.
+
         this->add_catalogues_gal(mm);
         // Read
         // Convert to cartessian coords
@@ -977,7 +976,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
               this->tracer_cat._NCOLS(),
               this->tracer_cat._type_of_object(),
               mean_density,
-              compute_dndz,
+              measure_dndz,
               z_v,
               dndz_v,
               vzz,
@@ -991,20 +990,24 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
 #else
           this->tracer_cat.get_interpolated_density_field(false,"any"); // Interpolate tracer catalog on a mesh
 #endif
+
         //Update the instance params in  in the class tracer_cat from the instance params in random_cat
         // such that the offsets , and derived parameters are applying the same to the tracer cat
         if(true==this->params._use_random_catalog())
           this->tracer_cat.set_params(this->random_cat.params);
-        // Free memmory if necessary. If not, released below
+
+          // Free memmory if necessary. If not, released below
         if(false==this->params._Get_tracer_relative_bias())
           {
             this->tracer_cat.Halo.clear();
             this->tracer_cat.Halo.shrink_to_fit();
           }
+
         this->fftw_functions.resize_fftw_vectors();
         if(true==verbose)
           fftw_functions.write_fftw_parameters();
-        // PASS parameter computed in the class Catalog when interpolating to the fftwFunction class
+
+        // PASS parameter measured in the class Catalog when interpolating to the fftwFunction class
         this->fftw_functions.set_n_gal(this->tracer_cat._n_gal());
         this->fftw_functions.set_w_g(this->tracer_cat._w_g());
         this->fftw_functions.set_s_g(this->tracer_cat._s_g());
@@ -1038,7 +1041,8 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
           for(ULONG i=0;i<this->params._NGRID();++i)
             this->fftw_functions.set_data_r(i,this->random_cat.field_external[i]); // Set rho_r to its container in fftw_functions
           }
-       // If relative bias is to be computed, do it  and release memmory
+
+          // If relative bias is to be measured, do it  and release memmory
         if(true==this->params._Get_tracer_relative_bias())
           {
                 // Vamos a generar uan muestra pequeña aleatoria y a esa muestra le asignamos el bias
@@ -1177,19 +1181,22 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
                 this->File.read_array_fast(this->params._delta_grid_file4(), field);
                 break;
             }
-          if(this->params._input_type()=="delta_grid")
-            {
+         
+            if(this->params._input_type()=="delta_grid")
+             {
 #ifdef _USE_OMP_
 #pragma omp parallel for
 #endif
-                  for(ULONG i=0;i<this->params._NGRID();++i)
-                    fftw_functions.data_g[i]=static_cast<real_prec>(field[i]);
-                  ngal_new=this->params._ngal_delta();
-           }
+               for(ULONG i=0;i<this->params._NGRID();++i)
+                  fftw_functions.data_g[i]=static_cast<real_prec>(field[i]);
+               ngal_new=this->params._ngal_delta();
+             }
           else if (this->params._input_type()=="density_grid")
             {
-              ngal_new=0;
-              for(ULONG i=0;i<this->params._NGRID();++i)ngal_new+=static_cast<real_prec>(field[i]);
+               ngal_new=0;
+              for(ULONG i=0;i<this->params._NGRID();++i)
+                ngal_new+=static_cast<real_prec>(field[i]);
+              
               real_prec nmean=static_cast<real_prec>(ngal_new)/static_cast<real_prec>(this->params._NGRID());
     #ifdef _USE_OMP_
 #pragma omp parallel for
@@ -1217,6 +1224,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
               break;
             }
           fftw_functions.data_gp.resize(this->params._NGRID(),0);
+
           if (this->params._input_type()=="delta_grid")
             {
 #ifdef _USE_OMP_
@@ -1267,6 +1275,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
             {
               for(int i=0;i<this->params._d_Nnp_data();i++)
                 this->kvector_data.push_back(this->params._d_kmin()+this->params._d_DeltaK_data()*(i+0.5));
+
               for(int i=0;i<this->params._d_Nnp_window();i++)
                 this->kvector_window.push_back(this->params._d_kmin()+this->params._d_DeltaK_window()*(i+0.5));
             }
@@ -1274,15 +1283,17 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
               {
                 for(int i=0;i<kvector_data.size();i++)
                   this->kvector_data.push_back(this->params._d_kmin()*pow(10,(i-0.5)*this->params._d_Deltal()));
+
                 for(int i=0;i<kvector_window.size();i++)
-                this->kvector_window.push_back(this->params._d_kmin()*pow(10,(i-0.5)*this->params._d_Deltal()));
+                  this->kvector_window.push_back(this->params._d_kmin()*pow(10,(i-0.5)*this->params._d_Deltal()));
               }
             for(int i=0;i<this->params._d_Nnp_data();i++)
               kvector_data2d.push_back(this->params._d_kmin()+this->params._d_DeltaK_data()*(i+0.5));
+
             for(int i=0;i<params._N_mu_bins();i++)
               muvector.push_back(-1.0+this->params._d_Deltamu()*(i+0.5));
             // *****************************************************************************
-            // Resize arrays for P(k), and 2d P(k). Compute and write to file
+            // Resize arrays for P(k), and 2d P(k). measure and write to file
             this->pk0.clear();
             this->pk0.shrink_to_fit();
             this->pk0.resize(this->params._d_Nnp_data(),0); //Monopole
@@ -1328,42 +1339,42 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, bool mcut){
             // Estimates of Bispectrum. Using the DFT already done for P(k)
             else if(this->params._statistics()=="Bk_fkp")
               {
-            if(this->params._type_of_binning()=="linear")
-              for(int i=0;i<this->params._d_Nnp_data();i++)
-                this->kvector_data_b.push_back(this->params._d_kmin()+this->params._d_DeltaK_data()*(i+0.5)); //Oficcial binning
-            else
-              if(this->params._type_of_binning()=="log"){
-                for(int i=0;i<this->params._d_Nnp_data();i++)
-                  this->kvector_data_b.push_back(this->params._d_kmin()*pow(10,(i-0.5)*this->params._d_Deltal()));
+                if(this->params._type_of_binning()=="linear")
+                  for(int i=0;i<this->params._d_Nnp_data();i++)
+                    this->kvector_data_b.push_back(this->params._d_kmin()+this->params._d_DeltaK_data()*(i+0.5)); //Oficcial binning
+                else
+                  if(this->params._type_of_binning()=="log"){
+                    for(int i=0;i<this->params._d_Nnp_data();i++)
+                      this->kvector_data_b.push_back(this->params._d_kmin()*pow(10,(i-0.5)*this->params._d_Deltal()));
               }
-            bispectrum.resize(this->params._Nft()*this->params._Nft()*this->params._Nft());
-            sn_bispectrum.resize(this->params._Nft()*this->params._Nft()*this->params._Nft());
-            modes_tri.resize(this->params._Nft()*this->params._Nft()*this->params._Nft());
-            this->fftw_functions.get_bispectrum_fkp('d', bispectrum, sn_bispectrum, modes_tri);
-            File.write_to_file(file_bispectrum,kvector_data_b,bispectrum,modes_tri);
-              }
+              bispectrum.resize(this->params._Nft()*this->params._Nft()*this->params._Nft());
+              sn_bispectrum.resize(this->params._Nft()*this->params._Nft()*this->params._Nft());
+              modes_tri.resize(this->params._Nft()*this->params._Nft()*this->params._Nft());
+              this->fftw_functions.get_bispectrum_fkp('d', bispectrum, sn_bispectrum, modes_tri);
+              File.write_to_file(file_bispectrum,kvector_data_b,bispectrum,modes_tri);
+            }
             // Estimates of Bispectrum for FKP using fast version
             else if(this->params._statistics()=="Bk_fkp_fast")
               {
-            this->pk0.resize(this->params._d_Nnp_data(),0);
-            for(int i=0;i<fftw_functions.Nshells_bk;i++)
-              kvector_data_b.push_back(this->params._d_kmin()+this->params._d_DeltaK_data()*(i+0.5)); //Jennifer's binning
-            bispectrum.resize(fftw_functions.Nshells_bk*fftw_functions.Nshells_bk*fftw_functions.Nshells_bk,0);
-            sn_bispectrum.resize(fftw_functions.Nshells_bk*fftw_functions.Nshells_bk*fftw_functions.Nshells_bk,0);
-            modes_tri.resize(fftw_functions.Nshells_bk*fftw_functions.Nshells_bk*fftw_functions.Nshells_bk,0);
-            fftw_functions.get_power_spectrum_for_bispectrum(this->pk0);
-            fftw_functions.get_bispectrum_fkp_fast(this->pk0,bispectrum,modes_tri,file_bispectrum);
-          }
+              this->pk0.resize(this->params._d_Nnp_data(),0);
+              for(int i=0;i<fftw_functions.Nshells_bk;i++)
+                kvector_data_b.push_back(this->params._d_kmin()+this->params._d_DeltaK_data()*(i+0.5)); //Jennifer's binning
+              bispectrum.resize(fftw_functions.Nshells_bk*fftw_functions.Nshells_bk*fftw_functions.Nshells_bk,0);
+              sn_bispectrum.resize(fftw_functions.Nshells_bk*fftw_functions.Nshells_bk*fftw_functions.Nshells_bk,0);
+              modes_tri.resize(fftw_functions.Nshells_bk*fftw_functions.Nshells_bk*fftw_functions.Nshells_bk,0);
+              fftw_functions.get_power_spectrum_for_bispectrum(this->pk0);
+              fftw_functions.get_bispectrum_fkp_fast(this->pk0,bispectrum,modes_tri,file_bispectrum);
+            }
 #ifndef _WRITE_MULTIPOLES_
         write_power_and_modes();
 #else
-        write_power_spectrum();
+        this->write_power_spectrum();
 #endif
         this->write_fftw_parameters();
    }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PowerSpectrumF::compute_power_spectrum(){
+void PowerSpectrumF::measure_power_spectrum(){
     string file_p=this->file_power;
     string file_lg=this->file_power_log;
     for(int bin1=0; bin1<3; bin1++) // Bin in redshift
@@ -1392,7 +1403,7 @@ void PowerSpectrumF::compute_power_spectrum(){
 	    // If applies, give a first estimate of mean number density from a box
 	    // in case we do not use random catalog                                                    *
 	    //If a random catalog is used, set this numer to 1
-	    //and use the nmbar tabulated in the catalogs or computed in this code
+	    //and use the nmbar tabulated in the catalogs or measured in this code
 	    // *****************************************************************************************
 	    // *****************************************************************************************
 	    // *****************************************************************************************
@@ -1408,7 +1419,7 @@ void PowerSpectrumF::compute_power_spectrum(){
 	    s_data_structure s_data_struct_prop;
 	    vector<gsl_real> z_v;
 	    vector<gsl_real> dndz_v;
-	    bool compute_dndz=false;
+	    bool measure_dndz=false;
 #ifdef _USE_SEVERAL_RANDOM_FILES_
 	    for(int ir=0;ir<this->params._NRANDOMfiles();++ir)
 	      {
@@ -1420,7 +1431,7 @@ void PowerSpectrumF::compute_power_spectrum(){
 		// The new Lbox is updated in this method into the instance params belonging to the class random_cat
 		if(false==this->params._nbar_tabulated() && false==this->params._use_file_nbar())// extra security check
 		  {
-		    compute_dndz=true;
+		    measure_dndz=true;
 #ifdef _USE_SEVERAL_RANDOM_FILES_
 		    if(0==ir)// resize only when reading the first file, For the others, we just keep on filling it.
 		      {
@@ -1470,7 +1481,7 @@ void PowerSpectrumF::compute_power_spectrum(){
 		  }
 		s_data_struct_prop={
 		  mean_density,
-		  compute_dndz,
+		  measure_dndz,
 		  z_v,
 		  dndz_v,
 		  vzz,
@@ -1500,7 +1511,7 @@ void PowerSpectrumF::compute_power_spectrum(){
 		    //mesh onto whcih the rest will be interpolated! This is important
 #endif
 		    // *****************This is important**********************
-		    // update even if no new_Lbox is requested, as in any case the offsets are to be computed and used by the fftwfunctions' methods (multipoles mainly)
+		    // update even if no new_Lbox is requested, as in any case the offsets are to be measured and used by the fftwfunctions' methods (multipoles mainly)
 		    this->set_params(this->random_cat.params);                // Update the instance parms in this class from the instance params in random_cat
 		    this->fftw_functions.set_params(this->random_cat.params); //Update the instance parms  in the class fftw_functions from the instance params in random_cat
 #ifdef _USE_SEVERAL_RANDOM_FILES_
@@ -1522,7 +1533,7 @@ void PowerSpectrumF::compute_power_spectrum(){
 	    // 3 Transform to cartessian coord (assigning nbar if needed and searching for box side lenght, offsets and mins)
 	    // 4 Interpolate on the mesh
 	    // 5 Update params
-	    // 6 Release memmory from the catalog if relative bias is not to be computed.
+	    // 6 Release memmory from the catalog if relative bias is not to be measured.
 	    this->add_catalogues_gal(bin1, bin2, bin3);
 	    // Read
 	    // Convert to cartessian coords
@@ -1549,7 +1560,7 @@ void PowerSpectrumF::compute_power_spectrum(){
 	    // ***********************************************************************************
 	    this->fftw_functions.resize_fftw_vectors();
 	    this->fftw_functions.write_fftw_parameters();
-	    // PASS parameter computed in the class Catalog when interpolating to the fftwFunction class
+	    // PASS parameter measured in the class Catalog when interpolating to the fftwFunction class
         this->fftw_functions.set_n_gal(this->tracer_cat._n_gal());
         this->fftw_functions.set_w_g(this->tracer_cat._w_g());
         this->fftw_functions.set_s_g(this->tracer_cat._s_g());
@@ -1575,7 +1586,7 @@ void PowerSpectrumF::compute_power_spectrum(){
 #endif
 	    for(ULONG i=0;i<this->params._NGRID();++i)
 	      this->fftw_functions.set_data_r(i,this->random_cat.field_external[i]); // Set rho_r to its container in fftw_functions
-	    // If relative bias is to be computed, do it  and release memmory
+	    // If relative bias is to be measured, do it  and release memmory
 	    if(true==this->params._Get_tracer_relative_bias())
 	      {
 		// Vamos a generar uan muestra pequeña aleatoria y a esa muestra le asignamos el bias
@@ -1645,7 +1656,7 @@ void PowerSpectrumF::compute_power_spectrum(){
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PowerSpectrumF::compute_window_function(){
+void PowerSpectrumF::measure_window_function(){
     time_t start;
     time (&start);
 #ifdef _USE_OMP_
@@ -1678,11 +1689,11 @@ void PowerSpectrumF::compute_window_function(){
         vector<gsl_real> z_v;
         vector<gsl_real> dndz_v;
         vector< vector<gsl_real> > dndz_matrix;
-        // If nbar is not tabulated, Compute a smoothed version of dN/dz from randoms to get nbar  *
-        bool compute_dndz=false;
+        // If nbar is not tabulated, measure a smoothed version of dN/dz from randoms to get nbar  *
+        bool measure_dndz=false;
         if(true==this->params._use_random_catalog() && false==params._nbar_tabulated())
           {
-            compute_dndz=true;
+            measure_dndz=true;
             vector<gsl_real> z_v;
             z_v.resize(params._new_N_dndz_bins(),0);
             vector<gsl_real> dndz_v;
@@ -1693,7 +1704,7 @@ void PowerSpectrumF::compute_window_function(){
         So.message_screen("Setting data in structure for RANDOMS");
         s_data_structure s_data_struct_r={
           mean_density,
-          compute_dndz,
+          measure_dndz,
           z_v,
           dndz_v,
           vzz,
@@ -1736,7 +1747,7 @@ void PowerSpectrumF::compute_window_function(){
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- void PowerSpectrumF::compute_power_spectrum_grid(const vector<real_prec> &data_in, bool write_to_file)
+ void PowerSpectrumF::measure_power_spectrum_grid(const vector<real_prec> &data_in, bool write_to_file)
  {
    this->So.enter(__PRETTY_FUNCTION__);
 
@@ -1804,7 +1815,7 @@ void PowerSpectrumF::compute_window_function(){
  }//closes memmber function
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PowerSpectrumF::compute_power_spectrum(bool verbose, vector<s_Halo>& tracer_cat){
+void PowerSpectrumF::measure_power_spectrum(bool verbose, vector<s_Halo>& tracer_cat){
       this->So.enter(__PRETTY_FUNCTION__);
 #ifdef _USE_OMP_
       int NTHREADS=_NTHREADS_;
@@ -1827,7 +1838,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, vector<s_Halo>& tracer
       So.message_screen("Using one global Halo Mass-cut at M = ",MINIMUM_PROP_CUT, "Ms/h");
 #endif
 #else
-      So.message_warning("Masss-cuts are defined in PowerSpectrumF::compute_power_spectrum");
+      So.message_warning("Masss-cuts are defined in PowerSpectrumF::measure_power_spectrum");
 #endif
       mass_cuts.clear();
       bool mcut=true;
@@ -1985,7 +1996,7 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, vector<s_Halo>& tracer
     }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- void PowerSpectrumF::compute_power_spectrum(vector<s_Halo>& tracer_cat, string space_p,string property){
+ void PowerSpectrumF::measure_power_spectrum(vector<s_Halo>& tracer_cat, string space_p,string property){
    this->So.enter(__PRETTY_FUNCTION__);
    if(tracer_cat.size()==0)
    {
@@ -2185,6 +2196,8 @@ void PowerSpectrumF::compute_power_spectrum(bool verbose, vector<s_Halo>& tracer
        this->pkk.resize(this->params._d_Nnp_data());
        this->pmk.resize(params._N_mu_bins());
        fftw_functions.get_power_spectrum_fkp(this->pk0,this->pk2,this->pk4,this->pk_w,this->pkk,this->pmk,this->modes_g);
+   
+       
        this->power_in_bins[im].i_ncbin=this->modes_g;
        this->power_in_bins[im].vbin=this->kvector_data;
        this->power_in_bins[im].vq1=this->pk0;
@@ -2547,7 +2560,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
    this->params.set_mass_assignment_scheme("CIC");
    this->params.set_SN_correction(false);
    this->set_output_filenames();
-   this->compute_power_spectrum_grid(DM_DEN_FIELD, true);
+   this->measure_power_spectrum_grid(DM_DEN_FIELD, true);
    vector<real_prec>power_dm(this->params._d_Nnp_data(),0);
 #ifdef _USE_OMP_
 #pragma omp parallel for
@@ -3086,7 +3099,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
 #endif
            ofstream blsm; blsm.open(file_lss_bias_marked.c_str());
            this->File.input_type=this->params._input_type();
-           if(Nbb==first_sec_property_used)// Compute the raw number counts, only needed once, so we do it for Nbb=first index used
+           if(Nbb==first_sec_property_used)// measure the raw number counts, only needed once, so we do it for Nbb=first index used
              {
                this->tracer_cat.field_external.clear();
                this->tracer_cat.field_external_s.clear();
@@ -3255,7 +3268,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
        }// closes if(true==get_marked)
        // ************************************************************************************************************
        // END OF MARKED POWER SECTION
-       //if marked is false, we still would like to have the primary field to have cross power computed below:
+       //if marked is false, we still would like to have the primary field to have cross power measured below:
        else{
            if(true==this->params._Get_cross_power_spectrum())
            {
@@ -3918,7 +3931,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
                                              }
                                              if(true==this->params._Get_pearson_coefficient())
                                             {
-                                             // *Compute the pearson coefficients among halo proeprties. This is the intrinsic correlation *//
+                                             // *measure the pearson coefficients among halo proeprties. This is the intrinsic correlation *//
                                          ofstream pearsout;
                                          ofstream pearsout_b;
                                          string file_pearson_intrinsic;
@@ -4087,10 +4100,10 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
 					   {
 					     // Measure cross correlation between halo full population and sub-population
 					     So.message_screen("\tComputing cross power spectrum between primary and secondary selected tracers");
-                    //     this->compute_cross_power_spectrum_grid(false, this->fftw_functions.field_external, primary_field, true);
+                    //     this->measure_cross_power_spectrum_grid(false, this->fftw_functions.field_external, primary_field, true);
 					     // Measure cross correlation between DM field and sub-population
 					     this->file_power_cross=file_pow_cross+extra_info_dm;
-                         this->compute_cross_power_spectrum_grid(true, DM_DEN_FIELD, tracer_final.field_external,true);
+                         this->measure_cross_power_spectrum_grid(true, DM_DEN_FIELD, tracer_final.field_external,true);
 					     
                          pair<real_prec, real_prec>lss_bias_cpower=this->get_lss_cross_bias(this->pk0, power_dm, this->kvector_data, this->modes_g, 2, this->params._kmax_tracer_bias()); // 0.08
                          pair<real_prec, real_prec>lss_bias_cpower2=this->get_lss_cross_bias(this->pk0, power_dm, this->kvector_data, this->modes_g, 2, 0.06);
@@ -4118,7 +4131,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
                                          real_prec kmax_sn=min(this->params._kmax_tracer_bias(),this->kvector_data[ik]);
                                          real_prec kmax_sn2=min(static_cast<real_prec>(0.06),this->kvector_data[ik]);
                                          real_prec kmax_sn3=min(static_cast<real_prec>(0.04),this->kvector_data[ik]);
-                                         if(kmax_sn>=this->kvector_data[initial_kmode])// this prevents that bias is computed from a shot-noise dominated signal
+                                         if(kmax_sn>=this->kvector_data[initial_kmode])// this prevents that bias is measured from a shot-noise dominated signal
                                            {
 					     
                                              this->So.message_screen("\tMaximum wave-number before shot-noise dominance:",this->kvector_data[ik]);
@@ -4135,7 +4148,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
                                              blss.close();
                                            }
 					 else
-                                           this->So.message_screen("\t\tP(k) dominated by shot-noise. LSS bias is not computed");
+                                           this->So.message_screen("\t\tP(k) dominated by shot-noise. LSS bias is not measured");
 					 cout<<endl;
                                          }//cloess do power, andres
                                            }// closes if number of tracers>0
@@ -4155,7 +4168,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
  }
  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- void PowerSpectrumF::compute_marked_power_spectrum_grid(const vector<real_prec> &data_in,const vector<real_prec> &data_in_MW)
+ void PowerSpectrumF::measure_marked_power_spectrum_grid(const vector<real_prec> &data_in,const vector<real_prec> &data_in_MW)
  {
 
 #ifdef _VERBOSE_POWER_
@@ -4208,7 +4221,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
  }
  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- void PowerSpectrumF::compute_power_spectrum_grid()
+ void PowerSpectrumF::measure_power_spectrum_grid()
  {
    this->So.enter(__PRETTY_FUNCTION__);
 #ifdef _USE_OMP_
@@ -4330,7 +4343,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
   this->alpha=fftw_functions._alpha();
   this->normal_power=fftw_functions._normal_power();
   So.DONE();
-  // Compute here the squared of the distance to the origin d² for each random tracer
+  // measure here the squared of the distance to the origin d² for each random tracer
 #ifdef _FULL_VERBOSE_
   this->So.message_screen("\tComputing r**2 for randoms");
 #endif
@@ -4355,7 +4368,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
   So.DONE();
   real_prec pre_factor=2.0*pow(this->alpha,2)/pow(this->normal_power,2);
   ULONG Npairs=this->N_random*(this->N_random-1)/2;
-  // Allocate structure for pre-computed pair_info:
+  // Allocate structure for pre-measured pair_info:
   struct pair_info{
     ULONG ipair; // index of the i tracer in the pair
     ULONG jpair; // index of the j tracer in the pair
@@ -4569,7 +4582,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
    this->So.message_screen("\t            to k =", this->params._kmax_tracer_bias());
 #endif
    real_prec use_imag=0;
-  // This is the normalization of the halo power spectrum, which being computed object-by object, is just the volume
+  // This is the normalization of the halo power spectrum, which being measured object-by object, is just the volume
    // FOr the full sample it would be the volume/Ntracer, = nbar. But Ntracer =1 for each object!
    real_prec dk_x=this->params._d_deltak_x();
    real_prec dk_y=this->params._d_deltak_y();
@@ -4650,7 +4663,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
        //*******   The cross power spectrum has real and imaginary parts. C=A+iB.If the fieidsl are not properly correlated, the imaginary parts will be non-zero
        //*******   I.e, for perfectly correlated fields, B== and the cross power is C=A.
        //*******   Now, for bias. we compare the bias b_1 fro the one measured with power spectrum b²=Phh/Pmm.
-       //*******   while here, with the cross, we compute b = Phm/Pmm. This is chosen such that Phm is decomposed in delta_dm * exp(-ikr)
+       //*******   while here, with the cross, we measure b = Phm/Pmm. This is chosen such that Phm is decomposed in delta_dm * exp(-ikr)
        // Loop over the Fourier box up to the maximum k (bin) used to get bias
        for(ULONG i=Kmin_bin; i< new_Nft/2;++i)
          for(ULONG j=Kmin_bin; j< new_Nft/2;++j)
@@ -4852,7 +4865,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
    this->So.message_screen("\t            to k =", this->params._kmax_tracer_bias());
 #endif
    real_prec use_imag=0;
-  // This is the normalization of the halo power spectrum, which being computed object-by object, is just the volume
+  // This is the normalization of the halo power spectrum, which being measured object-by object, is just the volume
    // FOr the full sample it would be the volume/Ntracer, = nbar. But Ntracer =1 for each object!
    real_prec dk_x=this->params._d_deltak_x();
    real_prec dk_y=this->params._d_deltak_y();
@@ -5013,7 +5026,7 @@ void PowerSpectrumF::get_window_matrix_multipole()
         }   //closes loop over l
       } // loop over tracers
 
-//compute average of all bl's
+//measure average of all bl's
       vector<real_prec>bmean(lmax+1,0);
       vector<real_prec>bvar(lmax+1,0);
 for(int ell=0; ell<=lmax;++ell)
@@ -5100,7 +5113,7 @@ for(int ell=0; ell<=lmax;++ell)
    this->So.message_screen("\t            to k =", this->params._kmax_tracer_bias());
 #endif
    // ---------------------------------------------------
-  // This is the normalization of the halo power spectrum, which being computed object-by object, is just the volume
+  // This is the normalization of the halo power spectrum, which being measured object-by object, is just the volume
    // FOr the full sample it would be the volume/Ntracer, = nbar. But Ntracer =1 for each object!
    this->So.message_screen("\tGetting power dark matter:");
   // This is done once for all tracers
@@ -5187,7 +5200,7 @@ for(int ell=0; ell<=lmax;++ell)
        //*******   The cross power spectrum has real and imaginary parts. C=A+iB.If the fieidsl are not properly correlated, the imaginary parts will be non-zero
        //*******   I.e, for perfectly correlated fields, B== and the cross pwoer is C=A.
        //*******   Now, for bias. we compare the bias b_1 fro the one measured with power spectrum b²=Phh/Pmm.
-       //*******   while here, with the cross, we compute b = Phm/Pmm. This is chosen as Phm is decomposed in delta_dm * exp(-ikr)
+       //*******   while here, with the cross, we measure b = Phm/Pmm. This is chosen as Phm is decomposed in delta_dm * exp(-ikr)
       // Loop over the Fourier box up to the maximum k (bin) used to get bias
        for(ULONG i=initial_mode; i< new_Nft/2;++i)
          for(ULONG j=initial_mode; j< new_Nft/2;++j)
@@ -6024,7 +6037,7 @@ void PowerSpectrumF::object_by_object_bias_squared(vector<s_Halo>& tracer_cat, v
  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  //#define paired
-// #define parallel_grf
+#define parallel_grf
 #define white_noise
  void PowerSpectrumF::get_GaussianRandomField(){
 #ifdef _USE_OMP_
@@ -6047,36 +6060,39 @@ void PowerSpectrumF::object_by_object_bias_squared(vector<s_Halo>& tracer_cat, v
        Nft=this->params._Nft();
        Ngrid=this->params.d_NGRID();
        NTT=Nft*Nft*(Nft/2+1);
-     }
-   // ******************************************************************************
+      }
+
+      // ******************************************************************************
    // Computation of cosmological growth
-   real_prec g1=this->cosmology.growth_factor(this->params._Initial_Redshift_DELTA());
-   real_prec g2=this->cosmology.growth_factor(this->params._Initial_Redshift_TH_power_file());
    real_prec ic_factor=1.;
    if(this->params._Normalize_IC_to_initial_redshift()==true)
-     ic_factor= pow(g1/g2,2);
-#ifdef _ABACUS_
-   real_prec abacus_factor=47.304805056;
-   ic_factor=1./(pow(abacus_factor,2));
-#endif
-   So.message_screen("Growth at redshift of theoretical power", g1);
-   So.message_screen("Growth at redshift of initial conditions", g2);
+     {
+      real_prec g1=this->cosmology.growth_factor(this->params._Initial_Redshift_DELTA());
+      real_prec g2=this->cosmology.growth_factor(this->params._Initial_Redshift_TH_power_file());
+      ic_factor= pow(g1/g2,2);
+      So.message_screen("Growth at redshift of theoretical power", g1);
+      So.message_screen("Growth at redshift of initial conditions", g2);
+     }
    So.message_screen("IC Factor", ic_factor);
    // ******************************************************************************
    real_prec norm=(Ngrid*Ngrid) / pow(Lside,3);  // Normalization of power spectrum. Multiply by this factor to un-normalize the theoretical power
    vector<real_prec>prop;
    string power_file=this->params._dir()+this->params._ic_power_file();
+
    ULONG nlines_p=this->File.read_file(power_file,prop,8);
+
    ULONG ncols=(static_cast<ULONG>(prop.size()/nlines_p));
+
    vector<double>kv(nlines_p,0);
    vector<double>pv(nlines_p,0);
+
    for(ULONG i=0;i<nlines_p;++i)
      {
        kv[i]=static_cast<double>(prop[ncols*i]);
 #ifdef _USE_IC_INPUT_POWER_DELTA_
        pv[i]=static_cast<double>(prop[1+ncols*i])*(norm*ic_factor)*(2.*M_PI*M_PI)/pow(kv[i],3); //con factor dejo el P(k) a z=z_initial_simulation
 #else
-#ifdef _correct_shape_theoretica_power_
+#ifdef _correct_shape_theoretical_power_
        pv[i]=static_cast<double>(prop[1+ncols*i])*(norm*ic_factor)/(1.0+0.05*kv[i]*kv[i]); //con factor dejo el P(k) a z=z_initial_simulation
 #else
        pv[i]=static_cast<double>(prop[1+ncols*i])*(norm*ic_factor); //con factor dejo el P(k) a z=z_initial_simulation
@@ -6084,17 +6100,23 @@ void PowerSpectrumF::object_by_object_bias_squared(vector<s_Halo>& tracer_cat, v
 #endif
      }
    So.DONE();
+
    prop.clear();prop.shrink_to_fit();
+
    gsl_interp_accel *acc = gsl_interp_accel_alloc();
    gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear,kv.size());
    gsl_spline_init(spline,&kv[0],&pv[0],pv.size());
    real_prec deltak=this->params._d_DeltaK_data();
    real_prec ideltak=1.0/static_cast<double>(deltak);
+
    vector<real_prec> coords(Nft,0);// Coordinates of wavevectors in a regular grid
+
    for(ULONG i=0;i<Nft ;++i)
      coords[i]=deltak*(i<=Nft/2  ? static_cast<real_prec>(i): -static_cast<real_prec>(Nft-i));
+
    vector<real_prec> mean_power(Nft/2/ndel,0);// Mean power to be updated
    vector<real_prec>IC_field_grf(Ngrid,0);
+
    for(ir=0;ir<this->params._Number_of_GRF();++ir)
      {
        So.message_screen("Realization ", ir);
@@ -6127,118 +6149,120 @@ void PowerSpectrumF::object_by_object_bias_squared(vector<s_Halo>& tracer_cat, v
        vector<real_prec> IC_FA_lr;
 
        if(true==this->params._use_low_pass_filter())
-     {
-       IC_GRF_lr.resize(Nft_LR/2/ndel,0);
-       if(true==this->params._Generate_FA())
-         {
-           IC_MIXED_lr.resize(Nft_LR/2/ndel,0);
-           IC_FA_lr.resize(Nft_LR/2/ndel,0);
-         }
-     }
+       {
+         IC_GRF_lr.resize(Nft_LR/2/ndel,0);
+         if(true==this->params._Generate_FA())
+           {
+             IC_MIXED_lr.resize(Nft_LR/2/ndel,0);
+             IC_FA_lr.resize(Nft_LR/2/ndel,0);
+           }
+        }
 
        if(true==this->params._Generate_FA())
-     {
-       IC_FA.resize(Nft/2/ndel,0);
-       IC_MIXED.resize(Nft/2/ndel,0);
-     }
+         {
+          IC_FA.resize(Nft/2/ndel,0);
+          IC_MIXED.resize(Nft/2/ndel,0);
+        }
        //************************************ parallel stuff****************
        // This is the right way to implement parallelization with random number generators //
 #ifdef parallel_grf
-       gsl_rng **gBaseRand = new gsl_rng *[_NTHREADS_];
-       for (int b = 0; b < _NTHREADS_; b++)
-     {
-       gBaseRand[b] = gsl_rng_alloc(gsl_rng_mt19937);
-       gsl_rng_set(gBaseRand[b], b * 101*(ir+1));
-     }
+      gsl_rng **gBaseRand = new gsl_rng *[_NTHREADS_];
+      for (int b = 0; b < _NTHREADS_; b++)
+       {
+         gBaseRand[b] = gsl_rng_alloc(gsl_rng_mt19937);
+         gsl_rng_set(gBaseRand[b], b * 101*(ir+1));
+        }
 #else
        gsl_rng * gBaseRand;
        const gsl_rng_type * rng_t;
 #endif
        gsl_rng_env_setup();
+
        if(true==this->params._Generate_FA())
-     {
-       IC_FOURIER_MIXED= (complex_prec *)fftw_malloc(2*NTT*sizeof(real_prec));
-       IC_FOURIER_FA= (complex_prec *)fftw_malloc(2*NTT*sizeof(real_prec));
-       So.message_screen("Going for fixed amplitude");
+       {
+          IC_FOURIER_MIXED= (complex_prec *)fftw_malloc(2*NTT*sizeof(real_prec));
+          IC_FOURIER_FA= (complex_prec *)fftw_malloc(2*NTT*sizeof(real_prec));
+          So.message_screen("Going for fixed amplitude");
+
 #ifdef parallel_grf
 #pragma omp parallel
-       {
-         int jthread=omp_get_thread_num();
-#pragma omp for nowait
-#else
-         gsl_rng_default_seed= 5658*(ir+1);
-         rng_t = gsl_rng_mt19937;
-         gBaseRand = gsl_rng_alloc (rng_t);
+        {
+          int jthread=omp_get_thread_num();
+  #pragma omp for nowait
+  #else
+          gsl_rng_default_seed= 5658*(ir+1);
+          rng_t = gsl_rng_mt19937;
+          gBaseRand = gsl_rng_alloc (rng_t);
 #endif
 
-         for(ULONG i=0;i<Nft;++i)
-           {
-         for(ULONG j=0;j< Nft;++j)
-           {
-             for(ULONG k=0;k<Nft/2+1;++k)
-               {
-             ULONG lp=index_3d(i,j,k,Nft,Nft/2+1);                                      // 3D C-like index
-             real_prec kmod=sqrt(pow(coords[i],2)+pow(coords[j],2)+pow(coords[k],2)); // k=|k|= Magnitude of wave-vector
-             ULONG ik=static_cast<ULONG>(floor(kmod/deltak));                                               // Bin in k
-             real_prec Power_th = (kmod<kv[0] ? 0 : gsl_spline_eval(spline,kmod, acc));  // Theoretial Power interpolated at k
+          for(ULONG i=0;i<Nft;++i)
+            {
+            for(ULONG j=0;j< Nft;++j)
+              {
+                for(ULONG k=0;k<Nft/2+1;++k)
+                {
+                ULONG lp=index_3d(i,j,k,Nft,Nft/2+1);                                      // 3D C-like index
+                  real_prec kmod=sqrt(pow(coords[i],2)+pow(coords[j],2)+pow(coords[k],2)); // k=|k|= Magnitude of wave-vector
+                  ULONG ik=static_cast<ULONG>(floor(kmod/deltak));                                               // Bin in k
+                  real_prec Power_th = ( (kmod<kv[0] || kmod>=kv.back()) ? 0 : gsl_spline_eval(spline,kmod, acc));  // Theoretial Power interpolated at k
 #ifdef parallel_grf
-             real_prec phi_ic = 2.*M_PI*gsl_rng_uniform(gBaseRand[jthread]);                     // GR: Random phases. Add pi to get the inverted-phase pair
-             real_prec Amp_ic = gsl_ran_rayleigh(gBaseRand[jthread],sqrt(0.5*Power_th));         // GR: Random Amplitude->Reyleigh distribution
+                  real_prec phi_ic = 2.*M_PI*gsl_rng_uniform(gBaseRand[jthread]);                     // GR: Random phases. Add pi to get the inverted-phase pair
+                  real_prec Amp_ic = gsl_ran_rayleigh(gBaseRand[jthread],sqrt(0.5*Power_th));         // GR: Random Amplitude->Reyleigh distribution
 #else
-             real_prec phi_ic = 2.*M_PI*gsl_rng_uniform(gBaseRand);                     // GR: Random phases. Add pi to get the inverted-phase pair
-             real_prec Amp_ic = gsl_ran_rayleigh(gBaseRand,sqrt(0.5*Power_th));         // GR: Random Amplitude->Reyleigh distribution
+                  real_prec phi_ic = 2.*M_PI*gsl_rng_uniform(gBaseRand);                     // GR: Random phases. Add pi to get the inverted-phase pair
+                  real_prec Amp_ic = gsl_ran_rayleigh(gBaseRand,sqrt(0.5*Power_th));         // GR: Random Amplitude->Reyleigh distribution
 #endif
-             real_prec cphi = cos(phi_ic);                                              // Cosinos of phase
-             real_prec sphi = sin(phi_ic);                                              // Sin of phase
-             IC_FOURIER_GRF[lp][REAL] = Amp_ic*cphi;                             // Real part of GR field
-             IC_FOURIER_GRF[lp][IMAG] = Amp_ic*sphi;                             // Imag part of Mixed field
+                  real_prec cphi = cos(phi_ic);                                              // Cosinos of phase
+                  real_prec sphi = sin(phi_ic);                                              // Sin of phase
+                  IC_FOURIER_GRF[lp][REAL] = Amp_ic*cphi;                             // Real part of GR field
+                  IC_FOURIER_GRF[lp][IMAG] = Amp_ic*sphi;                             // Imag part of Mixed field
 #ifdef paired
-             real_prec cphi_paired = cos(phi_ic+M_PI);                                              // Cosinos of phase
-             real_prec sphi_paired = sin(phi_ic+M_PI);                                              // Sin of phase
-             IC_FOURIER_GRF_PAIRED[lp][REAL] = Amp_ic*cphi_paired;                             // Real part of GR field
-             IC_FOURIER_GRF_PAIRED[lp][IMAG] = Amp_ic*sphi_paired;                             // Imag part of Mixed field
+                  real_prec cphi_paired = cos(phi_ic+M_PI);                                              // Cosinos of phase
+                  real_prec sphi_paired = sin(phi_ic+M_PI);                                              // Sin of phase
+                  IC_FOURIER_GRF_PAIRED[lp][REAL] = Amp_ic*cphi_paired;                             // Real part of GR field
+                  IC_FOURIER_GRF_PAIRED[lp][IMAG] = Amp_ic*sphi_paired;                             // Imag part of Mixed field
 #endif
-             real_prec Amp_faf = sqrt(Power_th);                                        // FA: Amplitude fixed to the power at k
-             real_prec Amp_ic_final = kmod<=kmax ? Amp_faf: Amp_ic;                    // Final amplitude: below kmax, let it FA: above, let it GR
-             IC_FOURIER_MIXED[lp][REAL] = Amp_ic_final*cphi;                                // Real part of Mixed field
-             IC_FOURIER_MIXED[lp][IMAG] = Amp_ic_final*sphi;                                // Imag part of Mixed field
-             IC_FOURIER_FA[lp][REAL] = Amp_faf*cphi;                                   // Real part of FA field
-             IC_FOURIER_FA[lp][IMAG] = Amp_faf*sphi;                                   // Imag part of FA field
-             // Do shell average to measure power of the three fields
-             if(ik<Nft/2/ndel)
-               {
+                  real_prec Amp_faf = sqrt(Power_th);                                        // FA: Amplitude fixed to the power at k
+                  real_prec Amp_ic_final = kmod<=kmax ? Amp_faf: Amp_ic;                    // Final amplitude: below kmax, let it FA: above, let it GR
+                  IC_FOURIER_MIXED[lp][REAL] = Amp_ic_final*cphi;                                // Real part of Mixed field
+                  IC_FOURIER_MIXED[lp][IMAG] = Amp_ic_final*sphi;                                // Imag part of Mixed field
+                  IC_FOURIER_FA[lp][REAL] = Amp_faf*cphi;                                   // Real part of FA field
+                  IC_FOURIER_FA[lp][IMAG] = Amp_faf*sphi;                                   // Imag part of FA field
+              // Do shell average to measure power of the three fields
+                  if(ik<Nft/2/ndel)
+                   {
+    #ifdef parallel_grf
+    #pragma omp atomic
+    #endif
+                    nmodes[ik]++;    // Number of modes in k-shells
+    #ifdef parallel_grf
+    #pragma omp atomic
+    #endif
+                    IC_MIXED[ik]+= pow(Amp_ic_final,2);  // Mixed
+    #ifdef parallel_grf
+    #pragma omp atomic
+    #endif
+                    IC_FA[ik]+= pow(Amp_faf,2);      // FA
+    #ifdef parallel_grf
+    #pragma omp atomic
+    #endif
+                    IC_TH[ik]+= pow(sqrt(Power_th),2); //Theoretical power evaluated at the Fourier mesh
+    #ifdef parallel_grf
+    #pragma omp atomic
+    #endif
+                    IC_GRF[ik]+= pow(Amp_ic,2);  // GRF
+                  }
+              }
+            }
+         }
 #ifdef parallel_grf
-#pragma omp atomic
-#endif
-                 nmodes[ik]++;    // Number of modes in k-shells
-#ifdef parallel_grf
-#pragma omp atomic
-#endif
-                 IC_MIXED[ik]+= pow(Amp_ic_final,2);  // Mixed
-#ifdef parallel_grf
-#pragma omp atomic
-#endif
-                 IC_FA[ik]+= pow(Amp_faf,2);      // FA
-#ifdef parallel_grf
-#pragma omp atomic
-#endif
-                 IC_TH[ik]+= pow(sqrt(Power_th),2); //Theoretical power evaluated at the Fourier mesh
-#ifdef parallel_grf
-#pragma omp atomic
-#endif
-                 IC_GRF[ik]+= pow(Amp_ic,2);  // GRF
-               }
-               }
-           }
-           }
-#ifdef parallel_grf
-       } // closes parallel region
+        } // closes parallel region
 #endif
 
-     }// closes if
+      }// closes if 
 
-       else if (false==this->params._Generate_FA()) // this is only gaussian
-     {
+     else if (false==this->params._Generate_FA()) // this is only gaussian
+      {
 
 #ifdef parallel_grf
 #pragma omp parallel
@@ -6246,31 +6270,41 @@ void PowerSpectrumF::object_by_object_bias_squared(vector<s_Halo>& tracer_cat, v
          int  jthread=omp_get_thread_num();
 #pragma omp for nowait
 #else
-             gsl_rng_default_seed= 5658*(ir+1587);
+         gsl_rng_default_seed= 5658*(ir+1587);
          rng_t = gsl_rng_mt19937;
          gBaseRand = gsl_rng_alloc (rng_t);
 #endif
 
 #ifdef white_noise
          // get a white noise
-         So.message_screen("Getting white noise");
+
+
          for(ULONG i=0;i< IC_field_grf.size();++i)
-           IC_field_grf[i]=gsl_rng_uniform(gBaseRand);
+           IC_field_grf[i]=gsl_rng_uniform(gBaseRand[jthread]);
+
          // Get mean of WN
              real_prec meanWN=get_mean(IC_field_grf);
-         // Ensure that WN has zero mean
+
+             // Ensure that WN has zero mean
          for(ULONG i=0;i< IC_field_grf.size();++i)
            IC_field_grf[i]-=meanWN;
-         meanWN=0;
-         for(ULONG i=0;i< IC_field_grf.size();++i)
+
+           meanWN=0;
+
+           for(ULONG i=0;i< IC_field_grf.size();++i)
            meanWN+=IC_field_grf[i];
+
          meanWN/=static_cast<real_prec>(IC_field_grf.size());
+
          this->So.message_screen("Mean WN =",meanWN);
-         //Compute variance of the field sigma²
+
+         //measure variance of the field sigma²
          real_prec sigmaWN=0;
          for(ULONG i=0;i< IC_field_grf.size();++i)
            sigmaWN+=(IC_field_grf[i]-meanWN)*(IC_field_grf[i]-meanWN);
+
          sigmaWN/=static_cast<real_prec>(IC_field_grf.size()-1);
+
          this->So.message_screen("Sigma² WN =",sigmaWN);
 
              // Nrmalize field to get sigma² = 1
@@ -6312,37 +6346,31 @@ void PowerSpectrumF::object_by_object_bias_squared(vector<s_Halo>& tracer_cat, v
                  int i_m= (i <= Nft/2 ? i : Nft-i);
                  real_prec i_deltak_x =  static_cast<real_prec>(i_m *i_m) *this->params._d_deltak_x() * this->params._d_deltak_x();
                  for(int j=0; j < Nft; ++j)
-           {
+                   {
                      int j_m= (j <= Nft/2 ? j : Nft-j);
                      real_prec i_deltak_y = static_cast<real_prec>(j_m * j_m) * this->params._d_deltak_y() * this->params._d_deltak_y();
                      for(int k=0; k<=Nft/2 ;++k)
-               {
+                       {
                          real_prec i_deltak_z = static_cast<real_prec>(k * k) * this->params._d_deltak_z() * this->params._d_deltak_z();
-             real_prec kmod = sqrt(i_deltak_x+i_deltak_y+i_deltak_z); // k=|k|= Magnitude of wave-vector
+                         real_prec kmod = sqrt(i_deltak_x+i_deltak_y+i_deltak_z); // k=|k|= Magnitude of wave-vector
                          real_prec Power_th = 0;
                          if(kmod>=kv[0] && kmod<kv[kv.size()-1])
                            Power_th = gsl_spline_eval(spline,kmod, acc); // Theoretial Power interpolated at k
-
-#ifndef white_noise
+                          ULONG lp = index_3d(i,j,k,Nft,Nft/2+1);
 #ifdef parallel_grf
-             real_prec Amp_ic = gsl_ran_rayleigh(gBaseRand[jthread],sqrt(0.5*Power_th));
-                         real_prec phi_ic = 2.*M_PI*gsl_rng_uniform(gBaseRand[jthread]);
+                        real_prec phi_ic = 2.*M_PI*gsl_rng_uniform(gBaseRand[jthread]);                     // GR: Random phases. Add pi to get the inverted-phase pair
+                        real_prec Amp_ic = gsl_ran_rayleigh(gBaseRand[jthread],sqrt(0.5*Power_th));         // GR: Random Amplitude->Reyleigh distribution
 #else
-             real_prec Amp_ic = static_cast<real_prec>(gsl_ran_rayleigh(gBaseRand,sqrt(0.5*Power_th)));
-             real_prec phi_ic = 2.*M_PI*gsl_rng_uniform(gBaseRand);
+                  real_prec phi_ic = 2.*M_PI*gsl_rng_uniform(gBaseRand);                     // GR: Random phases. Add pi to get the inverted-phase pair
+                  real_prec Amp_ic = gsl_ran_rayleigh(gBaseRand,sqrt(0.5*Power_th));         // GR: Random Amplitude->Reyleigh distribution
 #endif
-
-             IC_FOURIER_GRF[lp][REAL] = Amp_ic*cos(phi_ic);
+                         real_prec cphi = cos(phi_ic);                                              // Cosinos of phase
+                         real_prec sphi = sin(phi_ic);         
+                         IC_FOURIER_GRF[lp][REAL] = Amp_ic*cos(phi_ic);
                          IC_FOURIER_GRF[lp][IMAG] = -Amp_ic*sin(phi_ic);
-#else
-             real_prec Amp_ic = sqrt(Power_th/factorN);
-             ULONG lp = index_3d(i,j,k,Nft,Nft/2+1);
-                         IC_FOURIER_GRF[lp][REAL] *= Amp_ic;
-                         IC_FOURIER_GRF[lp][IMAG] *= Amp_ic;
-#endif
                          int ik = static_cast<int>(floor((kmod-this->params._d_kmin())*ideltak));
                          if(ik<nmodes.size())
-               {
+                           {
 #ifdef parallel_grf
 #pragma omp atomic
 #endif
@@ -6356,31 +6384,35 @@ void PowerSpectrumF::object_by_object_bias_squared(vector<s_Halo>& tracer_cat, v
 #endif
                              IC_GRF[ik]+= IC_FOURIER_GRF[lp][REAL]*IC_FOURIER_GRF[lp][REAL]+ IC_FOURIER_GRF[lp][IMAG]*IC_FOURIER_GRF[lp][IMAG];
                            }
+                   }
                }
-           }
            }
 #ifdef parallel_grf
        } // closes parallel region
 #endif
      }//closes else
-       So.DONE();
-       So.message_screen("Getting power");
-       if(true==this->params._Generate_FA())
+    So.DONE();
+    So.message_screen("Getting power");
+    if(true==this->params._Generate_FA())
      {
        for(ULONG i=0;i<IC_MIXED.size();++i)
+       {
          if(nmodes[i]>0)
+         {
            IC_MIXED[i]/=static_cast<real_prec>(nmodes[i]*norm);
-
-
-       for(ULONG i=0;i<IC_FA.size();++i)
-         if(nmodes[i]>0)
            IC_FA[i]/=static_cast<real_prec>(nmodes[i]*norm);
-     }
-       else if(false==this->params._Generate_FA())
+           IC_TH[i]/=static_cast<real_prec>(nmodes[i]*norm);
+           IC_GRF[i]/=(static_cast<real_prec>(nmodes[i])*norm);
+         }
+        }
+    }
+ 
+     else if(false==this->params._Generate_FA())
      {
        for(ULONG i=0;i<IC_TH.size();++i)
          if(nmodes[i]>0)
            IC_TH[i]/=static_cast<real_prec>(nmodes[i]*norm);
+
        for(ULONG i=0;i<IC_GRF.size();++i)
          if(nmodes[i]>0)
                IC_GRF[i]/=(static_cast<real_prec>(nmodes[i])*norm);
@@ -6410,47 +6442,59 @@ void PowerSpectrumF::object_by_object_bias_squared(vector<s_Halo>& tracer_cat, v
        vector<real_prec>IC_field_fa_lr;
        vector<real_prec>IC_field_mixed_lr;
        if(true==this->params._use_low_pass_filter())
+       {
+          So.message_screen("Applying low pass filter: ");
+          real_prec mean_HR=static_cast<real_prec>(Ngrid_HR)/pow(params._Lbox(),3);
+          for(ULONG i=0; i<IC_field_grf.size();++i)
+            IC_field_grf[i]=mean_HR*(1.0+IC_field_grf[i]);
+
+          low_pass_filter(Nft_HR,Nft_LR,1,false, IC_field_grf,IC_field_grf_lr, params._Lbox());
+          get_overdens(IC_field_grf_lr,IC_field_grf_lr);
+
+          this->File.write_array(this->params._Output_directory()+"IC_GRF_lpass_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_grf_lr);
+          this->File.write_array(this->params._Output_directory()+"IC_GRF_lpass_paired_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_grf_paired_lr);
+          this->params.set_input_type("delta_grid");
+          this->params.set_Nft(Nft_LR);
+          this->params.set_NGRID(Ngrid_LR);
+          this->params.set_SN_correction(false);
+          this->params.set_MAS_correction(false);
+          this->measure_power_spectrum_grid(IC_field_grf_lr, false);
+          for(ULONG i=0;i<IC_GRF_lr.size();++i)
+            IC_GRF_lr[i]=this->pk0[i];
+
+          if(true==this->params._Generate_FA())
+            {
+              IC_field_fa_lr.resize(Ngrid_LR,0);
+              IC_field_mixed_lr.resize(Ngrid_LR,0);
+              low_pass_filter(Nft_HR,Nft_LR,1,false, IC_field_fa,IC_field_fa_lr, params._Lbox());
+              this->File.write_array(this->params._Output_directory()+"IC_FA_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_fa_lr) ;
+              this->set_output_file_grf(this->params._Output_directory()+"IC_FA_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR));
+
+              low_pass_filter(Nft_HR,Nft_LR,1,false, IC_field_mixed,IC_field_mixed_lr, params._Lbox());
+              this->File.write_array(this->params._Output_directory()+"IC_mixed_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_mixed_lr);
+              this->set_output_file_grf(this->params._Output_directory()+"IC_FA_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR));
+           }
+          this->set_output_file_grf(this->params._Output_directory()+"IC_GRF_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR));
+          So.DONE();
+     }
+    else
      {
-       So.message_screen("Applying low pass filter: ");
-
-       real_prec mean_HR=static_cast<real_prec>(Ngrid_HR)/pow(params._Lbox(),3);
-       for(ULONG i=0; i<IC_field_grf.size();++i)
-         IC_field_grf[i]=mean_HR*(1.0+IC_field_grf[i]);
-
-           low_pass_filter(Nft_HR,Nft_LR,1,false, IC_field_grf,IC_field_grf_lr, params._Lbox());
-       get_overdens(IC_field_grf_lr,IC_field_grf_lr);
-
-       this->File.write_array(this->params._Output_directory()+"IC_GRF_lpass_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_grf_lr);
-       this->File.write_array(this->params._Output_directory()+"IC_GRF_lpass_paired_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_grf_paired_lr);
-       this->params.set_input_type("delta_grid");
-       this->params.set_Nft(Nft_LR);
-       this->params.set_NGRID(Ngrid_LR);
-       this->params.set_SN_correction(false);
-       this->params.set_MAS_correction(false);
-           this->compute_power_spectrum_grid(IC_field_grf_lr, false);
-       for(ULONG i=0;i<IC_GRF_lr.size();++i)
-         IC_GRF_lr[i]=this->pk0[i];
-
+       string ff=this->params._Output_directory()+"IC_GRF_realization"+to_string(ir)+"_Nres"+to_string(Nft);
+       this->File.write_array(ff, IC_field_grf);
+       this->set_output_file_grf(ff);
+  
        if(true==this->params._Generate_FA())
          {
-           IC_field_fa_lr.resize(Ngrid_LR,0);
-           IC_field_mixed_lr.resize(Ngrid_LR,0);
-               low_pass_filter(Nft_HR,Nft_LR,1,false, IC_field_fa,IC_field_fa_lr, params._Lbox());
-           this->File.write_array(this->params._Output_directory()+"IC_FA_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_fa_lr) ;
-               low_pass_filter(Nft_HR,Nft_LR,1,false, IC_field_mixed,IC_field_mixed_lr, params._Lbox());
-           this->File.write_array(this->params._Output_directory()+"IC_mixed_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_mixed_lr);
-         }
-       So.DONE();
-     }
-       else
-     {
-       this->File.write_array(this->params._Output_directory()+"IC_GRF_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_grf);
-       if(true==this->params._Generate_FA())
-         {
-           this->File.write_array(this->params._Output_directory()+"IC_FA_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_fa) ;
-           this->File.write_array(this->params._Output_directory()+"IC_mixed_realization"+to_string(ir)+"_Nres"+to_string(Nft_LR), IC_field_mixed);
-         }
-     }
+          ff=this->params._Output_directory()+"IC_FA_realization"+to_string(ir)+"_Nres"+to_string(Nft);
+          this->File.write_array(ff, IC_field_fa) ;
+          this->set_output_file_fa(ff);
+
+          ff= this->params._Output_directory()+"IC_mixed_realization"+to_string(ir)+"_Nres"+to_string(Nft);
+          this->File.write_array(ff, IC_field_mixed);
+          this->set_output_file_mixed_grf_fa(ff);
+          }
+
+        }
 #ifdef _USE_GNUPLOT_
        vector<pair<real_prec, real_prec> > xy_pts_fa;
        vector<pair<real_prec, real_prec> > xy_pts_mixed;
@@ -6525,27 +6569,32 @@ void PowerSpectrumF::object_by_object_bias_squared(vector<s_Halo>& tracer_cat, v
 #endif
        if(ir==0)
         {
-       ofstream atea; atea.open(this->params._Output_directory()+"mean_power_th.txt");
-       atea.precision(6);
-       atea.setf(ios::showpoint);
-       atea.setf(ios::scientific);
-       for(int i=1;i<IC_TH.size();++i)
-        atea<<deltak*(i+0.5)<<"  "<<IC_TH[i]<<endl;
-       atea.close();
-        }
-       ofstream btea; btea.open(this->params._Output_directory()+"power_grf_real"+to_string(ir)+".txt");
-       btea.precision(6);
-       btea.setf(ios::showpoint);
-       btea.setf(ios::scientific);
+          ofstream atea; atea.open(this->params._Output_directory()+"mean_power_th.txt");
+          atea.precision(6);
+          atea.setf(ios::showpoint);
+          atea.setf(ios::scientific);
+          for(int i=1;i<IC_TH.size();++i)
+            atea<<deltak*(i+0.5)<<"  "<<IC_TH[i]<<endl;
+          atea.close();
+            }
+          ofstream btea; btea.open(this->params._Output_directory()+"power_grf_real"+to_string(ir)+".txt");
+          btea.precision(6);
+          btea.setf(ios::showpoint);
+          btea.setf(ios::scientific);
 
-       for(int i=1;i<IC_GRF.size();++i)
-        btea<<deltak*(i+0.5)<<"\t"<<IC_GRF[i]<<"\t"<<nmodes[i]<<endl;
-       btea.close();
-       }// closes loop over ir
+          for(int i=1;i<IC_GRF.size();++i)
+            btea<<deltak*(i+0.5)<<"\t"<<IC_GRF[i]<<"\t"<<IC_TH[i]<<"  "<<IC_FA[i]<<"  "<<IC_MIXED[i]<<endl;
+          btea.close();
+          this->set_file_power_grf(this->params._Output_directory()+"power_grf_real"+to_string(ir)+".txt");
+
+      }// closes loop over ir
    ofstream tea; tea.open(this->params._Output_directory()+"mean_power.txt");
+
    for(ULONG i=0;i<mean_power.size();++i)
     tea<<deltak*(i+0.5)<<"  "<<mean_power[i]<<endl;
    tea.close();
+
+
    gsl_spline_free(spline);
    gsl_interp_accel_free(acc);
    So.DONE();

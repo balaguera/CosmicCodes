@@ -216,7 +216,7 @@ void BiasMT::get_power_spectrum(string type)
       else if (3==this->params._iMAS_X())
         this->params.set_mass_assignment_scheme("PSC");
       PowerSpectrumF cPSF(this->params);
-      cPSF.compute_power_spectrum_grid(this->delta_X_ini, true);
+      cPSF.measure_power_spectrum_grid(this->delta_X_ini, true);
       So.DONE();
       this->Power_DM_REF.resize(this->params._Nft()/2/this->params._ndel_data(), 0);
 #ifdef _USE_OMP_
@@ -233,7 +233,7 @@ void BiasMT::get_power_spectrum(string type)
       this->params.set_MAS_correction(false);
       this->params.set_measure_cross(true);
       PowerSpectrumF cPSF(this->params);
-      cPSF.compute_cross_power_spectrum_grid(true,this->delta_X, this->delta_Y, true);
+      cPSF.measure_cross_power_spectrum_grid(true,this->delta_X, this->delta_Y, true);
       So.DONE();
       cPSF.write_power_and_modes();
     }
@@ -246,7 +246,7 @@ void BiasMT::get_power_spectrum(string type)
       PowerSpectrumF cPSF(this->params);
       if(type=="DM_RO")
         {
-              cPSF.compute_power_spectrum_grid(this->delta_X_ini, true);
+              cPSF.measure_power_spectrum_grid(this->delta_X_ini, true);
              this->Power_DM_REF.resize(this->params._Nft()/2/this->params._ndel_data(), 0);
 #ifdef _USE_OMP_
 #pragma omp parallel for
@@ -256,7 +256,7 @@ void BiasMT::get_power_spectrum(string type)
         }
       if(type=="DM_KONV")
         {
-             cPSF.compute_power_spectrum_grid(this->delta_X,true);
+             cPSF.measure_power_spectrum_grid(this->delta_X,true);
              this->Power_DM_KONV.resize(this->params._Nft()/2/this->params._ndel_data(), 0);
 #ifdef _USE_OMP_
 #pragma omp parallel for
@@ -265,7 +265,7 @@ void BiasMT::get_power_spectrum(string type)
             this->Power_DM_KONV[i]=cPSF._pk0(i);
         }
       else
-        cPSF.compute_power_spectrum_grid(this->delta_X,true);
+        cPSF.measure_power_spectrum_grid(this->delta_X,true);
       So.DONE();
     }
   else if(type=="TR_MOCK" || type== "TR_MOCK_REALIZATION")//TR_MOCK refers to the itarations: TR_MOCK_REAL refers to the actuial mocks built from the learning process
@@ -304,7 +304,7 @@ void BiasMT::get_power_spectrum(string type)
       this->params.input_type="delta_grid";
 #endif
       PowerSpectrumF cPSF(this->params);
-      cPSF.compute_power_spectrum_grid(this->delta_Y_new,true);
+      cPSF.measure_power_spectrum_grid(this->delta_Y_new,true);
       this->Power_NEW.resize(this->params._Nft()/2/this->params._ndel_data(), 0);
 #ifdef _USE_OMP_
 #pragma omp parallel for
@@ -329,7 +329,7 @@ void BiasMT::get_power_spectrum(string type)
       this->params.set_mass_assignment_scheme("CIC");
       this->params.set_MAS_correction(true);
       PowerSpectrumF cPSF(this->params);
-      cPSF.compute_power_spectrum_grid(this->delta_Y_new,true);
+      cPSF.measure_power_spectrum_grid(this->delta_Y_new,true);
     }
   else if(type=="TR_MOCK_CAT")
     {
@@ -350,7 +350,7 @@ void BiasMT::get_power_spectrum(string type)
       this->params.set_i_coord3_g(2);
       /*      PowerSpectrumF cPSF(this->params);
               cPSF.tracer_cat=this->tracer;
-              cPSF.compute_power_spectrum(false, false);
+              cPSF.measure_power_spectrum(false, false);
               So.DONE();
               //the argument false above forces to write explicitely here the write_power and modes:
               cPSF.write_power_and_modes();
@@ -384,9 +384,9 @@ void BiasMT::get_power_spectrum(string type)
 #endif
       PowerSpectrumF cPSF(this->params);
 #ifdef _USE_TRACER_HR_
-      cPSF.compute_power_spectrum_grid(this->delta_Y_HR,true);
+      cPSF.measure_power_spectrum_grid(this->delta_Y_HR,true);
 #else
-      cPSF.compute_power_spectrum_grid(this->delta_Y,true);
+      cPSF.measure_power_spectrum_grid(this->delta_Y,true);
 #endif
       // Return to the original value of Nft
       // and write ref power up the the NF of the Nft
@@ -1777,7 +1777,7 @@ void BiasMT::analyze_input()
         this->params.set_mass_assignment_scheme("CIC");
         this->params.set_MAS_correction(true);
         PowerSpectrumF dPSFa(this->params);
-        dPSFa.compute_power_spectrum_grid(this->delta_X,true); //ojo, el argumento debe ser DENSIDAD
+        dPSFa.measure_power_spectrum_grid(this->delta_X,true); //ojo, el argumento debe ser DENSIDAD
         dPSFa.write_power_and_modes();
       }
 #endif
@@ -1799,7 +1799,7 @@ void BiasMT::analyze_input()
       this->params.set_mass_assignment_scheme("CIC");
       this->params.set_MAS_correction(true);
       PowerSpectrumF dPSFa(this->params);
-      dPSFa.compute_power_spectrum_grid(this->delta_X,true,false); //ojo, el argumento debe ser DENSIDAD
+      dPSFa.measure_power_spectrum_grid(this->delta_X,true,false); //ojo, el argumento debe ser DENSIDAD
       dPSFa.write_power_and_modes();
 #endif
 #endif
@@ -12728,18 +12728,18 @@ else{
         atracer_ref.set_params(this->params_original);
         atracer_ref.read_catalog(this->params_original._Input_dir_cat()+this->params_original._file_catalogue(),pow(10,this->params._LOGMASSmin())*this->params._MASS_units());
 #ifdef _CAT_POWER_ONLY_COORDS_
-        Power_BiasMT_ref.compute_power_spectrum(atracer_ref.Halo,"real","_NONE_"); //*Get power*//
+        Power_BiasMT_ref.measure_power_spectrum(atracer_ref.Halo,"real","_NONE_"); //*Get power*//
 #else
-        Power_BiasMT_ref.compute_power_spectrum(atracer_ref.Halo,"real",_MASS_); //* Get the reference power in mass bins*//
+        Power_BiasMT_ref.measure_power_spectrum(atracer_ref.Halo,"real",_MASS_); //* Get the reference power in mass bins*//
 #endif
 #ifdef _SLICS_
 	}
 #endif
 #endif //* end for _COMPUTE_REF_POWER_ *//
 #ifdef _CAT_POWER_ONLY_COORDS_
-    Power_BiasMT.compute_power_spectrum(this->tracer.Halo,"real","_NONE_"); //*Get power*//
+    Power_BiasMT.measure_power_spectrum(this->tracer.Halo,"real","_NONE_"); //*Get power*//
 #else
-    Power_BiasMT.compute_power_spectrum(this->tracer.Halo,"real",_MASS_); //* Get the REFERENCE power in mass bins*//
+    Power_BiasMT.measure_power_spectrum(this->tracer.Halo,"real",_MASS_); //* Get the REFERENCE power in mass bins*//
 #endif
 #ifdef _USE_GNUPLOT_
 #ifdef _COMPUTE_REF_POWER_
@@ -12753,9 +12753,9 @@ else{
 #endif //* Closes  _USE_GNUPLOT_  *//
 #ifndef _CAT_POWER_ONLY_COORDS_
 #ifdef _COMPUTE_REF_POWER_
-      Power_BiasMT_ref.compute_power_spectrum(atracer_ref.Halo,"real",_VMAX_); //* Get the reference power in vmax bins*//
+      Power_BiasMT_ref.measure_power_spectrum(atracer_ref.Halo,"real",_VMAX_); //* Get the reference power in vmax bins*//
 #endif
-      Power_BiasMT.compute_power_spectrum(this->tracer.Halo,"real",_VMAX_); //* Get the bam power in vmax bins*//
+      Power_BiasMT.measure_power_spectrum(this->tracer.Halo,"real",_VMAX_); //* Get the bam power in vmax bins*//
 #ifdef _USE_GNUPLOT_
       this->plot_power(Power_BiasMT_ref.power_in_bins,Power_BiasMT.power_in_bins,_VMAX_,"real");
 #endif
@@ -12763,26 +12763,26 @@ else{
 #ifdef _REDSHIFT_SPACE_
 #ifndef _CAT_POWER_ONLY_COORDS_
       // *******************
-      Power_BiasMT.compute_power_spectrum(this->tracer.Halo,"redshift",_MASS_);
+      Power_BiasMT.measure_power_spectrum(this->tracer.Halo,"redshift",_MASS_);
 #ifdef _COMPUTE_REF_POWER_
-      Power_BiasMT_ref.compute_power_spectrum(atracer_ref.Halo,"redshift",_MASS_);
+      Power_BiasMT_ref.measure_power_spectrum(atracer_ref.Halo,"redshift",_MASS_);
 #endif
 #ifdef _USE_GNUPLOT_
       this->plot_power(Power_BiasMT_ref.power_in_bins,Power_BiasMT.power_in_bins, "redshift",_MASS_);
 #endif
 
-      Power_BiasMT.compute_power_spectrum(this->tracer.Halo,"redshift",_VMAX_);
+      Power_BiasMT.measure_power_spectrum(this->tracer.Halo,"redshift",_VMAX_);
 #ifdef _COMPUTE_REF_POWER_
-      Power_BiasMT_ref.compute_power_spectrum(atracer_ref.Halo,"redshift",_VMAX_);
+      Power_BiasMT_ref.measure_power_spectrum(atracer_ref.Halo,"redshift",_VMAX_);
 #endif
 #ifdef _USE_GNUPLOT_
       this->plot_power(Power_BiasMT_ref.power_in_bins,Power_BiasMT.power_in_bins, "redshift",_VMAX_);
 #endif
 
 #else  // else for ifndef _CAT_POWER_ONLY_COORDS_
-      Power_BiasMT.compute_power_spectrum(this->tracer.Halo,"redshift","_NONE_");
+      Power_BiasMT.measure_power_spectrum(this->tracer.Halo,"redshift","_NONE_");
 #ifdef _COMPUTE_REF_POWER_
-      Power_BiasMT_ref.compute_power_spectrum(atracer_ref.Halo,"redshift","_NONE_");
+      Power_BiasMT_ref.measure_power_spectrum(atracer_ref.Halo,"redshift","_NONE_");
 #endif
 
 #ifdef _USE_GNUPLOT_
@@ -13263,7 +13263,7 @@ void BiasMT::get_IC_from_particles()
         this->params.set_SN_correction(false); //change Nft by Nft_hr in params for PowerP measurement
         this->params.set_input_type("density_grid"); //change Nft by Nft_hr in params for PowerP measurement
         PowerSpectrumF cPSFa(this->params);
-        cPSFa.compute_power_spectrum_grid(field_hr,true);
+        cPSFa.measure_power_spectrum_grid(field_hr,true);
         cPSFa.write_power_and_modes();
         std::vector<std::pair<double, double> > xy_ptr;
         for(ULONG i=1; i<cPSFa._kvector_data_size(); ++i)
@@ -13274,7 +13274,7 @@ void BiasMT::get_IC_from_particles()
         params_aux.set_SN_correction(false); //change Nft by Nft_hr in params for PowerP measurement
         params_aux.set_input_type("density_grid"); //change Nft by Nft_hr in params for PowerP measurement
         PowerSpectrumF cPSFb(params_aux);
-        cPSFb.compute_power_spectrum_grid(field,true);
+        cPSFb.measure_power_spectrum_grid(field,true);
         cPSFb.write_power_and_modes();
         std::vector<std::pair<double, double> > xy_pts;
         for(ULONG i=1; i<cPSFb._kvector_data_size(); ++i)

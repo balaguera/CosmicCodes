@@ -14100,21 +14100,15 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef  _USE_SEVERAL_RANDOM_FILES_
-  void Catalog::get_interpolated_density_field(bool marked, string property, int ir) // meant for redshift space
+  void Catalog::get_interpolated_density_field(bool marked, string property, int ir) 
 #else
-  void Catalog::get_interpolated_density_field(bool marked, string property) // meant for redshift space
+  void Catalog::get_interpolated_density_field(bool marked, string property) 
 #endif
  {
    So.enter(__PRETTY_FUNCTION__);
-   // Sampling of the random or real catalog and
-   // interpolation of the object density field into a grid.
-   // This method expects the coordinates of the input
-   // catalogue already transformed into cartessian,
-   // with the information of the mean number density written
-   // in the corresponding slot as specified in the
-   // parameter file or computed from the box.
-   // Identify columns in the corresponding catalog                               *
+
 #ifdef _USE_WEIGHTS_IN_POWER_
+   // Identify columns in the corresponding catalog 
    int i_weight1     = (this->type_of_object!="RANDOM"? this->params._i_weight1_g() : this->params._i_weight1_r());
    int i_weight2     = (this->type_of_object!="RANDOM"? this->params._i_weight2_g() : this->params._i_weight2_r());
    int i_weight3     = (this->type_of_object!="RANDOM"? this->params._i_weight3_g() : this->params._i_weight3_r());
@@ -14189,40 +14183,45 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
        mark[i]=this->Halo[i].dach_number;
      }
    // If rsd=true, then there is no need to shift coordinates even if we want redshift space pwoer spectrum, for the catalog might be already "distorted"
-#ifdef _REDSHIFT_SPACE_
+
    real_prec rsd_x=1.0;
    real_prec rsd_y=1.0;
    real_prec rsd_z=1.0;
-   if(false==this->params._redshift_space_coords_g())
-     switch(LOS)
-       {
-       case(I_LOSX):rsd_x*=1.0;rsd_y*=0.0;rsd_z*=0.0; break;
-       case(I_LOSY):rsd_x*=0.0;rsd_y*=1.0;rsd_z*=0.0; break;
-       case(I_LOSZ):rsd_x*=0.0;rsd_y*=0.0;rsd_z*=1.0; break;
-       }
-   else // of coordinates have already the rsd included (as in a real catalog) and we still use _REDSHIFT_SPACE_ we have to set all rsd to 0
-     {
-       rsd_x=0.0;
-       rsd_y=0.0;
-       rsd_z=0.0;
-     }
-   // Conversion from km/s to Mpc/h for RSD
    real_prec conversion_factor=1;
-   if(this->params._redshift_space_coords_g() == false)
-     {
-       if("kmps"==this->params._vel_units_g())
-         conversion_factor=(1.+this->params._redshift())/(this->Cosmo.Hubble_function(this->params._redshift()));
-       else if("alpt"==this->params._vel_units_g())
-         conversion_factor= cgs_Mpc/(this->Cosmo.Hubble_function(this->params._redshift()));
-       else if("Mpcph"==this->params._vel_units_g())
+   if(false==this->params._redshift_space_coords_g() && "redshift_space" == this->params._clustering_space() )
+     { 
+      switch(LOS)
+          {
+            case(I_LOSX):rsd_x*=1.0;rsd_y*=0.0;rsd_z*=0.0; break;
+            case(I_LOSY):rsd_x*=0.0;rsd_y*=1.0;rsd_z*=0.0; break;
+            case(I_LOSZ):rsd_x*=0.0;rsd_y*=0.0;rsd_z*=1.0; break;
+          }
+
+      if("kmps"==this->params._vel_units_g())
+        conversion_factor=(1.+this->params._redshift())/(this->Cosmo.Hubble_function(this->params._redshift()));
+      else if("alpt"==this->params._vel_units_g())
+        conversion_factor= cgs_Mpc/(this->Cosmo.Hubble_function(this->params._redshift()));
+      else if("Mpcph"==this->params._vel_units_g())
         conversion_factor=1;
-     conversion_factor*=(VEL_BIAS_POWER);
+
+      conversion_factor*=(VEL_BIAS_POWER);
       So.message_screen("Current redshift =",this->params._redshift());
       So.message_screen("Hubble function at current redshift =",this->Cosmo.Hubble_function(this->params._redshift()));
       So.message_screen("Conversion factor =",conversion_factor);
-     }
+     
+#ifdef _USE_OMP_
+#pragma omp parallel for
 #endif
-   int exp_mas=this->params._mass_assignment();
+    for(ULONG i=0;i< nlines ;++i)
+      {
+        this->Halo[i].coord1+=rsd_x*this->Halo[i].vel1*conversion_factor;
+        this->Halo[i].coord2+=rsd_y*this->Halo[i].vel2*conversion_factor;
+        this->Halo[i].coord3+=rsd_z*this->Halo[i].vel3*conversion_factor;
+      }
+   }
+
+
+  int exp_mas=this->params._mass_assignment();
    So.message_screen("Interpolating", nlines,"tracers of type ", this->type_of_object);
    // The selection of the MAS is done outside the loop over the tracers, so we change Ntracers ifs for only 4 ifs.
    double n_selected=0;
@@ -14235,6 +14234,7 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
    real_prec vx=0;
    real_prec vy=0;
    real_prec vz=0;
+   
 #ifdef _USE_OMP_
 #ifdef _GET_BISPECTRUM_NUMBERS_
 #pragma omp parallel for reduction(+:n_selected,S_r_power,normal_power,W_r,S_r1,S_r2,normal_bispectrum)
@@ -14244,14 +14244,9 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
 #endif
    for(ULONG i=0;i< nlines ;++i)
      {
-#ifdef _REDSHIFT_SPACE_
-       vx=rsd_x*this->Halo[i].vel1*conversion_factor;
-       vy=rsd_y*this->Halo[i].vel2*conversion_factor;
-       vz=rsd_z*this->Halo[i].vel3*conversion_factor;
-#endif
-       real_prec x=this->Halo[i].coord1+vx;
-       real_prec y=this->Halo[i].coord2+vy;
-       real_prec z=this->Halo[i].coord3+vz;
+       real_prec x=this->Halo[i].coord1;
+       real_prec y=this->Halo[i].coord2;
+       real_prec z=this->Halo[i].coord3;
 #ifdef _USE_MASS_AS_OBSERVABLE_
        real_prec property=this->Halo[i].mass;
 #elif defined _USE_VMAX_AS_OBSERVABLE_
@@ -14390,7 +14385,31 @@ void Catalog::ang_to_cart_coordinates(s_data_structure *s_data){
 #endif
   So.message_screen("\t\t Weighted number of tracers in mesh", get_nobjects(field));
 
+  if(true==this->params._output_interpolated_field())
+  {
+    File.write_array(this->params._output_file_interpolated_field(), this->field_external);
+      if(true==this->params._show_interpolated_field()){
 
+        string json_file_plot ="plot_file_interpolated_field.json";
+        std::ofstream jfile(json_file_plot);
+        json j;
+         j["Lbox"]=this->params._Lbox();
+         j["show_interpolated_field"]=true;
+         j["Nft"] = this->params._Nft() ;
+         j["Nslices"] = 20;
+         j["Initial_slice"] = 20;
+         j["sample"] = params._Name_survey();
+         j["name"] = "Density";
+         j["redshift"] = params._redshift();
+         j["output_file"] = params._output_file_interpolated_field()+".dat";
+         jfile<<j.dump(4);
+         cout<<"Generating json file "<<json_file_plot<<" for plotting"<<endl;  
+         jfile.close();
+         system("python3 ../python/cosmolib_plots.py plot_file_interpolated_field.json &");
+      }
+
+
+  }
    field.clear();
    field.shrink_to_fit(); // we liberate memme
 #ifdef _MASS_WEIGHT_POWER_

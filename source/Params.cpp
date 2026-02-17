@@ -1458,6 +1458,8 @@ void Params::read_pars_json(std::string file){
           "measure_cross_power_using_a",
           "measure_cross_power_using_b",
           "get_new_line_of_sight",
+          "clustering_space",
+          "box_size",
           "box_size_lowres",
           "get_new_box_size",
           "min_x_coord",
@@ -1467,6 +1469,8 @@ void Params::read_pars_json(std::string file){
           "ngrid_ft_highres",
           "ngrid_ft_lowres",   
           "ngrid_jk",   
+          "output_interpolated_field",
+          "show_interpolated_field",
           "mass_assignment_scheme",
           "use_correction_mass_assignment_scheme",
           "type_of_kshell_binning",
@@ -1481,6 +1485,7 @@ void Params::read_pars_json(std::string file){
           "compute_fkp_variance",
           "compute_fkp_variance_exact",
           "output_file_power", 
+          "show_power_spectrum",
           "output_file_power_log", 
           "output_file_window",
           "output_file_power2d",
@@ -1506,7 +1511,7 @@ void Params::read_pars_json(std::string file){
     pname = "statistics";
     pname_c = "statistics";
     description = "Type of Fourier-space statistic to compute (e.g. power spectrum).";
-    options = "STRING. Pk_fkp, Pk_ys: Pk_yb; Pk_ds";
+    options = "STRING. Denotes the estimator of poẁer used for two or three point stats: Pk_fkp (FKP), Pk_ys (Yamamoto with Scoccimarro implementation): Pk_yb (Yamamoto with Bianchi's iomplementation); Pk_ds (direct sum)";
     this->statistics =
         FourierAnalysis.value(pname, "Pk_fkp");
     this->collect_params_info(pname, pname_c, this_section, description, options);
@@ -1554,7 +1559,7 @@ void Params::read_pars_json(std::string file){
     pname = "input_type";
     pname_c = "input_type";
     description = "Type of input used for the Fourier analysis (e.g. catalog or density field interpolated on a grid).";
-    options = "STRING";
+    options = "STRING (catalog, density_grid, overdensity_grid)";
     this->input_type = FourierAnalysis.value(pname, "catalog");
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_string.emplace_back(pname, this->input_type);
@@ -1658,6 +1663,14 @@ void Params::read_pars_json(std::string file){
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_boolean.emplace_back(pname, this->new_los);
 
+    pname = "clustering_space";
+    pname_c = "clustering_space";
+    description = "Space where the statistics is to be computed. Applies only for simulations";
+    options = "STRING, real_space or redshift_space";
+    this->clustering_space = FourierAnalysis.value(pname, "real_space");
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_string.emplace_back(pname, this->clustering_space);
+
     pname = "box_size_lowres";
     pname_c = "Lbox_low";
     description = "Box size used for low-resolution Fourier grids, in Mpc/h";
@@ -1665,6 +1678,16 @@ void Params::read_pars_json(std::string file){
     this->Lbox_low =  static_cast<real_prec>(FourierAnalysis.value(pname, 1.));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->Lbox_low);
+
+
+    pname = "box_size";
+    pname_c = "Lbox";
+    description = "Box size used for Fourier grids, in Mpc/h";
+    options = "real prec";
+    this->Lbox =  static_cast<real_prec>(FourierAnalysis.value(pname, 1.));
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_number.emplace_back(pname, this->Lbox);
+
 
     pname = "get_new_box_size";
     pname_c = "new_Lbox";
@@ -1731,7 +1754,7 @@ void Params::read_pars_json(std::string file){
     pname_c = "Nft_JK";
     description = "Number of grid cells used for jackknife resampling.";
     options = "ULONG";
-    this->Nft_JK = FourierAnalysis.value("ngrid_jk", 1);
+    this->Nft_JK = FourierAnalysis.value(pname, 1);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->Nft_JK);
 
@@ -1743,9 +1766,41 @@ void Params::read_pars_json(std::string file){
     description = "Mass assignment scheme used to deposit particles onto the grid.";
     options = "STRING";
     this->mass_assignment_scheme =
-        FourierAnalysis.value("mass_assignment_scheme", "NGP");
+        FourierAnalysis.value(pname, "NGP");
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_string.emplace_back(pname, this->mass_assignment_scheme);
+
+    pname = "output_interpolated_field";
+    pname_c = "output_interpolated_field";
+    description = "Output in binary filw the interpolated field";
+    options = "BOOL";
+    this->output_interpolated_field =
+        FourierAnalysis.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->output_interpolated_field);
+
+    this->set_output_file_interpolated_field(this->Output_directory+ "interpolated_feld");
+
+
+    pname = "show_interpolated_field";
+    pname_c = "show_interpolated_field";
+    description = "Show a slice of the interpolated field of the tracers used on the power spectrum measurements";
+    options = "BOOL";
+    this->show_interpolated_field =
+        FourierAnalysis.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->show_interpolated_field);
+
+    pname = "show_power_spectrum";
+    pname_c = "show_power_spectrum";
+    description = "Show measurements of power spectrum";
+    options = "BOOL";
+    this->show_power_spectrum =
+        FourierAnalysis.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->show_power_spectrum);
+
+
 
     pname = "use_correction_mass_assignment_scheme";
     pname_c = "MAS_correction";
@@ -2230,7 +2285,7 @@ void Params::read_pars_json(std::string file){
     pname = "redshift_space_coordinates_included";
     pname_c = "redshift_space_coords_g";
     description = "Flag indicating whether redshift-space coordinates are included.";
-    options = "BOOL";
+    options = "BOOL. Set to false when reading a simulation. If reading coordinates from a galaxy redshift survey, RS are alrady in: set it to true. If power from simulations is to be measured in redshift space (which implies that velocities are avaiblae, otherwise the code ignores the petition), enable to the pre-proc directive REDSHIFT_SPACE";
     this->redshift_space_coords_g =
         TracerCatalogue.value("redshift_space_coordinates_included", false);
     this->collect_params_info(pname, pname_c, this_section, description, options);
@@ -2310,6 +2365,13 @@ void Params::read_pars_json(std::string file){
         static_cast<int>(TracerCatalogue.value("i_v3", -1));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->i_v3_g);
+
+    if(this->clustering_space=="redshift_space" && (this->i_v1_g<0 || this->i_v2_g<0 || this->i_v3_g<0)){
+      this->clustering_space="real_space";
+      cout<<RED<<"Warning. SImulation requested in redshift space, but no velocities are available"<<endl;
+      exit(1);
+    }
+
 
     // ===============================
     // PHYSICAL AND GALAXY PROPERTIES
@@ -2446,7 +2508,7 @@ void Params::read_pars_json(std::string file){
     pname = "use_random_catalogue";
     pname_c = "use_random_catalogue";
     description = "Use a random catalogue for the analysis.";
-    options = "BOOL";
+    options = "BOOL, true or false; if set to false, the code interprets that the input catalog is a simulation.";
     this->use_random_catalog = RandomCatalogue.value(pname, false);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_boolean.emplace_back(pname, this->use_random_catalog);
@@ -2973,6 +3035,7 @@ void Params::read_pars_json(std::string file){
  //---------------------------------------------------------------------------------------------
   const auto& HaloAnalysis=cfg.at("HaloAnalysis");
   status=HaloAnalysis.value("status", "off");
+  this_section = "HaloAnalysis";
   if(ON==status)
   {
     this->enabled_sections.push_back("HaloAnalysis");
@@ -3182,42 +3245,50 @@ void Params::read_pars_json(std::string file){
       // NPROPbins_bam
       pname = "number_sec_property_bins_assignment_bmt";
       pname_c = "NPROPbins_bam";
-      description = "Number of bins for secondary property assignment (BAM).";
+      description = "Number of bins for secondary property assignment (BMT).";
       options = "real prec";
       this->NPROPbins_bam = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->NPROPbins_bam);
 
+
+      pname = "measure_power_spectrum";
+      pname_c = "Get_power_spectrum";
+      description = "Get power spectrum estimates for halo analysis";
+      options = "BOOL";
+      this->Get_power_spectrum = static_cast<real_prec>(HaloAnalysis.value(pname, false));
+      this->collect_params_info(pname, pname_c, this_section, description, options);
+      this->parameter_boolean.emplace_back(pname, this->Get_power_spectrum);
+
       // Boolean flags
-      #define ADD_BOOL_PARAM(key, member, desc) \
+      #define ADD_BOOL_PARAMa(key, member, desc) \
           pname = key; pname_c = #member; description = desc; options = "BOOL"; \
           this->member = HaloAnalysis.value(key, false); \
           this->collect_params_info(pname, pname_c, this_section, description, options); \
           this->parameter_boolean.emplace_back(pname, this->member);
 
-      ADD_BOOL_PARAM("set_bins_equal_number_tracers_main_property", set_bins_equal_number_tracers_main_property, "Set bins to equal number of tracers for main property");
-      ADD_BOOL_PARAM("set_bins_equal_number_tracers", set_bins_equal_number_tracers, "Set bins to equal number of tracers");
-      ADD_BOOL_PARAM("use_real_and_redshift_space", use_real_and_redshift_space, "Use both real and redshift space data");
-      ADD_BOOL_PARAM("compute_pearson_correlation_coefficient", Get_pearson_coefficient, "Compute Pearson correlation coefficient");
-      ADD_BOOL_PARAM("compute_spearman_correlation_coefficient", Get_spearman_coefficient, "Compute Spearman correlation coefficient");
-      ADD_BOOL_PARAM("perform_principal_component_analysis", Get_PCA, "Perform PCA analysis");
-      ADD_BOOL_PARAM("measure_marked_power_spectrum", Get_marked_power_spectrum, "Measure marked power spectrum");
-      ADD_BOOL_PARAM("measure_power_spectrum", Get_power_spectrum, "Measure power spectrum");
-      ADD_BOOL_PARAM("measure_cross_power_spectrum", Get_cross_power_spectrum, "Measure cross power spectrum");
-      ADD_BOOL_PARAM("get_tracer_number_counts", Get_tracer_number_counts, "Get tracer number counts");
-      ADD_BOOL_PARAM("get_tracer_mass_field", Get_tracer_mass_field, "Get tracer mass field");
-      ADD_BOOL_PARAM("get_tracer_vmax_field", Get_tracer_vmax_field, "Get tracer vmax field");
-      ADD_BOOL_PARAM("get_tracer_spin_field", Get_tracer_spin_field, "Get tracer spin field");
-      ADD_BOOL_PARAM("get_tracer_prop_function", Get_prop_function_tracer, "Get tracer property function");
-      ADD_BOOL_PARAM("get_tracer_prop_function_cwt", Get_prop_function_tracer_cwt, "Get tracer property function (CWT)");
-      ADD_BOOL_PARAM("get_cell_local_mach_number", Get_cell_local_mach_number, "Get cell-local Mach number");
-      ADD_BOOL_PARAM("get_tracer_local_mach_number", Get_tracer_local_mach_number, "Get tracer-local Mach number");
-      ADD_BOOL_PARAM("get_tracer_local_dach_number", Get_tracer_local_dach_number, "Get tracer-local DACH number");
-      ADD_BOOL_PARAM("get_tracer_local_dm_density", Get_tracer_local_dm_density, "Get tracer-local DM density");
-      ADD_BOOL_PARAM("get_local_overdensity", Get_local_overdensity, "Get local overdensity");
-      ADD_BOOL_PARAM("get_tidal_anisotropy_at_halo", Get_tidal_anisotropy_at_halo, "Get tidal anisotropy at halo");
-      ADD_BOOL_PARAM("get_peak_height_at_halo", Get_peak_height_at_halo, "Get peak height at halo");
-      ADD_BOOL_PARAM("get_distribution_minimum_separations", get_distribution_min_separations, "Get distribution of minimum separations");
+      ADD_BOOL_PARAMa("set_bins_equal_number_tracers_main_property", set_bins_equal_number_tracers_main_property, "Set bins to equal number of tracers for main property");
+      ADD_BOOL_PARAMa("set_bins_equal_number_tracers", set_bins_equal_number_tracers, "Set bins to equal number of tracers");
+      ADD_BOOL_PARAMa("use_real_and_redshift_space", use_real_and_redshift_space, "Use both real and redshift space data for analysis of halo clustering.");
+      ADD_BOOL_PARAMa("compute_pearson_correlation_coefficient", Get_pearson_coefficient, "Compute Pearson correlation coefficient");
+      ADD_BOOL_PARAMa("compute_spearman_correlation_coefficient", Get_spearman_coefficient, "Compute Spearman correlation coefficient in halo analysis");
+      ADD_BOOL_PARAMa("perform_principal_component_analysis", Get_PCA, "Perform PCA analysis");
+      ADD_BOOL_PARAMa("measure_marked_power_spectrum", Get_marked_power_spectrum, "Measure marked power spectrum within the halo analysis");
+      ADD_BOOL_PARAMa("measure_cross_power_spectrum", Get_cross_power_spectrum, "Measure cross power spectrum");
+      ADD_BOOL_PARAMa("get_tracer_number_counts", Get_tracer_number_counts, "Get tracer number counts");
+      ADD_BOOL_PARAMa("get_tracer_mass_field", Get_tracer_mass_field, "Get tracer mass field");
+      ADD_BOOL_PARAMa("get_tracer_vmax_field", Get_tracer_vmax_field, "Get tracer vmax field");
+      ADD_BOOL_PARAMa("get_tracer_spin_field", Get_tracer_spin_field, "Get tracer spin field");
+      ADD_BOOL_PARAMa("get_tracer_prop_function", Get_prop_function_tracer, "Get tracer property function");
+      ADD_BOOL_PARAMa("get_tracer_prop_function_cwt", Get_prop_function_tracer_cwt, "Get tracer property function (CWT)");
+      ADD_BOOL_PARAMa("get_cell_local_mach_number", Get_cell_local_mach_number, "Get cell-local Mach number");
+      ADD_BOOL_PARAMa("get_tracer_local_mach_number", Get_tracer_local_mach_number, "Get tracer-local Mach number");
+      ADD_BOOL_PARAMa("get_tracer_local_dach_number", Get_tracer_local_dach_number, "Get tracer-local DACH number");
+      ADD_BOOL_PARAMa("get_tracer_local_dm_density", Get_tracer_local_dm_density, "Get tracer-local DM density");
+      ADD_BOOL_PARAMa("get_local_overdensity", Get_local_overdensity, "Get local overdensity");
+      ADD_BOOL_PARAMa("get_tidal_anisotropy_at_halo", Get_tidal_anisotropy_at_halo, "Get tidal anisotropy at halo");
+      ADD_BOOL_PARAMa("get_peak_height_at_halo", Get_peak_height_at_halo, "Get peak height at halo");
+      ADD_BOOL_PARAMa("get_distribution_minimum_separations", get_distribution_min_separations, "Get distribution of minimum separations");
 
       // Number flags
       #define ADD_NUMBER_PARAM(key, member, desc, typecast) \
@@ -3278,6 +3349,8 @@ void Params::read_pars_json(std::string file){
             "fraction_to_dilute_sample",
             "get_tracer_relative_bias",
             "get_tracer_quadratic_bias",
+            "get_tracer_bias_squared",
+            "get_tracer_bias_multipoles",
             "max_kvalue_tracer_bias" ,
             "min_kvalue_tracer_bias" ,
             "min_kvalue_tracer_qbias",
@@ -3314,7 +3387,7 @@ void Params::read_pars_json(std::string file){
     // assign_bias_to_full_sample
     pname = "assign_bias_to_full_sample";
     pname_c = "assign_bias_to_full_sample";
-    description = "Assign bias to full tracer sample.";
+    description = "Assign bias to full tracer sample. If set to true, a plot with the intepolated bias field is shown.";
     options = "BOOL";
     this->assign_bias_to_full_sample = IndividualTracerBias.value(pname, false);
     this->collect_params_info(pname, pname_c, this_section, description, options);
@@ -3323,8 +3396,8 @@ void Params::read_pars_json(std::string file){
     // fraction_dilute
     pname = "fraction_to_dilute_sample";
     pname_c = "fraction_dilute";
-    description = "Fraction of sample to dilute.";
-    options = "real prec";
+    description = "Fraction of sample to dilute. ";
+    options = "real prec number in the range [0, 1]";
     this->fraction_dilute = static_cast<real_prec>(IndividualTracerBias.value(pname, 0.1));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->fraction_dilute);
@@ -3346,6 +3419,25 @@ void Params::read_pars_json(std::string file){
     this->Get_tracer_quadratic_bias = IndividualTracerBias.value(pname, false);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_boolean.emplace_back(pname, this->Get_tracer_quadratic_bias);
+
+    // Get_tracer_bias squared
+    pname = "get_tracer_bias_squared";
+    pname_c = "Get_tracer_bias_squared";
+    description = "Compute bias squared for tracers.";
+    options = "BOOL";
+    this->Get_tracer_bias_squared = IndividualTracerBias.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->Get_tracer_bias_squared);
+
+
+    // Get_tracer_bias multipoles
+    pname = "get_tracer_bias_multipoles";
+    pname_c = "Get_tracer_bias_multipoles";
+    description = "Compute multipola bias for tracers.";
+    options = "BOOL";
+    this->Get_tracer_bias_multipoles = IndividualTracerBias.value(pname, false);
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->Get_tracer_bias_multipoles);
 
     // kmax_tracer_bias
     pname = "max_kvalue_tracer_bias";
@@ -3731,16 +3823,37 @@ void Params::read_pars_json(std::string file){
 
     this->forbid_unknown_keys(GaussianRandomField, 
           {
+            "max_kvalue_fa",
             "number_of_gaussian_random_field",
             "generate_fixed_amplitude_initial_conditions"
           },
       "GaussianRandomField");
 
-    this->Number_of_GRF = static_cast<ULONG>(InitialConditions.value("number_of_gaussian_random_field", 1));
-    this->parameter_number.push_back(make_pair("number_of_gaussian_random_field", this->Number_of_GRF));
+    pname = "max_kvalue_fa";
+    pname_c = "Kmax_FA";
+    description = "Maximum wavenumber up to which fixed amplitude fluctuations are to be produced. For k>this value, fluctuations are drawn from gaussian distributions.";
+    options = "real_prec";
+    this->Kmax_FA = static_cast<real_prec>(GaussianRandomField.value(pname, 1.));
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_number.emplace_back(pname, this->Kmax_FA);
 
-    this->Generate_FA = InitialConditions.value("generate_fixed_amplitude_initial_conditions", false);
-    this->parameter_boolean.push_back(make_pair("generate_fixed_amplitude_initial_conditions", this->Generate_FA));
+
+    pname = "number_of_gaussian_random_field";
+    pname_c = "Number_of_GRF";
+    description = "Number of GRF to generate";
+    options = "int";
+    this->Number_of_GRF = static_cast<real_prec>(GaussianRandomField.value(pname, 1.));
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_number.emplace_back(pname, this->Number_of_GRF);
+
+    pname = "generate_fixed_amplitude_initial_conditions";
+    pname_c = "Generate_FA";
+    description = "Generate fixed amplitude initial conditions";
+    options = "BOOLEAN";
+    this->Generate_FA = static_cast<real_prec>(GaussianRandomField.value(pname, true));
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->Generate_FA);
+
   }
     //------------------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------------

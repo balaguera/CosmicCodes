@@ -3069,10 +3069,15 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
     }
   }
   else{
+//   for(ULONG i=0;i<Halo.size();++i)
+ //    {
+//      rcat<<log10(Halo[i].mass)<<"\t"<<log10(Halo[i].rs)<<"\t"<<log10(Halo[i].concentration)<<"\t"<<log10(Halo[i].spin_bullock)<<"\t"<<Halo[i].tidal_anisotropy_dm<<"\t"<<Halo[i].tidal_anisotropy<<"\t"<<Halo[i].bias<<"\t"<<Halo[i].gal_cwt<<endl;
+ //   }
    for(ULONG i=0;i<Halo.size();++i)
      {
-      rcat<<log10(Halo[i].mass)<<"\t"<<log10(Halo[i].rs)<<"\t"<<log10(Halo[i].concentration)<<"\t"<<log10(Halo[i].spin_bullock)<<"\t"<<Halo[i].tidal_anisotropy_dm<<"\t"<<Halo[i].tidal_anisotropy<<"\t"<<Halo[i].bias<<"\t"<<Halo[i].gal_cwt<<endl;
+      rcat<<log10(Halo[i].mass)<<"\t"<<Halo[i].bias<<endl;
     }
+
 
 
 

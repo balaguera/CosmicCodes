@@ -321,11 +321,6 @@ void CosmoLib::get_hmodel(){
   this->Ps.set_cosmo_pars(this->s_cosmo_par) ;// Update Power
   this->Cs.set_cosmo_pars(this->s_cosmo_par) ;// Update Stats
   // ***********************************************************************************************
-
-
-
-  // ***********************************************************************************************
-  // ***********************************************************************************************
   // ***********************************************************************************************
   // ***********************************************************************************************
   
@@ -373,20 +368,6 @@ void CosmoLib::get_hmodel(){
     v_mass_nat[i]=pow(10,v_mass[i]);
   }
 
-  File.write_to_file(this->params._mass_function_output_file(),v_mass_nat,v_mass_function,v_sigma_mass);
-  File.write_to_file(this->params._halo_mass_bias_output_file(),v_mass_nat,v_halo_mass_bias);
-
-
-  So.DONE();
-
-  // Write to json for plotting
-  j["output_file_mass_function"]=this->params._mass_function_output_file();
-  j["output_file_halo_mass_bias"]=this->params._halo_mass_bias_output_file();
-  j["mmin"]=v_mass_nat[0];
-  j["mmax"]=v_mass_nat.back();
-  j["show_mass_function_plot"]=this->params._show_mass_function_plot();
-  j["show_halo_mass_bias_plot"]=this->params._show_halo_mass_bias_plot();
-  j["show_power_spectrum_plot"]=this->params._show_power_spectrum_plot();
 
 
 
@@ -419,8 +400,26 @@ void CosmoLib::get_hmodel(){
   
   So.DONE();
 
-  File.write_to_file(this->params._effective_halo_mass_bias_output_file(),v_mass_nat, v_effective_halo_mass_bias);
-  File.write_to_file(this->params._effective_halo_mean_number_density_output_file(),v_mass_nat,v_effective_halo_mean_number_density);
+  std::vector<std::vector<gsl_real>> cols = {
+    v_mass_nat, v_mass_function,v_sigma_mass, v_effective_halo_mean_number_density, v_halo_mass_bias, v_effective_halo_mass_bias};
+  File.write_to_file(this->params._mass_function_output_file(),cols);
+
+  So.DONE();
+
+  // Write to json for plotting
+  j["output_file_mass_function"]=this->params._mass_function_output_file();
+  j["mmin"]=v_mass_nat[0];
+  j["mmax"]=v_mass_nat.back();
+  j["index_mass_function"]=1;
+  j["index_sigma_mass"]=2;
+  j["index_effective_halo_mean_number_density"]=3;
+  j["index_halo_mass_bias"]=4;
+  j["index_effective_halo_mass_bias"]=5;
+
+  j["show_mass_function_plot"]=this->params._show_mass_function_plot();
+  j["show_halo_mass_bias_plot"]=this->params._show_halo_mass_bias_plot();
+  j["show_power_spectrum_plot"]=this->params._show_power_spectrum_plot();
+
 
   // ***********************************************************************************************
   // ***********************************************************************************************
@@ -719,23 +718,21 @@ void CosmoLib::get_hmodel(){
           v_galaxy_power_2h[i]=v_l_power_spectrum[i]*pow(v_galaxy_matter_bias[i],2);
           v_galaxy_power_spectrum[i]=v_galaxy_power_1h_ss[i]+v_galaxy_power_1h_sc[i]+v_galaxy_power_2h[i];
         }
-      File.write_to_file(params._galaxy_ps_halo_model_output_file(),
-        v_k_ps,
-        v_galaxy_power_1h_ss,
-        v_galaxy_power_1h_sc,
-        v_galaxy_power_2h,
-        v_galaxy_power_spectrum,
-        v_l_power_spectrum,
-        v_nl_power_spectrum_halofit
-      );
-      s_cosmo_par.v_galaxy_power_spectrum_1h_ss=this->v_galaxy_power_1h_ss;
-      s_cosmo_par.v_galaxy_power_spectrum_1h_sc=this->v_galaxy_power_1h_sc;
-      s_cosmo_par.v_galaxy_power_spectrum_2h=this->v_galaxy_power_2h;
-      Ps.set_cosmo_pars(this->s_cosmo_par); // update
-    }
 
+      std::vector<std::vector<gsl_real>> cols = {
+        v_k_ps,v_galaxy_power_1h_ss,v_galaxy_power_1h_sc,v_galaxy_power_2h,
+        v_galaxy_power_spectrum,v_l_power_spectrum, v_nl_power_spectrum_halofit
+      };
+     File.write_to_file(params._galaxy_ps_halo_model_output_file(),cols);
 
-// ***********************************************************************************************
+     s_cosmo_par.v_galaxy_power_spectrum_1h_ss=this->v_galaxy_power_1h_ss;
+     s_cosmo_par.v_galaxy_power_spectrum_1h_sc=this->v_galaxy_power_1h_sc;
+     s_cosmo_par.v_galaxy_power_spectrum_2h=this->v_galaxy_power_2h;
+     Ps.set_cosmo_pars(this->s_cosmo_par); // update
+
+   }
+
+   // ***********************************************************************************************
 // GALAXY_CORRELATION FUNCTION HALO MODEL
 // Para calcular esto es obligatorio calcular el espectro
   if(true == this->params._compute_halo_model_galaxy_correlation_function())
@@ -776,16 +773,19 @@ void CosmoLib::get_hmodel(){
 #endif     
       for(int i=0;i<this->v_r_cf.size();i++)
           v_galaxy_correlation[i]=v_galaxy_correlation_2h[i]+v_galaxy_correlation_1h_ss[i]+v_galaxy_correlation_1h_sc[i];
+    So.DONE();
 
-        So.DONE();
-      File.write_to_file(this->params._galaxy_cf_halo_model_output_file(),
-		       v_r_cf,
-		       v_galaxy_correlation_1h_ss,
-		       v_galaxy_correlation_1h_sc,
-		       v_galaxy_correlation_2h,
-		       v_galaxy_correlation
-		       );
-    }
+    std::vector<std::vector<real_prec>> cols = {
+        v_r_cf,
+	      v_galaxy_correlation_1h_ss,
+	      v_galaxy_correlation_1h_sc,
+		    v_galaxy_correlation_2h,
+		    v_galaxy_correlation
+      };
+    File.write_to_file(this->params._galaxy_cf_halo_model_output_file(), cols);
+
+    
+  }
 
     j["output_file_galaxy_power_spectrum"]= this->params._galaxy_ps_halo_model_output_file();
     j["output_file_galaxy_power_spectrum"]= this->params._galaxy_ps_halo_model_output_file();
@@ -873,8 +873,8 @@ void CosmoLib::get_cosmological_information(){
     v_redshift, v_Hubble, v_comoving_distance,v_comoving_angular_diameter_distance, 
       v_comoving_sound_horizon,v_distance_modulus,v_luminosity_distance,v_growth_factor,v_age_universe
   };
-
   File.write_to_file(this->params._Output_directory()+"cosmology_inredshift.txt", cols);
+
   j["cosmology"]=true;
   j["output_file"]=this->params._Output_directory()+"cosmology_inredshift.txt";
   j["column_redshift"]=0;
@@ -890,7 +890,9 @@ void CosmoLib::get_cosmological_information(){
   j["zmin"] = v_redshift[0];
   j["zmax"] = v_redshift.back();
 
-   jfile<<j.dump(4);
+  jfile<<j.dump(4);
+
+  jfile.close(); 
 
   So.DONE();
   }

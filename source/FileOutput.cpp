@@ -538,17 +538,6 @@ void FileOutput::write_to_file(string fname, vector<real_prec>& kve, vector<real
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
-void FileOutput::write_to_file(string fname, vector<real_prec>& kve, vector<real_prec> &pk, vector<real_prec> &pkk,vector<real_prec> &pkkk, vector<real_prec> &si, vector<real_prec>& nmod)
-{
-  this->out.open(fname.c_str() , ios::out); 
-  So.message_output_file(fname, kve.size(),7);
-  for(int i=0;i<kve.size();++i)
-      this->out<<kve[i]<<"\t"<<pk[i]<<"\t"<<pkk[i]<<"\t"<<pkkk[i]<<"\t"<<si[i]<<"\t"<<nmod[i]<<endl;
-  So.DONE();
-  this->out.close(); 
-}
-/////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
 void FileOutput::write_to_file(string fname, vector<real_prec>& kve, vector<real_prec> &pk, vector<real_prec> &pkk,vector<real_prec> &pkkk, vector<real_prec> &si, vector<int>& nmod)
 {
 
@@ -571,26 +560,6 @@ void FileOutput::write_to_file(string fname, vector<real_prec>&kve, vector<real_
   this->out.close();
   So.DONE();
 }
-/////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
-void FileOutput::write_to_file(
-    const std::string& fname,
-    const std::vector<std::vector<real_prec>>& columns
-)
-{
-    this->out.open(fname, std::ios::out);
-    size_t nrows = columns[0].size();
-    size_t ncols = columns.size();  // +1 for nmod
-    So.message_output_file(fname, nrows, ncols);
-    for (size_t i = 0; i < nrows; ++i) {
-        for (size_t j = 0; j < columns.size(); ++j)
-            this->out << columns[j][i] << "\t";
-        this->out <<endl;;
-    }
-    this->out.close();
-    So.DONE();
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 void FileOutput::write_to_file(string fname, vector<real_prec> &kvx, vector<real_prec>&kvy,vector< vector<real_prec> > &pk)
@@ -1086,29 +1055,6 @@ void FileOutput::write_to_file(string fname, vector<gsl_real>& kve, vector<gsl_r
    for(int i=0;i<kve.size();++i)this->out<<kve[i]<<"\t"<<pk[i]<<"\t"<<pkk[i]<<"\t"<<pkkk[i]<<"\t"<<si[i]<<endl;
   this->out.close(); 
   So.DONE();
-}
-/////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
-void FileOutput::write_to_file(string fname, vector<gsl_real>& kve, vector<gsl_real> &pk, vector<gsl_real> &pkk,vector<gsl_real> &pkkk, vector<gsl_real> &si, vector<gsl_real>& nmod)
-{
-  this->out.open(fname.c_str() , ios::out); 
-  So.message_output_file(fname, kve.size(),7);
-  for(int i=0;i<kve.size();++i)
-      this->out<<kve[i]<<"\t"<<pk[i]<<"\t"<<pkk[i]<<"\t"<<pkkk[i]<<"\t"<<si[i]<<"\t"<<nmod[i]<<endl;
-  So.DONE();
-  this->out.close(); 
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
-void FileOutput::write_to_file(string fname, vector<gsl_real>& kve, vector<gsl_real> &pk, vector<gsl_real> &pkk,vector<gsl_real> &pkkk, vector<gsl_real> &si, vector<gsl_real>& nmod, vector<gsl_real>& nmoda)
-{
-  this->out.open(fname.c_str() , ios::out); 
-  So.message_output_file(fname, kve.size(),7);
-  for(int i=0;i<kve.size();++i)
-      this->out<<kve[i]<<"\t"<<pk[i]<<"\t"<<pkk[i]<<"\t"<<pkkk[i]<<"\t"<<si[i]<<"\t"<<nmod[i]<<"\t"<<nmoda[i]<<endl;
-  So.DONE();
-  this->out.close(); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
