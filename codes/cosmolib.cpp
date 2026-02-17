@@ -25,9 +25,8 @@ int main(int argc, char *argv[]){
   CosmoLib Clib(param);
 
 
-int option_index = 0;
-    int c;
-
+  int option_index = 0;
+  int c;
     static struct option long_options[] = {
         {"cosmology", required_argument, 0, 'c'},
         {"halomodel", required_argument, 0, 'm'},

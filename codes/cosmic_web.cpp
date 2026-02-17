@@ -138,31 +138,112 @@ int main(int argc, char *argv[])
     So.usage(argv[0]);
     exit(1);
   }
-  while ((temp = getopt(argc, argv, "hadi:b:")) != -1)
+
+  int option_index = 0;
+  int c;
+    static struct option long_options[] = {
+        {"ibias", required_argument, 0, 'i'},
+        {"cwc", required_argument, 0, 'c'},
+        {0, 0, 0, 0}
+    };
+
+
+  FileOutput File;     // File management
+  So.welcome_message_c();
+  par_file = argv[2];  // Get parameter file
+  Params params(par_file);  // Read parameter file
+
+
+  while ((temp = getopt(argc, argv, "i:c:")) != -1)
   {
-    if (temp == 'h')
-      usage(argv[0]);
-
-    else if (temp == 'a') // Show authors
-      So.author();
-
-    else if (temp == 'i') // displays input parameters
+    // -------------------------------------------------------------------------------------------------
+    if ( temp  == 'i') // assign individual bias to input tracer
     {
-      par_file = argv[2];
-      Params params(par_file);
-      params.show_params();
+
+      Catalog cat(params); // Feed params into the Catlaog class and define an object of that type
+      cat.read_catalog(params._Input_dir_cat() + params._file_catalogue(), 0); // Read the asciii file
+
+      vector<real_prec> dm_field(params._NGRID(), 0); //COntainer for dm
+      File.read_array(params._Input_Directory_X() + params._Name_Catalog_X(), dm_field); // Reading the binary file
+
+      PowerSpectrumF power(params);
+      string file_cat_new=params._Output_directory()+"diluted_cat_bias.txt";
+
+      vector<real_prec> bias_field; // Define container to allocate the bias on a mesh
+      vector<real_prec> tr_field_counts; // Cointainer for counts
+
+      if(true==params._assign_bias_to_full_sample())
+      {
+        tr_field_counts.resize(params._NGRID(), 0); // Cointainer for counts
+        cat.get_density_field_grid(_COUNTS_,tr_field_counts);  // Computing counts
+        power.object_by_object_bias(cat.Halo, dm_field);
+        if(true==params._Get_tracer_bias_squared())
+          power.object_by_object_bias_squared(cat.Halo, dm_field, tr_field_counts); // to compute b² for each tracer
+        if(true==params._Get_tracer_bias_multipoles())
+          power.object_by_object_bias_lm(cat.Halo, dm_field, params._lmax_bias()); // to compute b² for each tracer
+
+
+        bias_field.resize(params._NGRID(), 0);
+        cat.get_density_field_grid(_BIAS_,tr_field_counts,bias_field); //Get halo bias averaged on a mesh.
+        string fileb=params._Output_directory()+"ls_bias"; //Defile output file
+        File.write_array(fileb,bias_field); //Write the bias on the mesh to poutput file (binary)
+        bias_field.clear();bias_field.shrink_to_fit();// Release memmory
+        string json_file_plotf ="plot_file_bias_field.json";
+        std::ofstream jfilef(json_file_plotf);
+        json ja;
+        ja["output_file"] = fileb+".dat";
+        ja["show_bias_field"] = true;
+        ja["Lbox"] = params._Lbox();
+        ja["Nft"] = params._Nft();
+        ja["sample"] = params._Name_survey();
+        ja["name"] = "Halo effective bias";
+        ja["Initial_slice"] = static_cast<int>(floor(params._Nft()/2.));
+        ja["Nslices"] = 70;
+        jfilef<<ja.dump(4);
+        jfilef.close();
+        system("python3 ../python/cosmolib_plots.py plot_file_bias_field.json &");
+
+      }
+      else
+      {
+        cat.select_random_subsample(params._fraction_dilute());      // Dilute the sample:
+        power.object_by_object_bias(cat.Halo_random_subsample, dm_field);
+
+       if(true==params._Get_tracer_bias_squared())
+          power.object_by_object_bias_squared(cat.Halo_random_subsample, dm_field, tr_field_counts); // to compute b² for each tracer
+
+        if(true==params._Get_tracer_bias_multipoles())
+          power.object_by_object_bias_lm(cat.Halo_random_subsample, dm_field, params._lmax_bias()); // to compute b² for each tracer
+
+        So.message_warning("The function print catalog must be made automatic, not to be hard-coded.");
+        print_catalog(cat.Halo_random_subsample, file_cat_new, false); // set true of blm are to be written, 
+      }
+
+
+      if(params._i_mass_g()<0)
+      {
+        So.message_warning("Input catalog does not contain mass information");
+        exit(1);
+      }
+      string json_file_plot ="plot_file_individual_bias.json";
+      std::ofstream jfile(json_file_plot);
+      json j;
+      j["output_new_catalog"] = file_cat_new;
+      j["show_individual_halo_mass_bias"] = true;
+      j["column_mass"] = 0;
+      j["column_bias"] = 1;
+      jfile<<j.dump(4);
+      jfile.close();
+      system("python3 ../python/cosmolib_plots.py plot_file_individual_bias.json &");
+
+
+      // -------------------------------------------------------------------------------------------------
+      // -------------------------------------------------------------------------------------------------
+
     }
-    else if (temp == 'd') // displays input parameters
-    {
-      So.show_preproc();
-    }
-    else if ( temp  == 'b') // assign bias and do CW analysus using tracers and DM.
+    else if ( temp  == 'c') // Cosmic web analysis
     {
 
-      FileOutput File;     // File management
-      So.welcome_message_c();
-      par_file = argv[2];  // Get parameter file
-      Params params(par_file);  // Read parameter file
 
       //Read dm field
       vector<real_prec> dm_field(params._NGRID(), 0); //COntainer for dm
@@ -268,11 +349,14 @@ int main(int argc, char *argv[])
         power.object_by_object_bias(cat.Halo_random_subsample, dm_field);
 
         //Assign individual bias^2 to objects in cat.Halo. That bias uses the dm_field:
-        power.object_by_object_bias_squared(  cat.Halo_random_subsample, dm_field, tr_field_counts); // to compute b² for each tracer
+        if(true==params._Get_tracer_bias_squared())
+          power.object_by_object_bias_squared(  cat.Halo_random_subsample, dm_field, tr_field_counts); // to compute b² for each tracer
 
         //Assign individual harmonic-based bias to objects in cat.Halo. That bias uses the dm_field:
-//        power.object_by_object_bias_lm(cat.Halo_random_subsample, dm_field, params._lmax_bias());  
-        // Print catalog: do it below, after cwc is done
+        if(true==params._Get_tracer_bias_multipoles())
+            power.object_by_object_bias_lm(cat.Halo_random_subsample, dm_field, params._lmax_bias());  
+        
+            // Print catalog: do it below, after cwc is done
         print_catalog(cat.Halo_random_subsample, file_cat_new, true); // set true of blm are to be written, 
       }
 
