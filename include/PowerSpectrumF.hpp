@@ -1,0 +1,962 @@
+//////////////////////////////////////////////////////////
+/**
+ * @class <PowerSpectrumF>
+ * @note Header file for the class PowerSpectrum.
+ * The spectral analysis of cosmological probes aims at extracting most of the cosmological information by decomposing 
+ * the signal of the perturbations in a given observable (e.g, CMB temperature, spatial distribution of galaxies). 
+ * A motivation for this type of analysis comes from the behavior of early density fluctuations, which, evolving in a 
+ * linear regime, acquired independent equations of evolution once decomposed in plane-waves. As such, spectral analysis of density perturbations is typically expressed in terms of Fourier decomposition.  Plane-waves are not the only possible basis on which the density fluctuations can be expanded. Despite of being ideal for analysis of $N$-body simulations (in which periodic boundary conditions are assumed) and for small area covered by redshift surveys, the analysis if wide area surveys imposes the need to extract the cosmological information by using different basis. In this section we will briefly motivate three different basis, each of which will be exposed in more detail later in this chapter. 
+ *
+ *The Fourier analysis consists in the harmonic decomposition based on plane waves as basis, that is
+ * \f[
+ * \langle \textbf{r}|\textbf{k}\rangle=e^{i\textbf{k}\cdot\textbf{r}},
+ * \f]
+ * where the orthogonality conditions in Fourier and configuration space are respectively
+ * \f[
+ * \langle \textbf{k}'|\textbf{k}\rangle=(2\pi)^{3}\delta^{3}(\textbf{k}-\textbf{k}')
+ * \,\,\,\,\,\,\,\,\,\,\,\,\langle \textbf{r}'|\textbf{r}\rangle=\delta^{3}(\textbf{r}-\textbf{r}').
+ * \f]
+ * This provides the definition of the Fourier transform of the overdensity field \f$ \delta(\textbf{r}) \f$:
+ * \f[ 
+ * \delta(\textbf{k})=\int_{V} d^{3}\textbf{r}\, \delta(\textbf{r}){\mathrm e}^{-i\textbf{k}\cdot \textbf{r}}. 
+ * \f]
+ * If the field \f$\delta(\textbf{k})\f$ is a random variable, given that the Fourier transform \f$\delta(\textbf{k})\f$, being a linear superposition of random fields, is also a random field. By assuming periodicity over a volume $L^{3}$, the resulting Fourier space is accessed only by a set of discrete wavenumbers, multiples of the \emph{fundamental mode}\index{Fundamental mode} $\Delta k=2\pi /L$ (this is the \emph{harmonic boundary condition})
+ * \f[
+ * \textbf{k}_{n}=\left(\frac{2\pi}{L}\right)\textbf{n}=\Delta k\textbf{n}\,,\hspace{0.8cm}\textbf{n}=(n_{x},n_{y},n_{y},\cdots),
+ * \f]
+ * where \f$n_{x,y,z}\f$ are integer numbers (later we will find that a different boundary condition expressed in a different basis are also used, leading clearly to a different spectrum). Due to the discreteness of the $k-$space, the inverse relation reads as
+ * \f[
+ * \delta(\textbf{r})=\frac{1}{V}\sum_{k_{n}} \delta(\textbf{k}_{n}){\mathrm e}^{i\textbf{k}_{n}\cdot \textbf{r}}.
+ * \f]
+ * In the continuous limit (take \f$V\to \infty\f$), we can write the integral form:
+ * \f[
+ * \delta(\textbf{r})=\int \frac{d^{3}\textbf{k}}{(2\pi)^{3}}\, \delta(\textbf{k}){\mathrm e}^{i\textbf{k}\cdot \textbf{r}}.
+ * \f]
+ * Notice that, if the random variable \f$\delta(\textbf{r})\f$ is real, then the Hermit condition is fulfilled,  
+ * \f$\tilde{\delta}(\textbf{k})=\tilde{\delta}^{*}(-\textbf{k})\f$. This implies that all the information of the 
+ * Fourier transform of a real field \f$\delta(\textbf{r})\f$ is located in the first quadrant in the \f$k-\f$ space. We can understand 
+ * the properties of the harmonic decomposition by recalling that, as in quantum mechanics, the wave function written in Cartesian coordinates for a free particle can be represented by plane-waves. In other words, plane-waves represent the eigenstates of the momentum operator, $\hat{p}|\textbf{k}\rangle=k|\textbf{k}\rangle$. Indeed, as a free particle, it's linear momentum is conserved. Keeping in mind that the linear momentum is the generator of translations in space, 
+ * its conservation encodes a symmetry : this corresponds to the symmetry of isotropy.
+ * @file PowerSpectrumF.h
+ * @author Andres Balaguera-Antolínez
+ * @callgraph
+ *
+ * @details This file defines the interface of the class PowerSpectrum, used to obtain the measurements of Power spectrum (3D, Angular).
+ */
+//////////////////////////////////////////////////////////
+#ifndef __POWERSPECTRUM__
+#define __POWERSPECTRUM__
+# include "Params.hpp"
+# include "FileOutput.hpp"
+# include "HaloTools.hpp"
+# include "CoordinateSystem.hpp"
+# include "FftwFunctions.hpp"
+# include "Cwclass.hpp"
+# include "ScreenOutput.hpp"
+# include "McmcFunctions.hpp"
+# include "GnuplotC.hpp"
+using namespace std;
+class PowerSpectrumF{
+ private :
+    //////////////////////////////////////////////////////////
+/**
+  * @private
+  * @brief Object of type GnuplotC
+  * @note Used to make plots in Gnuplot
+*/
+  GnuplotC gp;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+  * @brief Object of type GnuplotC
+  * @note Used to make plots in Gnuplot
+   */
+  Gnuplot gp_pdf;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+  * @brief Object of type GnuplotC
+  * @note Used to make plots in Gnuplot
+   */
+  Gnuplot gp_power;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief Object of type params.
+   */
+  Params params;
+  //////////////////////////////////////////////////////////
+  /** 
+   * @private
+   * @brief Object of type CosmologicalFunctions
+   */
+  Cosmology cosmology; // nicer name
+  
+  //////////////////////////////////////////////////////////
+  /** 
+   * @private
+   * @brief Object of type CosmologicalFunctions
+   */
+  McmcFunctions mcmc;
+  //////////////////////////////////////////////////////////
+  /** 
+   * @private
+   * @brief Object of type FileOutput
+   */
+  FileOutput File;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   * @brief Object of type FftwFunctions
+   */
+  FftwFunctions fftw_functions;
+  //////////////////////////////////////////////////////////
+  /** 
+   * @private
+   * @brief Object of type ScreenOutput
+   */
+  ScreenOutput So;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   * @brief Number of galaxies in catalog
+   * @details This is read from the class member tracer_cat
+  */
+  long N_galaxy;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   * @brief Number of randoms in catalog
+   * @details This is read from the class member random_cat
+   */
+  long N_random;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   * @brief Object of type cwclass
+   */
+  Cwclass  cwclass;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+  *  @brief Vector containing the k identifying spherical shells for the estimates of gal sample
+   */
+  vector<real_prec> kvector_data;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   * @brief Vector containing the k identifying spherical shells for the estimates of the window function
+   */
+  vector<real_prec> kvector_window;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   * @brief Vector containing the k identifying spherical shells for the estimates of power spectrum* in 2d cart
+   */
+  vector<real_prec> kvector_data2d;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   * @brief
+   */
+  vector<real_prec> muvector;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief Complex field to allocate FT of dm
+   */
+   complex_prec *delta_dm;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief Container for the power spectrum in real spece
+   */
+  vector<real_prec> pk;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief Monopole of power spectrum in redshift space
+   */
+  vector<real_prec> pk0;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief Quadrupole of power spectrum in redhoift space
+   */
+  vector<real_prec> pk2;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief Hexadecapole of power in redhsift space
+   */
+  vector<real_prec> pk4;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief Power Spectrum of window function
+   */
+  vector<real_prec> pk_w;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief Number of Fourier modes in k-bins
+   */
+  vector<int> modes_g; 
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief  2D power spectrum kperp, kparallel
+   */
+  vector < vector<real_prec> > pkk;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief 2D power spectrum, |k|, mu
+   */
+  vector < vector<real_prec> > pmk;
+    //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief Variance of the FKP estimator
+   */
+  vector<real_prec> sigma_fkp;
+    //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief
+   */
+  vector<real_prec> sigma_y_l2;
+    //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief
+   */
+  vector<real_prec> sigma_y_l4;
+ //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief
+   */
+  vector<real_prec> kvector_data_b;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   *  @brief
+   */
+  vector<real_prec> bispectrum;
+ //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  vector<real_prec> sn_bispectrum;
+   //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  vector<int> modes_tri;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string rest_file;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  ULONG nside;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string file_random; 
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string file_dndz;   
+  //////////////////////////////////////////////////////////
+    /**
+   *  @brief 
+   */
+  string file_power;  
+  //////////////////////////////////////////////////////////
+    /**
+   *  @brief
+   */
+  string file_power_cross;
+ //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string file_power_real_space;  
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string file_power_redshift_space;  
+  //////////////////////////////////////////////////////////
+    /**
+   *  @brief
+   */
+  string file_power_marked;
+ //////////////////////////////////////////////////////////
+  /**
+   *  @brief
+   */
+  string file_power_marked_real_space;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief
+   */
+  string file_power_marked_redshift_space;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string file_MCF;  
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string file_power_log;  
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string file_power2d; 
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string file_power2d_mk;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string file_window; 
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string file_bispectrum;
+
+   //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */  
+  string file_power_grf;
+   //////////////////////////////////////////////////////////
+  /**
+   * @brief Output file for overdenity field with gaussian fluctuations 
+   */  
+  string output_file_grf;
+   //////////////////////////////////////////////////////////
+  /**
+   * @brief Output file for overdenity field with gaussian and fixed amplitude fluctuations according to the value of \f$k_{fa}\f$ given in the parameter file.
+   */  
+  string output_file_mixed_grf_fa;
+   //////////////////////////////////////////////////////////
+  /**
+   * @brief Output file for overdenity field with fixed amplitude fluctuations. 
+   */  
+  string output_file_fa;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  real_prec mean_density;
+ //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  bool use_random_catalog_cl;
+ //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  int Nbins_r;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  real_prec rmin;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  real_prec rmax;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  string r_bin_type;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+ public :
+
+ /**
+   *  @brief Default constructor
+   *  @return object of PowerSpectrum
+   */
+  PowerSpectrumF ():N_random(0),mean_density(0),Nbins_r(0),rmin(0),rmax(0){
+      time_t time_bam;
+      time(&time_bam);
+      this->So.initial_time=time_bam;
+      this->So.welcome_message();
+  }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /**
+   *  @brief Overloaded constructor
+   *  @param params 
+   */
+  PowerSpectrumF (Params &_params): params(_params),N_random(0),mean_density(0),Nbins_r(0),rmin(0),rmax(0)
+  {
+
+    this->fftw_functions.set_params(this->params);
+    this->set_output_filenames();
+    time_t time_bam;
+    time(&time_bam);
+    this->So.initial_time=time_bam;
+    this->gp_pdf<<"set border linewidth 1.3\n";
+    this->gp_pdf<<"set border linecolor '"<<FG_COLOR<<"' \n";
+    this->gp_pdf<<"set xtics textcolor '"<<FG_COLOR<<"' \n";
+    this->gp_pdf<<"set ytics textcolor '"<<FG_COLOR<<"' \n";
+    this->gp_pdf<<"set key textcolor rgb '"<<FG_COLOR<<"'\n";
+    this->gp_pdf<<"set title textcolor rgb '"<<FG_COLOR<<"' \n";
+    this->cosmology.set_cosmo_pars(this->params.s_cosmo_pars);
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  PowerSpectrumF (Params &_params, bool resize): params(_params),N_random(0),mean_density(0),Nbins_r(0),rmin(0),rmax(0)
+  {
+
+    this->fftw_functions.set_params(this->params);
+    this->set_output_filenames();
+    this->cosmology.set_cosmo_pars(this->params.s_cosmo_pars);
+    if (resize)
+    {
+      this->kvector_data.clear();
+      this->kvector_data.shrink_to_fit();
+      for(int i=0;i<this->params._d_Nnp_data();i++)
+        this->kvector_data.push_back(this->params._d_kmin()+this->params._d_DeltaK_data()*(i+0.5));
+    }
+  }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /**
+   *  @brief Default destructor
+   *  @return none
+   */
+  ~PowerSpectrumF () {}
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /**
+   * @brief Add both galaxy and random catalog at once
+  */
+  void add_catalogues();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Add galaxy catalog, aimed at improving mmemory management
+  */
+  void add_catalogues_gal();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Add both galaxy catalog, aimed at improving mmemory management
+  */
+  void add_catalogues_ran();
+  //////////////////////////////////////////////////////////
+#ifdef _USE_SEVERAL_RANDOM_FILES_
+  void add_catalogues_ran(real_prec mcuts, int);
+#endif
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  string file_data;
+//////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  real_prec alpha;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  real_prec normal_power;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief
+   */
+  real_prec var_prop;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+  */
+  vector<real_prec>window_matrix;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Structure to allocate power (l=0,2,4), kvector and nmodes
+  */
+  vector<s_info_in_bins> power_in_bins;
+   //////////////////////////////////////////////////////////
+  /**
+   * @brief Measurements of power spectrum
+   * @details This function generates the estiametes of power spectrum ()
+   *  (FKP, Yamamoto and their multipole decomposition) and the Bispectrum
+   *  (using FKP). This method is aimed for realistic surveys in which a random file is expected to be provided
+   *  along with (if defined in parameter file) a file with smoothed nbar tabulated
+   * @param verbose: used to write on screen
+   * @details This method reads input files and get power without touching the data, i-.e, does not make any binning in any property. It accepts catalogs as well as density fields.
+   * @note This methood has been adapted to the case in which the random catalogs are too large to be kept in memmory or they come in chunks of randoms
+   * with the SAME volume. The steps performed fr teh random catalog in this case are
+   * 1 Read catalog.
+   * 2 Get ready for nbar.
+   * 3 Transform to cartessian coord (assigning nbar if needed and searching for box side lenght, offsets and mins).
+   * 4 Interpolate on the mesh.
+   * 5 Update params.
+   * 6 Get window matrix if requested.
+   * 7 Release memmory from the catalog.
+   * If random file is too large, a loop over the chunks is done.
+   * The a new box size is requested, the size of the box is measured from the randoms, and in particular, from the first chunk, such that the parameters in the PowerSpectrumF and FfftwFunctions are updatred with
+   * @code
+     this->set_params(this->random_cat.params);
+     this->fftw_functions.set_params(this->random_cat.params);
+   * @endcode
+   * @return Interpolated tracer field. 
+   * \image html interpolated_tracer.png
+   * @return Tracer power spectrum in real 
+   * \image html power_realspace.png
+   * @return Tracer power spectrum in redshift space 
+   * \image html power_redshiftspace.png
+   * @warning No variance for Yammoto estimator have been coded.
+   * @author ABA
+*/
+  void measure_power_spectrum_data();
+
+  void measure_power_spectrum_box();
+
+  //////////////////////////////////////////////////////////
+ /**
+  * @brief Measurements of th window matrix
+  * @details This function generates the elements of the window matrix of power spectrum, for differnet multipoles
+  * and measured using the random catalog. Must be called inside the method measure_power_spectrum(bool, bool).
+  * @note  This function is to be read from the cosmicatlas.cpp main function: verbose is to show detailed information, mcut is to force the analysis to have a minium cut in a given property
+  depending on w. This method can be accesed from compilation with the -w option.
+   * @author ABA
+  */
+  void measure_window_function ();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Measurements of power spectrum
+   * @param Random catalogue
+   * @author ABA
+*/
+  void measure_power_spectrum (bool verbose, Catalogue&tracer);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Measurements of power spectrum
+   * @details This function is to be called from inside the code where catalogs are allocated in a s_halo type structure.
+   * @param tracer: a s_Halo type container with the halo catalog.
+   * @param space: "real space" or ·"redshift space"
+   * @param property : "_MASS_", or "_VMAX_". No more properties of the catalog are allowed at this function
+*/
+  void measure_power_spectrum(Catalogue& tracer, string space, string property);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Analysis of secondary bias
+   * @details This function computs lss bias, pearson, marked power and power of tracer in bins of differnet halo properties
+   * The ordering of the properties is fixed, but the name of the ouput dir must emphasize which is the main property somehow.
+   * This is the main method used for seconday bias studies.
+   * @param space: real_space, redshift_space
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+*/
+  void halo_bias_analysis(string space);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Measure marked correlation function-
+  */
+//  void measure_marked_correlation_function ();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Measure power spectrum using an interpolated field as input.
+   * @details Calls calass mebbers fields.
+  */
+  void measure_power_spectrum_grid();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief measure the Power_Spectrum and/or the Bispectrum
+   * @details This function generates the estiametes of power spectrum ()
+   *  (FKP, Yamamoto and their multipole decomposition) and the Bispectrum
+   *  (using FKP).
+   *  @note Used specifically in case we supply grids 1+delta1 and 1+delta2 and we want to measure the auto and cross power threof
+   */
+  void measure_power_spectrum_grid(const vector<real_prec>&, bool);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief To measure the Power_Spectrum from a grid density
+   * @details explicitely dedicatd to the case in which tracer bias is to be measured   */
+  void measure_power_spectrum_grid(const vector<real_prec>&);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief measure the Marked Power_Spectrum
+   */
+  void measure_marked_power_spectrum_grid(const vector<real_prec>&, const vector<real_prec>&);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief measure the cross power spectrum between fields X and Y
+    * @param dm bool set to true if X is dark matter so no shot-noise is measured for that component
+ */
+  void measure_cross_power_spectrum_grid(bool dm, vector<real_prec>&X,vector<real_prec>&Y, bool get_cross);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief measure the cross power spectrum between fields X and Y
+    * @param dm bool set to true if X is dark matter so no shot-noise is measured for that component
+ */
+  void measure_cross_power_spectrum_grid(bool dm, string file_X,string file_Y,bool get_cross);
+  //////////////////////////////////////////////////////////
+  /**
+ * @brief Large-scale bias from power spectra
+ *
+ * @details
+ * If the power spectra involved come from Gaussian initial conditions (IC),
+ * we need to use the error bars from the Gaussian approximation on large scales.
+ *
+ * The bias is measured using:
+ * \f[
+ * \langle b \rangle = \frac{\sum \left( b_k / \sigma_{b_k}^2 \right)}{\sum \left( 1 / \sigma_{b_k}^2 \right)}
+ * \f]
+ * and the error is:
+ * \f[
+ * \sigma^2 = \frac{1}{\sum \left( 1 / \sigma_{b_k}^2 \right)}
+ * \f]
+ * where \f$ \sigma_{b_k} \f$ is the error on the bias,
+ * and the bias is defined as:
+ * \f[
+ * b = \sqrt{\frac{P_h}{P_{\mathrm{dm}}}}
+ * \f]
+ *
+ * The error on the bias is given by:
+ * \f[
+ * \sigma_{b_k}^2 = \frac{1}{4} b_k^2 \left( \frac{\sigma_{k,h}^2}{P_h^2} + \frac{\sigma_{k,\mathrm{dm}}^2}{P_{\mathrm{dm}}^2} \right)
+ * \f]
+ * (errors added in quadrature), where:
+ * \f[
+ * \sigma_k^2 = P^2 \cdot \frac{2}{N_k}
+ * \f]
+ * (neglecting shot noise), and \f$ N_k \f$ is the number of modes in each k-bin. This yields:
+ * \f[
+ * \langle b \rangle = \frac{\sum (N_k / b_k^2)}{\sum (N_k / b_k^2)}
+ * \f]
+ * and:
+ * \f[
+ * \sigma_{b_k}^2 = \frac{b_k^2}{N_k} = \frac{1}{\sum (N_k / b_k^2)}
+ * \f]
+ * If we use fixed-amplitude fields, the average bias is measured as a simple mean,
+ * and its error follows from the standard deviation.
+ *
+ * @note Ojo
+ */
+
+  pair<real_prec, real_prec> get_lss_bias(vector<real_prec>&,vector<real_prec>&,vector<real_prec>&, vector<int>&, int init, real_prec kmax);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Large-scale bias from cross-power
+   */
+  pair<real_prec, real_prec> get_lss_cross_bias(vector<real_prec>&,vector<real_prec>& ,vector<real_prec>&, vector<int>&, int init, real_prec kmax);
+  //////////////////////////////////////////////////////////
+  /** 
+   * @brief Write output of power spectrum and/or bispectrum 
+   * @param write sigma true/false.
+   */
+  void write_power_spectrum (bool);
+  //////////////////////////////////////////////////////////
+  /** 
+   * @brief Write output of power spectrum and/or bispectrum 
+   * @param write sigma yes/no.
+   */
+  void write_power_and_modes();
+  //////////////////////////////////////////////////////////
+  /** 
+   * @brief Write output of power spectrum and/or bispectrum 
+   * @param write sigma yes/no.
+   */
+  void write_power_and_modes(string);
+  //////////////////////////////////////////////////////////
+  /** 
+   * @brief Write output of power spectrum and/or bispectrum 
+   * @details measured in the function measure_power_spectrum()
+   */
+  void write_power_spectrum_grid(string);
+  //////////////////////////////////////////////////////////
+ /**
+   * @brief Set parameters
+   */
+   void set_parameters_power();
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Set the values of the private variables that regard filenames - with one catalogue
+   */
+  void set_output_filenames();
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief get the value of the private member 
+   *  PowerSpectrum::kvector_data
+   *  @param i index of the vector kvector_data
+   *  @return PowerSpectrum::kvector_data[i]
+   */
+  real_prec _kvector_data (int i) { return kvector_data[i]; }
+ //////////////////////////////////////////////////////////
+  /**
+   *  @brief get the size of the private member
+   *  PowerSpectrum::kvector_data
+   *  @return PowerSpectrum::kvector_data.size()
+   */
+  ULONG _kvector_data_size () { return kvector_data.size(); }
+  ////////////////////////////////////////////////////////// 
+  /**
+   *  @brief get the value of the private member 
+   *  PowerSpectrum::pk0
+   *  @param i index of the vector pk0
+   *  @return PowerSpectrum::pk0[i]
+   */
+  real_prec _pk0 (int i) { return pk0[i]; }
+  ////////////////////////////////////////////////////////// 
+  /**
+   *  @brief get the value of the private member 
+   *  PowerSpectrum::modes
+   *  @param i index of the vector pk0
+   *  @return PowerSpectrum::pk0[i]
+   */
+  real_prec _nmodes_k (int i) { return modes_g[i]; }
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief get the value of the private member 
+   *  PowerSpectrum::pk2
+   *  @param i index of the vector pk2
+   *  @return PowerSpectrum::pk2[i]
+   */
+  real_prec _pk2 (int i) { return pk2[i]; }
+  ////////////////////////////////////////////////////////// 
+  /**
+   *  @brief get the value of the private member 
+   *  PowerSpectrum::pk4
+   *  @param i index of the vector pk4
+   *  @return PowerSpectrum::pk4[i]
+   */
+  real_prec _pk4 (int i) { return pk4[i]; }
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief get the value of the private member
+   *  PowerSpectrum::pk4
+   *  @param i index of the vector pk4
+   *  @return PowerSpectrum::pk4[i]
+   */
+  real_prec _sigma_fkp (int i) { return sigma_fkp[i]; }
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief measures the window matrix 
+    *@details  This function provides the window matrix which in reality is a tensor of 4 indices:
+   * two indices for multipoles l, l': these can be from 0 to 4, usually 0,2,4
+   * two indices for wavenumber modes, k and k': k runs over the bins used in the measurements, 
+   * while k' runs oer the modes implemented in the Gauss -legendre integration.
+   * @note This approach uses the randoms catalog to perform a MonteCarlo integration:
+   *\f[
+   * W(\textbf{k})=\frac{1}{N}\int d^{3}\textbf{r}\, w_{\rm FKP}(\textbf{r})\bar{n}(\textbf{r}){\rm e}^{i\textbf{k} \cdot \textbf{r}} \approx \frac{\alpha}{N}\sum _{\alpha=1}^{N_{\rm ran}}w_{\rm FKP}(\textbf{r}_{i}){\rm e}^{i\textbf{k} \cdot \textbf{r}_{\alpha}}
+   * \f] 
+   * where \f$\alpha\sim N_{\rm gal}/N_{\rm ran}\f$ and \f$N\f$ is a normalization constant. With this, we can write
+   * \f[
+   * |W(\textbf{k}- \textbf{k}')|^{2}=\frac{\alpha^{2}}{N^{2}}\sum_{\alpha,\beta(\alpha\neq \beta)}^{N_{\rm ran}}w_{\rm FKP}(\textbf{r}_{\alpha})w_{\rm FKP}(\textbf{r}_{\beta}){\rm e}^{i\textbf{k} \cdot \Delta \textbf{r}_{\alpha\beta}-i\textbf{k}' \cdot \Delta \textbf{r}_{\alpha\beta}}
+   * \f]
+   * where \f$\Delta \textbf{r}_{\alpha\beta}=\textbf{r}_{\alpha}-\textbf{r}_{\beta}\f$. Using the Reyleigh expansion of the two plane-waves involved and converting the integral over \f$k'\f$ into a sum using the Gauss-Legendre method, it can be shown that the mixing matrix takes for form 
+   *\f[
+   * \mathcal{W}_{\ell,\ell'} (k,k_{j}) = \frac{2\alpha^{2}}{N^{2}}(2\ell +1)i^{\ell}(-i)^{\ell'}w_{GL}(k_{j})k_{j}^{2} 
+   * \times  \sum_{\alpha,\beta (\alpha \neq \beta)}^{N_{\rm ran}}w_{\rm FKP}(\textbf{r}_{\alpha})w_{\rm FKP}(\textbf{r}_{\beta})\bar{J}_{\ell}(k_{i},|\Delta \textbf{r}_{\alpha\beta}|)j_{\ell'}(k_{
+   *    j}|\Delta \textbf{r}|_{\alpha\beta})\mathcal{L}_{\ell}(\Delta \hat{\textbf{r}}_{\alpha\beta}\cdot \hat{n}_{\alpha\beta})\mathcal{L}_{\ell'}(\Delta \hat{\textbf{r}}_{\alpha\beta}\cdot \hat{n}_{\alpha\beta}).
+   * \f]
+   * where
+   * \f[
+   *  \bar{J}_{\ell}(k_{i},\Delta \textbf{r})\equiv \frac{1}{\Delta k}\int _{k_{i}-\Delta k/2}^{k_{i}+\Delta k/2}j_{\ell}(k\Delta r)dk.
+   * \f]
+   */
+  void get_window_matrix_multipole(Catalogue &random);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief This method generates a gaussian random field in Fourier space.
+   * @param Input power spectrum \f$ P(k=|\vec{k}|, z_{\mathrm{ini}}() \f$: some theoretical linear power spectrum normalized at some redshift.
+   * @param kmax \f$k_{fa}\f$ for fixed amplitude. Flucuations aove this kmax will be derived from gaussian random fileds. Scales belo kmax will have fixed amplitude (FA) fluctuations.
+   * @details GRF: For modes  \f$ |\vec{k}|>k_{fa}\f$, the gaussian random field is a realization of an overdensity distribution  \f$ \delta_{\vec{k}} = A_{\vec{k}}e^{i\phi_{\vec{k}}}\f$ which values, both real and imaginary, in Fourier space, follows the distribution
+   * \f[
+   * \mathcal{P}(\delta)d \delta=\mathcal{P}(A_{\vec{k}},\phi)A_{\vec{k}}d A_{\vec{k}}d \phi=\left(\frac{2A_{\vec{k}}}{\sigma_{\vec{k}}^{2}} \exp \left[-\frac{A_{\vec{k}}^{2}}{\sigma_{\vec{k}}^{2}}\right]d A_{\vec{k}} \right) \left[ \frac{d \phi}{2\pi} \right].
+   * \f]
+   * That is, the amplitude \f$ A_{\vec{k}}\f$ of the fluctuations follows a Reyleight distribution, while the phases follow a random distribution. The input power spectrum is implemented as 
+   * the variance opf the amplitudes, \f$ \sigma^{2}_{\vec{k}} = P_{th}(|\vec{k}|,z_{\mathrm{ini}})/2 \f$
+   * @details FA: For modes  \f$ |\vec{k}|<k_{fa}\f$, the amplitude of the Fourier modes follow the distribution
+   * \f[
+   * \mathcal{P}(\delta)d \delta=\mathcal{P}(A_{\vec{k}},\phi)A_{\vec{k}}d A_{\vec{k}}d \phi= \delta_{D}\left( A_{\vec{k}}-\sqrt{P(k=|\vec{k}|, z_{\mathrm{ini}})}\right) d A_{\vec{k}} \left[ \frac{d \phi}{2\pi} \right].
+   * \f]
+   * @details For the purpose of generating initial conditions for N-body simulations, this overdensity field must be rescaled with the growth factor computed at the initial redshift (e.g, z=99, see \ref CosmoLib). This filed is then used to compute the initial gravitational potential, which will be in turn used to displace the initially randomly displaced tracers, using, for example, Zeldovich approximation or Lagrangian perturbation theory.
+   * Using the code \ref power_spectrum, we can generate an example of the three outputs for a box of 500 Mpc/h and a kmaxof 0.3 h/Mpc   
+   * \image html GRF.png
+   * @note This can be imlemented as an external function (e.g. in Miscelaneous.cpp). 
+   * @return Overdensity field (in configuration space) with fluctutions following an input theoretical power spectrum and linear (decoupled) Fourier modes. Three fields are generated: full GRF, full FA and mixed, according to the value \f$k_{fa}\f$.
+   */
+  void get_GaussianRandomField();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Method to assign effective bias to tracers
+   * @param tracer_cat Catalog of dark matter tracers
+   * @param dm_field Dark matter density field intepolated on a mesh
+   * @details The individual bias is measured as 
+   * \f[
+   * b^{(i)}_{hm}=\frac{\sum_{j,k_{j}<k_{max}}N^{j}_{k}\langle {\rm e}^{-i\textbf{k} \cdot \textbf{r}_{i}} \delta_{\mathrm{dm}}^{*}(\textbf{k}) \rangle_{k_{j}}}{\sum_{j,k_{j}<k_{max}} N^{j}_{k}P_{\rm dm}(k_{j})},
+   * \f]
+   * where:  
+   * - \f$ N_k^j \f$ is the number of Fourier modes in the \f$ j \f$-th spherical shell,
+   * - \f$ \delta_{\mathrm{dm}}(\mathbf{k}) \f$ is the Fourier transform of the dark matter density field,
+   * - \f$ P_{\mathrm{dm}}(k_j) \f$ is the dark matter power spectrum.
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   */
+  void object_by_object_bias(Catalogue & tracer_cat, vector<real_prec>& dm_field);
+  //////////////////////////////////////////////////////////
+  /**
+  *  @brief Method to assign effective bias and relative bias to tracers
+   * @param tracer_cat Catalog of dark matter tracers
+   * @param dm_field Dark matter density field intepolated on a mesh
+   * @param tracer_field tracer density field intepolated on a mesh
+   * @details The power spectrum of the DM has been measured before the call of this method  and is still allocated in the container this->pk0
+   * @warning This can be implemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   */
+  void object_by_object_bias(Catalogue& tracer_cat, vector<real_prec>& dm_field,vector<real_prec>& tracer_field);
+  //////////////////////////////////////////////////////////
+  /**
+  *  @brief Method to assign effective bias squared to tracers
+   * @param tracer_cat Catalog of dark matter tracers
+   * @param dm_field Dark matter density field intepolated on a mesh
+   * @param tracer_field tracer density field intepolated on a mesh
+   * @details The power spectrum of the DM has been measured before the call of this method  and is still allocated in the container this->pk0
+   * @warning This can be implemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   */
+  void object_by_object_bias_squared(Catalogue& tracer_cat, vector<real_prec>& dm_field,vector<real_prec>& tracer_field);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Assignment of the object-by-object relative_bias.
+   * @details Included in measure_power_spectrum meant to do that task in a realiztic sample. This method is meant to assign rbias for a realistic sample which imvolves the computation of the window fnuction * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   */
+  void object_by_object_rbias(Catalogue& tracer_cat,  HaloTools & htools_g, HaloTools & htools_r);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Method to assign large scale bias as a function of harmonic index from Harmonic decomposition in Fourier space.
+   * @details See details in this->object_by_object_bias
+   */
+  void object_by_object_qbias(Catalogue& tracer_cat, vector<real_prec>& dm_field);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Method to assign effective bias to tracers
+   * @param tracer_cat Catalog of dark matter tracers
+   * @param dm_field Dark matter density field intepolated on a mesh
+   * @param lmax_bias Maximum multipole
+   * @details The individual bias is measured as 
+   * \f[
+   * b_{\ell}^{(i)}= \frac{1}{2\ell +1} \sum_{m=-\ell}^{m=\ell} \frac{\sum_{j,k_{j}<k_{max}}N^{j}_{k}\langle {\rm e}^{-i\textbf{k} \cdot \textbf{r}_{i}} \delta_{\mathrm{dm}}^{*}(\textbf{k})Y_{\ell m}(\hat{\textbf{k}}) \rangle_{k_{j}}}{\sum_{j,k_{j}<k_{max}} N^{j}_{k}P_{\rm dm}(k_{j})},
+   * \f]
+   * where:  
+   * - \f$ N_k^j \f$ is the number of Fourier modes in the \f$ j \f$-th spherical shell,
+   * - \f$ \delta_{\mathrm{dm}}(\mathbf{k}) \f$ is the Fourier transform of the dark matter density field,
+   * - \f$ Y_{\ell m}(\hat{\mathbf{k}}) \f$ are spherical harmonics,
+   * - \f$ P_{\mathrm{dm}}(k_j) \f$ is the dark matter power spectrum.
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   */
+  void object_by_object_bias_lm(Catalogue& tracer_cat, vector<real_prec>& dm_field, int lmax);
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief measure cross correlatio.
+   */
+  void get_cross_correlation_config_space(vector<real_prec>&, vector<real_prec>& , vector<real_prec>&);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Method to do several taks lined to the secondary bias project
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   */
+  void GetSuperClusters(string, string);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Method to do several taks lined to the secondary bias project
+   * @warning This can be imlemented as an external function (e.g. in Miscelaneous.cpp) that implements methods of the current class.
+   */
+  void GetSuperClusters(string);
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Set parameters
+   */
+  void set_params(Params _pars){this->params=_pars;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Set the number of galaxies
+   */
+  void set_N_galaxy(ULONG new_N_galaxy){this->N_galaxy=new_N_galaxy;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Set the number of randoms
+   */
+  void set_N_random(ULONG new_N_random){this->N_random=new_N_random;}
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Write output of power spectrum and/or bispectrum
+   * @details measured in the function measure_power_spectrum()
+   */
+  void write_power_spectrum ();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Write log filw with numbers used and derived in the measuremetn of power
+   */
+  void write_fftw_parameters();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Write log file with numbers used and derived in the measuremetn of power
+   */
+  string _file_power(){return this->file_power;}
+
+ //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member file_power_grf
+   */
+  string _file_power_grf () {return this->file_power_grf;}
+
+  /**
+   *  @brief Set the value of the private member file_power_grf
+   */
+  void set_file_power_grf (string new_f) {this->file_power_grf=new_f;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member output_file_grf
+   */
+  string _output_file_grf () {return this->output_file_grf;}
+
+  /**
+   *  @brief Set the value of the private member output_file_grf
+   */
+  void set_output_file_grf (string new_f) {this->output_file_grf=new_f;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member output_file_grf
+   */
+  string _output_file_mixed_grf_fa () {return this->output_file_mixed_grf_fa;}
+
+  /**
+   *  @brief Set the value of the private member output_file_grf
+   */
+  void set_output_file_mixed_grf_fa (string new_f) {this->output_file_mixed_grf_fa=new_f;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief Get the value of the private member output_file_grf
+   */
+  string _output_file_fa () {return this->output_file_fa;}
+
+  /**
+   *  @brief Set the value of the private member output_file_grf
+   */
+  void set_output_file_fa (string new_f) {this->output_file_fa=new_f;}
+  //////////////////////////////////////////////////////////
+
+
+
+};
+
+#endif
