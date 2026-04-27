@@ -1,0 +1,11 @@
+{
+    "Initial_slice": 20,
+    "Lbox": 1000.0,
+    "Nft": 512,
+    "Nslices": 20,
+    "name": "Density",
+    "output_file": "/home/andres/data/Numerics/CosmicCODES/output_power/interpolated_feld.dat",
+    "redshift": 0.0,
+    "sample": "UNITSIM_HALOS",
+    "show_interpolated_field": true
+}

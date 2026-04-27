@@ -1,0 +1,19 @@
+{
+    "angular_power_spectrum_measurement": true,
+    "header": "lmin, lmid, lmax, power, var",
+    "lmax": 256,
+    "lmin": 1,
+    "mask_map": "/home/andres/data/Numerics/CosmicCODES/output_hgaps/MASK.fits",
+    "number_of_lbins": 43,
+    "number_of_zbins": 3,
+    "output_file_0": "/home/andres/data/Numerics/CosmicCODES/output_hgaps/Cl_K_UNITSIM_HALOS_zbtype_delta_lbins_H_Nside_64_zbins_1_1_all_galactic.txt",
+    "output_file_1": "/home/andres/data/Numerics/CosmicCODES/output_hgaps/Cl_K_UNITSIM_HALOS_zbtype_delta_lbins_H_Nside_64_zbins_2_2_all_galactic.txt",
+    "output_file_2": "/home/andres/data/Numerics/CosmicCODES/output_hgaps/Cl_K_UNITSIM_HALOS_zbtype_delta_lbins_H_Nside_64_zbins_3_3_all_galactic.txt",
+    "output_file_map0": "/home/andres/data/Numerics/CosmicCODES/output_hgaps/cmaps_fits_zbin_3_Cl.fits",
+    "output_file_map1": "/home/andres/data/Numerics/CosmicCODES/output_hgaps/cmaps_fits_zbin_1_Cl.fits",
+    "output_file_map2": "/home/andres/data/Numerics/CosmicCODES/output_hgaps/cmaps_fits_zbin_2_Cl.fits",
+    "sample": "UNITSIM_HALOS",
+    "show_tomographic_maps": true,
+    "sky_fraction": 0.6927083134651184,
+    "statistics": "Cl"
+}

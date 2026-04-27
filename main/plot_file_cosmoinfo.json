@@ -1,0 +1,16 @@
+{
+    "column_Hubble": 1,
+    "column_age_universe": 8,
+    "column_comoving_angular_diameter_distance": 3,
+    "column_comoving_distance": 2,
+    "column_comoving_sound_horizon": 4,
+    "column_distance_modulus": 5,
+    "column_growth_factor": 7,
+    "column_luminosity_distance": 6,
+    "column_redshift": 0,
+    "cosmology": true,
+    "growth": true,
+    "output_file": "/home/andres/data/Numerics/CosmicCODES/output_cosmolib/cosmology_inredshift.txt",
+    "zmax": 9.950004577636719,
+    "zmin": 0.0010000000474974513
+}

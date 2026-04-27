@@ -1,0 +1,11 @@
+{
+    "Initial_slice": 256,
+    "Lbox": 1000.0,
+    "Nft": 512,
+    "Nslices": 20,
+    "name" : "Halo bias",
+    "column_bias": 1,
+    "output_file": "/home/andres/data/Numerics/CosmicCODES/output_cosmolib/ls_bias.dat",
+    "sample": "UNITSIM_HALOS",
+    "show_bias_field": true
+}

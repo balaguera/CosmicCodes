@@ -1,0 +1,10 @@
+{
+    "clustering_space": "GRF",
+    "input_file": "/home/andres/data/Numerics/UNITSIM/REFERENCE/001/IC/Pk_Planck15_Table4.txt",
+    "kmax": 2.0,
+    "kmin": 0.005,
+    "output_file": "/home/andres/data/Numerics/CosmicCODES/output_cosmolib/power_grf_real0.txt",
+    "power_spectrum_grf": true,
+    "redshift": 0.0,
+    "sample": "GRF"
+}

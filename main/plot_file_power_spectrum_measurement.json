@@ -1,0 +1,11 @@
+{
+    "clustering_space": "galaxy redshift survey",
+    "header": "k vec, p0, p2, p4, sigma, nmodes",
+    "kmax": 2.0,
+    "kmin": 0.001193137955851853,
+    "output_file": "/home/andres/data/Numerics/CosmicCODES/output_sdss/Pk_yb_SDSS_Nft512_TSC_test.txt",
+    "power_spectrum_measurement": true,
+    "redshift": 0.0,
+    "sample": "SDSS",
+    "statistics": "Pk_yb"
+}
