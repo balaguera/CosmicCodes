@@ -1,10 +1,24 @@
+## Description
+
 Library in C++ to perform calculations in Cosmology (theoretical and observational). 
 Theoretical cosmology: prediction for 1 and 2 point statistics (abundance, power spectrum in 2D and 3D).
 Observational: measurements of abundance (e.g. luminosity functions, power spectrum, correlation function), marked statistics, halo properties.
 
+## Documentation
 Documentation is available in dOxygen and pdf. It can be requested via e-mail to abalant@gmail.com.
 
-The maike file in /main/ will react under the command make help as
+## Build
+$mkdir build
+
+$cd build
+
+$cmake ..
+
+$cmake --build . -- VERBOSE=1
+
+
+## Usage
+The make file in /main/ will react under the command make help as
 CosmiCalc compiling options
 
 -make bmt: creates executable for the Bias Mapping Technique
