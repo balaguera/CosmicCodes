@@ -1,5 +1,4 @@
 ## Description
-
 Library in C++ to perform calculations in Cosmology (theoretical and observational). 
 Theoretical cosmology: prediction for 1 and 2 point statistics (abundance, power spectrum in 2D and 3D).
 Observational: measurements of abundance (e.g. luminosity functions, power spectrum, correlation function), marked statistics, halo properties.
@@ -7,7 +6,10 @@ Observational: measurements of abundance (e.g. luminosity functions, power spect
 ## Documentation
 Documentation is available in dOxygen and pdf. It can be requested via e-mail to abalant@gmail.com.
 
+
 ## Build
+Follow the follow instructions:
+
 $mkdir build
 
 $cd build
@@ -18,26 +20,30 @@ $cmake --build . -- VERBOSE=1
 
 
 ## Usage
-The make file in /main/ will react under the command make help as
-CosmiCalc compiling options
+In examples/ there are codes with examples if the diferent usages of the library. These are compiled with the Makefile
+and executed with the following options:
 
--make bmt: creates executable for the Bias Mapping Technique
-	  execute with ./bmt.exe -b parameter_file to run bmt tasks.
-	  execute with ./bmt.exe -d to check preprocessor directives.
-	  execute with ./bmt.exe -i parameter_file to check input parameters directives.
+-make bmt: creates executable for the computation of bias related propertioes of dark matter tracers
+	execute with ./bmt.exe -bmt parameter_file.json to run the Bias Mapping Technique.
+    execute with ./bmt.exe -ibias parameter_file.json to assign individual bias to input tracers.
+	execute with ./bmt.exe -pbias parameter_file.json to produce plots of bias vs halo properties.
+	execute with ./bmt.exe -sbias parameter_file.json to perform an analysis of secondary bias.
+
+
 
 -make power: creates executable for the power spectrum and related operations
-	  execute with ./power.exe -p parameter_file to measure power (see documentation)
-	  execute with ./power.exe -w parameter_file to measure window matrix
-	  execute with ./power.exe -g parameter_file to obtain GRF.
-	  execute with ./power.exe -s parameter_file for low pass filter.
-	  execute with ./power.exe -m parameter_file for marked correlation function
+	  execute with ./power.exe -power parameter_file to measure power (see documentation)
+	  execute with ./power.exe -window parameter_file to measure window matrix
+	  execute with ./power.exe -grf parameter_file to obtain GRF.
+	  execute with ./power.exe -lowpassfilter parameter_file for low pass filter.
 
--make secbias: creates executable for the analysis of secondary bias
-	  execute with ./secbias.exe -s parameter_file for low pass filter
+-make angpower: creates executable for the measurement of angular power spectrum"
+      execute with ./hgaps.exe -cl parameter_file.json 
+	  to measure power (see documentation)"
+
 
 -make gtools: creates executable for the analysis of galaxy samples 
-	  execute with ./gtools.exe parameter_file (this is different from otopns 1-4). This is still under merging stages: merged with class::Catalog
+	  execute with ./gtools.exe parameter_file (this is different from otopns 1-4). 
 
 -make htools: creates executable for the analysis of halo catalogs 
 	  execute with ./htools.exe -c parameter_file to analyze catalog
