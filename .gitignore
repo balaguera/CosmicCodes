@@ -5,3 +5,9 @@ output_hgaps/
 output_ibias/
 output_power
 output_sdss/
+main/INIT_PARS/
+main/INIT_TNG/
+main/INIT_PARS_UNITSIM/
+main/healpy_env/
+main/generate_param_files_voids_80.sh
+main/*exe
