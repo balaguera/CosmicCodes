@@ -1,0 +1,121 @@
+\hypertarget{FftwFunctions_8h}{}\section{Fftw\+Functions.\+h File Reference}
+\label{FftwFunctions_8h}\index{Fftw\+Functions.\+h@{Fftw\+Functions.\+h}}
+{\ttfamily \#include $<$ctime$>$}\newline
+{\ttfamily \#include $<$cmath$>$}\newline
+{\ttfamily \#include $<$cctype$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$cassert$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$alm.\+h$>$}\newline
+{\ttfamily \#include $<$alm\+\_\+fitsio.\+h$>$}\newline
+{\ttfamily \#include $<$healpix\+\_\+map.\+h$>$}\newline
+{\ttfamily \#include $<$healpix\+\_\+map\+\_\+fitsio.\+h$>$}\newline
+{\ttfamily \#include $<$healpix\+\_\+data\+\_\+io.\+h$>$}\newline
+{\ttfamily \#include $<$healpix\+\_\+base.\+h$>$}\newline
+{\ttfamily \#include $<$healpix\+\_\+base2.\+h$>$}\newline
+{\ttfamily \#include $<$alm\+\_\+powspec\+\_\+tools.\+h$>$}\newline
+{\ttfamily \#include $<$alm\+\_\+healpix\+\_\+tools.\+h$>$}\newline
+{\ttfamily \#include $<$cxxutils.\+h$>$}\newline
+{\ttfamily \#include $<$omp.\+h$>$}\newline
+{\ttfamily \#include $<$complex$>$}\newline
+{\ttfamily \#include \char`\"{}fftw\+\_\+array.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Numerical\+Methods.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Coordinate\+System.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Screen\+Output.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Params.\+h\char`\"{}}\newline
+Include dependency graph for Fftw\+Functions.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{FftwFunctions_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=181pt]{FftwFunctions_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classFftwFunctions}{Fftw\+Functions}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Manipulation of function in Fourier space \begin{DoxyAuthor}{Author}
+Andres Balaguera Antolinez 
+
+Federico Marulli \& Jennifer Pollack 
+
+Optimization and parallelization by Luca Tornatore 
+\end{DoxyAuthor}
+\begin{DoxyVersion}{Version}
+1.\+1a 
+\end{DoxyVersion}
+\begin{DoxyDate}{Date}
+2013-\/2020
+\end{DoxyDate}
+N\+O\+T\+ES R\+E\+L\+A\+T\+ED TO F\+F\+TW The outputs of the F\+F\+TW has dimensions N1$\ast$\+N2$\ast$(N3/2+1), where only half of frequencies in the third component (kz) are stored. The other half of the third component can be found using Hermitian Symmetry (see below). The original output of the F\+F\+TW has the ordering \begin{DoxyVerb}index:    o_i      =  0    1     2     3    ...   N/2     N/2+1       N/2+2     ...   N-1
+freq:     k_i      =  0   k_f   2k_f  3k_f  ...   k_N   -k_n+k_f   -k_n+2k_f   ...   -k_f
+freq:    q_i/k_f   =  0    1     2     3    ...   N/2    -N/2+1      -N/2+2     ...   -1        in units of k_f                                                                                       *
+\end{DoxyVerb}
+ where k\+\_\+f is the fundamental mode, N is the number of grid cells per dimension in the D\+FT and \begin{DoxyVerb}k_n= (N/2)k_f
+\end{DoxyVerb}
+
+
+is the Nyquist frequency. Hence, the slot for the frequency -\/k\+\_\+n is not written in the output. We need to explicitely use the negative and positive values to account for all posible configurations properly, specialy when computing the Bispectrum. For the Power spectrum it is not necessary for we do not expect to exploit information at the scales of the Nyquist freq.
+
+We therfore expand the loops over the wavenumbers by introducing one more slot, such that the new ordering (i) and coordinates (q\+\_\+i/k\+\_\+f) read as
+
+index\+: i = 0 1 2 j ... N/2, N/2+1 N/2+2 N/2+3 ... j N-\/2 N-\/1 N freq\+: k\+\_\+i = 0 k\+\_\+f 2k\+\_\+f jk\+\_\+f ... k\+\_\+N, -\/k\+\_\+N -\/k\+\_\+n+k\+\_\+f -\/k\+\_\+n+2k\+\_\+f ... -\/k\+\_\+n+(j-\/1)k\+\_\+f -\/3k\+\_\+f -\/2k\+\_\+f -\/k\+\_\+f freq\+: q\+\_\+i/k\+\_\+f = 0 1 2 j ... N/2 -\/\+N/2 -\/\+N/2+1 -\/\+N/2+2 ... -\/\+N/2+(j-\/1) -\/3 -\/2 -\/1 in units of k\+\_\+f $\ast$
+
+Hence, the new coordinates of the modes are
+
+q\+\_\+i/k\+\_\+f = i for i$<$=N/2,
+
+and
+
+q\+\_\+i/k\+\_\+f = i-\/(N+1) for i$>$=N/2+1
+
+Similarly, to map the new index to the original output, we have
+
+o\+\_\+i = i for i$<$=N/2,
+
+and
+
+o\+\_\+i = i-\/1 for i$>$=N/2+1,
+
+such that for i=N/2, o\+\_\+i=i and for i= N/2+1, o\+\_\+i is also o\+\_\+i=i.
+
+For the third (kz) component of the D\+FT we only have N3/2+1 elements displayed originally as \begin{DoxyVerb}index     o_k       =  0   1   2   3   i ...  N3/2
+freq     q_k/f_f    =  0   1   2   3   i ...  N3/2
+\end{DoxyVerb}
+
+
+We reorder the components as we did above for the x-\/y components. However, in this case, the amplitude at a coordinate -\/k\+\_\+i is obtained by Hermitian symmetry \begin{DoxyVerb}  delta(kx,ky,-kz)=delta(-kx,-ky,kz)*.
+\end{DoxyVerb}
+
+
+That is, when we use the complex conjugate to obtain the negative z-\/plane, we need to reverse the sign of the kx and ky components. Then, the reordered index is \begin{DoxyVerb}  i3        =  0   1  2   j ...  N3/2   N3/2+1   N3/2+2    N3/2+3  ...     j      ... N3-2  N3-1   N3
+\end{DoxyVerb}
+ q\+\_\+i3/k\+\_\+f = 0 1 2 j ... N3/2 N3/2 N3/2-\/1 N3/2-\/2 ... N3-\/(j-\/1) ... 3 2 1
+
+that is,
+
+q\+\_\+i3/k\+\_\+f = i for i$<$=N/2,
+
+and
+
+q\+\_\+i3/k\+\_\+f = N3-\/(i-\/1) for i$>$=N/2+1.
+
+The index need in the function ijk() is fabs( q\+\_\+i / k\+\_\+f ). 

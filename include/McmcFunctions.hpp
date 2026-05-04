@@ -11,13 +11,6 @@
 #ifndef _McmcFunctions_
 #define _McmcFunctions_
 
-# include <gsl/gsl_blas.h>
-# include <gsl/gsl_errno.h>
-# include <gsl/gsl_rng.h>
-# include <gsl/gsl_eigen.h>
-# include <gsl/gsl_randist.h>
-# include <gsl/gsl_sort.h>
-# include <gsl/gsl_sort_vector.h>
 # include <ctime>
 # include <cmath>
 # include <cctype>
@@ -411,16 +404,6 @@ private:
    * @brief 
    */
   void set_mcmc_read_vectors();
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief 
-   */
-  void mass_asg2d(string, real_prec,real_prec,real_prec,real_prec,real_prec,vector< vector<real_prec> >&);
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief 
-   */
-  void get_mean(vector<real_prec>  &, int, vector< vector<real_prec> > &);
   //////////////////////////////////////////////////////////
   /**
    * @brief 

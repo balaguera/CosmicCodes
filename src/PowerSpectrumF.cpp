@@ -4181,6 +4181,9 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
 
  void PowerSpectrumF::object_by_object_bias(Catalogue& tracer_cat, vector<real_prec>& dm_field){
    this->So.enter(__PRETTY_FUNCTION__);
+
+  
+
 #ifdef _FULL_VERBOSE_
    this->So.message_screen("Getting object-to-object bias");
 #endif
@@ -4500,7 +4503,7 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
     So.message_screen("\tFourier transforming");
     do_fftw_r2c(this->params._Nft(),over_dm_field,Delta_dm);
     over_dm_field.clear(); over_dm_field.shrink_to_fit();
-   vector<real_prec> kcoords(new_Nft,0);// Build k-coordinates
+    vector<real_prec> kcoords(new_Nft,0);// Build k-coordinates
 
 #ifdef _USE_OMP_
 #pragma omp parallel for
@@ -4579,16 +4582,20 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
    real_prec b00=0;
    real_prec factor_ylm = sqrt(4.*M_PI);
 
+
+   
 #ifdef _USE_OMP_
 #pragma omp parallel for reduction(+: b00)
 #endif
    for(ULONG itr=0;itr<tracer_cat._NOBJS();++itr)
      {
+
         real_prec xtracer=tracer_cat.coord1_at(itr);
         real_prec ytracer=tracer_cat.coord2_at(itr);
         real_prec ztracer=tracer_cat.coord3_at(itr);
         vector<real_prec>power_cross(Kmax_bin,0);
-        // Here goes the loop over l and m
+
+        // Here goes the loop over l and m : 
        for(int ell=0; ell<=lmax;++ell) // loop over l
        {
         real_prec hll=0;

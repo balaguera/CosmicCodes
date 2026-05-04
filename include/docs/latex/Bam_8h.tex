@@ -1,0 +1,114 @@
+\hypertarget{Bam_8h}{}\section{Bam.\+h File Reference}
+\label{Bam_8h}\index{Bam.\+h@{Bam.\+h}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+{\ttfamily \#include $<$iomanip$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include \char`\"{}Numerical\+Methods.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Screen\+Output.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Params.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Power\+Spectrum\+F.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Power\+Spectrum\+T\+H.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Mcmc\+Functions.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Patchy.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Cwclass.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Catalog.\+h\char`\"{}}\newline
+Include dependency graph for Bam.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{Bam_8h__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classBam}{Bam}
+\begin{DoxyCompactList}\small\item\em Header file for the class \hyperlink{classBam}{Bam}\+:\+: \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Bias Assignment method for mock catalogs \begin{DoxyAuthor}{Author}
+Andres Balaguera-\/\+Antolínez, Francisco-\/\+Shu Kitaura 
+\end{DoxyAuthor}
+\begin{DoxyVersion}{Version}
+1.\+0 
+\end{DoxyVersion}
+\begin{DoxyDate}{Date}
+2020
+\end{DoxyDate}
+\+: This is an example of a main function to call bam. A file called cosmicatlas.\+cpp 
+\begin{DoxyCode}
+\textcolor{preprocessor}{# include "../Headers/Bam.h"}
+\textcolor{preprocessor}{# include "../Headers/FileOutput.h"}
+\textcolor{preprocessor}{# include "../Headers/NumericalMethods.h"}
+\textcolor{preprocessor}{# include "Tasks.h"}
+
+\textcolor{keyword}{using namespace }\hyperlink{namespacestd}{std};
+
+  \textcolor{keywordtype}{int} main(\textcolor{keywordtype}{int} argc, \textcolor{keywordtype}{char} *argv[])\{
+
+  time\_t start\_all;
+  time(&start\_all);
+  \textcolor{keywordtype}{char} temp;
+  \textcolor{keywordtype}{string} par\_file\_bam;
+
+  \hyperlink{classScreenOutput}{ScreenOutput} So(start\_all);
+
+  \textcolor{keywordflow}{if}(argc==1)\{
+    So.usage(argv[0]);
+    exit(1);
+  \}
+  \textcolor{keywordflow}{while}((temp =  getopt(argc, argv, \textcolor{stringliteral}{"hiam:n:c:t:p:x:r:"})) != -1)
+    \{
+      \textcolor{keywordflow}{if}(temp==\textcolor{charliteral}{'h'})
+        So.usage(argv[0]);
+
+      \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (temp==\textcolor{charliteral}{'a'})  \textcolor{comment}{// Show authors}
+        So.author();
+
+      \textcolor{keywordflow}{else} \textcolor{keywordflow}{if}(temp==\textcolor{charliteral}{'c'}) \textcolor{comment}{// Run cosmicatlas}
+        \{
+
+          So.message(start\_all);
+          par\_file\_bam = argv[2];
+          \hyperlink{classParams}{Params} Par(par\_file\_bam);
+          \hyperlink{classBam}{Bam} bam(Par);
+          bam.So=So;
+          bam.bamrunner();
+          So.message\_time(start\_all);
+        \}
+      \textcolor{keywordflow}{else} \textcolor{keywordflow}{if}(temp==\textcolor{charliteral}{'i'}) \textcolor{comment}{// displays input parameters}
+        \{
+          par\_file\_bam = argv[2];
+          \hyperlink{classParams}{Params} \hyperlink{Type__structures__def_8h_structparams}{params}(par\_file\_bam);
+          \hyperlink{classBam}{Bam} bam(\hyperlink{Type__structures__def_8h_structparams}{params});
+          bam.show\_params();
+        \}
+
+      \textcolor{keywordflow}{else} \textcolor{keywordflow}{if}(temp==\textcolor{charliteral}{'m'})   \textcolor{comment}{// to Mesure power spectrum}
+        \{
+          So.message(start\_all);
+          par\_file\_bam = argv[2];
+          \hyperlink{classParams}{Params} \hyperlink{Type__structures__def_8h_structparams}{params}(par\_file\_bam);
+          \hyperlink{classPowerSpectrumF}{PowerSpectrumF} cPSF(\hyperlink{Type__structures__def_8h_structparams}{params});
+          cPSF.compute\_power\_spectrum(\textcolor{keyword}{true},\textcolor{keyword}{true});
+          So.message\_time(start\_all);
+        \}
+      \textcolor{keywordflow}{else} \textcolor{keywordflow}{if}(temp==\textcolor{charliteral}{'t'})   \textcolor{comment}{// to read input tracer catalg and analyze it. The operations here should be
+       included in BAM}
+        \{
+          So.message(start\_all);
+          par\_file\_bam = argv[2];
+          \hyperlink{classParams}{Params} \hyperlink{Type__structures__def_8h_structparams}{params}(par\_file\_bam);
+          \hyperlink{classPowerSpectrumF}{PowerSpectrumF} cPSF(\hyperlink{Type__structures__def_8h_structparams}{params});
+        \}
+     \}
+  \}
+\end{DoxyCode}
+ 

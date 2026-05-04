@@ -3174,6 +3174,11 @@ private :
   /*
    * @brief
    */
+  bool get_cwc_properties;
+  //////////////////////////////////////////////////////////
+  /*
+   * @brief
+   */
   bool Get_tracer_quadratic_bias;
   //////////////////////////////////////////////////////////
   /*
@@ -7355,6 +7360,11 @@ public:
    *  @brief
    */
   bool _print_catalogue(){return this->print_catalogue;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief
+   */
+  bool _get_cwc_properties(){return this->get_cwc_properties;}
   //////////////////////////////////////////////////////////
   /**
    *  @brief

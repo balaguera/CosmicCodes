@@ -693,6 +693,7 @@ void Catalogue::read_catalog_new(std::string input_file)
       {&this->vrms,   i_vrms, &this->info_vrms},
       {&this->mean_density,   i_mean_density, &this->info_mean_density},
       {&this->rs,   i_rs,     &this->info_rs},
+      {&this->rvir,   i_rvir,  &this->info_rvir},
       {&this->spin,   i_spin, &this->info_spin},
       {&this->spin_bullock,   i_spin_bullock, &this->info_spin_bullock},
       {&this->b_to_a, i_b_to_a, &this->info_b_to_a},
@@ -717,11 +718,32 @@ void Catalogue::read_catalog_new(std::string input_file)
   So.DONE();  
 
 
+
+
   prop.clear(); prop.shrink_to_fit();   
 
 //      this->So.message_screen("\tMin redshift  =", std::get<static_cast<int>(PropStats::MIN)>(this->info_redshift));
 //      this->So.message_screen("\tMax redshift  =", std::get<static_cast<int>(PropStats::MAX)>(this->info_redshift));
 //      this->So.message_screen("\tMean redshift  =", std::get<static_cast<int>(PropStats::MEAN)>(this->info_redshift));
+
+
+  if(i_rvir>0 && i_rs>0)
+  {
+    this->concentration.resize(NOBJS);
+    So.message_screen("Assigning concentration");
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
+      for(ULONG i=0;i<NOBJS;++i)
+      {
+        if(rs[i]>0)
+          this->concentration[i]=this->rvir[i]/this->rs[i];
+        else
+          this->concentration[i]=0;
+        }
+        So.DONE();
+      }
+
 
   if(i_b_to_a>0 && i_c_to_a >0)
   {
@@ -749,38 +771,100 @@ void Catalogue::read_catalog_new(std::string input_file)
 
  void Catalogue::print_catalogue(string file, bool pbias){
  
+   So.enter(__PRETTY_FUNCTION__);
    ofstream rcat;
    rcat.open(file.c_str());
    rcat.precision(3);
    rcat.setf(ios::showpoint);
    rcat.setf(ios::scientific);
    ULONG counter=0;
-   if(pbias)
+
+   
+   this->So.message_screen("Writting downsampled version of input catalogue with bias in file ",file);
+
+   if(this->params._get_cwc_properties())
    {
-      for (size_t i = 0; i < this->NOBJS; ++i) {
-        rcat << log10(mass[i]) << "\t"
-            << log10(rs[i]) << "\t"
-            << log10(concentration[i]) << "\t"
-            << log10(spin_bullock[i]) << "\t"
-            << tidal_anisotropy_dm[i] << "\t"
-            << tidal_anisotropy[i] << "\t"
-            << bias[i] << "\t"
-            << bias_squared[i] << "\t"
-            << static_cast<int>(gal_cwt[i]) << "\t";
 
-        for (int il = 0; il < bias_multipole.size(); ++il)
-            rcat << bias_multipole[i][il] << "\t";
-
-        rcat << std::endl;
+    if(pbias)
+    {
+        rcat<<"#coord1, coord2, coord3, logM, log rs, log c, log spin, tidal_ani_dm, tidal_ani_tr, bias,bias_lm"<<endl;
+        for (size_t i = 0; i < this->NOBJS; ++i) {
+          rcat << coord1[i]<<"\t"
+              <<coord2[i]<<"\t"
+              <<coord3[i]<<"\t"
+              <<log10(mass[i]) << "\t"
+              << log10(rs[i]) << "\t"
+              << log10(concentration[i]) << "\t"
+              << log10(spin_bullock[i]) << "\t"
+              << tidal_anisotropy_dm[i] << "\t"
+              << tidal_anisotropy[i] << "\t"
+              << bias[i] << "\t"
+              << static_cast<int>(gal_cwt[i]) << "\t";
+              for (size_t il = 0; il < bias_multipole.size(); ++il)
+                rcat << bias_multipole[i][il] << "\t";
+          rcat << std::endl;
+        }
       }
-    }
-  else
-  {
+    else
+    {
+        rcat<<"#coord1, coord2, coord3, logM, log rs, log c, log spin, tidal_ani_dm, tidal_ani_tr, bias, cwc"<<endl;
+        for (size_t i = 0; i < this->NOBJS; ++i) {
+          rcat << coord1[i]<<"\t"
+              <<coord2[i]<<"\t"
+              <<coord3[i]<<"\t"
+              <<log10(mass[i]) << "\t"
+              << log10(rs[i]) << "\t"
+              << log10(concentration[i]) << "\t"
+              << log10(spin_bullock[i]) << "\t"
+              << tidal_anisotropy_dm[i] << "\t"
+              << tidal_anisotropy[i] << "\t"
+              << bias[i] << "\t"
+              << static_cast<int>(gal_cwt[i]) << endl;
+        }
   
-    for(ULONG i=0;i<this->NOBJS;++i)
-      rcat<<log10(mass[i])<<"\t"<<bias[i]<<endl;
+    }
   }
-  rcat.close();
-  this->So.message_screen("Writting downsampled version of input catalogue with bias in file ",file);
+  else{
+    if(pbias)
+    {
+        rcat<<"#coord1, coord2, coord3, logM, log rs, log c, log spin, bias,bias_lm"<<endl;
+        for (size_t i = 0; i < this->NOBJS; ++i) {
+          rcat << coord1[i]<<"\t"
+              <<coord2[i]<<"\t"
+              <<coord3[i]<<"\t"
+              <<log10(mass[i]) << "\t"
+              << log10(rs[i]) << "\t"
+              << log10(concentration[i]) << "\t"
+              << log10(spin_bullock[i]) << "\t"
+              << bias[i] << "\t";
+              for (size_t il = 0; il < bias_multipole.size(); ++il)
+                rcat << bias_multipole[i][il] << "\t";
+            rcat << std::endl;
+        }
+      }
+    else
+    {
+        rcat<<"#coord1, coord2, coord3, logM, log rs, log c, log spin, bias"<<endl;
+        for (size_t i = 0; i < this->NOBJS; ++i) {
+          rcat << coord1[i]<<"\t"
+              <<coord2[i]<<"\t"
+              <<coord3[i]<<"\t"
+              <<log10(mass[i]) << "\t"
+              << log10(rs[i]) << "\t"
+              << log10(concentration[i]) << "\t"
+              << log10(spin_bullock[i]) << "\t"
+              << bias[i]<<endl;
+        }
+  
+    }
+
+
+
+
+  }
+
+
+    rcat.close();
+  So.DONE();
 
 }

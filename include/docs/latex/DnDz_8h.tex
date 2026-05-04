@@ -1,0 +1,162 @@
+\hypertarget{DnDz_8h}{}\section{Dn\+Dz.\+h File Reference}
+\label{DnDz_8h}\index{Dn\+Dz.\+h@{Dn\+Dz.\+h}}
+{\ttfamily \#include \char`\"{}Coordinate\+System.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Numerical\+Methods.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}File\+Output.\+h\char`\"{}}\newline
+Include dependency graph for Dn\+Dz.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{DnDz_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=181pt]{DnDz_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{DnDz_8h_structs__dndz}{s\+\_\+dndz}
+\item 
+class \hyperlink{classDnDz}{Dn\+Dz}
+\end{DoxyCompactItemize}
+
+
+\subsection{Class Documentation}
+\index{s\+\_\+dndz@{s\+\_\+dndz}}\label{structs__dndz}
+\Hypertarget{DnDz_8h_structs__dndz}
+\subsubsection{struct s\+\_\+dndz}
+\begin{DoxyFields}{Class Members}
+\mbox{\Hypertarget{DnDz_8h_a61777bbcdab22c1a4636fb4205a03715}\label{DnDz_8h_a61777bbcdab22c1a4636fb4205a03715}} 
+\hyperlink{def_8h_a1bfef05e1923c960372fbf2b4380f8c2}{real\_prec}&
+alpha0&
+First estimate of the parameter alpha, N\+\_\+ran / N\+\_\+gal. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_a94e36cf4a7b6f20d3a19b54190746d03}\label{DnDz_8h_a94e36cf4a7b6f20d3a19b54190746d03}} 
+\hyperlink{def_8h_a1bfef05e1923c960372fbf2b4380f8c2}{real\_prec}&
+area\_pixel&
+Area of one Healpix pixel. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_ad8f4b9bc5529791dffe03940140043be}\label{DnDz_8h_ad8f4b9bc5529791dffe03940140043be}} 
+\hyperlink{def_8h_a1bfef05e1923c960372fbf2b4380f8c2}{real\_prec}&
+area\_survey&
+Area of the survey. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_a4921dda06cc1c94e1312c4244ad41a78}\label{DnDz_8h_a4921dda06cc1c94e1312c4244ad41a78}} 
+bool&
+compute\_dndz&
+Measure the reshift distribution. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_aed8fa774b4aaea0e6f9cdba80d925a7a}\label{DnDz_8h_aed8fa774b4aaea0e6f9cdba80d925a7a}} 
+bool&
+constant\_depth&
+Has the survey a constnat depth. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_abdb52a7a7403488e8f54014468e2aa2e}\label{DnDz_8h_abdb52a7a7403488e8f54014468e2aa2e}} 
+string&
+file\_dndz&
+Output file for the d\+Ndz. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_ae508358c49c155e7c77c172ca4d19db0}\label{DnDz_8h_ae508358c49c155e7c77c172ca4d19db0}} 
+int&
+i\_coord1\_r&
+the column where the first random coordinate (according to the system of coordinates of the catalog) is written. Here first column must come as 0. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_acfec4cc61e9f9901ceb1eb118bc2c3bf}\label{DnDz_8h_acfec4cc61e9f9901ceb1eb118bc2c3bf}} 
+int&
+i\_coord2\_r&
+the column where the second random coordinate (according to the system of coordinates of the catalog) is written. Here first column must come as 0. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_aa1dafe683a9878463692f68f1e52430a}\label{DnDz_8h_aa1dafe683a9878463692f68f1e52430a}} 
+int&
+i\_coord3\_r&
+\\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_a4acd613557e49b9fc270ba1c290c15da}\label{DnDz_8h_a4acd613557e49b9fc270ba1c290c15da}} 
+int&
+n\_columns&
+the number of columns in the galaxy catalogue \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_a6290f1eac8824a0e74a513a8b8fb6fe2}\label{DnDz_8h_a6290f1eac8824a0e74a513a8b8fb6fe2}} 
+int&
+n\_dndz&
+Number of redshift bins to measure d\+Ndz. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_a5b42745bcef0a9f7fa5916e02a2274fe}\label{DnDz_8h_a5b42745bcef0a9f7fa5916e02a2274fe}} 
+bool&
+nbar\_tabulated&
+Is the nbar tabulated? \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_acd8a2c726a46db0e0961e9b01bb353c9}\label{DnDz_8h_acd8a2c726a46db0e0961e9b01bb353c9}} 
+int&
+new\_n\_dndz&
+Number of redshift bins to provide smooth version of d\+Ndz. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_a47fa23540321a074cd6976b9d1ca9918}\label{DnDz_8h_a47fa23540321a074cd6976b9d1ca9918}} 
+long&
+npixels&
+Number of pixels used in thee stimation of d\+Ndz for depth varying sample. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_a3a940f7039eb3b5772dde3da013f3811}\label{DnDz_8h_a3a940f7039eb3b5772dde3da013f3811}} 
+long&
+nside&
+Nside, healpix parameter. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_afd4cc1525068ace4595b5a3eac4e61c3}\label{DnDz_8h_afd4cc1525068ace4595b5a3eac4e61c3}} 
+vector$<$ \hyperlink{def_8h_a1bfef05e1923c960372fbf2b4380f8c2}{real\_prec} $>$&
+properties&
+Container with the galaxy catalogue. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_ae68ef1ba83481032774b57664fe0fb14}\label{DnDz_8h_ae68ef1ba83481032774b57664fe0fb14}} 
+vector$<$ \hyperlink{def_8h_a9045104c4e710587ecade026b62bb6ae}{gsl\_real} $>$&
+rc&
+Vector of comoving distance evaluated at zz. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_a0ba1c804b89147b0490460f76eb65358}\label{DnDz_8h_a0ba1c804b89147b0490460f76eb65358}} 
+\hyperlink{def_8h_a1bfef05e1923c960372fbf2b4380f8c2}{real\_prec}&
+redshift\_max\_sample&
+Maximum redshift of the sample. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_a890798e2c3275b42508bb5620b7c8882}\label{DnDz_8h_a890798e2c3275b42508bb5620b7c8882}} 
+\hyperlink{def_8h_a1bfef05e1923c960372fbf2b4380f8c2}{real\_prec}&
+redshift\_min\_sample&
+Minimum redshift of the sample. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_a940822c69bc8b03caedd4a3af4ac422e}\label{DnDz_8h_a940822c69bc8b03caedd4a3af4ac422e}} 
+int&
+sys\_of\_coord\_r&
+System of coordinate of the random catalogue. \\
+\hline
+
+\mbox{\Hypertarget{DnDz_8h_ac7bcf1dfe8a8bfd989801ae4013e2bd4}\label{DnDz_8h_ac7bcf1dfe8a8bfd989801ae4013e2bd4}} 
+vector$<$ \hyperlink{def_8h_a9045104c4e710587ecade026b62bb6ae}{gsl\_real} $>$&
+zz&
+Vector of redshiftsa. \\
+\hline
+
+\end{DoxyFields}

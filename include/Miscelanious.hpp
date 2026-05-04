@@ -661,6 +661,20 @@ void get_mean_density_interpolated(real_prec zmin, real_prec zmax, real_prec ra,
 ¨* @author ABA
 */
 void remap(int nn1, int nn2, int nn3, int i, int j, int k, int *ooi, int *ooj, int *ook, real_prec *ofactor);
+
+
+//////////////////////////////////////////////////////////
+/**
+* @brief 
+*/
+real_prec maf(std::string mas, real_prec x);
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+/**
+* @brief 
+*/
+ void mass_assignment_2d(std::string, real_prec,real_prec,real_prec,real_prec,real_prec,vector< vector<real_prec> >&, int N);
+
 ////////////////////////////////////////////////////////////////////////////
 #ifndef _MOCabc_
 #define _MOCabc_

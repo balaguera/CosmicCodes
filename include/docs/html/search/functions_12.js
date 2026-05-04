@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['randomize_5fvector',['randomize_vector',['../NumericalMethods_8h.html#aab00f021b3d12176230a4a70f5703f8d',1,'NumericalMethods.h']]],
+  ['rankorder',['rankorder',['../NumericalMethods_8h.html#ab880600dad02c8355b01bb1651ef73c7',1,'rankorder(int seed, vector&lt; real_prec &gt;dens, ULONG N, ULONG Nk, real_prec maxk, real_prec mink, vector&lt; real_prec &gt; &amp;in, vector&lt; real_prec &gt; &amp;pdfin, vector&lt; real_prec &gt; &amp;pdfout):&#160;NumericalMethods.h'],['../NumericalMethods2_8h.html#a7c125b9c882811ada7f2ebca25e9d278',1,'rankorder(int seed, vector&lt; double &gt;dens, ULONG N, ULONG Nk, double maxk, double mink, vector&lt; double &gt; &amp;in, vector&lt; double &gt; &amp;pdfin, vector&lt; double &gt; &amp;pdfout):&#160;NumericalMethods2.h']]],
+  ['raw_5fsampling',['raw_sampling',['../classFftwFunctions.html#a5336319bf43125c1424b46396da63cc4',1,'FftwFunctions']]],
+  ['rb_5fm2l',['RB_M2L',['../classSCALING__RELATIONS.html#a2fedb608a7874e931b26ab278f47aebc',1,'SCALING_RELATIONS']]],
+  ['read_5farray',['read_array',['../classFileOutput.html#a34d31436dc71f3496914f49f1c5bad55',1,'FileOutput::read_array(string, float *, ULONG)'],['../classFileOutput.html#aeb212a2e1cb9c59d7e4c02392ba6be54',1,'FileOutput::read_array(string, vector&lt; real_prec &gt; &amp;)'],['../classFileOutput.html#aace5c6ba891d31760c24628c8839bfe4',1,'FileOutput::read_array(string, vector&lt; ULONG &gt; &amp;)'],['../classFileOutput.html#ad07880a70235a096e1d1a67361001f40',1,'FileOutput::read_array(string, vector&lt; real_prec &gt; &amp;)']]],
+  ['read_5farray_5ft',['read_array_t',['../classFileOutput.html#a4e0e632ccc47d6657d93302f04db90c9',1,'FileOutput']]],
+  ['read_5fbam_5ffiles',['read_bam_files',['../classBam.html#a7a89c71a29fd0bf8fa79099902bddb92',1,'Bam']]],
+  ['read_5fcatalog',['read_catalog',['../classCatalog.html#a3561d6e90cd449ab719af002834461f7',1,'Catalog']]],
+  ['read_5fcatalog_5fbin',['read_catalog_bin',['../classCatalog.html#a336d1b896ebd376e791728a778d921ed',1,'Catalog']]],
+  ['read_5fcatalogue',['read_catalogue',['../classCatalogue.html#a265c953f56d1e36c0750909f6d5506ae',1,'Catalogue']]],
+  ['read_5ffile',['read_file',['../classFileOutput.html#ada643a0dfa77e1ae07353b20a406616d',1,'FileOutput::read_file(string ifile, vector&lt; real_prec &gt; &amp;prop)'],['../classFileOutput.html#a12ca344fe4b0a4e2569e1690688c79fa',1,'FileOutput::read_file(string ifile, vector&lt; vector&lt; real_prec &gt; &gt; &amp;prop)'],['../classFileOutput.html#aef26ba353fc2ce321523c13b8223ed0f',1,'FileOutput::read_file(string fname, vector&lt; real_prec &gt; &amp;prop_ob, int NTHREADS)']]],
+  ['read_5ffile_5fone',['read_file_one',['../classFileOutput.html#a362f58eb6ff019931696a8997914cb72',1,'FileOutput']]],
+  ['read_5ffile_5fone_5fn',['read_file_one_N',['../classFileOutput.html#aad0493f8d612c1331206ddaefbba0ff2',1,'FileOutput']]],
+  ['read_5fget_5fkcorr',['read_get_Kcorr',['../classGALAXY.html#ad390a235faf657ddb53666d567b9345c',1,'GALAXY']]],
+  ['read_5finput_5fcats',['read_input_cats',['../classGALAXY.html#a36f14382a283b96f129ca2965edbbbde',1,'GALAXY']]],
+  ['read_5fparameters',['read_parameters',['../classMCMC__FUNCTIONS.html#a9b820a242c2fa2f6ff117b6cdd994356',1,'MCMC_FUNCTIONS']]],
+  ['read_5fpars',['read_pars',['../classGALAXY.html#adef815abb5a84b7a99952cbfcbe0c023',1,'GALAXY::read_pars()'],['../classParams.html#acc18d00ca3677c622861046c83f32598',1,'Params::read_pars()']]],
+  ['read_5ftabulated_5fpower',['read_tabulated_power',['../classPATCHY.html#aa47da7b664918c8b984ccccaeaad04a1',1,'PATCHY']]],
+  ['real_5fsh',['real_sh',['../NumericalMethods_8h.html#a4c8763e6ac2e275a728f48ba2480eba1',1,'real_sh(int l, int m, real_prec theta, real_prec phi):&#160;NumericalMethods.h'],['../NumericalMethods2_8h.html#a0a2c37b781e966b9e16c4baf416d45fa',1,'real_sh(int l, int m, double theta, double phi):&#160;NumericalMethods2.h']]],
+  ['remap',['remap',['../classFftwFunctions.html#a5042809b6e6e0b4645638f8552b40de4',1,'FftwFunctions']]],
+  ['remove_5ffile',['remove_file',['../group__fileutilsgroup.html#gabda9a65233fa0cd23c35fe0fa4160902',1,'cxxutils.h']]],
+  ['resize_5fcatalogue',['resize_catalogue',['../classCatalogue.html#ad8e5560ad4e717add34643444f225c2c',1,'Catalogue']]],
+  ['rr',['rr',['../classCosmology.html#a257ab8806fcc2d8536a6e3f7d0284f32',1,'Cosmology']]]
+];

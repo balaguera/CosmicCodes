@@ -879,16 +879,18 @@ void Cwclass::get_CWC(vector<real_prec>&delta)
 #endif
   for (ULONG index=0;index<this->params._NGRID();++index)
     {
-    vector<real_prec>cwc_v={this->lambda1[index], this->lambda2[index],this->lambda3[index]};
-    int vtype=0;
-    for(int it=0;it<cwc_v.size();++it)
+      vector<real_prec>cwc_v={this->lambda1[index], this->lambda2[index],this->lambda3[index]};
+      int vtype=0;
+      for(size_t it=0; it<cwc_v.size(); ++it)
         if(cwc_v[it]>this->params._lambdath())
-            vtype++;
-    this->CWClass[index]=static_cast<WebType>(4-vtype);
-#pragma omp atomic
-    vff[4-vtype-1]++;
+          vtype++;
+      this->CWClass[index]=static_cast<WebType>(4-vtype);
+  #pragma omp atomic
+      vff[4-vtype-1]++;
   }
   So.DONE();
+
+
   this->volume_knots=static_cast<real_prec>(vff[0])/static_cast<real_prec>(this->params._NGRID()); // Volume in knots / Total volume
   this->volume_filaments=static_cast<real_prec>(vff[1])/static_cast<real_prec>(this->params._NGRID()); // Volume in knots / Total volume
   this->volume_sheets=static_cast<real_prec>(vff[2])/static_cast<real_prec>(this->params._NGRID()); // Volume in knots / Total volume

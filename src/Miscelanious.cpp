@@ -1309,8 +1309,8 @@ real_prec MAS_NGP(real_prec x)
 ////////////////////////////////////////////////////////////////////////////
 real_prec MAS_CIC(real_prec x)
 {
-  x=fabs(x);
   real_prec ans=0;
+  x=fabs(x);
   if(x<1)
     ans= 1.-x;
   return ans;
@@ -2890,7 +2890,62 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
 #endif
       	}
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+real_prec maf(string mas, real_prec x)
+{
+  if(mas=="NGP")
+    return MAS_NGP(x);
+  else if(mas=="CIC")
+    return MAS_CIC(x);
+  else if(mas=="TSC")
+    return MAS_TSC(x);    
+  else 
+    return 0;
+  }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+void mass_assignment_2d(string MAS,real_prec x,real_prec y,real_prec deltax,real_prec deltay,real_prec wpart,vector< vector<real_prec> >&data, int nbin_2D){
+  /*Determining the number of cell*/
+
+  int xc=(int)floor(x/deltax);
+  int yc=(int)floor(y/deltay);
+
+  /*Location of the center of each cell*/
+  real_prec xx  = deltax*(xc+0.5);
+  real_prec yy  = deltay*(yc+0.5);
+  /*Location of the center of each cell forward*/
+  real_prec xxf = deltax*(xc+1.5);
+  real_prec yyf = deltay*(yc+1.5);
+  /*Location of the center of each cell backward*/
+  real_prec xxb = deltax*(xc-0.5);
+  real_prec yyb = deltay*(yc-0.5);
+
+  real_prec Xb, Yb;   //siempre apareceran como Xb-1
+  Xb=(xc==0 ? nbin_2D: xc);//es decir si xc=0, Xf-1=n1-1, i.e, salta hacia atras y termina el la ultima
+  Yb=(yc==0 ? nbin_2D: yc);
+
+  real_prec Xf, Yf;  //siempre apareceran como Xf+1
+  Xf=(xc==nbin_2D-1 ? -1: xc);//es decir si xc=n1-1, Xf+1=0, i.e, salta hacia adelante y termina el la primera
+  Yf=(yc==nbin_2D-1 ? -1: yc);
+
+
+  /*Filling cells*/
+  data[Xb-1][Yb-1]+=wpart*maf(MAS,(xxb-x)/deltax)*maf(MAS,(yyb-y)/deltay);
+  data[Xb-1][yc]  +=wpart*maf(MAS,(xxb-x)/deltax)*maf(MAS,(yy-y)/deltay);
+  data[Xb-1][Yf+1]+=wpart*maf(MAS,(xxb-x)/deltax)*maf(MAS,(yyf-y)/deltay);
+
+  data[xc][Yb-1]+=wpart*maf(MAS,(xx-x)/deltax)*maf(MAS,(yyb-y)/deltay);
+  data[xc][yc]  +=wpart*maf(MAS,(xx-x)/deltax)*maf(MAS,(yy-y)/deltay);
+  data[xc][Yf+1]+=wpart*maf(MAS,(xx-x)/deltax)*maf(MAS,(yyf-y)/deltay);
+
+  data[Xf+1][Yb-1]+=wpart*maf(MAS,(xxf-x)/deltax)*maf(MAS,(yyb-y)/deltay);
+  data[Xf+1][yc]  +=wpart*maf(MAS,(xxf-x)/deltax)*maf(MAS,(yy-y)/deltay);
+  data[Xf+1][Yf+1]+=wpart*maf(MAS,(xxf-x)/deltax)*maf(MAS,(yyf-y)/deltay);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3045,7 +3100,8 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- void print_catalog(Catalogue &Halo, string file, bool bias){
+ void print_catalog(Catalogue &Halo, string file, bool bias)
+ {
  
    ofstream rcat;
    rcat.open(file.c_str());
@@ -3056,28 +3112,40 @@ void grid_assignment_PCS(Params *params,real_prec x, real_prec y, real_prec z, r
    if(bias)
    {
       for (ULONG i = 0; i < Halo._NOBJS(); ++i) {
-        rcat << log10(Halo.mass_at(i)) << "\t"
-            << log10(Halo.rs_at(i)) << "\t"
-            << log10(Halo.concentration_at(i)) << "\t"
-            << log10(Halo.spin_bullock_at(i)) << "\t"
-            << Halo.tidal_anisotropy_dm_at(i) << "\t"
-            << Halo.tidal_anisotropy_at(i) << "\t"
-            << Halo.bias_at(i) << "\t"
-            << Halo.bias_squared_at(i) << "\t"
-            << static_cast<int>(Halo.gal_cwt_at(i)) << "\t";
-
+        rcat << log10(Halo.coord1_at(i)) << "\t"
+        << log10(Halo.coord2_at(i)) << "\t"
+        << log10(Halo.coord3_at(i)) << "\t"
+        << log10(Halo.mass_at(i)) << "\t"
+        << log10(Halo.rs_at(i)) << "\t"
+        << log10(Halo.concentration_at(i)) << "\t"
+        << log10(Halo.spin_bullock_at(i)) << "\t"
+        << Halo.tidal_anisotropy_dm_at(i) << "\t"
+        << Halo.tidal_anisotropy_at(i) << "\t"
+        << Halo.bias_at(i) << "\t"
+        << static_cast<int>(Halo.gal_cwt_at(i)) << "\t";
         for (int il = 0; il < Halo.bias_multipole_size(); ++il)
-            rcat << Halo.bias_multipole_at(i, il) << "\t";
-
+          rcat << Halo.bias_multipole_at(i, il) << "\t";
         rcat << std::endl;
       }
-    }
-  else{
+   }
+  else
+  {
    for(ULONG i=0;i<Halo._NOBJS();++i)
-    
-      rcat<<log10(Halo.mass_at(i))<<"\t"<<Halo.bias_at(i)<<endl;
+    {
+        rcat << log10(Halo.coord1_at(i)) << "\t"
+        << log10(Halo.coord2_at(i)) << "\t"
+        << log10(Halo.coord3_at(i)) << "\t"
+        << log10(Halo.mass_at(i)) << "\t"
+        << log10(Halo.rs_at(i)) << "\t"
+        << log10(Halo.concentration_at(i)) << "\t"
+        << log10(Halo.spin_bullock_at(i)) << "\t"
+        << Halo.tidal_anisotropy_dm_at(i) << "\t"
+        << Halo.tidal_anisotropy_at(i) << "\t"
+        << Halo.bias_at(i) << "\t"
+        << static_cast<int>(Halo.gal_cwt_at(i)) <<endl;
+    }
   }
-
+  
   rcat.close();
    cout<<"\tWritting downsample catalogue in file "<< file<<endl;
 }

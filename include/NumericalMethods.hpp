@@ -59,6 +59,7 @@
 # include <gsl/gsl_deriv.h>
 # include <gsl/gsl_roots.h>
 # include <gsl/gsl_poly.h>
+# include <gsl/gsl_blas.h>
 # include <vector>
 # include <numeric>
 # include <algorithm>
@@ -703,6 +704,8 @@ real_prec pearson_correlation(real_prec, vector<real_prec>&, real_prec, vector<r
  * @brief  Get minimum and maximum of elements in container
  */
 void min_max_vector(vector<real_prec>vec, size_t &imin, size_t &imax);
+
+
 ////////////////////////////////////////////////////////////////////////////
 /**
  * @brief Swap input values

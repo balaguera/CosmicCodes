@@ -12,62 +12,29 @@
 #include "../include/McmcFunctions.hpp"
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-real_prec maf(string mas, real_prec x){
-  /*Mas assigment*/
-  real_prec ans;
-  real_prec daux;
-  if(mas=="NGP")
-   {
-    daux=fabs(x);
-    if(daux<0.5)
-      ans=1.0;
-
-    if(daux==0.5)
-      ans=0.5;
-
-    if(daux>0.5)
-     ans=0.0;
-  }
-  if(mas=="CIC")
-
-    ans=(fabs(x)<1 ? 1.-fabs(x): 0);
-
-  if(mas=="TSC")
-  {
-    if(fabs(x)<0.5)ans=(0.75-x*x);
-    if(fabs(x)>=0.5 && fabs(x)<1.5) ans= (0.5*pow(1.5-fabs(x),2));
-    if(fabs(x)>=1.5)ans=0.0;
-  }
-  return ans;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
 
 void McmcFunctions::set_mcmc_read_vectors(){
 
   cout<<BLUE<<"Defining space for accepted models"<<RESET<<endl;
   this->acc_parameters_all.resize(n_parameters);
 
-  for (int i = 0; i<n_parameters;i++) {
+  for (size_t i = 0; i<n_parameters;++i) {
     this->acc_parameters_all[i].resize(this->params._number_of_accepted_models());
-    for (int j=0;j<this->params._number_of_accepted_models();j++){
+    for (size_t j=0;j<this->params._number_of_accepted_models();++j){
       this->acc_parameters_all[i][j].resize(this->params._number_of_chains(),0);
     }
   }
-
   this->weight_r.resize(this->params._number_of_accepted_models());
-  for(int i=0;i<weight_r.size();i++)weight_r[i].resize(this->params._number_of_chains(),0);
+  for(size_t i=0;i<weight_r.size();++i)
+    weight_r[i].resize(this->params._number_of_chains(),0);
 
   this->chi_models.resize(this->params._number_of_accepted_models());
-  for(int i=0;i<chi_models.size();i++)chi_models[i].resize(this->params._number_of_chains(),0);
+  for(size_t i=0;i<chi_models.size();++i)
+    chi_models[i].resize(this->params._number_of_chains(),0);
 
   this->mark.resize(this->params._number_of_chains(),0);
   this->acca.resize(this->params._number_of_chains(),0);
   this->R.resize(n_parameters);
-
 }
 
 // ************************************************************************************
@@ -90,16 +57,14 @@ void McmcFunctions::get_cova_pars(int acc){
     for(int jp=0;jp<n_parameters;++jp)
       for(int ai=0;ai<acc;++ai)
         this->cov_masses[ip][jp]+=(this->acc_parameters[ip][ai]-this->mean_parameters[ip])*(this->acc_parameters[jp][ai]-this->mean_parameters[jp])/(acc-1);
-  
+ 
 }
-
 
 // ************************************************************************************
 // ************************************************************************************
 //#define _USE_HMS_
 // ************************************************************************************
 void McmcFunctions::set_mcmc_vectors(){
-
 
  string append_n = this->params._Output_directory()+"_chain"+to_string(this->seed_index)+".txt";
  
@@ -115,7 +80,6 @@ void McmcFunctions::set_mcmc_vectors(){
       this->chiss.resize(this->params._number_of_accepted_models());
       this->weight.resize(this->params._number_of_fit_parameters());
       this->acc_parameters.resize(this->params._number_of_fit_parameters());
-
 
       // NOTE: Set the initial parameters according to the action requested in par file.
       if(this->params._random_initial_value_within_priors())
@@ -144,14 +108,15 @@ void McmcFunctions::set_mcmc_vectors(){
   this->stdev_parameter.resize(this->params._number_of_fit_parameters());
   this->lower_bound_sigma.resize(this->params._number_of_fit_parameters());
   this->upper_bound_sigma.resize(this->params._number_of_fit_parameters());
+
   // NOTE; Normalizing gactor for updates of parameter covariance amtrix
   step_size_multiplier=2.38/sqrt(this->parameters.size());
+
   // NOTE: att the percentiles for mcmc analysis  
   this->tail_probabilities.push_back(0); 
   this->tail_probabilities.push_back(0.1587);
   this->tail_probabilities.push_back(0.0228);
   this->tail_probabilities.push_back(0.0013);
-
 
   acc_parameters.resize(this->n_parameters);
   for(int i=0;i<acc_parameters.size();i++)
@@ -164,7 +129,6 @@ void McmcFunctions::set_mcmc_vectors(){
   stdev_parameters.resize(this->n_parameters,0);
   lower_bound_sigma.resize(this->n_parameters,0);
   upper_bound_sigma.resize(this->n_parameters,0);
-
 
 #ifdef _USE_HMS_
   grad_U.resize(this->n_parameters,1);  
@@ -190,7 +154,8 @@ void McmcFunctions::set_mcmc_vectors(){
 real_prec McmcFunctions::kinetic(int in){
 
   real_prec ans=0;
-  if(in==0){ // For diagonal mass matrix
+  if(in==0)
+  { // For diagonal mass matrix
     for(int ip=0;ip<momentum.size();ip++)
       if(this->params.action_parameters[ip]!=static_cast<int>(MCMCactions::FIXED))
         ans+=0.5*pow(this->momentum[ip],2)/this->masses[ip];
@@ -211,14 +176,16 @@ real_prec McmcFunctions::kinetic(int in){
 // Trastearlo a FB
 void McmcFunctions::get_model_FB(vector<vector<real_prec> >&Step,vector<vector<real_prec> >&R,vector<vector<real_prec> >&V,vector<real_prec>&Cmodel){
 
-  int nmodes=R[0].size();
-  int nmodes_n=Cmodel.size();
+  size_t nmodes=R[0].size();
+  size_t nmodes_n=Cmodel.size();
 
-  for(int ii=0;ii<nmodes_n;ii++)Cmodel[ii]=0;
+  for(size_t ii=0;ii<nmodes_n;ii++)
+    Cmodel[ii]=0;
 
-  for(int i=0;i<nmodes_n;i++){
-    for(int k=1;k<Step.size();++k){
-      for(int j=0;j<nmodes;j++)
+  for(size_t i=0; i<nmodes_n; ++i)
+  {
+    for(size_t k=1;k<Step.size();++k){
+      for(size_t j=0;j<nmodes;++j)
         {
         	Cmodel[i]+=pow(R[i][j] + this->parameters[0]*V[i][j],2)*pow(10,this->parameters[k])*Step[k][j];
       }
@@ -238,18 +205,20 @@ void McmcFunctions::get_cova_FB_delta(vector<matrices>&VM, int l, vector<vector<
   cova.resize(nmodes_n);
   for(int i=0;i<cova.size();i++)cova[i].resize(nmodes_n,0);
 
-  for(int i=0;i<nmodes_n;i++){
-    for(int j=0;j<nmodes_n;j++){
-      for(int k=1;k<VM[l].Step.size();++k){
-        for(int p=0;p<nmodes;p++){
-          cova[i][j]+=(VM[l].R[i][p] + this->parameters[0]*VM[l].V[i][p])*(VM[l].R[j][p] + this->parameters[0]*VM[l].V[j][p])*pow(10,this->parameters[k])*VM[l].Step[k][p] + VM[l].N[i][j];
+  for(int i=0;i<nmodes_n;i++)
+    {
+      for(int j=0;j<nmodes_n;j++)
+        {
+          for(int k=1;k<VM[l].Step.size();++k)
+            {
+              for(int p=0;p<nmodes;p++){
+                cova[i][j]+=(VM[l].R[i][p] + this->parameters[0]*VM[l].V[i][p])*(VM[l].R[j][p] + this->parameters[0]*VM[l].V[j][p])*pow(10,this->parameters[k])*VM[l].Step[k][p] + VM[l].N[i][j];
+            }
         }
-      }
     }
   }
   matrix_inversion(cova,iCov);
-  
-  
+    
 }
 // ************************************************************************************
 // ************************************************************************************
@@ -258,31 +227,43 @@ void McmcFunctions::get_cova_FB_delta(vector<matrices>&VM, int l, vector<vector<
 void McmcFunctions::get_gradU(vector<real_prec>&Cmodel,vector<real_prec>&Cmeas,  vector<vector<real_prec> >&Step, vector<vector<real_prec> >&R,vector<vector<real_prec>>&V,vector<vector<real_prec> >&icov){
   // Get the gradient of the potential and also the model for this step.
   // The model is rerturned and then will be assigned as member of the FB class
-  int nn=Cmodel.size();
-  int nn_n=R[0].size();
+  size_t nn=Cmodel.size();
+  size_t nn_n=R[0].size();
   dCmod_dp.resize(nn);
-  for(int i=0;i<nn;++i)dCmod_dp[i].resize(this->n_parameters,0);
+  for(size_t i=0;i<nn;++i)
+    dCmod_dp[i].resize(this->n_parameters,0);
   
   // // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   get_model_FB(Step,R,V,Cmodel);
-
   
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // Compute derivative of the model in the current step
-  for(int ii=0;ii<nn;ii++)for(int ip=0;ip<this->n_parameters;ip++)dCmod_dp[ii][ip]=0;
+  for(size_t ii=0;ii<nn;++ii)
+    for(size_t ip=0;ip<this->n_parameters;++ip)
+      dCmod_dp[ii][ip]=0;
 
   // Derivative wrt parameter[0]
   if(this->params.action_parameters[0]!=1){
-    for(int ii=0;ii<nn;ii++)for(int ij=0;ij<nn_n;ij++)for(int k=1;k<Step.size();k++)dCmod_dp[ii][0]+=2.*(R[ii][ij]+this->parameters[0]*V[ii][ij])*V[ii][ij]*pow(10,this->parameters[k])*Step[k][ij];
+    for(size_t ii=0;ii<nn; ++ii)
+      for(size_t ij=0;ij<nn_n;++ij)
+        for(int k=1;k<Step.size();++k)
+          dCmod_dp[ii][0]+=2.*(R[ii][ij]+this->parameters[0]*V[ii][ij])*V[ii][ij]*pow(10,this->parameters[k])*Step[k][ij];
   }
-  else for(int ii=0;ii<nn;ii++)dCmod_dp[ii][0]=0;
+  else 
+    for(size_t ii=0;ii<nn; ++ii)
+      dCmod_dp[ii][0]=0;
   
   // Derivative wrt parameter[k] k>=1
-  for(int ii=0;ii<nn;ii++)for(int k=1;k<Step.size();k++)for(int ij=0;ij<nn_n;ij++)dCmod_dp[ii][k]+=pow(R[ii][ij]+this->parameters[0]*V[ii][ij],2.)*log(10.0)*pow(10,this->parameters[k])*Step[k][ij];
+  for(size_t ii=0;ii<nn;++ii)
+    for(size_t k=1;k<Step.size();++k)
+      for(size_t ij=0;ij<nn_n;++ij)
+        dCmod_dp[ii][k]+=pow(R[ii][ij]+this->parameters[0]*V[ii][ij],2.)*log(10.0)*pow(10,this->parameters[k])*Step[k][ij];
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   //Compute the grad U, i.e, the derivative of the chi squared:
-  for(int ip=0;ip<parameters.size();ip++)this->grad_U[ip]=0;
-  for(int ip=0;ip<parameters.size();ip++)if(this->params.action_parameters[ip]!=1)for(int ii=0;ii<nn;ii++)for(int ij=0;ij<nn;ij++)this->grad_U[ip]-=dCmod_dp[ii][ip]*icov[ii][ij]*(Cmeas[ij]-Cmodel[ij]);
+  for(size_t ip=0;ip<parameters.size();++ip)
+    this->grad_U[ip]=0;
+  for(size_t ip=0;ip<parameters.size();++ip)
+    if(this->params.action_parameters[ip]!=1)for(int ii=0;ii<nn;ii++)for(int ij=0;ij<nn;ij++)this->grad_U[ip]-=dCmod_dp[ii][ip]*icov[ii][ij]*(Cmeas[ij]-Cmodel[ij]);
 
 }
 
@@ -290,7 +271,8 @@ void McmcFunctions::get_gradU(vector<real_prec>&Cmodel,vector<real_prec>&Cmeas, 
 // ************************************************************************************
 // ************************************************************************************
 
-void McmcFunctions::get_gradU_full(int lmin, int lmax, vector<matrices> VM,vector<real_prec>&Cmodel,vector<real_prec>&gradU_full){
+void McmcFunctions::get_gradU_full(int lmin, int lmax, vector<matrices> VM,vector<real_prec>&Cmodel,vector<real_prec>&gradU_full)
+  {
   // Get the gradient of the potential and also the model for this step.
   // The model is rerturned and then will be assigned as member of the FB class
 
@@ -298,62 +280,59 @@ void McmcFunctions::get_gradU_full(int lmin, int lmax, vector<matrices> VM,vecto
 
   real_prec full_like;
   
-  for(int l=lmin;l<=lmax;l++){
-    
-    // // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    int nn=VM[l].R.size();
-    int nn_n=VM[l].R[0].size();
+  for(int l=lmin;l<=lmax;l++)
+    {
+        // // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      size_t nn=VM[l].R.size();
+      size_t nn_n=VM[l].R[0].size();
 
-    vector<real_prec> model(nn,0);
-    get_model_FB(VM[l].Step,VM[l].R,VM[l].V,model);
-    
-    // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    // Compute derivative of the model in the current step
-    dCmod_dp.resize(nn);
-    for(int i=0;i<nn;++i)dCmod_dp[i].resize(this->n_parameters,0);
+      vector<real_prec> model(nn,0);
+      get_model_FB(VM[l].Step,VM[l].R,VM[l].V,model);
+      
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      // Compute derivative of the model in the current step
+      dCmod_dp.resize(nn);
+      for(size_t i=0;i<nn;++i)dCmod_dp[i].resize(this->n_parameters,0);
 
-    
-    // Derivative wrt parameter[0]
-    if(this->params.action_parameters[0]!=1){
-      for(int ii=0;ii<nn;ii++)
-        for(int ij=0;ij<nn_n;ij++)
-          for(int k=1;k<VM[l].Step.size();k++)
-            dCmod_dp[ii][0]+=2.*(VM[l].R[ii][ij]+this->parameters[0]*VM[l].V[ii][ij])*VM[l].V[ii][ij]*pow(10,this->parameters[k])*VM[l].Step[k][ij];
-    }
-    else for(int ii=0;ii<nn;ii++)dCmod_dp[ii][0]=0;
-    
-    // Derivative wrt parameter[k] k>=1
-    for(int ii=0;ii<nn;ii++)for(int k=1;k<VM[l].Step.size();k++)for(int ij=0;ij<nn_n;ij++)dCmod_dp[ii][k]+=pow(VM[l].R[ii][ij]+this->parameters[0]*VM[l].V[ii][ij],2.)*log(10.0)*pow(10,this->parameters[k])*VM[l].Step[k][ij];
+      // Derivative wrt parameter[0]
+      if(this->params.action_parameters[0]!=1){
+        for(size_t ii=0;ii<nn;++ii)
+          for(size_t ij=0;ij<nn_n;++ij)
+            for(size_t k=1;k<VM[l].Step.size();k++)
+              dCmod_dp[ii][0]+=2.*(VM[l].R[ii][ij]+this->parameters[0]*VM[l].V[ii][ij])*VM[l].V[ii][ij]*pow(10,this->parameters[k])*VM[l].Step[k][ij];
+      }
+      else 
+        for(size_t ii=0;ii<nn;++ii)
+          dCmod_dp[ii][0]=0;
+      
+      // Derivative wrt parameter[k] k>=1
+      for(size_t ii=0;ii<nn;ii++)
+        for(size_t k=1;k<VM[l].Step.size();k++)
+          for(size_t ij=0;ij<nn_n;ij++)
+            dCmod_dp[ii][k]+=pow(VM[l].R[ii][ij]+this->parameters[0]*VM[l].V[ii][ij],2.)*log(10.0)*pow(10,this->parameters[k])*VM[l].Step[k][ij];
 
+      // Compute now the chi square for each l
+      // real_prec chiss;
+      // chi_squared(VM[l].Cmed,model,VM[l].iCov,chiss);
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      //Compute the grad U, i.e, the derivative of the chi squared for each l
+      // and multiply it by the likelihood
+      // Lineas comnetadas 
+      // para hacer el analisis sumando las posterior
+      // en vez de sumar las likelihoods
 
-    // Compute now the chi square for each l
-    // real_prec chiss;
-    // chi_squared(VM[l].Cmed,model,VM[l].iCov,chiss);
-    // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    //Compute the grad U, i.e, the derivative of the chi squared for each l
-    // and multiply it by the likelihood
-    // Lineas comnetadas 
-    // para hacer el analisis sumando las posterior
-    // en vez de sumar las likelihoods
+      //    for(int ip=0;ip<parameters.size();ip++)if(this->params.action_parameters[ip]!=0)for(int ii=0;ii<nn;ii++)for(int ij=0;ij<nn_n;ij++)this->grad_U[ip]-=(exp(-0.5*chiss)/sqrt(2.*M_PI*VM[l].det_matrix))*dCmod_dp[ii][ip]*VM[l].iCov[ii][ij]*(VM[l].Cmed[ij]-model[ij]);
+      //full_like+=exp(-0.5*chiss)/sqrt(2.*M_PI*VM[l].det_matrix);
 
-    //    for(int ip=0;ip<parameters.size();ip++)if(this->params.action_parameters[ip]!=0)for(int ii=0;ii<nn;ii++)for(int ij=0;ij<nn_n;ij++)this->grad_U[ip]-=(exp(-0.5*chiss)/sqrt(2.*M_PI*VM[l].det_matrix))*dCmod_dp[ii][ip]*VM[l].iCov[ii][ij]*(VM[l].Cmed[ij]-model[ij]);
-    //full_like+=exp(-0.5*chiss)/sqrt(2.*M_PI*VM[l].det_matrix);
-
-    for(int ip=0;ip<parameters.size();ip++)
-      if(this->params.action_parameters[ip]!=1)
-      for(int ii=0;ii<nn;ii++)
-        for(int ij=0;ij<nn_n;ij++)
-          this->grad_U[ip]-=dCmod_dp[ii][ip]*VM[l].iCov[ii][ij]*(VM[l].Cmed[ij]-model[ij]);
-    
-    
-
+      for(int ip=0;ip<parameters.size();ip++)
+        if(this->params.action_parameters[ip]!=1)
+        for(int ii=0;ii<nn;ii++)
+          for(int ij=0;ij<nn_n;ij++)
+            this->grad_U[ip]-=dCmod_dp[ii][ip]*VM[l].iCov[ii][ij]*(VM[l].Cmed[ij]-model[ij]);
+   
   }
-
   // Divide ny the total likelihood
   //  for(int ip=0;ip<parameters.size();ip++)grad_U[ip]/=full_like;
-  
-  
-
 }
 
 
@@ -414,8 +393,7 @@ if(this->params._update_covariance())
   }
 else if (!this->params._update_covariance())
 {
-
-      for(size_t ip=0;ip<this->parameters.size();ip++)
+  for(size_t ip=0;ip<this->parameters.size();ip++)
     {
       switch(this->params.action_parameters[ip])
       {
@@ -437,85 +415,10 @@ else if (!this->params._update_covariance())
 
 // ************************************************************************************
 // ************************************************************************************
-// ************************************************************************************
-
-void McmcFunctions::get_mean(vector<real_prec>  &weight,int slab,vector<vector<real_prec> > &AA){
-  
-  // ******************************************************************************************************
-  // Computes the mean parameter in a Markov-Chain using the weights computed
-  // from the MH algorithm. Returns the mean and the standard deviation
-  // for all the np parameters
-  // weight = matrix, weights of the MCMC for each model evaluated
-  // this->params._number_of_avoided_steps_to_get_stats() = 1 ofe all steps are to be used, 2 if we want to take every two stepes and so on
-  // acc   = number of accepted models
-  // slab  = label of the first model taken after burn-in phase
-  // np    = number of parameters to be constrained
-  // AA    = matrix (parameters , model), 
-  // meanA = vector (parameters), returns the mean of each parameters 
-  // stdev = vector (parameters), returns the standard deviation within the chain
-  // NOTE: COMPUTE ALSO THE MEDIAN
-  // ******************************************************************************************************
-  
-  real_prec new_acc=0;
-  // WARNING , AL MOVER ESTO A C++ EMPIEZO A LLENAR TODO DESDE 0
-  // no necesito pasar aca el numero np, uso .size()
-
-  for(int ip=0;ip<this->mean_parameters.size();ip++){
-    new_acc=0;
-    for(int j=slab;j<weight.size();j=j+this->params._number_of_avoided_steps_to_get_stats())if(AA[ip][j]!= -999)new_acc+=weight[j];
-    real_prec mm=0;
-    for(int j=slab;j<weight.size();j=j+this->params._number_of_avoided_steps_to_get_stats())if(AA[ip][j]!= -999)mm+=AA[ip][j]*weight[j]/new_acc;
-    this->mean_parameters[ip]=mm;
-  }
-  /*compute standard deviation*/
-  int new_acc_warning=0;
-  for(int j=slab;j<AA[0].size();j=j+this->params._number_of_avoided_steps_to_get_stats())
-    if(AA[0][j]!= -999)
-      new_acc++;
-
-  if(new_acc_warning==1){
-    So.message_screen("Warning: only one accepted model in total!");
-    exit(1);
-  }
-
-  for(int ip=0;ip<this->stdev_parameters.size();ip++)
-  {
-    real_prec  stdeviation=0;
-    for(int j=slab;j<AA[0].size();j=j+this->params._number_of_avoided_steps_to_get_stats())
-      {
-        if(AA[ip][j]!= -999) 
-          stdeviation+=weight[j]*pow(AA[ip][j]-this->mean_parameters[ip],2);
-      }
-    this->stdev_parameters[ip]=sqrt(stdeviation/(new_acc-1.));
-  }
-  return;
-}
-
-/************************************************************************************************************************************************************************/
-/************************************************************************************************************************************************************************/
-/************************************************************************************************************************************************************************/
-/************************************************************************************************************************************************************************/
+// ************************************************************************************************************************************************************************/
 
 void McmcFunctions::gelman_rubbin_diag( vector<vector<vector<double>>> &acca_parameters ){
-  
- 
-  // ******************************************************************************************************
-  // Gelman Rubbin diagnostics to check convergence of differnet Markov chains :                      
-  // n           = number of free parameters
-  // this->params._number_of_chains()_tot = number of chains to be analized
-  // chain_ini   = label of the first chain 
-  // chain_fin   = label of the last chain 
-  // mark[nc]    = label from which the chain nc is going to be analized
-  // acca[nc]    = number of points in the chain nc after the first passage 
-  // through the point with chis=chir
-  // acca_parameters [n][acca[nc]][nc]  = points in the chain 
-  // R = vector(n), if R<1.03, chains have converged
-  // ******************************************************************************************************
-
-    // acca_parameters [n][acca[nc]][nc]  = points in the chain 
-  // R = vector(n), if R<1.03, chains have converged
-  // ******************************************************************************************************
-  cout<<endl;
+   
   So.message_screen("Checking for convergence (Gelman & Rubbin diagnostic): R<1.03");
 
   size_t nparams=  this->params._number_of_fit_parameters();
@@ -528,7 +431,7 @@ void McmcFunctions::gelman_rubbin_diag( vector<vector<vector<double>>> &acca_par
   vector< vector<real_prec> > mean_chain;
   mean_chain.resize(nparams);
 
-  for(int i=0;i<nparams;++i)
+  for(size_t i=0;i<nparams;++i)
     mean_chain[i].resize(nchains,0);
 
   /*Mean within each chain:*/
@@ -630,11 +533,9 @@ void McmcFunctions::chi_squared(const vector<real_prec> &data, const vector<real
           ncount++;
       }
   chis_one/=(static_cast<double>(ncount));
-
 }
-
 // *******************************************************************************************************
-
+// *******************************************************************************************************
 void McmcFunctions::chi_squared_poisson(vector<real_prec> &data, vector<real_prec> &model, real_prec &chis_one){
   /*
     Compute chi square given the data, the model and the inverse
@@ -644,10 +545,7 @@ void McmcFunctions::chi_squared_poisson(vector<real_prec> &data, vector<real_pre
   for(int i=0;i<model.size();++i)
       if(model[i]>0)
           chis_one+=data[i]*log(model[i])-model[i];
-
 }
-
-
 // *******************************************************************************************************
 // *******************************************************************************************************
 void McmcFunctions::get_loglikelihood_Poisson(vector<vector<real_prec>> &data, vector<vector<real_prec>> &model, real_prec &log_likelihood){
@@ -655,7 +553,6 @@ void McmcFunctions::get_loglikelihood_Poisson(vector<vector<real_prec>> &data, v
     Compute chi square given the data, the model and the inverse
     of the covariance matrix of dimension nXn
   */
-
   log_likelihood=0;
 #pragma omp parallel for reduction(+:log_likelihood) collapse(2)
   for(int i=0;i<model.size();++i)
@@ -664,8 +561,6 @@ void McmcFunctions::get_loglikelihood_Poisson(vector<vector<real_prec>> &data, v
         log_likelihood += (data[i][j]*log(model[i][j])-model[i][j]);
 
 }
-
-
 // *******************************************************************************************************
 // *******************************************************************************************************
 void McmcFunctions::chi_squared(vector<real_prec> &data, vector<real_prec> &model,vector<real_prec> &sigma, vector<real_prec>&xvar, real_prec xmin, real_prec xmax, real_prec &chis_one){
@@ -679,9 +574,6 @@ void McmcFunctions::chi_squared(vector<real_prec> &data, vector<real_prec> &mode
     }
   }
 }
-
-
-
 // ***********************************************************************************************
 // ***********************************************************************************************
 void McmcFunctions::chi_squared_marginalized_amplitude(vector<real_prec> &data, vector<real_prec> &model,vector< vector<real_prec> > &inv_cova, real_prec &chis_one){
@@ -694,16 +586,24 @@ void McmcFunctions::chi_squared_marginalized_amplitude(vector<real_prec> &data, 
   vector < vector<real_prec> > inv_cor_aux2(n, vector<real_prec >(n,0));
   vector < vector<real_prec> > inv_cor_aux3(n, vector<real_prec >(n,0));
 
-  for(int i=0;i<n;++i)for(int k=0;k<n;k++)inv_cor_aux1[i][k]=model[i]*model[k];
-  for(int i=0;i<n;++i)for(int k=1;k<n;k++)for(int p=0;p<n;p++)inv_cor_aux2[i][k]+=inv_cor_aux1[i][p]*inv_cova[p][k];
-  for(int i=0;i<n;++i)for(int k=1;k<n;k++)for(int p=0;p<n;p++)inv_cor_aux3[i][k]+=inv_cova[i][p]*inv_cor_aux2[p][k];
-  for(int i=0;i<n;++i)for(int k=1;k<n;k++)chis_one+=model[i]*inv_cova[i][k]*model[k];
-  for(int i=0;i<n;++i)for(int k=1;k<n;k++)inv_cor_aux2[i][k]=inv_cova[i][k]-inv_cor_aux3[i][k]/chis_one;
+  for(int i=0;i<n;++i)for(int k=0;k<n;k++)
+    inv_cor_aux1[i][k]=model[i]*model[k];
+  for(int i=0;i<n;++i)for(int k=1;k<n;k++)
+    for(int p=0;p<n;p++)
+      inv_cor_aux2[i][k]+=inv_cor_aux1[i][p]*inv_cova[p][k];
+  for(int i=0;i<n;++i)
+    for(int k=1;k<n;k++)
+      for(int p=0;p<n;p++)inv_cor_aux3[i][k]+=inv_cova[i][p]*inv_cor_aux2[p][k];
+  for(int i=0;i<n;++i)
+    for(int k=1;k<n;k++)
+      chis_one+=model[i]*inv_cova[i][k]*model[k];
+  for(int i=0;i<n;++i)
+    for(int k=1;k<n;k++)
+      inv_cor_aux2[i][k]=inv_cova[i][k]-inv_cor_aux3[i][k]/chis_one;
   chis_one=0;
-  for(int i=0;i<n;++i)for(int k=0;k<n;k++)chis_one+=data[i]*inv_cor_aux2[i][k]*data[k];
-
+  for(int i=0;i<n;++i)for(int k=0;k<n;k++)
+    chis_one+=data[i]*inv_cor_aux2[i][k]*data[k];
 }
-
 // ***********************************************************************************************
 // ***********************************************************************************************
 
@@ -711,11 +611,12 @@ void McmcFunctions::chi_squared_marginalized_amplitude(vector<real_prec> &data, 
   /*
     Chi square eith analytic marginalization over an amplitud of the model
   */
-    int n=model.size();
+    size_t n=model.size();
     real_prec alpha=0;
     real_prec beta=0;
     real_prec gamma=0;
-    for(int i=0;i<n;++i){
+    for(size_t i=0;i<n;++i)
+    {
       if(xvar[i]<xmax && xvar[i]>=xmin){
         alpha+= data[i]*data[i]/pow(sigma[i],2);
         beta += model[i]*data[i]/pow(sigma[i],2);
@@ -735,7 +636,8 @@ void McmcFunctions::likelihood_full(int lmin, int lmax, vector<matrices>&VM,real
      ONLY FOR FB analysis
   */
   like=0;
-  for(int l=lmin;l<=lmax;++l){
+  for(int l=lmin;l<=lmax;++l)
+  {
     vector<real_prec>model(VM[l].R.size(),0);
     get_model_FB(VM[l].Step,VM[l].R,VM[l].V,model);
     real_prec chiss;
@@ -743,8 +645,6 @@ void McmcFunctions::likelihood_full(int lmin, int lmax, vector<matrices>&VM,real
     like+=0.5*chiss;
   }
 }
-
-
 // *******************************************************************************************************
 // *******************************************************************************************************
 
@@ -853,10 +753,7 @@ size_t macc=acc-this->weight[acc];
       }
    }
 
-   
 }
-
-
 // ************************************************************************************************
 // ************************************************************************************************
 
@@ -889,7 +786,7 @@ void  McmcFunctions::auto_correlation_mcmc(vector< vector<real_prec> > &auto_cor
                   aux[ip][k] +=(this->acc_parameters[ip][i]-mean[ip])*(this->acc_parameters[ip][i+k]-mean[ip]);
                   daux[ip][k]+=pow(this->acc_parameters[ip][i]-mean[ip],2);
                 }
-            auto_corr[ip][k]=aux[ip][k]/daux[ip][k];
+                auto_corr[ip][k]=aux[ip][k]/daux[ip][k];
             }
         }
    }
@@ -912,7 +809,10 @@ void McmcFunctions::entropy_mcmc(vector<vector<real_prec> > &pdf, vector<real_pr
   //  Entropy of a MCMC chain for each parameter. Check the definition!
   // ********************************************************************
 
-  for(int i=0;i<entro.size();++i)for(int n=0;n<pdf[0].size();n++)if(pdf[i][n]!=0)entro[i]+=pdf[i][n]*log(pdf[i][n]);
+  for(int i=0;i<entro.size();++i)
+    for(int n=0;n<pdf[0].size();n++)
+      if(pdf[i][n]!=0)
+        entro[i]+=pdf[i][n]*log(pdf[i][n]);
   return;
 }
 
@@ -1044,7 +944,7 @@ void McmcFunctions::posterior1d(string fname_mean, string fname_pdf, vector<real
 
   
   /*
-    Sup error bars:
+    Uppererror bars:
     the vector e_al_max[nbin+1] counts the cumulative number of events starting from the upper limit
     and surveying the x-axis towards the mean of the posterior distribution, until it finds the bin at which the 
     cumultive number is a *DESIRED* fraction of the total area, (i.e, new_acc[]): 
@@ -1123,7 +1023,7 @@ void McmcFunctions::posterior1d(string fname_mean, string fname_pdf, vector<real
   // *********************************************
   // Output     
   // *********************************************
-  get_mean(weight,slab,acc_par);                                          /*Compute mean and standard deviation of the distribution*/
+  this->get_stats();                                          /*Compute mean and standard deviation of the distribution*/
   for(int ip=0;ip<np;ip++){
     if(this->params.action_parameters[ip]==static_cast<int>(MCMCactions::FIXED)){
       this->upper_bound_sigma[ip]=this->mean_parameters[ip];
@@ -1285,23 +1185,31 @@ void McmcFunctions::posterior2d(string tdpost, string CR,vector<real_prec>  &wei
      shape cloud mass asssignement scheme and unsing the weights.
      ================================================*/
   
-  for(int ip=0;ip<np;ip++){                                 /*Loops over the parameters*/
-    for(int jp=0;jp<np;jp++){
+  for(int ip=0;ip<np;ip++)
+    {                                 /*Loops over the parameters*/
+    for(int jp=0;jp<np;jp++)
+      {
 //      if(jp>ip){
-        if(this->params.action_parameters[ip]==1 && this->params.action_parameters[jp]==1){
-          for(int i=0;i<this->nbin_2D;++i)for(int j=0;j<this->nbin_2D;++j)poster[i][j]=0;
-	  for(int i=slab;i<acc;i=i+this->params._number_of_avoided_steps_to_get_stats()){
-            if(acc_par[ip][i]!= -999 && (acc_par[ip][i]>=this->prior_parameters_min_values_2dplot[ip] && acc_par[jp][i]>=this->prior_parameters_min_values_2dplot[jp]) &&  (acc_par[ip][i]<this->prior_parameters_max_values_2dplot[ip] && acc_par[jp][i]<this->prior_parameters_max_values_2dplot[jp])){
-              real_prec x=acc_par[ip][i]-this->prior_parameters_min_values_2dplot[ip];
-              real_prec y=acc_par[jp][i]-this->prior_parameters_min_values_2dplot[jp];
-              // The weight for ip is the same for ij, these are models
-              this->mass_asg2d(this->MAS,x,y,ddel[ip],ddel[jp],weight[i], poster);
-            }
-	  }
+        if(this->params.action_parameters[ip]==1 && this->params.action_parameters[jp]==1)
+          {
 
+            for(int i=0;i<this->nbin_2D;++i)
+              for(int j=0;j<this->nbin_2D;++j)
+                poster[i][j]=0;
+
+             for(int i=slab;i<acc;i=i+this->params._number_of_avoided_steps_to_get_stats())
+              {
+                 if(acc_par[ip][i]!= -999 && (acc_par[ip][i]>=this->prior_parameters_min_values_2dplot[ip] && acc_par[jp][i]>=this->prior_parameters_min_values_2dplot[jp]) &&  (acc_par[ip][i]<this->prior_parameters_max_values_2dplot[ip] && acc_par[jp][i]<this->prior_parameters_max_values_2dplot[jp]))
+                  {
+                    real_prec x=acc_par[ip][i]-this->prior_parameters_min_values_2dplot[ip];
+                    real_prec y=acc_par[jp][i]-this->prior_parameters_min_values_2dplot[jp];
+                    // The weight for ip is the same for ij, these are models
+                    mass_assignment_2d(this->MAS,x,y,ddel[ip],ddel[jp],weight[i], poster, this->nbin_2D);
+                  }
+	            }
 
         /*buscamos el maximo y normalizamos*/
-	lkmin=-100.0;
+      	lkmin=-100.0;
         real_prec lkk=0.0;
         for(int i=0;i<this->nbin_2D;++i){
           for(int j=0;j<this->nbin_2D;++j){
@@ -1309,10 +1217,11 @@ void McmcFunctions::posterior2d(string tdpost, string CR,vector<real_prec>  &wei
 	    lkmin=lkk;
 	  }  
 	}         
-	
-        for(int i=0;i<poster.size();++i)for(int j=0;j<poster[0].size();++j)poster[i][j]/=(real_prec)lkk;     /*Normalize the posterior to 1 */
 
-
+  real_prec ilkk=1./static_cast<real_prec>(lkk);
+  for(int i=0;i<poster.size();++i)
+    for(int j=0;j<poster[0].size();++j)
+      poster[i][j]*=ilkk;     /*Normalize the posterior to 1 */
 
 	ofstream lout;
 	string ntdpost=tdpost+"_"+to_string(ip)+"_"+to_string(jp)+".txt";
@@ -1625,64 +1534,65 @@ void McmcFunctions::get_contour_levels(string CR,ULONG Nbins, vector<real_prec> 
   vector<real_prec> sf(7,0);     /*Use to allocate heights of posterior for different sigmas*/
   
     
+/*
+          Estimates of the levels defining confidence regions
+*/
   for(int ip=0;ip<np;ip++)
     {                                 /*Loops over the parameters*/
       for(int jp=0;jp<np;jp++)
-  {
-    /*
-      Estimates of the levels defining confidence regions
-    */
-    
-    poster_all=0;
-    for(int i=0;i<this->nbin_2D;++i)
-      for(int j=0;j<this->nbin_2D;++j)
-        poster_all+=poster[index_2d(i,j,Nbins)];      /*total volumen  enclosed by the 2d de posterior*/
-    
-    fill(com.begin(), com.end(), 0);
-    fill(nppi.begin(), nppi.end(), 1); // Initialize it with 1
-    
-    for(int li=0;li<nll;++li)
-      for(int i=0;i<this->nbin_2D;++i)
-        for(int j=0;j<this->nbin_2D;++j)las[li][i][j]=0;
-    
-    
-    for(int i=0;i<this->nbin_2D;++i)
-      {                                                    /*Loop over bins of parameter 1*/
-        for(int j=0;j<this->nbin_2D;++j)
-    {
-      real_prec lpost = log10(poster[index_2d(i,j,Nbins)]);
-      if(lpost >= min_log_posterior && lpost<=max_log_posterior)
         {
-          /*Loop over bins of parameter 2*/
-          int li = floor((lpost-min_log_posterior)/delta_log_posterior);    // get bin in the posterior
-          if (li==nll) li--;
-          las[li][i][j]=static_cast<real_prec>(poster[index_2d(i,j,Nbins)]);                                            /*fill tensor las[][][]*/
-          nppi[li]++;      /*Compute the number of cells that contribute to this posterior*/
-          com[li]+=poster[index_2d(i,j,Nbins)];   /*Compute the volume enclosed by the posterior within this specific bin i-j*/
-        }                                                                 
-    }
-      }
-    
+          poster_all=0;
+          for(int i=0;i<this->nbin_2D;++i)
+            for(int j=0;j<this->nbin_2D;++j)
+              poster_all+=poster[index_2d(i,j,Nbins)];      /*total volumen  enclosed by the 2d de posterior*/
+          
+          fill(com.begin(), com.end(), 0);
+          fill(nppi.begin(), nppi.end(), 1); // Initialize it with 1
+          
+          for(int li=0;li<nll;++li)
+            for(int i=0;i<this->nbin_2D;++i)
+              for(int j=0;j<this->nbin_2D;++j)
+                las[li][i][j]=0;
+          
+          
+          for(int i=0;i<this->nbin_2D;++i)
+            {                                                    /*Loop over bins of parameter 1*/
+              for(int j=0;j<this->nbin_2D;++j)
+                {
+                  real_prec val = std::max(static_cast<double>(poster[index_2d(i,j,Nbins)]), 1e-30);
+                  real_prec lpost = log10(val);
+                  if(lpost >= min_log_posterior && lpost<=max_log_posterior)
+                    {
+                      /*Loop over bins of parameter 2*/
+                      int li = floor((lpost-min_log_posterior)/delta_log_posterior);    // get bin in the posterior
+                      if (li==nll) 
+                        li--;
+                      las[li][i][j]=static_cast<real_prec>(poster[index_2d(i,j,Nbins)]);                                            /*fill tensor las[][][]*/
+                      nppi[li]++;      /*Compute the number of cells that contribute to this posterior*/
+                      com[li] +=  poster[index_2d(i,j,Nbins)];   /*Compute the volume enclosed by the posterior within this specific bin i-j*/
+                    }                                                                 
+                }
+            }
     
     fill(cs.begin(), cs.end(), 0);
     for(int li=0;li<nll;li++)
       for(int lj=0;lj<=li;++lj)
         cs[li]+=com[lj];  /*In each bin of posterior, compute the cumulative volume enclosed until that bin*/
     
-    for(int sl=0;sl<sigmalevel.size();sl++)
+    for(size_t sl=0;sl<sigmalevel.size();++sl)
       lsl[sl]=0;
     
-    for(int sl=0;sl<sigmalevel.size();sl++) /*Loop over the values defining the confidence regions*/
+    for(size_t sl=0;sl<sigmalevel.size();++sl) /*Loop over the values defining the confidence regions*/
       {                           
-        for(int li=0;li<nll;li++)
-    {   /*Loop over the bins in posterior: find the bin (for each sigma)*/                                                                   
-      /* at which the enclosed*/
-      if( (1.0-sigmalevel[sl])*poster_all>=cs[li]  && (1.0-sigmalevel[sl])*poster_all<cs[li+1]){     /*volume corresponds to a fraction (1-sigmalevel) of the total*/
-        lsl[sl]=li;                                                                                  /*enclosed volume poster_all. The term (1-sigmalevel) means that*/
-      }                                                                                              /*we are staring from below upwards and once the bin is found, a fraction*/
-    }                                                                                                /*sigmalevel remains above that bin*/
+        for(int li=0;li<nll;++li)
+        {   /*Loop over the bins in posterior: find the bin (for each sigma)*/                                                                   
+          /* at which the enclosed*/
+          if((1.0-sigmalevel[sl])*poster_all>=cs[li] && (1.0-sigmalevel[sl])*poster_all<cs[li+1]){     /*volume corresponds to a fraction (1-sigmalevel) of the total*/
+            lsl[sl]=li;                                                                                  /*enclosed volume poster_all. The term (1-sigmalevel) means that*/
+          }                /*we are staring from below upwards and once the bin is found, a fraction*/
+        }                                                                                                /*sigmalevel remains above that bin*/
       }
-    
+   
     // ***********************************************************************************************
     // Computing the height in posterior defining cofidence regions:
     // for each sigma, compute the average posterior at the
@@ -1698,8 +1608,8 @@ void McmcFunctions::get_contour_levels(string CR,ULONG Nbins, vector<real_prec> 
         int index=lsl[sl];
         int number = nppi[index] == 0 ? 1: nppi[index];
         for(int i=0;i<this->nbin_2D;++i)
-    for(int j=0;j<this->nbin_2D;++j)
-      sf[sl]+=las[index][i][j]/static_cast<real_prec>(number);
+          for(int j=0;j<this->nbin_2D;++j)
+            sf[sl]+=las[index][i][j]/static_cast<real_prec>(number);
       }
     /*  Output of height of normalized posterior distribution defining different confidence regions
         One line, six columns. A file for every pair of parameters*/
@@ -1713,21 +1623,19 @@ void McmcFunctions::get_contour_levels(string CR,ULONG Nbins, vector<real_prec> 
         kout.setf(ios::showpoint);
         kout.setf(ios::scientific);
         
-        for(int sl=0;sl<sigmalevel.size();sl++)kout<<sf[sl]<<"\t"; kout<<"\t"<<endl;
+        for(int sl=0;sl<sigmalevel.size();sl++)
+          kout<<sf[sl]<<"\t"; kout<<"\t"<<endl;
         So.message_screen("Wrote CR in file", nCR);
         kout.close();
       }
-  }
     }
+  }
   
-  //  std:: cout<<GREEN<<"Posterior distributions succesfully written!"<<RESET<<std::endl;
   return;
 }
 // ********************************************************************************************
 // ********************************************************************************************
 // ********************************************************************************************
-
-
 
 //NOTE: MAYBE WE CAN PUT HERE THE 1D DISTRIBUTION AND LET THE FUNCTION ABOVE ONLY FOR THE percentiles
 void McmcFunctions::posterior2d_combined_experiments(string fname_mean, string fname_pdf, string tdpost, string CR, experiments experiments){
@@ -2012,8 +1920,6 @@ void McmcFunctions::posterior2d_combined_experiments(string fname_mean, string f
             }                                                                                              /*we are staring from below upwards and once the bin is found, a fraction*/
           }                                                                                                /*sigmalevel remains above that bin*/
         }
-
-
         // ***********************************************************************************************
         // Computing the height in posterior defining cofidence regions:
         // for each sigma, compute the average posterior at the
@@ -2021,8 +1927,6 @@ void McmcFunctions::posterior2d_combined_experiments(string fname_mean, string f
         // read from the tensor las[lsls[sl]][i][j] divided by the number
         // of parameter_cells that contributed to that particular bin of posterior nppi[lsl[sl]]
         // ***********************************************************************************************
-
-
         fill(sf.begin(), sf.end(), 0);
         for(int sl=0;sl<6;sl++){
           for(int i=0;i<this->nbin_2D;++i){
@@ -2045,21 +1949,14 @@ void McmcFunctions::posterior2d_combined_experiments(string fname_mean, string f
         for(int sl=0;sl<6;sl++)kout<<sf[sl]<<"\t"; kout<<"\t"<<endl;
 	this->So.message_screen("Wrote CR in file",nCR);
         kout.close();
-
-
       }
     }
-
   }
-
 
   std:: cout<<GREEN<<"Posterior distributions succesfully written!"<<RESET<<std::endl;
 
-
-
  // NOW WE GET THERE THE 1D POSTERIORS FOLLOWING THE POSTERIOR1D FUNCTION. HERE THE 1D ARRAYS WILL HAVE THE SAME DIMENTIONA STHE 2D ARRAYS
   int perc=1;
-
 
   vector<real_prec> new_acc(np,0);
   vector< vector<real_prec> > e_al_max(np, vector<real_prec> (this->nbin_2D, 0));                                            /*for ech aprameter, computes the cumultive number counts starting from the upper limit*/
@@ -2164,56 +2061,7 @@ void McmcFunctions::posterior2d_combined_experiments(string fname_mean, string f
 
 
 
-
-
-
   return;
-}
-
-
-
-/************************************************************************************************************************************************************************/
-
-void McmcFunctions::mass_asg2d(string MAS,real_prec x,real_prec y,real_prec deltax,real_prec deltay,real_prec wpart,vector< vector<real_prec> >&data){
-  /*Determining the number of cell*/
-  int N=this->nbin_2D;
-
-  int xc=(int)floor(x/deltax);
-  int yc=(int)floor(y/deltay);
-
-  /*Location of the center of each cell*/
-  real_prec xx  = deltax*(xc+0.5);
-  real_prec yy  = deltay*(yc+0.5);
-  /*Location of the center of each cell forward*/
-  real_prec xxf = deltax*(xc+1.5);
-  real_prec yyf = deltay*(yc+1.5);
-  /*Location of the center of each cell backward*/
-  real_prec xxb = deltax*(xc-0.5);
-  real_prec yyb = deltay*(yc-0.5);
-
-  real_prec Xb, Yb;   //siempre apareceran como Xb-1
-  Xb=(xc==0 ? this->nbin_2D: xc);//es decir si xc=0, Xf-1=n1-1, i.e, salta hacia atras y termina el la ultima
-  Yb=(yc==0 ? this->nbin_2D: yc);
-
-  real_prec Xf, Yf;  //siempre apareceran como Xf+1
-  Xf=(xc==this->nbin_2D-1 ? -1: xc);//es decir si xc=n1-1, Xf+1=0, i.e, salta hacia adelante y termina el la primera
-  Yf=(yc==this->nbin_2D-1 ? -1: yc);
-
-
-  /*Filling cells*/
-  data[Xb-1][Yb-1]+=wpart*maf(MAS,(xxb-x)/deltax)*maf(MAS,(yyb-y)/deltay);
-  data[Xb-1][yc]  +=wpart*maf(MAS,(xxb-x)/deltax)*maf(MAS,(yy-y)/deltay);
-  data[Xb-1][Yf+1]+=wpart*maf(MAS,(xxb-x)/deltax)*maf(MAS,(yyf-y)/deltay);
-
-  data[xc][Yb-1]+=wpart*maf(MAS,(xx-x)/deltax)*maf(MAS,(yyb-y)/deltay);
-  data[xc][yc]  +=wpart*maf(MAS,(xx-x)/deltax)*maf(MAS,(yy-y)/deltay);
-  data[xc][Yf+1]+=wpart*maf(MAS,(xx-x)/deltax)*maf(MAS,(yyf-y)/deltay);
-
-  data[Xf+1][Yb-1]+=wpart*maf(MAS,(xxf-x)/deltax)*maf(MAS,(yyb-y)/deltay);
-  data[Xf+1][yc]  +=wpart*maf(MAS,(xxf-x)/deltax)*maf(MAS,(yy-y)/deltay);
-  data[Xf+1][Yf+1]+=wpart*maf(MAS,(xxf-x)/deltax)*maf(MAS,(yyf-y)/deltay);
-
-
 }
 
 // ************************************************************************** 
@@ -2281,7 +2129,9 @@ void McmcFunctions::set_distance_priors(){
 	   */
       this->priors_measured[0]=302.10;
       this->priors_measured[1]=1090.04;
-      for(int i=0;i<n_priors;++i)for(int j=0;j<n_priors;++j)cov[i][j]=0;
+      for(int i=0;i<n_priors;++i)
+        for(int j=0;j<n_priors;++j)
+          cov[i][j]=0;
       cov[0][0]=pow(0.86,2);
       cov[1][1]=pow(0.93,2);
       cov[0][1]=0.4215*(0.86*0.93);
@@ -2497,10 +2347,10 @@ void McmcFunctions::distance_priors_cmb_model(int I, int J, s_CosmologicalParame
     this->priors_model[0] =  lA;
     this->priors_model[1] =  R;
     this->priors_model[2] =  z_drag;
-    this->priors_model[3] =  100*omega_b;
+    this->priors_model[3] =  100.0*omega_b;
   }
   if(I==4){
-    this->priors_model[0] =  100*omega_b;
+    this->priors_model[0] =  100.0*omega_b;
     this->priors_model[1] =  z_drag;
     this->priors_model[2] =  lA;
     this->priors_model[3] =  R;

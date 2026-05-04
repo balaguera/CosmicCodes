@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['x',['x',['../classGalaxy.html#aa4979471a435aee492e05e13fa3052c2',1,'Galaxy']]],
+  ['x_5fbins',['X_bins',['../classBam.html#af44f887af5f5bf99b8793b0117581fe4',1,'Bam']]],
+  ['x_5fcoord_5fbin_5fproperties',['x_coord_bin_properties',['../Type__structures__def_8h.html#a6cdf2ba7c3aef161ebbd732a63c2f431',1,'s_mass_members']]],
+  ['xbessel',['xBessel',['../classAngularPowerSpectrum.html#a22ee63ef34e9fc59095f2fecda3ddb8a',1,'AngularPowerSpectrum']]],
+  ['xgal',['xgal',['../classCatalog.html#ae637d74e09bee0cb4ebb7701751bfb08',1,'Catalog::xgal()'],['../Type__structures__def_8h.html#a7582dba23941a3e64e62064c6aaf6d45',1,'s_Galaxy::xgal()']]],
+  ['xllc',['xllc',['../classParams.html#a33e887bf0f9991af603263c377aac244',1,'Params::xllc()'],['../classPATCHY.html#a204c929d79e3ff7f30da3bf158176dbe',1,'PATCHY::xllc()']]],
+  ['xmax',['Xmax',['../classBam.html#a1959a15244f3079895ddc9e341cda7b5',1,'Bam::Xmax()'],['../classFftwFunctions.html#aaa5c2f6111c4393b6aba7842b7d62585',1,'FftwFunctions::Xmax()']]],
+  ['xmin',['xmin',['../Type__structures__def_8h.html#a92cbf5a377e06a12164024b517f2d34c',1,'s_parameters_box_yam::xmin()'],['../classBam.html#abbfc88d77c43a567d0f4ac17100cce69',1,'Bam::Xmin()'],['../classFftwFunctions.html#a1f2555c07b69f67f4415768dfe740710',1,'FftwFunctions::Xmin()'],['../classCoordinateSystem.html#add1fa84b25b78bf9a8dd37d1a837e11c',1,'CoordinateSystem::XMIN()']]],
+  ['xname',['XNAME',['../classBam.html#afb8d248b34d78abed7b5a2adc8212b0a',1,'Bam::XNAME()'],['../classParams.html#a387e3bdbf225aa3ce1dae773c9e83791',1,'Params::XNAME()'],['../Type__structures__def_8h.html#a89ba0df0df90d4a7be60e63b01caaebf',1,'params::XNAME()']]],
+  ['xobs',['xobs',['../classParams.html#ad7429812952b268920c892d58af6d1a0',1,'Params::xobs()'],['../classPATCHY.html#a796238c7ae0555cae55a05cef9989b29',1,'PATCHY::xobs()']]],
+  ['xoffset',['Xoffset',['../classFftwFunctions.html#afdf7e75d2520982b39bff5984e4f0f06',1,'FftwFunctions']]],
+  ['xx',['XX',['../classPowerSpectrum.html#a8dea046cfa1246771da5fd13a40613fd',1,'PowerSpectrum::XX()'],['../Type__structures__def_8h.html#ab3ff4d9c6ea86113746f133bf07e2235',1,'s_aux::XX()']]],
+  ['xx_5fk',['XX_k',['../classAngularPowerSpectrum.html#ae300cd2193d9965fc9ea2f2a0c8105cb',1,'AngularPowerSpectrum']]],
+  ['xx_5fmass',['XX_Mass',['../classPowerSpectrum.html#a2911723e30c84cd77ae8aba12925038e',1,'PowerSpectrum::XX_Mass()'],['../classStatistics.html#af9c7ad8e6a87ff9cdbfaadce2e174835',1,'Statistics::XX_Mass()']]],
+  ['xx_5fmu',['XX_mu',['../classPowerSpectrum.html#ade96de2add320323d797237f33b160c0',1,'PowerSpectrum::XX_mu()'],['../Type__structures__def_8h.html#a53ec443f897ea65cb3005e0ee0675e1f',1,'s_aux::XX_mu()']]],
+  ['xx_5fz',['XX_z',['../classAngularPowerSpectrum.html#ad188537aa0fc93c05934b7cc694dde4d',1,'AngularPowerSpectrum::XX_z()'],['../Type__structures__def_8h.html#af8c263cbf4c8f0363aa6d7bdda9d5f3c',1,'s_aux::XX_z()']]]
+];

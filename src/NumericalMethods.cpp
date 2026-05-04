@@ -1697,7 +1697,7 @@ ULONG grid_ID(s_params_box_mas *params, const real_prec &x, const real_prec &y, 
 //  j = static_cast<ULONG>(fmod(static_cast<real_prec>(j),static_cast<real_prec>(params->Nft)));
   k = k % params->Nft;
 //  k = static_cast<ULONG>(fmod(static_cast<real_prec>(k),static_cast<real_prec>(params->Nft)));
-  return static_cast<ULONG>(i,j,k,params->Nft,params->Nft);
+  return static_cast<ULONG>(index_3d(i,j,k,params->Nft,params->Nft));
 }
 
 ////////////////////////////////////////////////////////////////////////////

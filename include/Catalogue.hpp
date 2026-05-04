@@ -111,24 +111,6 @@ class Catalogue{
   */
   string type_of_object;
 
- //////////////////////////////////////////////////////////
-  /**
-   * @private
-   * @brief  Class containing the input parameters
-   */
-  s_params_box_mas box;
-  //////////////////////////////////////////////////////////
-  /**
-   * @private
-   * @brief  Class containing the input parameters
-   */
-  s_params_box_mas box_HR;
-  ///////////////////////////////////////////////////////
-  /**
-   * @private
-   * @brief
-   */
-  s_params_box_mas box_n;  //new, auxiliary
   //////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////
   /**
@@ -639,8 +621,7 @@ public:
     gsl_rng_default_seed=1015;
     this->Tn_cat =  gsl_rng_mt19937 ;//gsl_rng_default;
     rn_cat = gsl_rng_alloc (this->Tn_cat);
-
-
+    
   }
   //////////////////////////////////////////////////////////
   /**
@@ -1215,7 +1196,12 @@ public:
    void resize_gal_cwt(size_t N){
     this->gal_cwt.resize(N);
    }
-  //////////////////////////////////////////////////////////
+
+   size_t size_gal_cwt(){
+    return this->gal_cwt.size();
+   }
+
+   //////////////////////////////////////////////////////////
    /**
    * @public
    * @brief Set the grid ID for each tracer
@@ -1847,6 +1833,13 @@ public:
    * @brief Tuple for min, max and mean of tracer mass
    */
   std::tuple<real_prec, real_prec, real_prec> info_rs;
+  //////////////////////////////////////////////////////////
+  /**
+   * @public
+   * @public
+   * @brief Tuple for min, max and mean of tracer mass
+   */
+  std::tuple<real_prec, real_prec, real_prec> info_rvir;
   //////////////////////////////////////////////////////////
   /**
    * @public

@@ -1,0 +1,17 @@
+<map id="Bam" name="Bam">
+<area shape="rect" id="node2" href="$Type__structures__def_8h.html#structs__Deltas" title="s_Deltas" alt="" coords="535,9,610,36"/>
+<area shape="rect" id="node3" href="$Type__structures__def_8h.html#structs__maximums" title="The s_maximums struct. " alt="" coords="523,60,623,87"/>
+<area shape="rect" id="node4" href="$classPATCHY.html" title="CLASS PATCHY. " alt="" coords="534,435,611,461"/>
+<area shape="rect" id="node5" href="$classFileOutput.html" title="Header file for the class FileOutput:: " alt="" coords="227,639,310,665"/>
+<area shape="rect" id="node11" href="$classCwclass.html" title="Header file for the class Cwclass:: " alt="" coords="536,700,609,727"/>
+<area shape="rect" id="node14" href="$classCatalog.html" title="Header file for the class Catalog:: " alt="" coords="539,948,606,975"/>
+<area shape="rect" id="node6" href="$classScreenOutput.html" title="ScreenOutput" alt="" coords="5,395,108,421"/>
+<area shape="rect" id="node13" href="$classMCMC__FUNCTIONS.html" title="MCMC_FUNCTIONS" alt="" coords="497,181,648,208"/>
+<area shape="rect" id="node7" href="$Type__structures__def_8h.html#structs__CosmoInfo" title="The s_CosmoInfo struct. " alt="" coords="219,380,319,407"/>
+<area shape="rect" id="node8" href="$classCosmology.html" title="Header file for the class Cosmology:: " alt="" coords="225,233,313,260"/>
+<area shape="rect" id="node9" href="$classParams.html" title="Params" alt="" coords="235,864,302,891"/>
+<area shape="rect" id="node10" href="$Type__structures__def_8h.html#structs__CosmologicalParameters" title="The s_CosmoInfo struct. " alt="" coords="177,515,360,541"/>
+<area shape="rect" id="node12" href="$Type__structures__def_8h.html#structs__minimums" title="The s_minimums struct. " alt="" coords="525,999,621,1025"/>
+<area shape="rect" id="node15" href="$Type__structures__def_8h.html#structs__params__box__mas" title="Auxiliary structure used to pass box arguments to different functions. " alt="" coords="199,1072,338,1099"/>
+<area shape="rect" id="node16" href="$Type__structures__def_8h.html#structs__Galaxy" title="s_Galaxy" alt="" coords="230,959,307,985"/>
+</map>

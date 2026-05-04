@@ -1193,6 +1193,7 @@ void Params::read_pars_json(std::string file){
             "min_kvalue_tracer_qbias",
             "max_kvalue_tracer_qbias",
             "max_multipole_tracer_lmbias",
+            "get_cwc_properties",
             "print_catalogue"
           },
       "IndividualTracerBias");
@@ -1322,14 +1323,22 @@ void Params::read_pars_json(std::string file){
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->lmax_bias);
 
-     // lmax_bias
     pname = "print_catalogue";
     pname_c = "print_catalogue";
     description = "Print cataloguw with assigned individual bias";
     options = "bool";
     this->print_catalogue = static_cast<bool>(IndividualTracerBias.value(pname, false));
     this->collect_params_info(pname, pname_c, this_section, description, options);
-    this->parameter_number.emplace_back(pname, this->print_catalogue);
+    this->parameter_boolean.emplace_back(pname, this->print_catalogue);
+
+    pname = "get_cwc_properties";
+    pname_c = "get_cwc_properties";
+    description = "Get the cosmic-web classification to be printed out in the catalogue";
+    options = "bool";
+    this->get_cwc_properties = static_cast<bool>(IndividualTracerBias.value(pname, false));
+    this->collect_params_info(pname, pname_c, this_section, description, options);
+    this->parameter_boolean.emplace_back(pname, this->get_cwc_properties);
+
 
    } 
   
@@ -6105,6 +6114,26 @@ void Params::derived_pars(){
   this->Nnp_window    = (this->type_of_binning==LOG ? this->N_log_bins : this->Nft/this->ndel_window/ 2); 
   this->Deltal        = log10(this->kmax/this->kmin)/static_cast<double>(this->N_log_bins); 
   this->Deltamu       = 2.0/(static_cast<real_prec>(this->N_mu_bins));
+  this->d1=this->Lbox/static_cast<real_prec>(this->Nft);		/* grid spacing x-direction */
+  this->d2=this->Lbox/static_cast<real_prec>(this->Nft);		/* grid spacing y-direction */
+  this->d3=this->Lbox/static_cast<real_prec>(this->Nft);		/* grid spacing z-direction */
+  this->Xoffset = this->Lbox/2; /* Xoffset for a box*/
+  this->Yoffset = this->Lbox/2;
+  this->Zoffset = this->Lbox/2;
+  this->xmax=this->xmin+this->Lbox; /*xmax for a box */
+  this->ymax=this->ymin+this->Lbox;
+  this->zmax=this->zmin+this->Lbox;
+  this->d1_HR=this->Lbox/static_cast<real_prec>(this->Nft_HR);		/* grid spacing x-direction */
+  this->d2_HR=this->Lbox/static_cast<real_prec>(this->Nft_HR);		/* grid spacing y-direction */
+  this->d3_HR=this->Lbox/static_cast<real_prec>(this->Nft_HR);		/* grid spacing z-direction */
+  this->d1_low=this->Lbox/static_cast<real_prec>(this->Nft_low);		/* grid spacing x-direction */
+  this->d2_low=this->Lbox/static_cast<real_prec>(this->Nft_low);		/* grid spacing y-direction */
+  this->d3_low=this->Lbox/static_cast<real_prec>(this->Nft_low);		/* grid spacing z-direction */
+  this->d1_JK=this->Lbox/static_cast<real_prec>(this->Nft_JK);		/* grid spacing x-direction */
+  this->d2_JK=this->Lbox/static_cast<real_prec>(this->Nft_JK);		/* grid spacing y-direction */
+  this->d3_JK=this->Lbox/static_cast<real_prec>(this->Nft_JK);		/* grid spacing z-direction */
+
+  
 #ifdef _USE_SLICS_PK_BINNING_
   this->kmin = MIN_K;
   this->deltak_0 = DELTA_K; 

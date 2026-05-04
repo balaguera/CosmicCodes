@@ -1,0 +1,27 @@
+<map id="Type_structures_def.h" name="Type_structures_def.h">
+<area shape="rect" id="node2" href="$NumericalMethods_8h.html" title="NumericalMethods.h" alt="" coords="1222,80,1365,107"/>
+<area shape="rect" id="node3" href="$Params_8h.html" title="The class Parameters. Reads the parameter. " alt="" coords="366,155,445,181"/>
+<area shape="rect" id="node4" href="$CosmologicalFunctions_8h.html" title="CosmologicalFunctions.h" alt="" coords="1269,229,1438,256"/>
+<area shape="rect" id="node5" href="$AngularPowerSpectrum_8h.html" title="AngularPowerSpectrum.h" alt="" coords="1555,453,1725,480"/>
+<area shape="rect" id="node6" href="$COSMOlib_8h.html" title="COSMOlib.h" alt="" coords="2008,528,2104,555"/>
+<area shape="rect" id="node7" href="$CosmoLib_8h.html" title="CosmoLib.h" alt="" coords="1471,528,1563,555"/>
+<area shape="rect" id="node8" href="$PowerSpectrumTH_8h.html" title="PowerSpectrumTH.h" alt="" coords="1496,379,1640,405"/>
+<area shape="rect" id="node9" href="$Bam_8h.html" title="Bam.h" alt="" coords="679,603,739,629"/>
+<area shape="rect" id="node14" href="$Catalog_8h.html" title="Catalog.h" alt="" coords="489,453,567,480"/>
+<area shape="rect" id="node15" href="$DnDz_8h.html" title="DnDz.h" alt="" coords="347,453,413,480"/>
+<area shape="rect" id="node17" href="$Patchy_8h.html" title="Patchy.h" alt="" coords="776,453,851,480"/>
+<area shape="rect" id="node18" href="$Cwclass_8h.html" title="Cwclass.h" alt="" coords="667,453,751,480"/>
+<area shape="rect" id="node19" href="$Galaxy_8h.html" title="The class Galaxy. " alt="" coords="1920,453,1995,480"/>
+<area shape="rect" id="node21" href="$FftwFunctions_8h.html" title="FftwFunctions.h" alt="" coords="201,379,317,405"/>
+<area shape="rect" id="node26" href="$DensityProfiles_8h.html" title="Header file for the class DensityProfiles:: &#160;Functions related to the generation of density profiles ..." alt="" coords="2093,453,2216,480"/>
+<area shape="rect" id="node13" href="$PowerSpectrumF_8h.html" title="PowerSpectrumF.h" alt="" coords="346,528,481,555"/>
+<area shape="rect" id="node23" href="$GalaxyF_8h.html" title="GalaxyF.h" alt="" coords="93,379,176,405"/>
+<area shape="rect" id="node10" href="$CorrelationFunction_8h.html" title="CorrelationFunction.h" alt="" coords="1749,453,1896,480"/>
+<area shape="rect" id="node11" href="$ScreenOutput_8h.html" title="ScreenOutput.h" alt="" coords="953,304,1066,331"/>
+<area shape="rect" id="node16" href="$McmcFunctions_8h.html" title="McmcFunctions.h" alt="" coords="1150,453,1277,480"/>
+<area shape="rect" id="node22" href="$CoordinateSystem_8h.html" title="The class CoordinateSystem. " alt="" coords="328,304,469,331"/>
+<area shape="rect" id="node25" href="$GalaxyOperations_8h.html" title="GalaxyOperations.h" alt="" coords="1391,304,1529,331"/>
+<area shape="rect" id="node12" href="$FileOutput_8h.html" title="FileOutput.h" alt="" coords="953,379,1047,405"/>
+<area shape="rect" id="node20" href="$NumericalMethods2_8h.html" title="NumericalMethods2.h" alt="" coords="925,453,1075,480"/>
+<area shape="rect" id="node24" href="$Catalogue_8h.html" title="The class Catalogue. " alt="" coords="94,453,186,480"/>
+</map>

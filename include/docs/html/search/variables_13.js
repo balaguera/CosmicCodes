@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['t',['T',['../classMCMC__FUNCTIONS.html#ac01c327d60befe10ae7e2b6776e5e880',1,'MCMC_FUNCTIONS']]],
+  ['tab',['tab',['../classPATCHY.html#ad219252a8279e371437d1c7fc5314496',1,'PATCHY']]],
+  ['tcmb',['Tcmb',['../classGALAXY.html#ae3efb5e95e9f77358cb4f9822f8df8a7',1,'GALAXY::Tcmb()'],['../classParameters.html#a394454fa6565f81d173a0edc94a8c472',1,'Parameters::Tcmb()'],['../classParametersCosmolib.html#a198d74026f0d01c6b834ac10b359abef',1,'ParametersCosmolib::Tcmb()'],['../classParametersF.html#a1f0d51db4f5b3c12bd97509e5505da23',1,'ParametersF::Tcmb()'],['../classParametersMCMC.html#a45c77fd875f696ccecee47b3ace3bccd',1,'ParametersMCMC::Tcmb()'],['../classParams.html#acf9fa38fdea87c6134a81ad4b9d87d78',1,'Params::Tcmb()'],['../classPowerSpectrumF.html#adf23c72c74d8036d2e0626b3f4de6c15',1,'PowerSpectrumF::Tcmb()'],['../Type__structures__def_8h.html#a501e0b142cd63d15b0c42870690a2a3e',1,'s_CosmologicalParameters::Tcmb()'],['../namespaceCosmo__parameters__test.html#a1141cad5226d705cf4a9c8b489f00199',1,'Cosmo_parameters_test::Tcmb()'],['../namespaceCosmo__parameters__PLANCK.html#a8c8ff4a28b72ff74eb9bf2b3f74f3ab7',1,'Cosmo_parameters_PLANCK::Tcmb()'],['../namespaceCosmo__parameters__Minerva.html#af4409c3113b5781b879aca3c7ccd445e',1,'Cosmo_parameters_Minerva::Tcmb()'],['../group__physconstgroup.html#gaf3df0a9a87f7ac55bb5b4ebe908bb964',1,'tcmb():&#160;constants.h']]],
+  ['theta_5fbin',['Theta_bin',['../Type__structures__def_8h.html#aff6631140ad3559a60a32e9ac870e837',1,'s_cell_info']]],
+  ['tidal_5fanisotropy',['Tidal_Anisotropy',['../classCwclass.html#af2670d4a789237c0c6ed1a907118eb4d',1,'Cwclass']]],
+  ['total_5farea',['total_area',['../classGALAXY.html#a694a3b8a829489035fc47ea655b64b96',1,'GALAXY']]],
+  ['tracer',['tracer',['../classBam.html#a2c2cf29620a6b8b53ebdc467ef30b835',1,'Bam']]],
+  ['tracer_5fcat',['tracer_cat',['../classPowerSpectrumF.html#ab6c07295bb1c33a3a2cdf0f2597f4f1b',1,'PowerSpectrumF']]],
+  ['tracer_5fref',['tracer_ref',['../classBam.html#a2bdb48e3d57ebefe1d1bb5f2b302fbe6',1,'Bam']]],
+  ['transf',['transf',['../classParams.html#a1f90f609f9589ad353694b70bbfd7540',1,'Params::transf()'],['../classPATCHY.html#a2fcb5e530a27ada5662d6e2711d24fbc',1,'PATCHY::transf()']]],
+  ['tropicalyear',['tropicalYear',['../group__physconstgroup.html#ga18b7beae42366eaf28ec62f5bc7ea642',1,'constants.h']]],
+  ['trv',['trv',['../classGALAXY.html#a569150a287c3fad29ca7417ea0d31a4a',1,'GALAXY::trv()'],['../Type__structures__def_8h.html#aca3628624ca298dc195da933464642ef',1,'s_CosmologicalParameters::trv()']]],
+  ['tstruct',['tstruct',['../classBam.html#a8cd1cd1126ed8fa8b0d7b069d4e502e9',1,'Bam']]],
+  ['twopi',['twopi',['../group__mathconstgroup.html#gad996edbbc287b4e5f3dd072a10bd6122',1,'constants.h']]],
+  ['twothird',['twothird',['../group__mathconstgroup.html#gaa6b794ded10022c0d51f9d8511e32759',1,'constants.h']]],
+  ['type_5fof_5fbinning',['type_of_binning',['../classParametersF.html#ad190d44dcda0e29e140db9ec27b8f6f6',1,'ParametersF::type_of_binning()'],['../classParams.html#a4551c1df8a95e647b41fe99952b3630e',1,'Params::type_of_binning()'],['../classPowerSpectrumF.html#aaa349dae9416653c8a285f36a3e5b373',1,'PowerSpectrumF::type_of_binning()']]],
+  ['type_5fof_5ffile_5fx',['Type_of_File_X',['../classBam.html#a2b005f3a51b6747d17af552216ec5956',1,'Bam::Type_of_File_X()'],['../Type__structures__def_8h.html#aef3de701fd200c0507e8fd6e21400dd2',1,'params::Type_of_File_X()']]],
+  ['type_5fof_5ffile_5fy',['Type_of_File_Y',['../classBam.html#af0ba2188eafb929398a706ab0de93cf1',1,'Bam::Type_of_File_Y()'],['../Type__structures__def_8h.html#ad29ce5202f6df035737fb62accf76042',1,'params::Type_of_File_Y()']]],
+  ['type_5fof_5finput_5ffile',['type_of_input_file',['../classParametersF.html#a6575930a69718a6290a3516ae09c96b7',1,'ParametersF']]],
+  ['type_5fof_5fk_5fcorrection',['type_of_K_correction',['../classGALAXY.html#a0f39b8c6f5741afe385dc090f3d23681',1,'GALAXY']]],
+  ['type_5fof_5flbinning',['type_of_lbinning',['../classParametersF.html#a5b057fda5cb1a6e0121806060457dce9',1,'ParametersF']]],
+  ['type_5fof_5fnl_5fpower',['type_of_nl_power',['../Type__structures__def_8h.html#ade26ed273ff7934e0d7259df5f939935',1,'params_clth']]],
+  ['type_5fof_5fobject',['type_of_object',['../classCatalog.html#a3b792cc3863ee099dfe2eb0fcc675cf3',1,'Catalog::type_of_object()'],['../Type__structures__def_8h.html#ae36b593a05e16c1e83bd879751ebf7c0',1,'s_Galaxy::type_of_object()']]],
+  ['type_5fof_5fzbins',['type_of_zbins',['../classParametersF.html#add820000b060ac2c27c60a8320ac35e3',1,'ParametersF']]]
+];
