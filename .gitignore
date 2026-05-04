@@ -1,1 +1,7 @@
 output*/*
+external_libs/gnuplot-iostream/
+gnuplot-iostream/
+output_hgaps/
+output_ibias/
+output_power
+output_sdss/
