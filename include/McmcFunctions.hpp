@@ -75,6 +75,11 @@ private:
    * @brief 
   */
   ScreenOutput So;
+  //------------------------------------------
+  /** 
+   * @brief 
+  */
+  FileOutput File;
 
 //------------------------------------------
   /** 
@@ -162,6 +167,11 @@ private:
    * @brief  
    */
   int chain;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief  
+   */
+  string chain_file_name;
   //////////////////////////////////////////////////////////
   /**
    * @brief  read it from from params
@@ -403,11 +413,6 @@ private:
   /**
    * @brief 
    */
-  void set_mcmc_read_vectors();
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief 
-   */
   void gelman_rubbin_diag( vector<vector<vector<double>>> &acca_parameters);
   //////////////////////////////////////////////////////////
   /**
@@ -423,7 +428,7 @@ private:
   /**
    * @brief 
    */
-  void chi_squared(vector<real_prec>&,vector<real_prec>&, vector< vector <real_prec> > &, real_prec &);
+  void chi_squared(std::vector<real_prec>&data,std::vector<real_prec>&model, std::vector< std::vector <real_prec> > &icova, real_prec &chis);
   //////////////////////////////////////////////////////////
   /**
    * @brief 
@@ -530,6 +535,16 @@ private:
    * @brief 
    */
   void get_contour_levels(string,ULONG, vector<real_prec> &);
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */
+  void read_nchains();
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief 
+   */
+  void output_parameters();
 
   //////////////////////////////////////////////////////////
   /**
@@ -561,48 +576,6 @@ private:
    * @returns
    */
   void get_covariance_parameters();
-
-  //////////////////////////////////////////////////////////
-
-
-  /**
-   * @brief 
-   * @details LSS Distance priors obtained from  different LSS probe: CMB power spectum, BAOS
-  *  returns the inverse of the covariance matrix assocaited to a set of distance priors.
-  *  That inv_cov will be used to constrain cosmological parameters
-  *  As input, I and J denotes the distance and WMAP prios to be used as follows
-
-  *   I=1: WMAP5 5 (Komatsu et al.) with the following sub-cases:
-  *   J=1: l_A
-  *   J=2: R
-  *   J=3: z_dec
-  *   J=4: r_s;
-  *   J=5: l_A+R
-  *   J=6: l_A+z
-  *   J=7: R+z
-  *   J=8: l_A,R,z
-  *   I=2, J=1: l_A+R+z+ob ,extended distance priors, WMAP5, Komatsu et al. 2009
-  *   I=3, J=1: l_A,R,z, from WMAP7(Komatsu et al 2010)
-  *   I=4, J=1: CMB+LSS: 100om_b, z*, l_A(z_star),R,G  extended distance priors (Sanchez et al 2010).
-  * @warning Include after subroutine matrix_inversion
-  * @warning I=4, J=1 case (Sanchez et al 2010) are wrong.
-*/
-  void set_distance_priors();
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief 
-   */
-  void distance_priors_cmb_model(int I, int J, s_CosmologicalParameters *scp);
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief 
-   */
-  real_prec chi_squared_distance_priors();
-  //////////////////////////////////////////////////////////
-  /**
-   * @brief 
-   */
-  void run_distance_priors(string, int);
   //////////////////////////////////////////////////////////
   /**
    * @brief 

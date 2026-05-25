@@ -12,34 +12,6 @@
 #include "../include/McmcFunctions.hpp"
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-
-void McmcFunctions::set_mcmc_read_vectors(){
-
-  cout<<BLUE<<"Defining space for accepted models"<<RESET<<endl;
-  this->acc_parameters_all.resize(n_parameters);
-
-  for (size_t i = 0; i<n_parameters;++i) {
-    this->acc_parameters_all[i].resize(this->params._number_of_accepted_models());
-    for (size_t j=0;j<this->params._number_of_accepted_models();++j){
-      this->acc_parameters_all[i][j].resize(this->params._number_of_chains(),0);
-    }
-  }
-  this->weight_r.resize(this->params._number_of_accepted_models());
-  for(size_t i=0;i<weight_r.size();++i)
-    weight_r[i].resize(this->params._number_of_chains(),0);
-
-  this->chi_models.resize(this->params._number_of_accepted_models());
-  for(size_t i=0;i<chi_models.size();++i)
-    chi_models[i].resize(this->params._number_of_chains(),0);
-
-  this->mark.resize(this->params._number_of_chains(),0);
-  this->acca.resize(this->params._number_of_chains(),0);
-  this->R.resize(n_parameters);
-}
-
-// ************************************************************************************
-// ************************************************************************************
-// ************************************************************************************
 void McmcFunctions::get_cova_pars(int acc){
   // Compute the covariance of the parameters
   // at the step acc of the markov chain
@@ -66,43 +38,43 @@ void McmcFunctions::get_cova_pars(int acc){
 // ************************************************************************************
 void McmcFunctions::set_mcmc_vectors(){
 
- string append_n = this->params._Output_directory()+"_chain"+to_string(this->seed_index)+".txt";
+ string append_n = this->params._Output_directory()+this->params._name_experiment()+"_chain"+to_string(this->seed_index)+".txt";
  
  string chain_file_name = append_n;
 
-  if(this->action=="RUN")  
-    {
-      this->gBaseRand = gsl_rng_alloc(gsl_rng_taus2); 
-      gsl_rng_set (this->gBaseRand, get_seed(this->seed_index)+1);
-      lpout.open(chain_file_name);
-      this->parameters.resize(this->params._number_of_fit_parameters());
-      this->weight.resize(this->params._number_of_accepted_models());
-      this->chiss.resize(this->params._number_of_accepted_models());
-      this->weight.resize(this->params._number_of_fit_parameters());
-      this->acc_parameters.resize(this->params._number_of_fit_parameters());
+ if(this->action=="RUN")  
+   {
+     this->gBaseRand = gsl_rng_alloc(gsl_rng_taus2); 
+     gsl_rng_set (this->gBaseRand, get_seed(this->seed_index)+1);
+     lpout.open(chain_file_name);
+     this->parameters.resize(this->params._number_of_fit_parameters());
+     this->weight.resize(this->params._number_of_accepted_models());
+     this->chiss.resize(this->params._number_of_accepted_models());
+     this->weight.resize(this->params._number_of_fit_parameters());
+     this->acc_parameters.resize(this->params._number_of_fit_parameters());
 
       // NOTE: Set the initial parameters according to the action requested in par file.
-      if(this->params._random_initial_value_within_priors())
-        {
-          for(int i=0; i<this->parameters.size() ;i++)
-            if(this->params.action_parameters[i] == static_cast<int>(MCMCactions::FREE))
-              this->parameters[i]= this->params.prior_parameters_min_values[i]+ gsl_rng_uniform(this->gBaseRand) * (this->params.prior_parameters_max_values[i]- this->params.prior_parameters_min_values[i] );
-            else  if(this->params.action_parameters[i]== static_cast<int>(MCMCactions::FIXED)  )
-              this->parameters[i]=  this->params.initial_parameters[i];
-            else  if(this->params.action_parameters[i] == static_cast<int>(MCMCactions::GAUSSIAN_PRIOR))
-              this->parameters[i]=  this->params.initial_parameters[i]+gsl_ran_gaussian(this->gBaseRand, this->params.proposal_parameters[i]); 
-      }
+     if(this->params._random_initial_value_within_priors())
+       {
+        for(size_t i = 0; i < this->parameters.size() ;++i)
+         {
+           if(this->params.action_parameters[i] == static_cast<int>(MCMCactions::FREE))
+             this->parameters[i]= this->params.prior_parameters_min_values[i]+ gsl_rng_uniform(this->gBaseRand) * (this->params.prior_parameters_max_values[i]- this->params.prior_parameters_min_values[i] );
+           else  if(this->params.action_parameters[i]== static_cast<int>(MCMCactions::FIXED)  )
+             this->parameters[i]=  this->params.initial_parameters[i];
+           else  if(this->params.action_parameters[i] == static_cast<int>(MCMCactions::GAUSSIAN_PRIOR))
+             this->parameters[i]=  this->params.initial_parameters[i]+gsl_ran_gaussian(this->gBaseRand, this->params.proposal_parameters[i]); 
+          }
+       }
       else
         {
           for(int i=0; i<this->parameters.size() ;i++)
-            this->parameters[i]=  this->params.initial_parameters[i];
+            this->parameters[i] = this->params.initial_parameters[i];
         }
    }
-   
   else if ( this->action=="ANALYZE")
-    {
-      this->acc_parameters.resize(this->params._number_of_fit_parameters());
-    }
+    this->acc_parameters.resize(this->params._number_of_fit_parameters());
+
 
   this->mean_parameter.resize(this->params._number_of_fit_parameters());
   this->stdev_parameter.resize(this->params._number_of_fit_parameters());
@@ -118,31 +90,27 @@ void McmcFunctions::set_mcmc_vectors(){
   this->tail_probabilities.push_back(0.0228);
   this->tail_probabilities.push_back(0.0013);
 
-  acc_parameters.resize(this->n_parameters);
-  for(int i=0;i<acc_parameters.size();i++)
-      acc_parameters[i].resize(this->params._number_of_accepted_models(),0);
 
   weight.resize(this->params._number_of_accepted_models(),0);
   chiss.resize(this->params._number_of_accepted_models(),0);
 
-  mean_parameters.resize(this->n_parameters,0);
-  stdev_parameters.resize(this->n_parameters,0);
-  lower_bound_sigma.resize(this->n_parameters,0);
-  upper_bound_sigma.resize(this->n_parameters,0);
 
 #ifdef _USE_HMS_
-  grad_U.resize(this->n_parameters,1);  
-  momentum.resize(this->n_parameters,1);  
-  masses.resize(this->n_parameters,0);  
-  epsilon.resize(this->n_parameters,0);  
+  grad_U.resize(this->parameters.size(),1);  
+  momentum.resize(this->parameters.size(),1);  
+  masses.resize(this->parameters.size(),0);  
+  epsilon.resize(this->parameters.size(),0);  
 
-  cov_masses.resize(this->n_parameters);
-  icov_masses.resize(this->n_parameters);
-  for(int i=0;i<this->n_parameters;++i){
-    cov_masses[i].resize(this->n_parameters,0);
-    icov_masses[i].resize(this->n_parameters,0);
+  cov_masses.resize(this->parameters.size());
+  icov_masses.resize(this->parameters.size());
+  for(int i=0;i<this->parameters.size();++i){
+    cov_masses[i].resize(this->parameters.size(),0);
+    icov_masses[i].resize(this->parameters.size(),0);
   }
 #endif
+
+
+
 }
 
 // ************************************************************************************
@@ -229,9 +197,10 @@ void McmcFunctions::get_gradU(vector<real_prec>&Cmodel,vector<real_prec>&Cmeas, 
   // The model is rerturned and then will be assigned as member of the FB class
   size_t nn=Cmodel.size();
   size_t nn_n=R[0].size();
+  size_t n_parameters = this->parameters.size();
   dCmod_dp.resize(nn);
   for(size_t i=0;i<nn;++i)
-    dCmod_dp[i].resize(this->n_parameters,0);
+    dCmod_dp[i].resize(n_parameters,0);
   
   // // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   get_model_FB(Step,R,V,Cmodel);
@@ -239,7 +208,7 @@ void McmcFunctions::get_gradU(vector<real_prec>&Cmodel,vector<real_prec>&Cmeas, 
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // Compute derivative of the model in the current step
   for(size_t ii=0;ii<nn;++ii)
-    for(size_t ip=0;ip<this->n_parameters;++ip)
+    for(size_t ip=0;ip<n_parameters;++ip)
       dCmod_dp[ii][ip]=0;
 
   // Derivative wrt parameter[0]
@@ -292,7 +261,7 @@ void McmcFunctions::get_gradU_full(int lmin, int lmax, vector<matrices> VM,vecto
       // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       // Compute derivative of the model in the current step
       dCmod_dp.resize(nn);
-      for(size_t i=0;i<nn;++i)dCmod_dp[i].resize(this->n_parameters,0);
+      for(size_t i=0;i<nn;++i)dCmod_dp[i].resize(n_parameters,0);
 
       // Derivative wrt parameter[0]
       if(this->params.action_parameters[0]!=1){
@@ -324,10 +293,10 @@ void McmcFunctions::get_gradU_full(int lmin, int lmax, vector<matrices> VM,vecto
       //    for(int ip=0;ip<parameters.size();ip++)if(this->params.action_parameters[ip]!=0)for(int ii=0;ii<nn;ii++)for(int ij=0;ij<nn_n;ij++)this->grad_U[ip]-=(exp(-0.5*chiss)/sqrt(2.*M_PI*VM[l].det_matrix))*dCmod_dp[ii][ip]*VM[l].iCov[ii][ij]*(VM[l].Cmed[ij]-model[ij]);
       //full_like+=exp(-0.5*chiss)/sqrt(2.*M_PI*VM[l].det_matrix);
 
-      for(int ip=0;ip<parameters.size();ip++)
+      for(int ip=0;ip<parameters.size();++ip)
         if(this->params.action_parameters[ip]!=1)
         for(int ii=0;ii<nn;ii++)
-          for(int ij=0;ij<nn_n;ij++)
+          for(int ij=0;ij<nn_n;++ij)
             this->grad_U[ip]-=dCmod_dp[ii][ip]*VM[l].iCov[ii][ij]*(VM[l].Cmed[ij]-model[ij]);
    
   }
@@ -348,7 +317,7 @@ if(this->params._update_covariance())
   
     if(n_accepted<=this->params._number_of_burnin_phase_models()) // Before burn in, jump as usual
     {
-      for(size_t ip=0;ip<this->parameters.size();ip++)
+      for(size_t ip=0;ip<this->parameters.size();++ip)
       {
         switch(this->params.action_parameters[ip])
         {
@@ -367,7 +336,7 @@ if(this->params._update_covariance())
   // After burn in, and for some period, update the covariance; in the main implmentation, the cov will be frozen after number_of_post_burnin_phase_model steps
     else if(n_accepted>this->params._number_of_burnin_phase_models() )
     {
-      for(size_t ip=0;ip<this->parameters.size();ip++)
+      for(size_t ip=0;ip<this->parameters.size();++ip)
       {
         switch(this->params.action_parameters[ip])
         {
@@ -393,7 +362,7 @@ if(this->params._update_covariance())
   }
 else if (!this->params._update_covariance())
 {
-  for(size_t ip=0;ip<this->parameters.size();ip++)
+  for(size_t ip=0;ip<this->parameters.size();++ip)
     {
       switch(this->params.action_parameters[ip])
       {
@@ -504,16 +473,13 @@ void McmcFunctions::gelman_rubbin_diag( vector<vector<vector<double>>> &acca_par
 // *******************************************************************************************************
 
 void McmcFunctions::chi_squared(vector<real_prec> &data, vector<real_prec> &model,vector< vector <real_prec> > &inv_cova, real_prec &chis_one){
-
   // Compute chi square given the data, the model and the inverse
   //  of the covariance matrix of dimension nXn
   chis_one=0;
-  for(int i=0;i<model.size();++i){
-    for(int k=0;k<model.size();++k){
+  for(size_t i=0;i<model.size();++i)
+    for(size_t k=0;k<model.size();++k)
       chis_one+=(data[i]-model[i])*inv_cova[i][k]*(data[k]-model[k]);
-    }
-  }
-}
+ }
 
 // *******************************************************************************************************
 // *******************************************************************************************************
@@ -683,7 +649,7 @@ double MH=0;
   // Get the ra tio between new_posterior/old_posterior: this assumes the same priors
 
   double posterior_ratio= std::exp(-0.5*prop_loglike+0.5*curr_loglike);
-   int ip=0;
+  int ip=0;
    while((this->parameters[ip]>=this->params.prior_parameters_min_values[ip]) && (this->parameters[ip]<= this->params.prior_parameters_max_values[ip]) && (ip<this->parameters.size()))
    {
     ip++;
@@ -721,35 +687,37 @@ return;
 
 // *******************************************************************************************************
 // *******************************************************************************************************
-void McmcFunctions::write_accepted_models(int j, size_t acc, int weight_here, bool screen){
+void McmcFunctions::write_accepted_models(int j, size_t acc, int weight_here, bool screen)
+  {
 
-size_t macc=acc-this->weight[acc];
+  size_t macc=acc-this->weight[acc];
   size_t wacc=acc-1;
   lpout<< std::fixed << std::setprecision(10);
 // NOTE: Write in output file:
- if(acc>1 && weight_here!=0)
+
+  if(acc>1 && weight_here!=0)
     {
       this->lpout<<this->chiss[wacc]<<"\t"<<this->weight[wacc]<<"\t";
       for(size_t jk=0;jk<this->parameters.size();jk++)
       {
-       this->lpout<<this->acc_parameters[jk][macc];
-        if (jk + 1 < this->parameters.size())
-       this->lpout << "\t"; 
+         this->lpout<<this->acc_parameters[jk][macc];
+         if (jk + 1 < this->parameters.size())
+           this->lpout << "\t"; 
       }
       this->lpout << "\n";
     // Write in the screen:  *
       if(screen)
        {
-        cout<<endl;
-        So.message_screen("Step accepted. Info:");
-        So.message_screen("Step = ",j);
-        So.message_screen("# of accepted = ",wacc);
-        So.message_screen("Acceptance rate = ",100.0*wacc/static_cast<double>(j)," %");
-        So.message_screen("log_likelihood = ",this->chiss[macc]);
-        So.message_screen("Weight at this point = ",weight[wacc]);
-        for(size_t jk=0;jk<this->parameters.size();jk++)
-          So.message_screen("Accepted value",jk," = ",acc_parameters[jk][macc]);
-        cout<<endl;
+          cout<<endl;
+          So.message_screen("Step accepted. Info:");
+          So.message_screen("Step = ",j);
+          So.message_screen("# of accepted = ",wacc);
+          So.message_screen("Acceptance rate = ",100.0*wacc/static_cast<double>(j)," %");
+          So.message_screen("log_likelihood = ",this->chiss[macc]);
+          So.message_screen("Weight at this point = ",weight[wacc]);
+          for(size_t jk=0;jk<this->parameters.size();jk++)
+            So.message_screen(this->params.name_parameters[jk]+ "= ",this->parameters[jk]);
+          cout<<endl;
       }
    }
 
@@ -794,14 +762,6 @@ void  McmcFunctions::auto_correlation_mcmc(vector< vector<real_prec> > &auto_cor
 
 // ************************************************************************************************
 // ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
 
 
 void McmcFunctions::entropy_mcmc(vector<vector<real_prec> > &pdf, vector<real_prec> &entro){
@@ -816,14 +776,6 @@ void McmcFunctions::entropy_mcmc(vector<vector<real_prec> > &pdf, vector<real_pr
   return;
 }
 
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
-// ************************************************************************************************
 // ************************************************************************************************
 // ************************************************************************************************
 // ************************************************************************************************
@@ -1677,8 +1629,6 @@ void McmcFunctions::posterior2d_combined_experiments(string fname_mean, string f
   int nll  = 25; // Divide the interval of posterior [0,1] in this number of bins
   int slab = 0;    // This means that the models read here are already selected after burn-in phase, so the cut hs been already done beforea calling this function
 
-
-
   // Vector containing the heights for the posterior
   vector<real_prec>sigmalevel;
   sigmalevel.push_back(0.683);
@@ -2066,323 +2016,6 @@ void McmcFunctions::posterior2d_combined_experiments(string fname_mean, string f
 
 // ************************************************************************** 
 // ************************************************************************* *
-void McmcFunctions::set_distance_priors(){
-
-  int I=this->params._dprior_ID();
-  int J=this->params._dprior_JD();  
-
-
-  if(I==1 && (J==1 || J==2 || J==3 || J==4))this->n_priors=1;
-  if(I==1 && (J==5 || J==6 || J==7))this->n_priors=2;
-  if(I==1 && J==8) this->n_priors=3;
-  if(I==2) this->n_priors=4;
-  if(I==3) this->n_priors=3;
-  if(I==4) this->n_priors=5;
-  this->priors_measured.resize(this->n_priors,0);
-  this->inv_cov.resize(this->n_priors);
-
-  for(int i=0;i<this->n_priors;++i)this->inv_cov[i].resize(this->n_priors,0);
-
-  vector<vector<real_prec> > cov(n_priors,vector<real_prec>(n_priors,0));
-  
-  switch(I){
-  case 1:
-    switch(J){
-    case 1:      /*DISTANCE PRIORS FROM KOMATSU et al 2009 WMAP5,	1) l_A*/
-      this->priors_measured[0]=302.10;
-      this->inv_cov[0][0]=pow(1./0.86,2);
-      break;
-      
-    case 2: /*DISTANCE PRIORS FROM KOMATSU et al 2009 WMAP5	1) R = shift parameter  */ 
-      this->priors_measured[0]=1.710;
-      this->inv_cov[0][0]=pow(1./0.019,2);
-      break;
-      
-    case 3:/*DISTANCE PRIORS FROM KOMATSU et al 2009 WMAP5    1) z_*/
-      this->priors_measured[0]=1090.04;
-      this->inv_cov[0][0]=pow(1./0.93,2);
-      break;
-      
-    case 4: /*DISTANCE PRIORS FROM KOMATSU et al 2009 WMAP5*   
-	      1) r_s = sond horizon*/
-      this->priors_measured[0]=146.8;
-      this->inv_cov[0][0]=pow(1./1.8,2);
-      break;
-      
-    case 5:/*DISTANCE PRIORS FROM KOMATSU et al 2009 WMAP5
-	     1) l_A = shift parameter
-	     2) R  = shift parameter
-	   */
-      this->priors_measured[0]=302.10;
-      this->priors_measured[1]=1.710;
-      for(int i=0;i<n_priors;++i)for(int j=0;j<n_priors;++j)cov[i][j]=0;
-      cov[0][0]=pow(0.86,2);
-      cov[1][1]=pow(0.019,2);
-      cov[0][1]=0.1109*(0.86*0.019);
-      cov[1][0]=cov[0][1];
-      matrix_inversion(cov,this->inv_cov);
-      break;
-      
-    case 6:/*DISTANCE PRIORS FROM KOMATSU et al 2009 WMAP5
-	     1) l_A = sound horizon angular scale
-	     2) z  = redshift at decoupling
-	   */
-      this->priors_measured[0]=302.10;
-      this->priors_measured[1]=1090.04;
-      for(int i=0;i<n_priors;++i)
-        for(int j=0;j<n_priors;++j)
-          cov[i][j]=0;
-      cov[0][0]=pow(0.86,2);
-      cov[1][1]=pow(0.93,2);
-      cov[0][1]=0.4215*(0.86*0.93);
-      cov[1][0]=cov[0][1];
-      matrix_inversion(cov,this->inv_cov);
-      break; 
-
-    case 7:/*DISTANCE PRIORS FROM KOMATSU et al 2009 WMAP5
-	     1) R_ = shift parameter
-	     2) z  = redshift at decoupling
-	   */
-
-      this->priors_measured[0]=1.710;
-      this->priors_measured[1]=1090.04;
-      
-      for(int i=0;i<n_priors;++i)for(int j=0;j<n_priors;++j)cov[i][j]=0;
-      cov[0][0]=pow(0.019,2);
-      cov[1][1]=pow(0.93,2);
-      cov[0][1]=0.6928*(0.019*0.93);
-      cov[1][0]=cov[0][1];
-      matrix_inversion(cov,this->inv_cov);
-      break;
-
-    case 8:/*DISTANCE PRIORS FROM KOMATSU et al 2009 WMAP5
-	     1) l_ = sound horizon angular scale
-	     2) R_ = shift parameter
-	     3 z  = redshift at decoupling
-	   */
-      this->priors_measured[0]= 302.10;
-      this->priors_measured[1]= 1.710;
-      this->priors_measured[2]= 1090.04;
-      this->inv_cov[0][0]= 1.800;
-      this->inv_cov[0][1]= 27.968;
-      this->inv_cov[0][2]=-1.103;
-      this->inv_cov[1][0]= inv_cov[0][1];
-      this->inv_cov[1][1]= 5667.577;
-      this->inv_cov[1][2]=-92.263;
-      this->inv_cov[2][0]= this->inv_cov[0][2];
-      this->inv_cov[2][1]= this->inv_cov[1][2];
-      this->inv_cov[2][2]= 2.923;
-      // //***********************************************************
-        //invirtiendo la covariancia: esto es solo para chequear
-      //for(int i=0;i<=n_priors;++i)for(int j=0;j<=n_priors;++j)cov[i][j]=0;
-        // cov[1][1]= pow(0.86,2);
-        // cov[1][2]= 0.1109*0.86*0.019;
-        // cov[1][3]= 0.4215*0.86*0.93;
-        // cov[2][1]= cov_priors_cmb[1][2];
-        // cov[2][2]= pow(0.019,2);
-        // cov[2][3]= 0.6928*1.019*0.93;
-        // cov[3][1]= cov_priors_cmb[1][3];
-        // cov[3][2]= cov_priors_cmb[2][3];
-        // cov[3][3]= pow(0.93,2);
-	
-      //   //***********************************************************      
-      break;
-    }
-
-    break;
-
-  case 2:
-    /*EXTENDED DISTANCE PRIORS FROM CMB+SNia+Ho FROM KOMATSU et al 2010
-      1) l_A(z_star),  
-      2) R(z_star), 
-      3) z_star = redshift  at decoupling 
-      4) 100w_b  
-    */
-    this->priors_measured[0]=302.10;
-    this->priors_measured[1]=1.710;
-    this->priors_measured[2]=1090.04;
-    this->priors_measured[3]=2.2765;
-    
-    this->inv_cov[0][0]= 31.001;
-    this->inv_cov[0][1]=-5015.642;
-    this->inv_cov[0][2]= 183.903;
-    this->inv_cov[0][3]= 2337.977;
-    
-    this->inv_cov[1][0]=this->inv_cov[0][1];
-    this->inv_cov[1][1]= 876807.166;
-    this->inv_cov[1][2]=-32046.750;
-    this->inv_cov[1][3]=-403818.837;
-    
-    
-    this->inv_cov[2][0]=this->inv_cov[0][2];
-    this->inv_cov[2][1]=this->inv_cov[1][2];
-    this->inv_cov[2][2]=1175.054;
-    this->inv_cov[2][3]=14812.579;
-    
-    this->inv_cov[3][0]=this->inv_cov[0][3];
-    this->inv_cov[3][1]=this->inv_cov[1][3];
-    this->inv_cov[3][2]=this->inv_cov[3][4];
-    this->inv_cov[3][3]=187191.186;
-    
-    break;    
-    
-  case 3:
-    /*DISTANCE PRIORS FROM KOMATSU et al 2010 WMAP7
-      1) l_A(z_star),  
-      2) R(z_star), 
-      3) z_star = redshift  at decoupling */
-    this->priors_measured[0] = 302.09;
-    this->priors_measured[1] = 1.725;
-    this->priors_measured[2] = 1091.3;
-    this->inv_cov[0][0]= 2.305;
-    this->inv_cov[0][1]= 29.698;
-    this->inv_cov[0][2]= -1.333;
-    this->inv_cov[1][0]= this->inv_cov[0][1];
-    this->inv_cov[1][1]= 6825.270;
-    this->inv_cov[1][2]=-113.180;
-    this->inv_cov[2][0]= this->inv_cov[0][2];
-    this->inv_cov[2][1]= this->inv_cov[1][2];
-    this->inv_cov[2][2]= 3.414;
-    
-    break;
-    
-    
-  case 4:
-    /*DISTANCE PRIORS FROM SDSS(LSS)+CMB+SNia FROM SANCHEZ et al. 2009
-      1) 100 \Omega_bar h^2, 
-      2) z_star = redshift  of decoupling 
-      3) l_A(z_star),  
-      4) R(z_star), 
-      5) G(z_m), z_m=0.35*/
-    this->priors_measured[0]=2.28;
-    this->priors_measured[1]=1090.12;
-    this->priors_measured[2]=301.58;
-    this->priors_measured[3]=1.701;
-    this->priors_measured[4]=1175.;
-    for(int i=1;i<n_priors;++i)for(int j=1;j<n_priors;++j)cov[i][j]=0;
-    cov[0][0]= 2.99e-7;
-    cov[0][1]=-4.2030e-4;
-    cov[0][2]=-1.9988e-4;
-    cov[0][3]=-3.4393e-6;
-    cov[0][4]=-1.9978e-3;
-    cov[1][0]=cov[0][1]; 
-    cov[1][1]=8.6812e-1;
-    cov[1][2]=0.2557;
-    cov[1][3]=1.1999e-1;
-    cov[1][4]=3.2355;
-    cov[2][0]=cov[0][2];
-    cov[2][1]=cov[1][2];
-    cov[2][2]=0.4558;
-    cov[2][3]=3.1265e-2;
-    cov[2][4]=1.8247;
-    cov[3][0]=cov[0][3];
-    cov[3][1]=cov[1][3];
-    cov[3][2]=cov[2][3];
-    cov[3][3]=3.1460e-4;
-    cov[3][4]=3.9649e-2;
-    cov[4][0]=cov[0][4];
-    cov[4][1]=cov[1][4];
-    cov[4][2]=cov[2][4];
-    cov[4][3]=cov[3][4];
-    cov[4][4]=4.3784e2;
-    matrix_inversion(cov,this->inv_cov);
-  }
-  
-  return ;
-}
-
-
-// ************************************************************************** 
-// ************************************************************************* *
-
-real_prec McmcFunctions::chi_squared_distance_priors(){
-  real_prec ans=0;
-
-  for(size_t i=0;i<this->priors_model.size();++i)
-    for(size_t k=0;k<this->priors_model.size();k++)
-      ans+=(this->priors_measured[i]-this->priors_model[i])*inv_cov[i][k]*(this->priors_measured[k]-this->priors_model[k]);
-  return ans;
-}
-
-// ************************************************************************** 
-// ************************************************************************* *
-
-void McmcFunctions::distance_priors_cmb_model(int I, int J, s_CosmologicalParameters *scp){
-  Cosmology CF(*scp);
-  this->priors_model.resize(this->n_priors,0);
-  /*Distance priors from Komatsu et al. 2010 (CMB)*/
-  /*Calculamos z_dec segun Hu & Sujiyama, ver Komatsu et al. 2007 WMAP5 eq 65 */
-  real_prec omega_b  = (scp->Om_baryons)*pow(scp->hubble,2);
-  real_prec omega_m  = (scp->Om_matter)*pow(scp->hubble,2);
-
-  // Baryon drag epoch:
-  real_prec z_drag = CF.drag_redshift(); 
-  real_prec da_zd  = CF.proper_angular_diameter_distance(z_drag);
-  real_prec rsound = CF.comoving_sound_horizon(z_drag);
-  real_prec R      = (1+z_drag)*da_zd*sqrt(scp->Om_matter)*scp->Hubble/Constants::speed_light;
-  real_prec lA     = (1+z_drag)*da_zd*M_PI/rsound;
-
-  if(I==1 && J==1)this->priors_model[0]=lA;
-  if(I==1 && J==2)this->priors_model[0]=R;
-  if(I==1 && J==3)this->priors_model[0]=z_drag;
-  if(I==1 && J==4)this->priors_model[0]=rsound;
-  if(I==1 && J==5){
-    this->priors_model[0] =  lA;
-    this->priors_model[1] =  R;
-  }
-  if(I==1 && J==6){
-    this->priors_model[0] =  lA;
-    this->priors_model[1] =  z_drag;
-  }
-  if(I==1 && J==7){
-    this->priors_model[0] =  R;
-    this->priors_model[1] =  z_drag;
-  }
-  if((I==1 && J==8) || I==3){
-    this->priors_model[0] =  lA;
-    this->priors_model[1] =  R;
-    this->priors_model[2] =  z_drag;
-  }
-  if(I==2 && J==1){
-    this->priors_model[0] =  lA;
-    this->priors_model[1] =  R;
-    this->priors_model[2] =  z_drag;
-    this->priors_model[3] =  100.0*omega_b;
-  }
-  if(I==4){
-    this->priors_model[0] =  100.0*omega_b;
-    this->priors_model[1] =  z_drag;
-    this->priors_model[2] =  lA;
-    this->priors_model[3] =  R;
-    this->priors_model[4] =  (1+Constants::z_mean_sdss)*this->Cf.proper_angular_diameter_distance(Constants::z_mean_sdss)*pow(0.01*this->Cf.Hubble_function(Constants::z_mean_sdss),0.8);
-  }
-
-  So.message_screen("Distance priors with fid. cosmology.      Measured priors.              difference");
-  for(int i=0;i<n_priors;i++)
-    cout<<priors_measured[i]<<"                       "<<priors_model[i]<<"     "<<100*(priors_measured[i]-priors_model[i])/priors_measured[i]<<"%"<<endl;
-
-  real_prec chis_cmb=chi_squared_distance_priors();
-  
-  for(size_t i=0;i<priors_model.size();++i)
-    priors_model[i]=0;  
-
-  cout<<"  "<<endl;
-  cout <<"========================================================================================== "<<endl; 
-  cout<<"chi^2 from fiducial parameters   "<<chis_cmb<<endl;
-  cout <<"========================================================================================== "<<endl;
-  
-}
-
-// ************************************************************************** 
-// ************************************************************************* 
-void McmcFunctions::run_distance_priors(string par_file, int th){
-
-    set_distance_priors();
-
-    }
-
-// ************************************************************************** 
-// ************************************************************************* *
 void McmcFunctions::analyze_chains(int ip_parameter){
     double pdfmax=0;
  #ifdef _RUN_PARALLEL_CHAINS_
@@ -2625,3 +2258,145 @@ void McmcFunctions::get_covariance_parameters()
   this->cov_parameters_decomposed.assign(this->parameters.size(), std::vector<double>(this->parameters.size(), 0.0));
   Cholesky_decomposition(cov_parameters_aux, cov_parameters_decomposed);      
  }
+
+
+// ************************************************************************** 
+// ************************************************************************* *
+// ************************************************************************** 
+// ************************************************************************* *
+
+ void McmcFunctions::read_nchains()
+{
+  size_t slab = this->params._number_of_burnin_phase_models();
+  size_t nchains = this->params._number_of_chains();
+  
+  if(this->params._update_covariance())
+    slab+=this->params._number_of_post_burnin_phase_models(); 
+
+
+  
+  vector<vector< vector<double>>> acc_par_chains;
+  
+  if(nchains>1)
+  {
+    acc_par_chains.resize(this->params._number_of_fit_parameters());
+    
+    for(size_t ip = 0; ip < this->params._number_of_fit_parameters(); ++ip) 
+      acc_par_chains[ip].resize(nchains);
+  }
+
+  for(size_t ch=0;ch< nchains; ++ch) // Loop over the chains
+  {
+    vector<float>prop;
+    string file = this->params._Output_directory()+this->params._name_experiment()+"_chain"+to_string(ch)+".txt";
+
+   // message_screen("Reading chain in ",file);
+
+    size_t nacc = File.read_file(file, prop, 1);
+    size_t Ncols=(static_cast<size_t>(prop.size()/nacc));
+
+    for(size_t i = slab ; i < nacc ;++i)
+     {
+        this->chiss.push_back(prop[i*Ncols]);
+        this->weight.push_back(prop[1+i*Ncols]);
+     }
+ 
+    for(size_t ip=0; ip< this->params._number_of_fit_parameters();++ip)
+      {
+        for(size_t i = slab ; i < nacc ;++i)
+          {
+            double val = prop[2+ip+i*Ncols];
+            this->acc_parameters[ip].push_back(val);
+          }
+     }
+  if(nchains>1)
+  {
+    for(size_t ip=0; ip< this->params._number_of_fit_parameters();++ip)
+      {
+        for(size_t i = slab ; i < nacc ;++i)
+          {
+            double val = prop[2+ip+i*Ncols];
+            acc_par_chains[ip][ch].push_back(val);    // Used to get Gelman Rubbin diagnostics
+          }
+     }
+   }
+
+  }
+
+  if(nchains>1)
+  { 
+    this->gelman_rubbin_diag(acc_par_chains);
+    acc_par_chains.clear(); acc_par_chains.shrink_to_fit();
+  }
+  
+  string ffile = this->params._Output_directory()+this->params._name_experiment()+"_merged_chains.txt";
+  So.message_screen("Writting merged chains in file", ffile);
+  ofstream lp; lp.open(ffile.c_str());  
+  lp << std::fixed << std::setprecision(10);
+  for(size_t i=0; i< this->acc_parameters[0].size();++i)
+  { 
+    lp<<this->chiss[i]<<"\t"<<this->weight[i]<<"\t";
+    for(size_t jk=0;jk<this->params._number_of_fit_parameters();jk++)
+    {
+      lp<<this->acc_parameters[jk][i];
+      if (jk + 1 < this->params._number_of_fit_parameters())
+        lp << "\t";
+    }
+   lp<<"\n";
+  }
+
+  this->chain_file_name = ffile;
+  lp.close();
+
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+void McmcFunctions::output_parameters()
+{
+
+
+  string append_n = this->params._name_experiment();
+
+  string json_file_params = this->params._Output_directory()+"MCMC_parameters_"+append_n+".json";
+
+  std::ofstream jfile(json_file_params);
+  {
+    So.message_screen("Printing results in file", json_file_params);
+    json j;
+    for(size_t ip=0; ip < this->params._number_of_fit_parameters(); ++ip)
+      if(this->params.action_parameters[ip] != static_cast<int>(MCMCactions::FIXED))
+        {
+          std::string pname = this->params.name_parameters[ip];
+          j[pname]["Mean"]         = mean_parameter[ip];
+          j[pname]["Upper 1sigma"] = upper_bound_sigma[ip];
+          j[pname]["Lower 1sigma"] = lower_bound_sigma[ip];
+          j[pname]["Stdev"]        = stdev_parameter[ip];
+        }
+        jfile << j.dump(4);
+        jfile.close();
+  }
+  {
+    string json_file_plots =  this->params._Output_directory() + "MCMC_plots_"+append_n+".json";
+    So.message_screen("Printing plot parameters in file", json_file_plots);
+    std::ofstream jfile(json_file_plots);
+    json j;
+    j["mean_parameter"]      = this->mean_parameter;
+    j["sigma_max"]      = this->upper_bound_sigma;
+    j["sigma_min"]      = this->lower_bound_sigma;
+    j["file_chains"]         = this->chain_file_name;
+    j["burn_in_number"]      = this->params._number_of_burnin_phase_models();
+    j["parameter_names"]     = this->params.name_parameters;
+    j["parameter_priors_min"]     = this->params.prior_parameters_min_values;
+    j["parameter_priors_max"]     = this->params.prior_parameters_max_values;
+    j["number_of_bins"] = this->nbin_1D;  
+    jfile << j.dump(4);
+    jfile.close();
+    std::string cmd = "python3 ../Python/cosmolib_plots.py " + json_file_plots + " &";
+    system(cmd.c_str());
+  }
+       
+}

@@ -763,53 +763,53 @@ void Catalogue::read_catalog_new(std::string input_file)
       }
     }
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
- void Catalogue::print_catalogue(string file, bool pbias){
+ void Catalogue::print_catalogue(string file){
  
    So.enter(__PRETTY_FUNCTION__);
+
    ofstream rcat;
    rcat.open(file.c_str());
    rcat.precision(3);
    rcat.setf(ios::showpoint);
    rcat.setf(ios::scientific);
-   ULONG counter=0;
 
-   
+   ULONG counter=0;
+  
    this->So.message_screen("Writting downsampled version of input catalogue with bias in file ",file);
 
-   if(this->params._get_cwc_properties())
+   if(true==this->params._get_cwc_properties())
    {
-
-    if(pbias)
-    {
-        rcat<<"#coord1, coord2, coord3, logM, log rs, log c, log spin, tidal_ani_dm, tidal_ani_tr, bias,bias_lm"<<endl;
-        for (size_t i = 0; i < this->NOBJS; ++i) {
-          rcat << coord1[i]<<"\t"
-              <<coord2[i]<<"\t"
-              <<coord3[i]<<"\t"
-              <<log10(mass[i]) << "\t"
-              << log10(rs[i]) << "\t"
-              << log10(concentration[i]) << "\t"
-              << log10(spin_bullock[i]) << "\t"
-              << tidal_anisotropy_dm[i] << "\t"
-              << tidal_anisotropy[i] << "\t"
-              << bias[i] << "\t"
-              << static_cast<int>(gal_cwt[i]) << "\t";
-              for (size_t il = 0; il < bias_multipole.size(); ++il)
-                rcat << bias_multipole[i][il] << "\t";
-          rcat << std::endl;
+      if(true==this->params._Get_tracer_bias_multipoles())
+        {
+          rcat<<"#coord1, coord2, coord3, logM, log rs, log c, log spin, tidal_ani_dm, tidal_ani_tr, bias,bias_lm"<<endl;
+          for (size_t i = 0; i < this->NOBJS; ++i)
+           {
+               rcat << coord1[i]<<"\t"
+                <<coord2[i]<<"\t"
+                <<coord3[i]<<"\t"
+                <<log10(mass[i]) << "\t"
+                << log10(rs[i]) << "\t"
+                << log10(concentration[i]) << "\t"
+                << log10(spin_bullock[i]) << "\t"
+                << tidal_anisotropy_dm[i] << "\t"
+                << tidal_anisotropy[i] << "\t"
+                << bias[i] << "\t"
+                << static_cast<int>(gal_cwt[i]) << "\t";
+                for (size_t il = 0; il < bias_multipole.size(); ++il)
+                  rcat << bias_multipole[i][il] << "\t";
+                rcat << std::endl;
+          }
         }
-      }
-    else
+    else 
     {
-        rcat<<"#coord1, coord2, coord3, logM, log rs, log c, log spin, tidal_ani_dm, tidal_ani_tr, bias, cwc"<<endl;
-        for (size_t i = 0; i < this->NOBJS; ++i) {
-          rcat << coord1[i]<<"\t"
+      rcat<<"#coord1, coord2, coord3, logM, log rs, log c, log spin, tidal_anisotropy_dm, tidal_anisotropy_tr, bias, cwc"<<endl;
+      for (size_t i = 0; i < this->NOBJS; ++i) {
+        rcat << coord1[i]<<"\t"
               <<coord2[i]<<"\t"
               <<coord3[i]<<"\t"
               <<log10(mass[i]) << "\t"
@@ -824,9 +824,10 @@ void Catalogue::read_catalog_new(std::string input_file)
   
     }
   }
-  else{
-    if(pbias)
-    {
+  else
+   {
+    if(this->params._Get_tracer_bias_multipoles())
+      {
         rcat<<"#coord1, coord2, coord3, logM, log rs, log c, log spin, bias,bias_lm"<<endl;
         for (size_t i = 0; i < this->NOBJS; ++i) {
           rcat << coord1[i]<<"\t"
@@ -843,7 +844,7 @@ void Catalogue::read_catalog_new(std::string input_file)
         }
       }
     else
-    {
+     {
         rcat<<"#coord1, coord2, coord3, logM, log rs, log c, log spin, bias"<<endl;
         for (size_t i = 0; i < this->NOBJS; ++i) {
           rcat << coord1[i]<<"\t"
@@ -855,16 +856,8 @@ void Catalogue::read_catalog_new(std::string input_file)
               << log10(spin_bullock[i]) << "\t"
               << bias[i]<<endl;
         }
-  
-    }
-
-
-
-
+   }
   }
-
-
-    rcat.close();
+  rcat.close();
   So.DONE();
-
 }

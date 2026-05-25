@@ -2169,28 +2169,33 @@ void Cwclass::Konvolve(vector<real_prec> &in, vector<real_prec>&out, string type
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-void Cwclass::get_tidal_anisotropy(string input_file, string output_file){
-    vector<real_prec>delta(this->params._NGRID(),0);
-    this->File.read_array(input_file, delta);
-    get_overdens(delta,delta);
-    this->get_CWC(delta);
-    for(ULONG i=0;i<delta.size();++i)
-        delta[i]=tidal_anisotropy(this->lambda1[i],this->lambda2[i],this->lambda3[i]);
-    this->File.write_array(output_file, delta);
+void Cwclass::get_tidal_anisotropy(string input_file, string output_file)
+{
+  So.enter(__PRETTY_FUNCTION__);
+  vector<real_prec>delta(this->params._NGRID(),0);
+  this->File.read_array(input_file, delta);
+  get_overdens(delta,delta);
+  this->get_CWC(delta);
+  for(ULONG i=0;i<delta.size();++i)
+    delta[i]=tidal_anisotropy(this->lambda1[i],this->lambda2[i],this->lambda3[i]);
+  this->File.write_array(output_file, delta);
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-void Cwclass::get_tidal_anisotropy(vector<real_prec>&delta, string output_file){
-    get_overdens(delta,delta);
-    this->get_CWC(delta);
-    for(ULONG i=0;i<delta.size();++i)
-        delta[i]=tidal_anisotropy(this->lambda1[i],this->lambda2[i],this->lambda3[i]);
-    this->File.write_array(output_file, delta);
+void Cwclass::get_tidal_anisotropy(vector<real_prec>&delta, string output_file)
+{
+  So.enter(__PRETTY_FUNCTION__);
+  get_overdens(delta,delta);
+  this->get_CWC(delta);
+  for(ULONG i=0;i<delta.size();++i)
+    delta[i]=tidal_anisotropy(this->lambda1[i],this->lambda2[i],this->lambda3[i]);
+  this->File.write_array(output_file, delta);
 }
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 void Cwclass::get_tidal_anisotropy(vector<real_prec>&delta){
+ So.enter(__PRETTY_FUNCTION__);
  get_overdens(delta,delta);
  this->get_CWC(delta);
  for(ULONG i=0;i<delta.size();++i)
@@ -2198,6 +2203,7 @@ void Cwclass::get_tidal_anisotropy(vector<real_prec>&delta){
 }
 ////////////////////////////////////////////////////////////////////////////
 void Cwclass::get_tidal_anisotropy(vector<real_prec>&dens, vector<real_prec>&tidal){
+ So.enter(__PRETTY_FUNCTION__);
  vector<real_prec>delta(dens.size(),0);
  get_overdens(dens,delta);
  this->get_CWC(delta);

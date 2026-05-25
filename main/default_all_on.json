@@ -59,11 +59,11 @@
     "i_mass" : 6,
     "i_vmax" : -7,
     "i_vrms" : -8,
-    "i_rs" : -9,
+    "i_rs" : 9,
     "i_spin" : -10,
-    "i_spin_bullock" : -14,
-    "i_virial" : -13,
-    "i_rvir" : -15,
+    "i_spin_bullock" : 14,
+    "i_virial" : 13,
+    "i_rvir" : 15,
     "i_b_to_a" : -11,
     "i_c_to_a" : -12,
     "convert_to_halo_ellipiticity_and_prolatness" : false,
@@ -158,7 +158,7 @@
         "compute_joint_pdf" : false,
         "compute_conditional_pdf" : false,
         "write_files_for_histograms" : false
-    },
+    }, 
 
     "BiasMappingTechnique":{
         "number_iterations_kernel" : 400,
@@ -186,7 +186,7 @@
     "IndividualTracerBias":{
         "get_individual_tracer_bias" : true,
         "assign_bias_to_full_sample" : false,
-        "fraction_to_dilute_sample" : 0.2,
+        "fraction_to_dilute_sample" : 0.1,
         "get_tracer_relative_bias" : false,
         "get_tracer_quadratic_bias" : false,
         "get_tracer_bias_squared" : false,
@@ -195,14 +195,16 @@
         "min_kvalue_tracer_bias" : 0.02,
         "min_kvalue_tracer_qbias" : 0.02,
         "max_kvalue_tracer_qbias" : 0.08,
-        "max_multipole_tracer_lmbias" : 8
+        "max_multipole_tracer_lmbias" : 8,
+        "get_cwc_properties" : true,
+        "print_catalogue": true
     }
  },
 
 
 "CWCAnalysis":{
     "status" : "on", 
-    "output_directory" : "null",
+    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_power/",
     "box_size" : 1000.0,
     "min_x_coord" : 0.0,
     "min_y_coord" : 0.0,
@@ -280,7 +282,7 @@
 
 
 "SurveyProperties":{
-    "status" : "on", 
+    "status" : "off", 
     "survey_name" : "UNITSIM_HALOS",
     "constant_sky_depth" : false,
     "redshift_min_sample" : 0.0,
@@ -310,7 +312,7 @@
 },
 
 "GalaxyAnalysis":{
-    "status" : "on", 
+    "status" : "off", 
     "output_directory" : "null",
     "measure_stellar_mass_function" : false,
     "measure_luminosity_function" : false,
@@ -327,7 +329,7 @@
 },
 
 "HaloAnalysis":{
-    "status" : "on", 
+    "status" : "off", 
     "output_directory" : "../output_ibias/",
     "mass_units" : 1,
     "number_bins_histograms" : 200,
@@ -503,7 +505,7 @@
     },
 
 "CosmologicalLibrary":{
-    "status" : "on", 
+    "status" : "off", 
     "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_cosmolib/",
     "cosmological_redshift" :  0.0,
     "fixed_cosmological_redshift" : true,
@@ -608,24 +610,25 @@
   },
 
 "MCMC" :{
-    "status" : "on", 
-    "output_directory" : "Chains/",
-    "name_parameters" : ["Soil thermal conductivity", "Soil temperature", "Soil specific heat capacity", "Soil density", "Nuisance parameter"],
-    "initial_parameters" :          [1.5,  286.25,  0.5, 1450.0, 46.33],
-    "prior_parameters_min_values" : [0.5,  280.00, 0.02, 1300.0, 60.0],
-    "prior_parameters_max_values" : [2.5,  290.00, 1.80, 1600.0, 75.0],
-    "proposal_parameters" :        [0.03,  0.05, 0.01,  10.0,   0.1],
-    "action_parameters" :  [0,   0,     0,     2,      0],
+    "status" : "off", 
+    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_distance_priors/",
+    "name_experiment" : "dpriors_cmb",
+    "name_parameters" : ["Omega_matter", "Omega_baryon", "w_eos"],
+    "initial_parameters" :          [0.5,  0.046,  -1.0],
+    "prior_parameters_min_values" : [0.1,  0.01, -2.0],
+    "prior_parameters_max_values" : [1.0,  0.09, 0.0],
+    "proposal_parameters" :         [0.001,  0.001, 0.001],
+    "action_parameters" :  [0,  0,  0],
     "random_initial_value_within_priors": true,
-    "number_of_accepted_models" :     400000,
-    "number_of_burnin_phase_models" : 250000,
-    "number_of_post_burnin_phase_models" : 20000,
+    "number_of_accepted_models" :     1000,
+    "number_of_burnin_phase_models" : 700,
+    "number_of_post_burnin_phase_models" : 200,
     "number_of_steps_to_update_covariance" : 5000,
     "number_of_avoided_steps_to_get_stats" : 10,
     "update_covariance": false,
-    "number_of_chains" : 12,
-    "use_distance_priors" : false,
-    "dprior_ID": 1, 
+    "number_of_chains" : 10,
+    "use_distance_priors" : true,
+    "dprior_ID": 2, 
     "dprior_JD": 1
 }
 

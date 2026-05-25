@@ -3974,6 +3974,12 @@ private :
   /** 
    * @brief 
    */
+  string name_experiment;
+//------------------------------------------
+//------------------------------------------
+  /** 
+   * @brief 
+   */
   bool update_covariance;
 //------------------------------------------
   /** 
@@ -8917,6 +8923,11 @@ public:
    * @brief Retrieve private variable
   */
   bool _random_initial_value_within_priors(){return  this->random_initial_value_within_priors;}
+  //////////////////////////////////////////////////////////
+ /** 
+   * @brief Retrieve private variable
+  */
+  string _name_experiment(){return  this->name_experiment;}
   //////////////////////////////////////////////////////////
  /** 
    * @brief Retrieve private variable

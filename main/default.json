@@ -195,7 +195,9 @@
         "min_kvalue_tracer_bias" : 0.02,
         "min_kvalue_tracer_qbias" : 0.02,
         "max_kvalue_tracer_qbias" : 0.08,
-        "max_multipole_tracer_lmbias" : 8
+        "max_multipole_tracer_lmbias" : 8,
+        "get_cwc_properties" : true,
+        "print_catalogue": true
     }
  },
 

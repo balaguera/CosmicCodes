@@ -4182,12 +4182,11 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
  void PowerSpectrumF::object_by_object_bias(Catalogue& tracer_cat, vector<real_prec>& dm_field){
    this->So.enter(__PRETTY_FUNCTION__);
 
-  
-
-#ifdef _FULL_VERBOSE_
+  #ifdef _FULL_VERBOSE_
    this->So.message_screen("Getting object-to-object bias");
 #endif
-     kvector_data.clear();
+  
+  kvector_data.clear();
 #if defined _TNG_ || defined _TNG_GAL_ || defined _UNITSIM_
      kvector_data.shrink_to_fit();
      for(int i=0;i<this->params._d_Nnp_data();i++)
@@ -4285,19 +4284,14 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
     So.DONE();
  
     real_prec conversion_factor=(1.+this->params._redshift())/(this->cosmology.Hubble_function(this->params._redshift()));
-#ifndef _TNG_GAL
-    real_prec kmax_b=0.08;
-    real_prec kmax_c=0.04;
-#elif defined _TNG_GAL_
-     real_prec kmax_b=0.25;
-     real_prec kmax_c=0.2;
-#endif
+
 
      real_prec lss_bias_halo=0;
      tracer_cat.resize_bias(tracer_cat._NOBJS());
      tracer_cat.resize_bias_rs(tracer_cat._NOBJS());
      tracer_cat.resize_rs_factor(tracer_cat._NOBJS());
 
+ 
 #ifdef _USE_OMP_
 #pragma omp parallel for reduction(+:lss_bias_halo)
 #endif
@@ -4306,6 +4300,8 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
         real_prec xtracer=tracer_cat.coord1_at(itr);
         real_prec ytracer=tracer_cat.coord2_at(itr);
         real_prec ztracer=tracer_cat.coord3_at(itr);
+     
+
 
 #ifndef _TNG_GAL_
         real_prec vx=tracer_cat.vel1_at(itr)*conversion_factor;
@@ -4394,13 +4390,10 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
                }
           }
         real_prec power_hm=0;
-        real_prec power_hm2=0;
-        real_prec power_hm3=0;
         real_prec p_dm=0;
-        real_prec p_dm2=0;
-        real_prec p_dm3=0;
         real_prec power_hm_s=0;
         real_prec gama=0;
+
         for(ULONG i=Kmin_bin; i< power_cross.size();++i)
           {
             power_hm+=power_cross[i]; // *** here it must be nmodes*(<power>_av)= nmodes*(power/nmodes)=power. That's why I do not need nmodes
@@ -4411,20 +4404,8 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
 #ifndef _TNG_GAL_
             gama+=Gamma_num[i];
 #endif
-            if(this->kvector_data[i]<kmax_b)
-            {
-                power_hm2+=power_cross[i]; // *** here it must be nmodes*(<power>_av)= nmodes*(power/nmodes)=power. That's why I do not need nmodes
-                p_dm2+=power_dmat[i];
-             }
-            if(this->kvector_data[i]<kmax_c)
-            {
-                power_hm3+=power_cross[i]; // *** here it must be nmodes*(<power>_av)= nmodes*(power/nmodes)=power. That's why I do not need nmodes
-                p_dm3+=power_dmat[i];
-             }
         }
         real_prec hb=(power_hm/p_dm)*this->params._NGRID();
-        real_prec hb2=(power_hm2/p_dm2)*this->params._NGRID();
-        real_prec hb3=(power_hm3/p_dm3)*this->params._NGRID();
 #ifndef _TNG_GAL_
         real_prec hbs=power_hm_s*this->params._NGRID();
         gama= (gama/p_dm)*this->params._NGRID();
@@ -4439,31 +4420,6 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
    lss_bias_halo/=static_cast<real_prec>(tracer_cat._NOBJS());
    So.message_screen("\tMean large-scale bias from individual bias =", lss_bias_halo);
 
-#ifdef _TNG_GAL_
-   vector<real_prec>baux(tracer_cat._NOBJS(),0);
-   vector<real_prec>xaux(tracer_cat._NOBJS(),0);
-   vector<real_prec>yaux(tracer_cat._NOBJS(),0);
-   vector<real_prec>zaux(tracer_cat._NOBJS(),0);
-#ifdef _USE_OMP_
-#pragma omp parallel for
-#endif
-  for(ULONG i=0;i<xaux.size(); ++i)
-    {
-        baux[i]=tracer_cat[i].bias;
-        xaux[i]=tracer_cat[i].coord1;
-        yaux[i]=tracer_cat[i].coord2;
-        zaux[i]=tracer_cat[i].coord3;
-    }
-    string file_bias=this->params._Output_directory()+"Bias_gal1";
-    this->File.write_array(file_bias, baux);
-
-    vector<real_prec>bfaux(this->params._NGRID(),0);
-
-    string file_bias_f=this->params._Output_directory()+"Bias_gal1_field";
-    getDensity_CIC(this->params._Nft(),this->params._Nft(),this->params._Nft(),this->params._Lbox(),this->params._Lbox(),this->params._Lbox(),this->params._d_delta_x(),this->params._d_delta_x(),this->params._d_delta_x(),0,0,0,xaux,yaux,zaux,baux,bfaux,true);
-    this->File.write_array(file_bias_f, bfaux);
-
-#endif
    So.DONE();
  }
 

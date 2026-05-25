@@ -93,7 +93,8 @@ void get_hist(Params params, vector<real_prec>&dm_alpha, vector<real_prec>&tr_al
 ////////////////////////////////////////////////////////////////////////////
 
 
-void cw_analysis(Params &params){
+void cw_analysis(Params &params)
+{
   FileOutput File;
   ScreenOutput So;
   //Read dm field
@@ -103,15 +104,15 @@ void cw_analysis(Params &params){
   File.read_array(params._Input_Directory_X() + params._Name_Catalog_X(), dm_field); // Reading the binary file
 
           // Read catalog
-          Catalogue cat(params, "TRACER");
-          cat.read_catalog_new(params._Input_dir_cat() + params._file_catalogue()); // Read the asciii file
-          HaloTools htools(params, cat); // Feed params into the Catlaog class and define an object of that type
+  Catalogue cat(params, "TRACER");
+  cat.read_catalog_new(params._Input_dir_cat() + params._file_catalogue()); // Read the asciii file
+  HaloTools htools(params, cat); // Feed params into the Catlaog class and define an object of that type
 
           // Get density field from tracers
 
-          So.message_screen("============================================================");
-          So.message_screen("NO CWC quantities are to be computed. Check line", __LINE__);
-          So.message_screen("============================================================");
+  So.message_screen("============================================================");
+  So.message_screen("NO CWC quantities are to be computed. Check line", __LINE__);
+  So.message_screen("============================================================");
 
           vector<real_prec> tr_field_counts; // Cointainer for counts
           tr_field_counts.resize(params._NGRID(), 0); // Cointainer for counts
@@ -194,8 +195,6 @@ void cw_analysis(Params &params){
               // Histograms here are done classifying CW according to tracers.
           get_hist(params, dm_alpha, tr_alpha, alpha_bias,cwclass.CWClass, 1);
 
-
-
 }
 
 
@@ -275,7 +274,6 @@ int main(int argc, char *argv[])
         {"vcw", required_argument, 0, 'v'},
         {0, 0, 0, 0}
     };
-
 
  
   while ((c = getopt_long(argc, argv, "t:v:",long_options, &option_index)) != -1) 

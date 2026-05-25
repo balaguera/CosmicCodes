@@ -1,0 +1,3 @@
+/home/andres/data/Numerics/CosmicCODES/build/CMakeFiles/CosmiCalCpp.dir
+/home/andres/data/Numerics/CosmicCODES/build/CMakeFiles/edit_cache.dir
+/home/andres/data/Numerics/CosmicCODES/build/CMakeFiles/rebuild_cache.dir

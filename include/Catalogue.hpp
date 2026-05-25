@@ -652,7 +652,7 @@ public:
   * @brief Print Catalogue
   * @details Used to prints out of catalogue with assigned
   */
-  void print_catalogue(string file, bool bias);
+  void print_catalogue(string file);
 
   //////////////////////////////////////////////////////////
   /**
@@ -1765,7 +1765,6 @@ public:
     this->most_massive_neighbour.resize(N);
    }
 
-
    //////////////////////////////////////////////////////////
   /**
    * @public
@@ -1913,7 +1912,6 @@ public:
    Params& _params(){
     return this->params;
    }
-
 
 };
 

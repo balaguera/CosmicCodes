@@ -1179,6 +1179,7 @@ void Params::read_pars_json(std::string file){
 
 //------------------------------------------     
     const auto & IndividualTracerBias = BiasAnalysis.at("IndividualTracerBias");
+    this_section="IndividualTracerBias";
     this->forbid_unknown_keys(IndividualTracerBias, 
           {
             "get_individual_tracer_bias",
@@ -1272,7 +1273,7 @@ void Params::read_pars_json(std::string file){
     // Get_tracer_bias multipoles
     pname = "get_tracer_bias_multipoles";
     pname_c = "Get_tracer_bias_multipoles";
-    description = "Compute multipola bias for tracers.";
+    description = "Compute multipole bias for tracers.";
     options = "bool";
     this->Get_tracer_bias_multipoles = IndividualTracerBias.value(pname, false);
     this->collect_params_info(pname, pname_c, this_section, description, options);
@@ -5179,43 +5180,38 @@ void Params::read_pars_json(std::string file){
   if(ON==status)
   {
     this->input_sections.MCMC = true;
-    this->enabled_sections.push_back("CosmologicalLibrary");
-    this->forbid_unknown_keys(CosmologicalLibrary, 
+    this->enabled_sections.push_back("MCMC");
+    this->forbid_unknown_keys(MCMC, 
        {
           "status", 
           "output_directory",
-          "run_chains_and_analyze",
+          "name_experiment",
           "name_parameters",
           "initial_parameters",
           "prior_parameters_min_values",
           "prior_parameters_max_values",
-          "number_values_redshift",
           "proposal_parameters",
           "action_parameters",
-          "number_of_burnin_phase_models",
+          "random_initial_value_within_priors",
           "number_of_accepted_models" ,
+          "number_of_burnin_phase_models",
           "number_of_post_burnin_phase_models",
           "number_of_steps_to_update_covariance",
           "number_of_avoided_steps_to_get_stats",
           "update_covariance",
-          "only_analyze_chains",
           "number_of_chains",
-          "random_initial_value_within_priors",
           "use_distance_priors",
           "dprior_ID",
-          "dprior_JD",
-          "use_diagonal_cov_matrix",
-          "use_analytic_marginalization_wrt_amplitude_for_power",
-          "name_of_experiment",
-          "type_of_parspace_sampling",
-          "show_live_models",
-          "frequency_live_models"
+          "dprior_JD"
         },
       "MCMC");
 
 
   pname="output_directory";
   this->Output_directory = MCMC.value(pname, "null");
+
+  pname="name_experiment";
+  this->name_experiment = MCMC.value(pname, "null");
 
   
   pname="name_parameters";
@@ -5262,6 +5258,10 @@ void Params::read_pars_json(std::string file){
 
   pname="number_of_accepted_models";
   this->number_of_accepted_models = MCMC.value(pname, 1);
+  description = "Number accepted models within the MCMC";
+  options = "size_t";
+  this->collect_params_info(pname, pname_c, this_section, description, options);
+  this->parameter_number.emplace_back(pname, this->number_of_accepted_models);
 
   pname="number_of_burnin_phase_models";
   this->number_of_burnin_phase_models = MCMC.value(pname, 1);
@@ -5281,12 +5281,16 @@ void Params::read_pars_json(std::string file){
   pname="number_of_chains";
   this->number_of_chains = MCMC.value(pname, 1);
   description = "Number of Markoff chains to be run in parallel";
-  options = "int";
+  options = "size_t";
   this->collect_params_info(pname, pname_c, this_section, description, options);
   this->parameter_number.emplace_back(pname, this->number_of_chains);
 
   pname="use_distance_priors";
   this->use_distance_priors = MCMC.value(pname, false);
+  options = "true, false";
+  description = "Use CMB distance priors for MCMC analysis of cosmological parameters";
+  this->collect_params_info(pname, pname_c, this_section, description, options);
+
 
   pname="dprior_ID";
   this->dprior_ID = MCMC.value(pname, 1);

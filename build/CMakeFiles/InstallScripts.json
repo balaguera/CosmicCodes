@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/andres/data/Numerics/CosmicCODES/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

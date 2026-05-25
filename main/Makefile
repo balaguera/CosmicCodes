@@ -68,8 +68,8 @@ OBJS_PA     = ../examples/paramsr.o
 TARGET_TEST   = test.exe
 OBJS_TEST     = ../examples/test.o
 
-TARGET_MCMC   = distance_priors.exe
-OBJS_MCMC     = ../examples/distance_priors.o
+TARGET_DP   = distance_priors.exe
+OBJS_DP     = ../examples/distance_priors.o
 
 
 # Default target
@@ -150,9 +150,9 @@ $(TARGET_TEST): $(OBJS_TEST)
 
 
 
-$(TARGET_MCMC): $(OBJS_MCMC)
+$(TARGET_DP): $(OBJS_DP)
 	@echo "Linking $@"
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_MCMC) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS_DP) $(LCOSMO) $(LIBS_HEALPIX) $(LIBS_FFTW) $(LIBS_GSL)
 	@echo "	  "		
 
 ##########################################################################
@@ -166,14 +166,14 @@ htools:    $(TARGET_HT)
 cosmicweb: $(TARGET_CW)
 params:    $(TARGET_PA)
 test:      $(TARGET_TEST)
-mcmc:      $(TARGET_MCMC)
+distance_priors:      $(TARGET_DP)
 
 ##########################################################################
 # Clean
 clean:
 	@echo "Cleaning..."
 	rm -f $(OBJS_CoL) $(OBJS_BMT) $(OBJS_PS) $(OBJS_SB) $(OBJS_GT) $(OBJS_Cl)\
-	      $(OBJS_HT) $(OBJS_CW) $(OBJS_PA) $(OBJS_TEST) *.exe core.* *~ 
+	      $(OBJS_HT) $(OBJS_CW) $(OBJS_PA) $(OBJS_DP) $(OBJS_TEST) *.exe core.* *~ 
 
 ##########################################################################
 .PHONY: all clean cosmolib bmt power hgaps secbias gtools htools cosmicweb params

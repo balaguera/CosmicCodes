@@ -33,43 +33,48 @@ void ind_bias(Params &params)
 
     vector<real_prec> bias_field; // Define container to allocate the bias on a mesh
     vector<real_prec> tr_field_counts; // Cointainer for counts
+    tr_field_counts.resize(params._NGRID(), 0); // Cointainer for counts
+    htools.get_density_field_grid(_COUNTS_,tr_field_counts);  // Computing counts
 
-    
-    
     if(params._get_cwc_properties())
     {
       vector<real_prec> dm_alpha(params._NGRID(), 0); //Container for TA computed from the tidal field of dm
+      vector<real_prec> tr_alpha(params._NGRID(), 0); //Container for TA computed from the tidal field of dm
+
       Cwclass cwclass_dm(params); //CWC type for dark matter
       cwclass_dm.get_tidal_anisotropy(dm_field, dm_alpha); //Compute tidal anisotropy from dm
-      htools.assign_idgrid_to_tracers();
       htools.assign_cwc_to_tracers(cwclass_dm.CWClass);
+      htools.assign_tidal_anisotropy_to_tracers(dm_alpha, true); // 1 indic
+
+      Cwclass cwclass_tr(params); //CWC type for tracers
+      cwclass_tr.get_tidal_anisotropy(tr_field_counts, tr_alpha); //Compute tidal anisotropy from dm
+      htools.assign_tidal_anisotropy_to_tracers(tr_alpha, false);//  0 for dm
+      htools.assign_idgrid_to_tracers();
     }
 
     if(params._assign_bias_to_full_sample())
-       {
-          tr_field_counts.resize(params._NGRID(), 0); // Cointainer for counts
-          htools.get_density_field_grid(_COUNTS_,tr_field_counts);  // Computing counts
-          power.object_by_object_bias(cat, dm_field);
+     {
+       power.object_by_object_bias(cat, dm_field);
 
-          if(params._Get_tracer_bias_squared())
-            power.object_by_object_bias_squared(cat, dm_field, tr_field_counts); // to compute b² for each tracer
+       if(params._Get_tracer_bias_squared())
+        power.object_by_object_bias_squared(cat, dm_field, tr_field_counts); // to compute b² for each tracer
 
-          if(params._Get_tracer_bias_multipoles())
-              power.object_by_object_bias_lm(cat, dm_field, params._lmax_bias()); // to compute b² for each tracer
+       if(params._Get_tracer_bias_multipoles())
+         power.object_by_object_bias_lm(cat, dm_field, params._lmax_bias()); // to compute b² for each tracer
 
-          bias_field.resize(params._NGRID(), 0);
-          htools.get_density_field_grid(_BIAS_,tr_field_counts,bias_field); //Get halo bias averaged on a mesh.
-          fs::path fileb = fs::path(params._Output_directory()) / "ls_bias"; //Defile output file
-          cat.clear_mem();// Release memmory
-          File.write_array(fileb.string() ,bias_field); //Write the bias on the mesh to poutput file (binary)
-          fileb.replace_extension(".dat");
-          bias_field.clear();bias_field.shrink_to_fit();// Release memmory
+       bias_field.resize(params._NGRID(), 0);
+       htools.get_density_field_grid(_BIAS_,tr_field_counts,bias_field); //Get halo bias averaged on a mesh.
+       fs::path fileb = fs::path(params._Output_directory()) / "ls_bias"; //Defile output file
+       cat.clear_mem();// Release memmory
+       File.write_array(fileb.string() ,bias_field); //Write the bias on the mesh to poutput file (binary)
+       fileb.replace_extension(".dat");
+       bias_field.clear();bias_field.shrink_to_fit();// Release memmory
 
-          string json_file_plotf ="plot_file_bias_field.json";
-          std::ofstream jfilef(json_file_plotf);
-          json ja;
-          ja["output_file"] = fileb.string();
-          ja["show_bias_field"] = true;
+       string json_file_plotf ="plot_file_bias_field.json";
+       std::ofstream jfilef(json_file_plotf);
+       json ja;
+       ja["output_file"] = fileb.string();
+       ja["show_bias_field"] = true;
           ja["Lbox"] = params._Lbox();
           ja["Nft"] = params._Nft();
           ja["sample"] = params._Name_survey();
@@ -82,7 +87,10 @@ void ind_bias(Params &params)
         }
       else
         {
+
           htools.select_random_subsample(params._fraction_dilute());      // Dilute the sample: this generates an object of type Catalogue, called catalogue_random_subsample
+          htools.catalogue_random_subsample.set_params(params);           // Feed the classs catalog_random_subsample with params
+
           power.object_by_object_bias(htools.catalogue_random_subsample, dm_field);
 
           if (params._Get_tracer_relative_bias())
@@ -95,8 +103,8 @@ void ind_bias(Params &params)
               power.object_by_object_bias_lm(htools.catalogue_random_subsample, dm_field, params._lmax_bias()); // to compute b² for each tracer
   
           if(params._print_catalogue())
-              htools.catalogue_random_subsample.print_catalogue(file_cat_new, false); // set true of blm are to be written, 
-      }
+              htools.catalogue_random_subsample.print_catalogue(file_cat_new); 
+         }
 
       htools.catalogue_random_subsample.clear_mem();// Release memmory
 
@@ -115,7 +123,7 @@ void ind_bias(Params &params)
       j["column_bias"] = 1;
       jfile<<j.dump(4);
       jfile.close();
-      system("python3 ../python/cosmolib_plots.py plot_file_individual_bias.json &");
+      system("python3 ../Python/cosmolib_plots.py plot_file_individual_bias.json &");
 }
 
 ////////////////////////////////////////////////////////////////////////////

@@ -2976,45 +2976,52 @@ void HaloTools::select_random_subsample(real_prec fraction){
    size_t Nobjs_fraction=static_cast<size_t>(floor(fraction*this->catalogue._NOBJS()));
    size_t counter=0;
    this->catalogue_random_subsample.clear_mem();
-   So.message_screen("\tSelecting a fraction: ",100*fraction, "%");
+   So.message_screen("\tSelecting a fraction: ",100*fraction, "%, ");
 
    vector<size_t> rind;
+   So.message_screen("\tSelecting random ids");
    do
     {
       rind.push_back(gsl_rng_uniform_int(gBaseRando,this->catalogue._NOBJS()));
       counter++;
     }while(counter<Nobjs_fraction);
+
    gsl_rng_free(gBaseRando);
 
 
-    if(params._i_coord1_g()>0)
+   So.message_screen("\tSelecting properties");
+   if(params._i_coord1_g()>=0)
       for(size_t j=0; j<rind.size();++j)
-        this->catalogue_random_subsample.push_coord1(this->catalogue.coord1_at(rind[j]));
-    if(params._i_coord2_g()>0)
+      {
+        real_prec val = this->catalogue.coord1_at(rind[j]);
+        this->catalogue_random_subsample.push_coord1(val);
+      }
+
+   if(params._i_coord2_g()>=0)
       for(size_t j=0; j<rind.size();++j)
         this->catalogue_random_subsample.push_coord2(this->catalogue.coord2_at(rind[j]));
-    if(params._i_coord3_g()>0)
+   if(params._i_coord3_g()>=0)
       for(size_t j=0; j<rind.size();++j)
         this->catalogue_random_subsample.push_coord3(this->catalogue.coord3_at(rind[j]));
-    if(params._i_v1_g()>0)
+   if(params._i_v1_g()>=0)
       for(size_t j=0; j<rind.size();++j)
         this->catalogue_random_subsample.push_vel1(this->catalogue.vel1_at(rind[j]));
-    if(params._i_v2_g()>0)
+   if(params._i_v2_g()>=0)
       for(size_t j=0; j<rind.size();++j)
         this->catalogue_random_subsample.push_vel2(this->catalogue.vel2_at(rind[j]));
-    if(params._i_v3_g()>0)
+   if(params._i_v3_g()>=0)
       for(size_t j=0; j<rind.size();++j)
         this->catalogue_random_subsample.push_vel3(this->catalogue.vel3_at(rind[j]));
-    if(params._i_mass_g()>0)
+   if(params._i_mass_g()>=0)
       for(size_t j=0; j<rind.size();++j)
         this->catalogue_random_subsample.push_mass(this->catalogue.mass_at(rind[j]));
-    if(params._i_spin_bullock_g()>0)
+   if(params._i_spin_bullock_g()>0)
       for(size_t j=0; j<rind.size();++j)
         this->catalogue_random_subsample.push_spin_bullock(this->catalogue.spin_bullock_at(rind[j]));
-    if(params._i_rs_g()>0)
+   if(params._i_rs_g()>=0)
       for(size_t j=0; j<rind.size();++j)
         this->catalogue_random_subsample.push_rs(this->catalogue.rs_at(rind[j]));
-    if(params._i_rs_g()>0  && params._i_rvir_g()>0)
+   if(params._i_rs_g()>=0  && params._i_rvir_g()>=0)
       for(size_t j=0; j<rind.size();++j)
         this->catalogue_random_subsample.push_concentration(this->catalogue.concentration_at(rind[j]));
         
@@ -3029,10 +3036,9 @@ void HaloTools::select_random_subsample(real_prec fraction){
         }
      }
 
-  this->catalogue_random_subsample.set_NOBJS(counter);
-
-
+   this->catalogue_random_subsample.set_NOBJS(counter);
    So.DONE();
+
 }
 
 
@@ -13192,6 +13198,7 @@ if(true==set_dndz){
 void HaloTools::assign_idgrid_to_tracers()
 {
 
+  So.enter(__PRETTY_FUNCTION__);
   this->catalogue.resize_GridID(this->catalogue._NOBJS());
 
 #ifdef _USE_OMP_
@@ -13210,9 +13217,10 @@ void HaloTools::assign_idgrid_to_tracers()
 void HaloTools::assign_cwc_to_tracers(vector<WebType>&cwc)
 {
  
+  So.enter(__PRETTY_FUNCTION__);
+
   So.message_screen("Assigning CWT to tracers");
   this->catalogue.resize_gal_cwt(this->catalogue._NOBJS());
-
 
 #ifdef _USE_OMP_
 #pragma omp parallel for
@@ -13227,21 +13235,29 @@ void HaloTools::assign_cwc_to_tracers(vector<WebType>&cwc)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void HaloTools::assign_tidal_anisotropy_to_tracers(vector<real_prec>&tidal, bool tr)
   {
-    if(false==tr) // tr =0 for tracers, 1 for dm
+    So.enter(__PRETTY_FUNCTION__);
+
+    if(!tr) // false for tr
       {
-  #ifdef _USE_OMP_
-  #pragma omp parallel for
-  #endif
+      this->catalogue.resize_tidal_anisotropy(this->catalogue._NOBJS());
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
       for(size_t i=0;i<this->catalogue._NOBJS();++i)
         this->catalogue.set_tidal_anisotropy(tidal[this->catalogue.GridID_at(i)], i);
       }
-      else
+  else if(tr) // true for dm
     {
-  #ifdef _USE_OMP_
-  #pragma omp parallel for
-  #endif
+      this->catalogue.resize_tidal_anisotropy_dm(this->catalogue._NOBJS());
+#ifdef _USE_OMP_
+#pragma omp parallel for
+#endif
       for(size_t i=0;i<this->catalogue._NOBJS();++i)
-        this->catalogue.set_tidal_anisotropy_dm(tidal[this->catalogue.GridID_at(i)],i);
+        {
+          ULONG index= this->catalogue.GridID_at(i);
+          real_prec tidal_a=tidal[index];
+          this->catalogue.set_tidal_anisotropy_dm(tidal_a,i);
+        }
     }
   }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
