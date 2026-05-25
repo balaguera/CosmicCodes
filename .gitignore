@@ -1,4 +1,5 @@
 output*/*
+main/output_distance_priors/
 external_libs/gnuplot-iostream/
 gnuplot-iostream/
 output_hgaps/
@@ -11,3 +12,4 @@ main/INIT_PARS_UNITSIM/
 main/healpy_env/
 main/generate_param_files_voids_80.sh
 main/*exe
+main/nulldiluted_cat_bias.txt
