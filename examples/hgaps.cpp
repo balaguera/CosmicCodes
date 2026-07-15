@@ -108,7 +108,7 @@ int main(int argc, char *argv[]){
             jfile<<j.dump(4);
             cout<<"Generating json file "<<json_file_plot<<" for plotting"<<endl;  
             jfile.close();
-            system("python3 ../python/cosmolib_plots.py plot_file_angular_power_spectrum_measurement.json ");
+            system("python3 ../Python/cosmolib_plots.py plot_file_angular_power_spectrum_measurement.json ");
             cout<<"============================================================================"<<endl;
             cout<<RED<<"Missing TASKS in HGAPS: check ARF, and z bins in plots"<<RESET<<endl;
             cout<<"============================================================================"<<endl;

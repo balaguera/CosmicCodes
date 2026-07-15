@@ -607,5 +607,31 @@
         "Get_SO_from_BN" :  false,
         "Delta_SO" :  220.0
     } 
-  }
+  },
+
+
+"MCMC" :{
+    "status" : "off", 
+    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_distance_priors/",
+    "name_experiment" : "dpriors_cmb",
+    "name_parameters" : ["Omega_matter", "Omega_baryon", "w_eos"],
+    "initial_parameters" :          [0.5,  0.046,  -1.0],
+    "prior_parameters_min_values" : [0.1,  0.01, -2.0],
+    "prior_parameters_max_values" : [1.0,  0.09, 0.0],
+    "proposal_parameters" :         [0.001,  0.001, 0.001],
+    "action_parameters" :  [0,  0,  0],
+    "random_initial_value_within_priors": true,
+    "number_of_accepted_models" :     1000,
+    "number_of_burnin_phase_models" : 700,
+    "number_of_post_burnin_phase_models" : 200,
+    "number_of_steps_to_update_covariance" : 5000,
+    "number_of_avoided_steps_to_get_stats" : 10,
+    "update_covariance": false,
+    "number_of_chains" : 10,
+    "use_distance_priors" : true,
+    "dprior_ID": 2, 
+    "dprior_JD": 1
+}
+
+
 }

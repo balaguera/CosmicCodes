@@ -45,7 +45,7 @@ int main(int argc, char *argv[]){
   };
 
 
-  while ((c = getopt_long(argc, argv, "p:s:",long_options, &option_index)) != -1)
+  while ((c = getopt_long(argc, argv, "ps:",long_options, &option_index)) != -1)
     {
 
       switch (c) {

@@ -417,7 +417,7 @@
     "status" : "off", 
     "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_hgaps/",
     "statistics" : "Cl",
-    "harmoinic_sampling" : "H",
+    "harmonic_sampling" : "H",
     "type_of_angular_power_estimator" : "K",
     "use_random_catalog" : false,
     "generate_fits_files" : false,
@@ -610,7 +610,7 @@
   },
 
 "MCMC" :{
-    "status" : "off", 
+    "status" : "on", 
     "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_distance_priors/",
     "name_experiment" : "dpriors_cmb",
     "name_parameters" : ["Omega_matter", "Omega_baryon", "w_eos"],

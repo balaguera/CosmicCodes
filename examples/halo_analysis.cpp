@@ -54,11 +54,9 @@ int main(int argc, char *argv[])
   int option_index = 0;
   int c;
     static struct option long_options[] = {
-        {"power", required_argument, 0, 'p'},
-        {"window", required_argument, 0, 'w'},
-        {"lpfilter",  required_argument, 0, 's'},
-        {"grf",      no_argument,       0, 'g'},
-        {"m",      required_argument,       0, 'm'},
+        {"a", required_argument, 0, 'c'},
+        {"hod", required_argument, 0, 'h'},
+        {"mock",  required_argument, 0, 'm'},
         {0, 0, 0, 0}
     };
 
