@@ -4535,13 +4535,10 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
 
    tracer_cat.resize_bias_multipole(tracer_cat._NOBJS(), lmax+1);
 
-   real_prec b00=0;
    real_prec factor_ylm = sqrt(4.*M_PI);
-
-
    
 #ifdef _USE_OMP_
-#pragma omp parallel for reduction(+: b00)
+#pragma omp parallel for 
 #endif
    for(ULONG itr=0;itr<tracer_cat._NOBJS();++itr)
      {
@@ -4549,20 +4546,21 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
         real_prec xtracer=tracer_cat.coord1_at(itr);
         real_prec ytracer=tracer_cat.coord2_at(itr);
         real_prec ztracer=tracer_cat.coord3_at(itr);
-        vector<real_prec>power_cross(Kmax_bin,0);
 
         // Here goes the loop over l and m : 
        for(int ell=0; ell<=lmax;++ell) // loop over l
        {
-        real_prec hll=0;
-         for(int mm=-ell; mm<=ell; ++mm) // loop over m
-        {
-          real_prec conn_phase = mm < 0 ? pow(-1, -mm) : 1;
-          int fmm=fabs(mm);
+  
+          vector<real_prec>power_cross(Kmax_bin,0); // debe estar en el loop sobre l
+          real_prec hll=0;
+          for(int mm=-ell; mm<=ell; ++mm) // loop over m
+           {
+            real_prec conn_phase = mm < 0 ? pow(-1, -mm) : 1;
+            int fmm=fabs(mm);
 
-          for(ULONG i=Kmin_bin; i< new_Nft/2;++i)
-            for(ULONG j=Kmin_bin; j< new_Nft/2;++j)
-                for(ULONG k=Kmin_bin; k< new_Nft/2+1;++k)
+           for(ULONG i=Kmin_bin; i< new_Nft/2;++i)
+             for(ULONG j=Kmin_bin; j< new_Nft/2;++j)
+               for(ULONG k=Kmin_bin; k< new_Nft/2+1;++k)
                 {
                   ULONG lp=index_3d(i,j,k,this->params._Nft(),this->params._Nft()/2+1);
                   real_prec kv=sqrt(pow(dk_x*kcoords[i],2)+pow(dk_y*kcoords[j],2)+pow(dk_z*kcoords[k],2));
@@ -4642,7 +4640,8 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
 //measure average of all bl's
       vector<real_prec>bmean(lmax+1,0);
       vector<real_prec>bvar(lmax+1,0);
-for(int ell=0; ell<=lmax;++ell)
+
+      for(int ell=0; ell<=lmax;++ell)
       {
         real_prec bll=0;
 #ifdef _USE_OMP_
