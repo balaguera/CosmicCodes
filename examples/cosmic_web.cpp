@@ -1,11 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////
-/** @file main_cosmicatlass.cpp
+/** 
+ * @file cosmic_web.cpp
  *
- *  @brief
- *  @authors Andrés Balaguera-Antolinez
+ * @brief Example code for cosmic web analysis.
+ * @authors Andrés Balaguera-Antolinez
  */
-#include "../include/def.hpp"
-#include "../include/CosmiCalcLIB.hpp"
+#include "CosmiCalcLIB.hpp"
 ////////////////////////////////////////////////////////////////////////////
 using namespace std;
 ////////////////////////////////////////////////////////////////////////////

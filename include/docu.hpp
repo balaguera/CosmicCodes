@@ -1,130 +1,353 @@
-// DOCUMENTATION FOR DOXYGEN COSMICATLAS
+
 /**
-* @mainpage
+ * @mainpage CosmicCodes Documentation
+ *
+ * @section contents Table of Contents
+ *
+ * - @ref intro_sec "Introduction"
+ * - @ref dw "Download the Code"
+ * - @ref ex "Compilation"
+ * - @ref exa "Applications and Examples"
+ *   - @ref spar "Input Parameter File"
+ *   - @ref gen "A detailed example"
+ *   - @ref ssbias "Bias Analysis"
+ *   - @ref sspower "Power Spectrum"
+ *   - @ref ssapower "Angular Power Spectrum"
+ *   - @ref sshtool "Halo Tools"
+ *   - @ref ssgtool "Galaxy Tools"
+ *   - @ref cwlib "Cosmic-Web Analysis"
+ *   - @ref clib "Cosmological Functions"
+ * - @ref dep "Library Dependencies"
+ * - @ref _doc "Additional Documentation"
+ * - @ref pap "Related Publications"
+ * - @ref _author "Author"
+ * - @ref _author_c "Contact"
+ *
 *
-* @section intro_sec Introduction
- CosmiCCodes++: A C++ library for calculations in cosmology with general and detailed applications.<br>
-
-*@subsection Applications
-The cosmicatlass code is aimed to perform general as well as very specific tasks in the context of large scale structure of the Universe. Among the detailed taks we can identify:<br>
-<b>Generation of halo mock catalogs based on the bias mapping method \b<br>
-<b>Measurement of 3D power spectrum of dark matter tracers \b <br>
-<b>Measurement of angular power spectrum and tomographic analysis \b <br>
-<b>Generation of random catalogs for clustering analysis \b <br>
-<b>Generation of lognormal catalogs for tomographic analysis\b<br>
-<b>Parameter constraints with MonteCarlo Markov chains \b<br>
-<b>Measurement of abundance of dark matter tracers \b<br>
-<b>Analysis of secondary halo bias \b<br>
-<tr>
-<td>
-
-
-* @section pap Related publications
-<a href="https://ui.adsabs.harvard.edu/abs/2023arXiv231112991B/abstract">Secondary halo bias </a><br>
-<a href="https://ui.adsabs.harvard.edu/abs/2023A%26A...673A.130B/abstract">Mock comparison project for DESI</a><br>
-<a href="https://ui.adsabs.harvard.edu/abs/2021arXiv210707917S/abstrac">Hydro-BAM II</a><br>
-<a href="https://ui.adsabs.harvard.edu/abs/2021ApJ...921...66S/abstract">Hydro-BAM I</a><br>
-<a href="https://ui.adsabs.harvard.edu/abs/2020arXiv200511598K/abstract">Connection to PT</a><br>
-<a href="https://ui.adsabs.harvard.edu/abs/2020MNRAS.493..586P/abstract">Comparison with other methods</a><br>
-<a href="http://adsabs.harvard.edu/abs/2019arXiv190606109B">One simulation to have them all</a><br>
-<a href="http://adsabs.harvard.edu/abs/2019MNRAS.483L..58B">The bias Assigment Method</a><br>
-<a href="https://ui.adsabs.harvard.edu/abs/2012hcxa.confE..71B/abstract">Power Spectrum analysis</a><br>
-
-
-*@section dw Download the code
-The code will be soon made available. It is temporarly a private directory at  <a href="https://github.com/balaguera/CosmicCodes">GitHub</a> <br>
-@note: Code will be subject to GNU-type licence.
-
-
-*@section ex Executing the Code 
-
-* @subsection rr Running CosmicAtlas
-This file is compiled with several options. The main function is in the file 
-\verbatim Main/cosmicatlass.cpp \endverbatim
-The different options supported at the current version are summarized by the otion -h:
-*@code
-Options:         
-CosmiCalc compiling options
-		-make bmt: creates executable for the Bias Mapping Technique
-			execute with ./bmt.exe -b parameter_file to run bmt tasks.
-			execute with ./bmt.exe -d to check preprocessor directives.
-			execute with ./bmt.exe -i parameter_file to check input parameters directives.
-		-make power: creates executable for the power spectrum and related operations
-			execute with ./power.exe -p parameter_file to measure power (see documentation)
-			execute with ./power.exe -w parameter_file to measure window matrix
-			execute with ./power.exe -g parameter_file to obtain GRF.
-			execute with ./power.exe -s parameter_file for low pass filter.
-			execute with ./power.exe -m parameter_file for marked correlation function
-		-make secbias: creates executable for the analysis of secondary bias
-			execute with ./secbias.exe -s parameter_file 
-		-make gtools: creates executable for the analysis of galaxy samples 
-			execute with ./gtools.exe parameter_file (this is different from otopns 1-4). This is still under merging stages: merged with class::Catalog
-		-make htools: creates executable for the analysis of halo catalogs 
-			execute with ./htools.exe -c parameter_file to analyze catalog
-			execute with ./htools.exe -b parameter_file to assign individual bias to input catalog
-			execute with ./htools.exe -s parameter_file to measure bias as a function of properteis
-			execute with ./htools.exe -h parameter_file to get galaxy catalogs using hod
-		-make cosmolib: Cosmology functions and statistical tools (bias, mass function, power spectrum)
-			execute with ./cosmolib.exe -s parameter_file. to get theoretical outputs for different cosmological functions at fixed redshift
-			execute with ./cosmolib.exe -z parameter_file. to get theoretical outputs for HOD predictions (under constuction)
-*@endcode
-
-
-*@subsection spar Parameter file
-The input paramter file contains a list of parameters (numbers, strings, lists) needed to execute the code.
-
-@note Not all the parameters in the parameter file are requested for the different options.
-
-* @subsection rc Running Cosmolib
-The cosmolib is devoted to calculate predictions of different cosmological observables such as the following:
-Mass function <br>
-Halo bias<br>
-Linear matter power spectrum <br>
-Non linear matter power spectrum<br>
-Linear and non-liner galaxy power spectrum based on HOD<br>
-Galaxy and dark matter correlation function<br>
-Angular power spectrum <br>
-
-*@subsubsection ssex Execution
-code has its one parameter file. 
-The user can also compile the cosmic_lib code
-*@code
-make clean;
-make cosmiclib
-./cosmiclib.exe parameter_cosmiclib.ini
-*@endcode
-</td>
-
-
-
-@note: Library dependencies <br>
-GSL <br>
-Gnuplot<br>
-Healpix<br>
-
-
-
+*
+ * @section intro_sec Introduction
+ *
+ * The **CosmicCodes** is a \c C++ library which provides tools for the statistical analysis of the
+ * large-scale structure of the Universe, using both N-body simulations or galaxy redshift surveys. Its main applications include:
+ *
+ * - Analysis of primary and secondary halo bias.
+ * - Generation of halo mock catalogs using the Bias Assignment Method.
+ * - Measurement of the three-dimensional power spectrum of dark-matter tracers.
+ * - Measurement of angular power spectra and tomographic analysis.
+ * - Generation of random catalogs for clustering analyses.
+ * - Generation of lognormal catalogs for tomographic analyses.
+ * - Cosmological parameter estimation using Markov Chain Monte Carlo methods.
+ * - Measurement of abundance statistics, including mass and luminosity functions.
+ * - Analysis of halo and galaxy catalogs.
+ * - Cosmic-web analysis.
+ *
+ *
+ * @section dw Download the Code
+ *
+ * The source codecan bu downloaded from 
+ * <a href="https://github.com/balaguera/CosmicCodes">GitHub</a>. 
+ *
+ * @note The code is distributed under a GNU-type license.
+ *
+ *
+ * @section ex Compilation
+ *
+ * The library is compiled using the CMake file available at <a href = "https://github.com/balaguera/CosmicCodes"> GitHub</a>. From the root directory of the project:
+ *
+ * \code{.sh}
+ * mkdir build
+ * cd build
+ * cmake ..
+ * cmake --build . -- VERBOSE=1
+ * \endcode
+ *
+ *
+ * @section exa Applications and Examples
+ *
+ * Example programs are available in the
+ * \c examples/ directory. The corresponding executables can be compiled
+ * using the Makefile located in \c main/.
+ *
+ * The available tools are described below.
+ *
+ *
+ * @subsection spar Input Parameter File
+ *
+ * The input parameter file is written in \c JSON (JavaScript object notation) format, with a number of sections dedicated to 
+ * either input catalogs of methods (calculations such as power spectrum, luminosity function, cosmological parameter constraints etc). 
+ *
+ * 
+ * @note Go to \ref parameters_docu for detailed information on the parameters used in this library.
+ * 
+ * 
+ * @subsection gen A detailed example
+ * 
+ * In the section \ref expl we show a more detail the usage of some classes of this library, as well as quick demonstrations and explanations.
+ *   
+ * 
+ * 
+ * @subsection ssbias Bias Analysis
+ * This example aims at performing the analysis of cosmological bias using as input dark matter and dark matter tracer catalogs.
+ * The <a href = "../../../examples/bmt.cpp">example code</a> can be compiled with
+ *
+ * \code{.sh}
+ * make bmt
+ * \endcode
+ *
+ * Available options:
+ *
+ * - **Assignment of individual bias to input tracers** (see e.g. @ref PowerSpectrumF::object_by_object_bias())
+  *   \code{.sh}
+ *   ./bmt.exe -ibias parameter_file.json
+ *   \endcode
+ *
+ * - **Generate plots of bias as a function of halo properties**
+  *   \code{.sh}
+ *   ./bmt.exe -pbias parameter_file.json
+ *   \endcode
+ *
+ * - **Perform a secondary-bias analysis**
+  *   \code{.sh}
+ *   ./bmt.exe -sbias parameter_file.json
+ *   \endcode
+ *
+ * - **Bias Mapping Technique**
+ *   \code{.sh}
+ *   ./bmt.exe -bmt parameter_file.json
+ *   \endcode
+ *
+ * @subsection sspower Power Spectrum
+ *
+ * The library offers the possibility to measure the 3D power spectrum from N-body simulations or redshift galaxy surveys. The <a href = "../../../examples/power_spectrum.cpp">example code</a> can be compiled with
+ *
+ * \code{.sh}
+ * make power
+ * \endcode
+ *
+ * Available options:
+ *
+ * - **Measure the power spectrum of an input catalog**
+ *
+ *   \code{.sh}
+ *   $ ./power.exe -power parameter_file
+ *   \endcode
+ *
+ * - **Measure the window matrix using an input random catalog** (see e.g. @ref PowerSpectrumF::get_window_matrix_multipole())
+ *
+ *   \code{.sh}
+ *   $ ./power.exe -window parameter_file
+ *   \endcode
+ *
+ * - **Generate Gaussian random fields from an input power spectrum** (see e.g. @ref PowerSpectrumF::get_GaussianRandomField())
+ *
+ *   \code{.sh}
+ *   $ ./power.exe -grf parameter_file
+ *   \endcode
+ *
+ * - **Apply a low-pass filter to an input density field**
+ *
+ *   \code{.sh}
+ *   $ ./power.exe -lowpassfilter parameter_file
+ *   \endcode
+ *
+ *
+ * @subsection ssapower Angular Power Spectrum
+ *
+ * The <a href = "../../../examples/hgaps.cpp">example code</a> can be compiled with
+ *
+ * \code{.sh}
+ * make angpower
+ * \endcode
+ *
+ * Available options:
+ *
+ * - **Measure the angular power spectrum from an input catalog and mask**
+ *
+ *   \code{.sh}
+ *   ./hgaps.exe -cl parameter_file.json
+ *   \endcode
+ *
+ * - **Measure cross-power spectra in different tomographic bins**
+ *
+ *   \code{.sh}
+ *   ./hgaps.exe -r parameter_file.json
+ *   \endcode
+ *
+ *
+ * @subsection sshtool Halo Tools
+ *
+ * The <a href = "../../../examples/halo_analysis.cpp">example code</a> can be compiled with
+ *
+ * \code{.sh}
+ * make htools
+ * \endcode
+ *
+ * Available options:
+ *
+ * - **Analyze an input catalog**
+ *
+ *   \code{.sh}
+ *   ./htools.exe -c parameter_file
+ *   \endcode
+ *
+ * - **Assign individual bias to an input catalog**
+ *
+ *   \code{.sh}
+ *   ./htools.exe -b parameter_file
+ *   \endcode
+ *
+ * - **Measure halo bias as a function of selected properties**
+ *
+ *   \code{.sh}
+ *   ./htools.exe -s parameter_file
+ *   \endcode
+ *
+ * - **Build galaxy catalogs from an input halo catalog using an HOD model**
+ *
+ *   \code{.sh}
+ *   ./htools.exe -h parameter_file
+ *   \endcode
+ *
+ * - **Build a mock catalog from a simulation snapshot using an input dN/dz**
+ *
+ *   \code{.sh}
+ *   ./htools.exe -m parameter_file
+ *   \endcode
+ *
+ *
+ * @subsection ssgtool Galaxy Tools
+ *
+ * The <a href = "../../../examples/galtools.cpp">example code</a> can be compiled with
+ *
+ * \code{.sh}
+ * make gtools
+ * \endcode
+ *
+ * The program is executed as:
+ *
+ * \code{.sh}
+ * ./gtools.exe parameter_file
+ * \endcode
+ *
+ * @note This module is currently under development.
+ *
+ *
+ * @subsection cwlib Cosmic-Web Analysis
+ *
+ * The <a href = "../../../examples/cosmic_web.cpp">example code</a> can be compiled with
+ *
+ * \code{.sh}
+ * make cosmicweb
+ * \endcode
+ *
+ * To perform a cosmic-web analysis:
+ *
+ * \code{.sh}
+ * ./cosmicweb.exe -cwc parameter_file.json
+ * \endcode
+ *
+ *
+ * @subsection clib Cosmological Functions
+ *
+ * The <a href = "../../../examples/cosmolib.cpp">example code</a> can be compiled with
+ *
+ * \code{.sh}
+ * make cosmolib
+ * \endcode
+ *
+ * Available options:
+ *
+ * - **Obtain theoretical predictions for cosmological functions at fixed redshift**
+ *
+ *   \code{.sh}
+ *   ./cosmolib.exe -c parameter_file
+ *   \endcode
+ *
+ * - **Obtain theoretical HOD predictions**
+ *
+ *   \code{.sh}
+ *   ./cosmolib.exe -h parameter_file
+ *   \endcode
+ *
+ * - **Obtain theoretical predictions for redshift-dependent quantities**
+ *
+ *   \code{.sh}
+ *   ./cosmolib.exe -z parameter_file
+ *   \endcode
+ *
+ * @note HOD predictions are currently under development.
+ *
+ *
+ * @section dep Library Dependencies
+ *
+ * The library currently depends on:
+ *
+ * - \c GSL
+ * - \c Gnuplot
+ * - \c HEALPix
+ * - \c Python
+ *
+ *
  * @section _doc Documentation
-A detailed documentation of the code can be found <a href="https://abalant.wixsite.com/abalan">Here</a> <br>
-
-
+ *
+ * Additional documentation is available
+ * <a href="https://abalant.wixsite.com/abalan">here</a>.
+ *
+ *
+ * @section pap Related Publications
+ *
+ * - <a href="https://ui.adsabs.harvard.edu/abs/2023arXiv231112991B/abstract">
+ *   Secondary halo bias</a>
+ *
+ * - <a href="https://ui.adsabs.harvard.edu/abs/2023A%26A...673A.130B/abstract">
+ *   Mock comparison project for DESI</a>
+ *
+ * - <a href="https://ui.adsabs.harvard.edu/abs/2021arXiv210707917S/abstract">
+ *   Hydro-BAM II</a>
+ *
+ * - <a href="https://ui.adsabs.harvard.edu/abs/2021ApJ...921...66S/abstract">
+ *   Hydro-BAM I</a>
+ *
+ * - <a href="https://ui.adsabs.harvard.edu/abs/2020arXiv200511598K/abstract">
+ *   Connection to perturbation theory</a>
+ *
+ * - <a href="https://ui.adsabs.harvard.edu/abs/2020MNRAS.493..586P/abstract">
+ *   Comparison with other methods</a>
+ *
+ * - <a href="http://adsabs.harvard.edu/abs/2019arXiv190606109B">
+ *   One simulation to have them all</a>
+ *
+ * - <a href="http://adsabs.harvard.edu/abs/2019MNRAS.483L..58B">
+ *   The Bias Assignment Method</a>
+ *
+ * - <a href="https://ui.adsabs.harvard.edu/abs/2012hcxa.confE..71B/abstract">
+ *   Power-spectrum analysis</a>
+ *
+ *
  * @section _author Author
- <a href="https://abalant.wixsite.com/abalan"> Andrés Balaguera-Antolínez</a> <br>
-This code has been developed during working periods at different institutions:<br>
-Instituto de Astrofísica de Canarias <br>
-Univesita degli Studi Roma 3 <br>
-Argelander Institut for Astronomy <br>
-Max Planck Institute for Extraterrestrial Physics <br>
-With the collaboration of many collabortors (co-authors) <br>
-*/
+ *
+ * <a href="https://abalant.wixsite.com/abalan">
+ * Andrés Balaguera-Antolínez</a>
+ *
+ * This code has been developed during research positions at:
+ *
+ * - Instituto de Astrofísica de Canarias (2017–2024)
+ * - Università degli Studi Roma Tre (2013–2016)
+ * - Argelander-Institut für Astronomie (2010–2013)
+ * - Max Planck Institute for Extraterrestrial Physics (2006–2010)
+ *
+ * The development of the code has benefited from the contributions of
+ * numerous collaborators and co-authors.
+ * 
+ * @section _author_c Contact
+ * 
+ * Questions related to the library, please write to abalant@gmail.com
+ *
+ * @image html flow.jpg "BAM Flowchart"
+ */
 
- <td>
- <div class="column"></div>
- <img src="../Headers/flow.jpg" alt="BAM Flowchart" width="600" height="700">
-</td>
 
- </tr>
- </table>
+
 
 
 

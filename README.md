@@ -4,11 +4,20 @@ Theoretical cosmology: prediction for 1 and 2 point statistics (abundance, power
 Observational: measurements of abundance (e.g. luminosity functions, power spectrum, correlation function), marked statistics, halo properties.
 
 ## Documentation
-Documentation is available in dOxygen and pdf. It can be requested via e-mail to abalant@gmail.com.
+Documentation is available in Doxygen and pdf. It can be requested via e-mail to abalant@gmail.com. For a html version, please install Doxygen and follow these steps:
 
+$cd include
+
+$doxygen Doxygen
+
+Open in a browser the page
+
+include/docs/html/index.html
+
+and navegate through the different explanations and examples.
 
 ## Build
-Follow the follow instructions:
+Follow the instructions:
 
 $mkdir build
 

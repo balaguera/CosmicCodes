@@ -1,0 +1,148 @@
+/**
+ * \page expl Examples
+
+ * @section expdet Example 1: cosmic web analysis
+ * Let us describe the example code tailored to develop a cosmic web analysis (see \ref cwlib)
+
+
+ * For an implementation of the library, the \c .cpp code in \examples demand the header
+ * \code
+ *    # include "CosmiCalcLIB.hpp"
+ *    using namespace std;
+ * \endcode
+
+ * Once in the main function, the first instances to create are those dealing with file managment (read and write, see \ref FileOutput), 
+ * \code
+ *  FileOutput File;
+ * \endcode
+ * and that in charge of communicating with the user (see \ref ScreenOutput):
+ * \code
+ *  ScreenOutput So;
+ * \endcode
+ * We now incude the parameters from the parametr file. To that aim, we read the name of the file as an execution argument 
+* \code
+ *  string  par_file = argv[2];
+ * \endcode
+
+ and define an instance of the class Params (see \ref params)
+ * \code
+ *  Params params(par_file);
+ * \endcode
+
+ * Now, define a container to allocate the dark matter density field; the size of this array and the path to the file are givben in the parameter file (sectin \ref DarkMatterField):
+ * \code
+ * vector<real_prec> dm_field(params._NGRID(), 0); //Container for dm
+ *\endcode
+ * Then, read the binary file containing the dark matter field:
+ * \code
+ * File.read_array(params._Input_Directory_X() + params._Name_Catalog_X(), dm_field); 
+ *\endcode
+ * We now focus on the dar matter tracer catalog. To that aim, we define an instance of the class Catalogue, which will allocate all the information of the tracer catalog: 
+ * \code
+ * Catalogue cat(params, "TRACER");
+ *\endcode
+ * Then, we read the input catalogue:
+ * \code
+ * cat.read_catalog_new(params._Input_dir_cat() + params._file_catalogue())
+ *\endcode
+ * In order to analyze the catalog,. we define an instance of the class Htool (see \ref htools)
+ * \code
+ *  HaloTools htools(params, cat)
+ *\endcode
+ * For the cosmic web analysis, we would like to have the interpolated tracer field. To that aim, we define a container where that will be allocated:
+ * \code
+ *  vector<real_prec> tr_field_counts;
+ *  tr_field_counts.resize(params._NGRID(), 0)
+ *\endcode
+ * Using the instance of \ref \htools, we can conmpute the interpolated tracer field as
+ * \code
+ * htools.get_density_field_grid(_COUNTS_,tr_field_counts)
+ *\endcode
+ * We are now in position to perform the cosmic-web clasification based on the dark matter -or tracer tidal field. To that aim, we define an instance of the class \ref cwclass aimed to the that classification with the tracers:
+ * \code
+ Cwclass cwclass(params)
+ *\endcode
+We also define a container to allocate some tidal properties, such as the tidal anisotropy, derived from the determination of the eigenvalues of the tidal field of the tracer set:
+ * \code
+  vector<real_prec> tr_alpha;
+  tr_alpha.resize(params._NGRID(), 0); 
+ *\endcode
+ We now compute the tidal anisotropy from the tracer field (see \ref Cwclass::get_tidal_anisotropy())
+ * \code
+ *  cwclass.get_tidal_anisotropy(tr_field_counts, tr_alpha)
+ *\endcode
+ * \code
+ *\endcode
+ * We pin point the path
+ * \code
+ *  const fs::path out_dir = params._Output_directory();
+ *\endcode
+ * We now use structure bending to collect output file names and name of containers 
+ * \code
+ * std::vector<std::pair<std::string, std::vector<real_prec>&>> tracer_outputs = { //Using strucure bending
+ *   {"alpha_tr", tr_alpha},
+ *   {"l1_tr",    cwclass.lambda1},
+ *   {"l2_tr",    cwclass.lambda2},
+ *   {"l3_tr",    cwclass.lambda3}
+ * };
+ *\endcode
+ * 
+ * and print out the tidal anisotropy and the eigenvalues on the mesh: 
+ * \code
+ * for (const auto& [fname, data] : tracer_outputs)
+ * {
+ *   So.message_screen("Writing binary file " + fname + " in the mesh");
+ *   fs::path fileo = out_dir / fname;
+ *   File.write_array(fileo.string(), data);
+ * }
+ *\endcode
+ *
+We now perform the same procedure with the dark matter field:
+ * \code
+ *  vector<real_prec> dm_alpha(params._NGRID(), 0); 
+ *  Cwclass cwclass_dm(params); 
+ *  cwclass_dm.get_tidal_anisotropy(dm_field, dm_alpha); 
+ *  fs::path fileo=fs::path(params._Output_directory()) 
+ *  File.write_array(fileo.string(),dm_alpha); 
+ *  std::vector<std::pair<std::string, std::vector<real_prec>&>> eigenfiles = {
+ *              {"l1_dm", cwclass_dm.lambda1},
+ *              {"l2_dm", cwclass_dm.lambda2},
+ *              {"l3_dm", cwclass_dm.lambda3}
+ *   };
+ *  for (const auto& [fname, data] : eigenfiles)
+ *    {
+ *      So.message_screen("Writing binary file for eigenvalue " + fname + " in the mesh");
+ *      fs:: path file_path = out_dir / fname;
+ *      File.write_array(file_path.string(), data);
+ *  }
+ *\endcode
+ * We are interested in assigning cosmic-web properties to the input tracers. We do this with the following steps. First, assign to each tracer (passed to \c htools as \catalog at inizialization) the ID of the cell where the tracer is located:
+ * \code
+ *  htools.assign_idgrid_to_tracers();
+ *\endcode
+ * Then, we can also assign the cosmic web classification (based on teh dark matter) of the cell where the tracer is located: 
+ * \code
+ *  htools.assign_cwc_to_tracers(cwclass_dm.CWClass);
+ *\endcode
+ * We can also assign to each tracer the value of the tidal anisotropy computed with its own field or with the dark matter density field:
+ * \code
+ *  htools.assign_tidal_anisotropy_to_tracers(tr_alpha, false);
+ *  htools.assign_tidal_anisotropy_to_tracers(dm_alpha, true); 
+ *\endcode
+ * We can also print out the values of the cosmic web classification on the mesh to a binary file: 
+ * \code
+ * cwc_file = out_dir / "cwc_dm";
+ * File.write_array(cwc_file.string(), cwclass_dm.CWClass);
+ *\endcode
+
+ * \code
+ *\endcode
+
+ * \code
+ *\endcode
+
+ * \code
+ *\endcode
+
+
+*/

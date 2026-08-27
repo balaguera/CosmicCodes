@@ -5,8 +5,8 @@
  *  @authors Andrés Balaguera-Antolinez
  */
 
-#include "../include/def.hpp"
-#include "../include/CosmiCalcLIB.hpp"
+//#include "../include/def.hpp"
+#include "CosmiCalcLIB.hpp"
 
 using namespace std;
 

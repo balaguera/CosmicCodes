@@ -1,10 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////
 /**
- *  @file Main file for BMT.
- *  @brief Uses the ComiCalc library and the file BiasMappingTechnique
+ *  @file Parameter description
+ *  @brief Helps to understand the paramteers of the Cosmicode library.
  *  @authors Andrés Balaguera-Antolinez
  */
-#include "../include/CosmiCalcLIB.hpp"
+#include "CosmiCalcLIB.hpp"
 ////////////////////////////////////////////////////////////////////////////
 using namespace std;
 ////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]){
             std::cout<<"Parameters of CosmicCodes"<<endl;
         news:
             std::cout<<"=========================="<<endl;
-            std::cout<<"Enter parameter name"<<endl;
+            std::cout<<"Enter parameter name:"<<endl;
             std:string par_name;
             cin>>par_name;
 

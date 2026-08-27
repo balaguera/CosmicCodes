@@ -4,8 +4,8 @@
  * Andres Balaguera,
  * 2007-2023
 */
-#include "../include/CosmiCalcLIB.hpp"
-#include "../include/CosmoLib.hpp"
+#include "CosmiCalcLIB.hpp"
+#include "CosmoLib.hpp"
 ////////////////////////////////////////////////////////////////////////////
 using namespace std;
 ////////////////////////////////////////////////////////////////////////////
@@ -71,14 +71,14 @@ int main(int argc, char *argv[]){
             {
                 So.message_screen("Cosmology");
                 Clib.get_cosmological_information();
-                system("python3 ../python/cosmolib_plots.py plot_file_cosmoinfo.json &");
+                system("python3 ../Python/cosmolib_plots.py plot_file_cosmoinfo.json &");
                 break;
             }
             case 'm':
             {
                 So.message_screen("Halo Model");
                 Clib.get_hmodel();
-                system("python3 ../python/cosmolib_plots.py plot_file.json ");
+                system("python3 ../Python/cosmolib_plots.py plot_file.json ");
                 break;
             }
             case 'z':

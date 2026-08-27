@@ -1,0 +1,30 @@
+/* Main documentation title */
+.title {
+    color: #C0C0C0;
+}
+
+/* Main page and section titles */
+h1 {
+    color: #bda9a9;
+    border-bottom: 2px solid #006699;
+}
+
+/* Section headings */
+h2 {
+    color: #006699;
+}
+
+/* Subsection headings */
+h3 {
+    color: #008080;
+}
+
+/* Links */
+a {
+    color: #006699;
+}
+
+/* Code blocks */
+.fragment {
+    border-radius: 6px;
+}
