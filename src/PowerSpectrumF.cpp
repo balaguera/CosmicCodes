@@ -651,11 +651,10 @@ void PowerSpectrumF::measure_power_spectrum_data()
   vector<gsl_real>vrc;
   if(CoordinateSystem::EQR==this->params._sys_of_coord_g() || CoordinateSystem::EQZ==this->params._sys_of_coord_g())
     {
-      So.message_screen("Computing comoving distances in the range",this->params._redshift_min_sample(),"<z< ",this->params._redshift_max_sample());
+//      So.message_screen("Computing comoving distances in the range ",this->params._redshift_min_sample(),"<z< ",this->params._redshift_max_sample());
       vzz.resize(params._nbins_redshift(),0);
       vrc.resize(params._nbins_redshift(),0);
       this->cosmology.Comoving_distance_tabulated(this->params._redshift_min_sample(),this->params._redshift_max_sample(), vzz,vrc);
-      So.DONE();
     }
 
     // If applies, give a first estimate of mean number density from a box
@@ -784,7 +783,7 @@ void PowerSpectrumF::measure_power_spectrum_data()
                 // ############################# This is important ################################################################################################
                 // update, even if no new_Lbox is requested, as in any case the offsets are to be measured and used by the fftwfunctions' methods (multipoles mainly)
                this->set_params(htools_ran.params);                // Update the instance parms in this class from the instance params in random_cat
-               this->fftw_functions.set_params(htools_ran.params); //Update the instance parms  in the class fftw_functions from the instance params in random_cat
+               this->fftw_functions.set_params(htools_ran.params); // Update the instance parms  in the class fftw_functions from the instance params in random_cat
                 // ############################# This is important ################################################################################################
 #ifdef _USE_SEVERAL_RANDOM_FILES_
              }
@@ -856,8 +855,10 @@ void PowerSpectrumF::measure_power_spectrum_data()
         //Update the instance params in  in the class tracer_cat from the instance params in random_cat
         // such that the offsets , and derived parameters are applying the same to the tracer cat
         if(this->params._use_random_catalog())
+        {
           htools_gal.set_params(htools_ran.params);
-
+          this->mean_redshift = htools_gal._mean_redshift();  
+        }
           // Free memmory if necessary. If not, released below
         if(!this->params._Get_tracer_relative_bias())
             galaxy.clear_mem();
@@ -873,6 +874,7 @@ void PowerSpectrumF::measure_power_spectrum_data()
         this->fftw_functions.set_s_g(htools_gal._s_g());
         this->fftw_functions.set_sg1(htools_gal._sg1());
         this->fftw_functions.set_sg2(htools_gal._sg2());
+        this->fftw_functions.set_mean_redshift(htools_gal._mean_redshift());
 
         if(this->params._use_random_catalog())
           {
@@ -1039,6 +1041,7 @@ void PowerSpectrumF::measure_power_spectrum_data()
                 fftw_functions.get_power_spectrum_for_bispectrum(this->pk0);
                 fftw_functions.get_bispectrum_fkp_fast(this->pk0,bispectrum,modes_tri,file_bispectrum);
             }
+
 #ifndef _WRITE_MULTIPOLES_
         write_power_and_modes();
 #else
@@ -1046,7 +1049,6 @@ void PowerSpectrumF::measure_power_spectrum_data()
 #endif
         this->write_fftw_parameters();
   }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -29,4 +29,5 @@
 # include "Hod.hpp"
 # include "BiasMappingTechnique.hpp"
 # include "AngularPowerSpectrumF.hpp"
+# include "CosmoLib.hpp"
 #endif  

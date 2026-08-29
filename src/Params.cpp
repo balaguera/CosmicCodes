@@ -515,7 +515,7 @@ void Params::read_pars_json(std::string file){
       // ____________________________________________________________________________
       string pname="redshift";    
       string pname_c="redshift";    
-      string description = "Cosmological redshift";
+      string description = "Cosmological redshift to characterize simulations (snapshots)";
       string options = "float > 0";
       this->redshift=Simulation.value(pname,0);
       this->collect_params_info(pname,pname_c,this_section, description,options);
@@ -643,7 +643,7 @@ void Params::read_pars_json(std::string file){
     pname = "delta_min";
     pname_c = "delta_X_min";
     description = "Minimum overdensity value used in the analysis.";
-    options = "real prec";
+    options = "float";
     this->delta_X_min = static_cast<real_prec>(DarkMatter.value(pname, 0.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->delta_X_min);
@@ -652,7 +652,7 @@ void Params::read_pars_json(std::string file){
     pname = "delta_max";
     pname_c = "delta_X_max";
     description = "Maximum overdensity value used in the analysis.";
-    options = "real prec";
+    options = "float";
     this->delta_X_max = static_cast<real_prec>(DarkMatter.value("delta_max", 10.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->delta_X_max);
@@ -661,7 +661,7 @@ void Params::read_pars_json(std::string file){
     pname = "logdelta_min";
     pname_c = "ldelta_X_min";
     description = "Minimum log-overdensity value used in the analysis.";
-    options = "real prec";
+    options = "float";
     this->ldelta_X_min = static_cast<real_prec>(DarkMatter.value("logdelta_min", 0.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->ldelta_X_min);
@@ -670,7 +670,7 @@ void Params::read_pars_json(std::string file){
     pname = "logdelta_max";
     pname_c = "ldelta_X_max";
     description = "Maximum log-overdensity value used in the analysis.";
-    options = "real prec";
+    options = "float";
     this->ldelta_X_max = static_cast<real_prec>(DarkMatter.value(pname, 10.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->ldelta_X_max);
@@ -762,7 +762,7 @@ void Params::read_pars_json(std::string file){
       pname = "delta_min";
       pname_c = "delta_Y_min";
       description = "Minimum overdensity value used in the tracer analysis.";
-      options = "real prec";
+      options = "float";
       this->delta_Y_min = static_cast<real_prec>(Tracers.value(pname, 0));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->delta_Y_min);
@@ -771,7 +771,7 @@ void Params::read_pars_json(std::string file){
       pname = "delta_max";
       pname_c = "delta_Y_max";
       description = "Maximum overdensity value used in the tracer analysis.";
-      options = "real prec";
+      options = "float";
       this->delta_Y_max = static_cast<real_prec>(Tracers.value(pname, 10));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->delta_Y_max);
@@ -780,7 +780,7 @@ void Params::read_pars_json(std::string file){
       pname = "logdelta_min";
       pname_c = "ldelta_Y_min";
       description = "Minimum log-overdensity value used in the tracer analysis.";
-      options = "real prec";
+      options = "float";
       this->ldelta_Y_min = static_cast<real_prec>(Tracers.value(pname, 0));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->ldelta_Y_min);
@@ -789,7 +789,7 @@ void Params::read_pars_json(std::string file){
       pname = "logdelta_max";
       pname_c = "ldelta_Y_max";
       description = "Maximum log-overdensity value used in the tracer analysis.";
-      options = "real prec";
+      options = "float";
       this->ldelta_Y_max = static_cast<real_prec>(Tracers.value(pname, 10));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->ldelta_Y_max);
@@ -1129,7 +1129,7 @@ void Params::read_pars_json(std::string file){
     pname = "distance_fraction_to_nearest_random_collapse";
     pname_c = "Distance_fraction";
     description = "Fractional distance to the nearest dm used to collapse random tracers towards.";
-    options = "real prec";
+    options = "float";
     this->Distance_fraction =
         static_cast<real_prec>(BiasMappingTechnique.value(
             "distance_fraction_to_nearest_random_collapse", 0));
@@ -1151,7 +1151,7 @@ void Params::read_pars_json(std::string file){
     pname = "scale_length_velkernel";
     pname_c = "slengthv";
     description = "Scale-length of the velocity kernel.";
-    options = "real prec";
+    options = "float";
     this->slengthv =
         static_cast<real_prec>(BiasMappingTechnique.value(
             "scale_lenght_velkernel", 0));
@@ -1162,7 +1162,7 @@ void Params::read_pars_json(std::string file){
     pname = "velocity_bias_random";
     pname_c = "velbias_random";
     description = "Velocity bias applied to random particles for the task of velocity assignment in BMT. Velocities are bised as v -> v * (1+vel_bias)";
-    options = "real prec";
+    options = "float";
     this->velbias_random = static_cast<real_prec>(BiasMappingTechnique.value("velocity_bias_random", 0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->velbias_random);
@@ -1171,7 +1171,7 @@ void Params::read_pars_json(std::string file){
     pname = "velocity_bias_dm";
     pname_c = "velbias_dm";
     description = "Velocity bias applied to dark matter particles for the task of velocity assignment in BMT. Velocities are bised as v -> v * (1+vel_bias)";
-    options = "real prec";
+    options = "float";
     this->velbias_dm = static_cast<real_prec>(BiasMappingTechnique.value("velocity_bias_dm", 0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->velbias_dm);
@@ -1283,7 +1283,7 @@ void Params::read_pars_json(std::string file){
     pname = "max_kvalue_tracer_bias";
     pname_c = "kmax_tracer_bias";
     description = "Maximum k-value for tracer bias.";
-    options = "real prec";
+    options = "float";
     this->kmax_tracer_bias = static_cast<real_prec>(IndividualTracerBias.value(pname, 0.1));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->kmax_tracer_bias);
@@ -1292,7 +1292,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_kvalue_tracer_bias";
     pname_c = "kmin_tracer_bias";
     description = "Minimum k-value for tracer bias.";
-    options = "real prec";
+    options = "float";
     this->kmin_tracer_bias = static_cast<real_prec>(IndividualTracerBias.value(pname, 0.));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->kmin_tracer_bias);
@@ -1301,7 +1301,7 @@ void Params::read_pars_json(std::string file){
     pname = "max_kvalue_tracer_qbias";
     pname_c = "kmax_tracer_qbias";
     description = "Maximum k-value for tracer quadratic bias.";
-    options = "real prec";
+    options = "float";
     this->kmax_tracer_qbias = static_cast<real_prec>(IndividualTracerBias.value(pname, 0.1));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->kmax_tracer_qbias);
@@ -1310,7 +1310,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_kvalue_tracer_qbias";
     pname_c = "kmin_tracer_qbias";
     description = "Minimum k-value for tracer quadratic bias.";
-    options = "real prec";
+    options = "float";
     this->kmin_tracer_qbias = static_cast<real_prec>(IndividualTracerBias.value(pname, 0.));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->kmin_tracer_qbias);
@@ -1319,7 +1319,7 @@ void Params::read_pars_json(std::string file){
     pname = "max_multipole_tracer_lmbias";
     pname_c = "lmax_bias";
     description = "Maximum multipole for tracer bias.";
-    options = "real prec";
+    options = "float";
     this->lmax_bias = static_cast<real_prec>(IndividualTracerBias.value(pname, 0.));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->lmax_bias);
@@ -1386,7 +1386,7 @@ void Params::read_pars_json(std::string file){
     pname = "box_size";
     pname_c = "Lbox";
     description = "Size of the simulation box.";
-    options = "real prec";
+    options = "float";
     this->Lbox = CWCAnalysis.value(pname, 1.);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->Lbox);
@@ -1395,7 +1395,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_x_coord";
     pname_c = "xmin";
     description = "Minimum X coordinate of the analysis volume.";
-    options = "real prec";
+    options = "float";
     this->xmin = CWCAnalysis.value(pname, 0.0);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->xmin);
@@ -1404,7 +1404,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_y_coord";
     pname_c = "ymin";
     description = "Minimum Y coordinate of the analysis volume.";
-    options = "real prec";
+    options = "float";
     this->ymin = CWCAnalysis.value(pname, 0.0);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->ymin);
@@ -1413,7 +1413,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_z_coord";
     pname_c = "zmin";
     description = "Minimum Z coordinate of the analysis volume.";
-    options = "real prec";
+    options = "float";
     this->zmin = CWCAnalysis.value(pname, 0.0);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->zmin);
@@ -1441,7 +1441,7 @@ void Params::read_pars_json(std::string file){
     pname = "lambda_threshold";
     pname_c = "lambdath";
     description = "Lambda threshold used for tidal cosmic web classification.";
-    options = "real prec";
+    options = "float";
     this->lambdath = CWCAnalysis.value(pname, 0.0);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->lambdath);
@@ -1450,7 +1450,7 @@ void Params::read_pars_json(std::string file){
     pname = "lambda_threshold_vshear";
     pname_c = "lambdath_v";
     description = "Lambda threshold used for velocity shear cosmic web classification.";
-    options = "real prec";
+    options = "float";
     this->lambdath_v =
         CWCAnalysis.value(pname, 0.);
     this->collect_params_info(pname, pname_c, this_section, description, options);
@@ -1729,7 +1729,7 @@ void Params::read_pars_json(std::string file){
     pname = "clustering_space";
     pname_c = "clustering_space";
     description = "Space where the statistics is to be computed. Applies only for simulations";
-    options = "string; real_space or redshift_space";
+    options = "string; real_space, redshift_space or galaxy_redshift_survey";
     this->clustering_space = FourierAnalysis.value(pname, "real_space");
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_string.emplace_back(pname, this->clustering_space);
@@ -1757,7 +1757,7 @@ void Params::read_pars_json(std::string file){
     pname = "box_size_lowres";
     pname_c = "Lbox_low";
     description = "Box size used for low-resolution Fourier grids, in Mpc/h";
-    options = "real prec";
+    options = "float";
     this->Lbox_low =  static_cast<real_prec>(FourierAnalysis.value(pname, 1.));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->Lbox_low);
@@ -1766,7 +1766,7 @@ void Params::read_pars_json(std::string file){
     pname = "box_size";
     pname_c = "Lbox";
     description = "Box size used for Fourier grids, in Mpc/h";
-    options = "real prec";
+    options = "float";
     this->Lbox =  static_cast<real_prec>(FourierAnalysis.value(pname, 1.));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->Lbox);
@@ -2482,8 +2482,7 @@ void Params::read_pars_json(std::string file){
     pname_c = "angles_units_g";
     description = "Units used for angular coordinates (degrees or radians).";
     options = "string: D (degree), or R (radians)";
-    this->angles_units_g =
-        TracerCatalogue.value("angles_units", "D");
+    this->angles_units_g = TracerCatalogue.value("angles_units", "D");
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_string.emplace_back(pname, this->angles_units_g);
 
@@ -2976,7 +2975,7 @@ void Params::read_pars_json(std::string file){
     pname = "redshift_min_sample";
     pname_c = "redshift_min_sample";
     description = "Minimum redshift in the sample.";
-    options = "real prec";
+    options = "float";
     this->redshift_min_sample = static_cast<real_prec>(SurveyProperties.value(pname, 0.001));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->redshift_min_sample);
@@ -2985,7 +2984,7 @@ void Params::read_pars_json(std::string file){
     pname = "redshift_max_sample";
     pname_c = "redshift_max_sample";
     description = "Maximum redshift in the sample.";
-    options = "real prec";
+    options = "float";
     this->redshift_max_sample = static_cast<real_prec>(SurveyProperties.value(pname, 1.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->redshift_max_sample);
@@ -3003,7 +3002,7 @@ void Params::read_pars_json(std::string file){
     pname = "area_surveyed_sky";
     pname_c = "area_survey";
     description = "Total area of the surveyed sky in square degrees.";
-    options = "real prec";
+    options = "float";
     this->area_survey = static_cast<real_prec>(SurveyProperties.value(pname, 1.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->area_survey);
@@ -3099,7 +3098,7 @@ void Params::read_pars_json(std::string file){
     pname = "i_mask_pixel";
     pname_c = "i_mask_pixel";
     description = "Index of the mask pixel.";
-    options = "real prec";
+    options = "float";
     this->i_mask_pixel = static_cast<real_prec>(MaskProperties.value(pname, -1));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->i_mask_pixel);
@@ -3108,7 +3107,7 @@ void Params::read_pars_json(std::string file){
     pname = "i_mask_alpha";
     pname_c = "i_mask_alpha";
     description = "Index of the mask alpha coordinate.";
-    options = "real prec";
+    options = "float";
     this->i_mask_alpha = static_cast<real_prec>(MaskProperties.value(pname, -1));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->i_mask_alpha);
@@ -3117,7 +3116,7 @@ void Params::read_pars_json(std::string file){
     pname = "i_mask_delta";
     pname_c = "i_mask_delta";
     description = "Index of the mask delta coordinate.";
-    options = "real prec";
+    options = "float";
     this->i_mask_delta = static_cast<real_prec>(MaskProperties.value(pname, -1));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->i_mask_delta);
@@ -3126,7 +3125,7 @@ void Params::read_pars_json(std::string file){
     pname = "i_mask_flag";
     pname_c = "i_mask_flag";
     description = "Index of the mask flag.";
-    options = "real prec";
+    options = "float";
     this->i_mask_flag = static_cast<real_prec>(MaskProperties.value(pname, -1));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->i_mask_flag);
@@ -3146,7 +3145,7 @@ void Params::read_pars_json(std::string file){
     pname = "number_bins_dndz";
     pname_c = "N_dndz_bins";
     description = "Number of bins for the dN/dz histogram.";
-    options = "real prec";
+    options = "float";
     this->N_dndz_bins = static_cast<real_prec>(RedshiftHistograms.value(pname, 1));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->N_dndz_bins);
@@ -3155,7 +3154,7 @@ void Params::read_pars_json(std::string file){
     pname = "new_number_bins_dndz";
     pname_c = "new_N_dndz_bins";
     description = "New number of bins for the dN/dz histogram.";
-    options = "real prec";
+    options = "float";
     this->new_N_dndz_bins = static_cast<real_prec>(RedshiftHistograms.value(pname, 1));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->new_N_dndz_bins);
@@ -3286,7 +3285,7 @@ void Params::read_pars_json(std::string file){
       pname = "min_color";
       pname_c = "Color_min";
       description = "Minimum color value.";
-      options = "real prec";
+      options = "float";
       this->Color_min = static_cast<real_prec>(GalaxyAnalysis.value(pname, 0.1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->Color_min);
@@ -3295,7 +3294,7 @@ void Params::read_pars_json(std::string file){
       pname = "max_color";
       pname_c = "Color_max";
       description = "Maximum color value.";
-      options = "real prec";
+      options = "float";
       this->Color_max = static_cast<real_prec>(GalaxyAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->Color_max);
@@ -3313,7 +3312,7 @@ void Params::read_pars_json(std::string file){
       pname = "min_stellar_mass";
       pname_c = "Mstellar_min";
       description = "Minimum stellar mass.";
-      options = "real prec";
+      options = "float";
       this->Mstellar_min = static_cast<real_prec>(GalaxyAnalysis.value(pname, 0.1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->Mstellar_min);
@@ -3322,7 +3321,7 @@ void Params::read_pars_json(std::string file){
       pname = "max_stellar_mass";
       pname_c = "Mstellar_max";
       description = "Maximum stellar mass.";
-      options = "real prec";
+      options = "float";
       this->Mstellar_max = static_cast<real_prec>(GalaxyAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->Mstellar_max);
@@ -3425,7 +3424,7 @@ void Params::read_pars_json(std::string file){
       pname = "mass_units";
       pname_c = "MASS_units";
       description = "Units for halo mass.";
-      options = "real prec";
+      options = "float";
       this->MASS_units = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->MASS_units);
@@ -3470,7 +3469,7 @@ void Params::read_pars_json(std::string file){
       pname = "min_logmass";
       pname_c = "LOGMASSmin";
       description = "Minimum halo log-mass.";
-      options = "real prec";
+      options = "float";
       this->LOGMASSmin = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->LOGMASSmin);
@@ -3479,7 +3478,7 @@ void Params::read_pars_json(std::string file){
       pname = "max_logmass";
       pname_c = "LOGMASSmax";
       description = "Maximum halo log-mass.";
-      options = "real prec";
+      options = "float";
       this->LOGMASSmax = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->LOGMASSmax);
@@ -3488,7 +3487,7 @@ void Params::read_pars_json(std::string file){
       pname = "min_vmax";
       pname_c = "VMAXmin";
       description = "Minimum vmax.";
-      options = "real prec";
+      options = "float";
       this->VMAXmin = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->VMAXmin);
@@ -3497,7 +3496,7 @@ void Params::read_pars_json(std::string file){
       pname = "max_vmax";
       pname_c = "VMAXmax";
       description = "Maximum vmax.";
-      options = "real prec";
+      options = "float";
       this->VMAXmax = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->VMAXmax);
@@ -3506,7 +3505,7 @@ void Params::read_pars_json(std::string file){
       pname = "min_rs";
       pname_c = "RSmin";
       description = "Minimum scale radius rs.";
-      options = "real prec";
+      options = "float";
       this->RSmin = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->RSmin);
@@ -3515,7 +3514,7 @@ void Params::read_pars_json(std::string file){
       pname = "max_rs";
       pname_c = "RSmax";
       description = "Maximum scale radius rs.";
-      options = "real prec";
+      options = "float";
       this->RSmax = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->RSmax);
@@ -3524,7 +3523,7 @@ void Params::read_pars_json(std::string file){
       pname = "min_spin";
       pname_c = "SPINmin";
       description = "Minimum halo spin.";
-      options = "real prec";
+      options = "float";
       this->SPINmin = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->SPINmin);
@@ -3533,7 +3532,7 @@ void Params::read_pars_json(std::string file){
       pname = "max_spin";
       pname_c = "SPINmax";
       description = "Maximum halo spin.";
-      options = "real prec";
+      options = "float";
       this->SPINmax = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->SPINmax);
@@ -3542,7 +3541,7 @@ void Params::read_pars_json(std::string file){
       pname = "number_sec_property_bins_assignment_bmt";
       pname_c = "NPROPbins_bam";
       description = "Number of bins for secondary property assignment (BMT).";
-      options = "real prec";
+      options = "float";
       this->NPROPbins_bam = static_cast<real_prec>(HaloAnalysis.value(pname, 1));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->NPROPbins_bam);
@@ -3588,7 +3587,7 @@ void Params::read_pars_json(std::string file){
 
       // Number flags
       #define ADD_NUMBER_PARAM(key, member, desc, typecast) \
-          pname = key; pname_c = #member; description = desc; options = "real prec"; \
+          pname = key; pname_c = #member; description = desc; options = "float"; \
           this->member = typecast(HaloAnalysis.value(key, 0)); \
           this->collect_params_info(pname, pname_c, this_section, description, options); \
           this->parameter_number.emplace_back(pname, this->member);
@@ -3681,7 +3680,7 @@ void Params::read_pars_json(std::string file){
       pname = "min_separation";
       pname_c = "rmin_cf";
       description = "Minimum separation for correlation function.";
-      options = "real prec";
+      options = "float";
       this->rmin_cf = static_cast<real_prec>(CorrelationFunction.value(pname, 0));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->rmin_cf);
@@ -3690,7 +3689,7 @@ void Params::read_pars_json(std::string file){
       pname = "max_separation";
       pname_c = "rmax_cf";
       description = "Maximum separation for correlation function.";
-      options = "real prec";
+      options = "float";
       this->rmax_cf = static_cast<real_prec>(CorrelationFunction.value(pname, 0));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->rmax_cf);
@@ -4239,7 +4238,7 @@ void Params::read_pars_json(std::string file){
       pname = "initial_redshift_thoeretical_power";
       pname_c = "Initial_Redshift_TH_power_file";
       description = "Initial redshift for theoretical power normalization.";
-      options = "real prec";
+      options = "float";
       this->Initial_Redshift_TH_power_file = static_cast<real_prec>(
           InitialConditions.value(pname, 100.));
       this->collect_params_info(pname, pname_c, this_section, description, options);
@@ -4303,7 +4302,7 @@ void Params::read_pars_json(std::string file){
       pname = "smoothing_lenght";
       pname_c = "slength";
       description = "Smoothing length for ICs.";
-      options = "real prec";
+      options = "float";
       this->slength = static_cast<real_prec>(InitialConditions.value(pname, 1.));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->slength);
@@ -4312,7 +4311,7 @@ void Params::read_pars_json(std::string file){
       pname = "velbias";
       pname_c = "velbias";
       description = "Velocity bias for ICs.";
-      options = "real prec";
+      options = "float";
       this->velbias = static_cast<real_prec>(InitialConditions.value(pname, 1.));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->velbias);
@@ -4321,7 +4320,7 @@ void Params::read_pars_json(std::string file){
       pname = "vslength";
       pname_c = "vslength";
       description = "Velocity smoothing length.";
-      options = "real prec";
+      options = "float";
       this->vslength = static_cast<real_prec>(InitialConditions.value(pname, 1.));
       this->collect_params_info(pname, pname_c, this_section, description, options);
       this->parameter_number.emplace_back(pname, this->vslength);
@@ -4407,8 +4406,8 @@ void Params::read_pars_json(std::string file){
     // cosmological_redshift
     pname = "cosmological_redshift";
     pname_c = "redshift";
-    description = "Redshift for cosmological calculations.";
-    options = "real prec";
+    description = "Input cosmological redshift for FRW cosmological calculations.";
+    options = "float > 0";
     this->redshift = static_cast<real_prec>(CosmologicalLibrary.value(pname, 0.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->redshift);
@@ -4426,7 +4425,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_redshift";
     pname_c = "redshift_min";
     description = "Minimum redshift for calculations.";
-    options = "real prec";
+    options = "float";
     this->redshift_min = static_cast<real_prec>(CosmologicalLibrary.value(pname, 0.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->redshift_min);
@@ -4435,7 +4434,7 @@ void Params::read_pars_json(std::string file){
     pname = "max_redshift";
     pname_c = "redshift_max";
     description = "Maximum redshift for calculations.";
-    options = "real prec";
+    options = "float";
     this->redshift_max = CosmologicalLibrary.value(pname, 1.0);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->redshift_max);
@@ -4483,7 +4482,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_mass_mf";
     pname_c = "M_min_mf";
     description = "Minimum halo mass for mass function.";
-    options = "real prec";
+    options = "float";
     this->M_min_mf = MassFunctionTH.value(pname, 1e7);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->M_min_mf);
@@ -4492,7 +4491,7 @@ void Params::read_pars_json(std::string file){
     pname = "max_mass_mf";
     pname_c = "M_max_mf";
     description = "Maximum halo mass for mass function.";
-    options = "real prec";
+    options = "float";
     this->M_max_mf = MassFunctionTH.value(pname, 1e16);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->M_max_mf);
@@ -4501,7 +4500,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_effective_mass";
     pname_c = "M_min_effective";
     description = "Minimum effective mass for mass function calculations.";
-    options = "real prec";
+    options = "float";
     this->M_min_effective = MassFunctionTH.value(pname, 1e16);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->M_min_effective);
@@ -4510,7 +4509,7 @@ void Params::read_pars_json(std::string file){
     pname = "max_effective_mass";
     pname_c = "M_max_effective";
     description = "Maximum effective mass for mass function calculations.";
-    options = "real prec";
+    options = "float";
     this->M_max_effective = MassFunctionTH.value(pname, 1e16);
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->M_max_effective);
@@ -4643,7 +4642,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_radius_dp";
     pname_c = "rmin_dp";
     description = "Minimum radius for density profile computation.";
-    options = "real prec";
+    options = "float";
     this->rmin_dp = static_cast<real_prec>(DarkMatterHaloDensityProfile.value(pname, 0.01));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->rmin_dp);
@@ -4652,7 +4651,7 @@ void Params::read_pars_json(std::string file){
     pname = "max_radius_dp";
     pname_c = "rmax_dp";
     description = "Maximum radius for density profile computation.";
-    options = "real prec";
+    options = "float";
     this->rmax_dp = static_cast<real_prec>(DarkMatterHaloDensityProfile.value(pname, 10.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->rmax_dp);
@@ -4688,7 +4687,7 @@ void Params::read_pars_json(std::string file){
     pname = "coef_concentration_amp";
     pname_c = "coef_concentration_amp";
     description = "Amplitude coefficient for halo concentration.";
-    options = "real prec";
+    options = "float";
     this->coef_concentration_amp = static_cast<real_prec>(DarkMatterHaloDensityProfile.value(pname, 1.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->coef_concentration_amp);
@@ -4697,7 +4696,7 @@ void Params::read_pars_json(std::string file){
     pname = "coef_concentration";
     pname_c = "coef_concentration";
     description = "Halo concentration coefficient.";
-    options = "real prec";
+    options = "float";
     this->coef_concentration = static_cast<real_prec>(DarkMatterHaloDensityProfile.value(pname, 1.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->coef_concentration);
@@ -4706,7 +4705,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_kvalue_dp";
     pname_c = "kmin_dp";
     description = "Minimum k-value for density profile in Fourier space.";
-    options = "real prec";
+    options = "float";
     this->kmin_dp = static_cast<real_prec>(DarkMatterHaloDensityProfile.value(pname, 0.01));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->kmin_dp);
@@ -4715,7 +4714,7 @@ void Params::read_pars_json(std::string file){
     pname = "max_kvalue_dp";
     pname_c = "kmax_dp";
     description = "Maximum k-value for density profile in Fourier space.";
-    options = "real prec";
+    options = "float";
     this->kmax_dp = static_cast<real_prec>(DarkMatterHaloDensityProfile.value(pname, 1.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->kmax_dp);
@@ -4787,7 +4786,7 @@ void Params::read_pars_json(std::string file){
     pname = "mass_one_hod";
     pname_c = "muno_hod";
     description = "Characteristic mass M1 for HOD.";
-    options = "real prec";
+    options = "float";
     this->muno_hod = static_cast<real_prec>(HOD.value(pname, 1e12));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->muno_hod);
@@ -4796,7 +4795,7 @@ void Params::read_pars_json(std::string file){
     pname = "alpha_hod";
     pname_c = "alpha_hod";
     description = "Power-law slope alpha in the HOD model.";
-    options = "real prec";
+    options = "float";
     this->alpha_hod = static_cast<real_prec>(HOD.value(pname, 1.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->alpha_hod);
@@ -4805,7 +4804,7 @@ void Params::read_pars_json(std::string file){
     pname = "mmin_hod";
     pname_c = "mmin_hod";
     description = "Minimum halo mass for hosting galaxies in HOD.";
-    options = "real prec";
+    options = "float";
     this->mmin_hod = static_cast<real_prec>(HOD.value(pname, 1e12));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->mmin_hod);
@@ -4814,7 +4813,7 @@ void Params::read_pars_json(std::string file){
     pname = "scatter_hod";
     pname_c = "scatter_hod";
     description = "Log-normal scatter in the HOD relation.";
-    options = "real prec";
+    options = "float";
     this->scatter_hod = static_cast<real_prec>(HOD.value(pname, 0.4));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->scatter_hod);
@@ -4886,7 +4885,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_kvalue_power_spectrum";
     pname_c = "kmin_ps";
     description = "Minimum k-value for power spectrum calculation.";
-    options = "real prec";
+    options = "float";
     this->kmin_ps =
         static_cast<real_prec>(PowerSpectrumTH.value(pname, 0.001));
     this->collect_params_info(pname, pname_c, this_section, description, options);
@@ -4896,7 +4895,7 @@ void Params::read_pars_json(std::string file){
     pname = "max_kvalue_power_spectrum";
     pname_c = "kmax_ps";
     description = "Maximum k-value for power spectrum calculation.";
-    options = "real prec";
+    options = "float";
     this->kmax_ps =
         static_cast<real_prec>(PowerSpectrumTH.value(pname, 1.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
@@ -5030,7 +5029,7 @@ void Params::read_pars_json(std::string file){
     pname = "min_r_value_correlation_function";
     pname_c = "rmin_cf";
     description = "Minimum separation r for correlation function.";
-    options = "real prec";
+    options = "float";
     this->rmin_cf = static_cast<real_prec>(CorrelationFunctionTH.value(pname, 0.01));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->rmin_cf);
@@ -5039,7 +5038,7 @@ void Params::read_pars_json(std::string file){
     pname = "max_r_value_correlation_function";
     pname_c = "rmax_cf";
     description = "Maximum separation r for correlation function.";
-    options = "real prec";
+    options = "float";
     this->rmax_cf = static_cast<real_prec>(CorrelationFunctionTH.value(pname, 100.0));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->rmax_cf);
@@ -5057,7 +5056,7 @@ void Params::read_pars_json(std::string file){
     pname = "number_of_values_correlation_function";
     pname_c = "npoints_cf";
     description = "Number of points in correlation function.";
-    options = "real prec";
+    options = "float";
     this->npoints_cf = static_cast<real_prec>(CorrelationFunctionTH.value(pname, 10));
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_number.emplace_back(pname, this->npoints_cf);
@@ -5130,7 +5129,7 @@ void Params::read_pars_json(std::string file){
     pname = key; \
     pname_c = var; \
     description = desc; \
-    options = "real prec"; \
+    options = "float"; \
     this->var = static_cast<real_prec>(lib.value(key, def)); \
     this->collect_params_info(pname, pname_c, this_section, description, options); \
     this->parameter_number.emplace_back(pname, this->var);
@@ -6163,12 +6162,15 @@ void Params::derived_pars(){
   this->d1=this->Lbox/static_cast<real_prec>(this->Nft);		/* grid spacing x-direction */
   this->d2=this->Lbox/static_cast<real_prec>(this->Nft);		/* grid spacing y-direction */
   this->d3=this->Lbox/static_cast<real_prec>(this->Nft);		/* grid spacing z-direction */
-  this->Xoffset = this->Lbox/2; /* Xoffset for a box*/
-  this->Yoffset = this->Lbox/2;
-  this->Zoffset = this->Lbox/2;
-  this->xmax=this->xmin+this->Lbox; /*xmax for a box */
-  this->ymax=this->ymin+this->Lbox;
-  this->zmax=this->zmin+this->Lbox;
+  if(!this->use_random_catalog)   //Only use this if the catalog is a simulation. When using a catalog with randoms, these values are computed in htools, along with Lbox new, so we call this method being carefully not to overwrite offsets.
+  {
+    this->Xoffset = this->Lbox/2; /* Xoffset for a box*/
+    this->Yoffset = this->Lbox/2;
+    this->Zoffset = this->Lbox/2;
+    this->xmax=this->xmin+this->Lbox; /*xmax for a box */
+    this->ymax=this->ymin+this->Lbox;
+    this->zmax=this->zmin+this->Lbox;
+  }
   this->d1_HR=this->Lbox/static_cast<real_prec>(this->Nft_HR);		/* grid spacing x-direction */
   this->d2_HR=this->Lbox/static_cast<real_prec>(this->Nft_HR);		/* grid spacing y-direction */
   this->d3_HR=this->Lbox/static_cast<real_prec>(this->Nft_HR);		/* grid spacing z-direction */

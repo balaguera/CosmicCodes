@@ -140,6 +140,7 @@ Catalogue catalogue(params, params._type_of_object());
     this->get_local_mach_number(true);
   //* COMPUTE DISTRIBUTION OF SEPARATIONS
   // There is a bug related to memmory in jumping from get_neighbpuro to get_distribution. UNidentified.
+
   if(this->params._get_distribution_min_separations())
     {
       vector<s_nearest_cells> ncells_info;
@@ -151,6 +152,7 @@ Catalogue catalogue(params, params._type_of_object());
     }
   //* COMPUTE ABUNDANCE:
   // We must set sos ifs in order to aks what are we going to analyze from the catalog
+
   string fname_mass_function_Y = this->Output_directory+this->catalogue._type_of_object()+this->params._Name_survey()+"_abundance_R"+to_string(this->params._realization())+".txt";
   if(this->params._Get_prop_function_tracer() ||  this->params._Get_tracer_mean_number_density())
     this->get_property_function(fname_mass_function_Y);
@@ -11460,19 +11462,20 @@ size_t nlines = this->catalogue._NOBJS();
 
   std::string angles_units = (this->catalogue._type_of_object()=="RANDOM" ? this->params._angles_units_r() : this->params._angles_units_g());
  
-  CoordinateSystem sys_coord = (this->catalogue._type_of_object()=="RANDOM" ? this->params._sys_of_coord_r(): this->params._sys_of_coord_g());
+  CoordinateSystem sys_coord = (this->catalogue._type_of_object()=="RANDOM" ? static_cast<CoordinateSystem>(this->params._sys_of_coord_r()): static_cast<CoordinateSystem>(this->params._sys_of_coord_g()));
 
   // Factor to transform deg to rad, as the function equ2cart expects angles in rads
   real_prec fac=1.0;
   if(angles_units=="D")
     fac=M_PI/static_cast<double>(180.);
 
-    int n_rc=0;
+  int n_rc=0;
   int n_zzv=0;
 #ifndef _use_simple_nbar_assignment_
   // Preparing for interpolation of the relation nbar(z)
   gsl_spline *spline_nbar;
   gsl_interp_accel *spline_acc_nbar;
+
   if(this->params._use_random_catalog() && !this->params._nbar_tabulated() && this->params._use_file_nbar())
     {
       spline_nbar = gsl_spline_alloc (gsl_interp_linear,s_data->zz_v.size());
@@ -11629,7 +11632,7 @@ size_t nlines = this->catalogue._NOBJS();
         real_prec z=0; real_prec zro=0; 
         real_prec ra_s=this->catalogue.coord1_at(i);
         real_prec dec_s=this->catalogue.coord2_at(i);
-        this->catalogue.redshift_at(i)=this->catalogue.coord3_at(i); // just to keep track of the redshift of the tracer
+        this->catalogue.set_redshift(this->catalogue.coord3_at(i),i); // just to keep track of the redshift of the tracer
         real_prec redshift_aux  = this->catalogue.redshift_at(i) < s_data->zz_c[0] ? s_data->zz_c[0]: this->catalogue.redshift_at(i);
         real_prec rr=gsl_spline_eval(spline_zro, redshift_aux, spline_acc_zro); // Transform to comoving distance *
         real_prec nbar=mean_density; 
@@ -11758,7 +11761,15 @@ size_t nlines = this->catalogue._NOBJS();
   real_prec llx=0;
   real_prec lly=0;
   real_prec llz=0;
-   if(true==params._new_Lbox())
+
+
+   real_prec new_lbox =  this->params._Lbox();
+
+  // If we have requested a new box size:  
+  if(sys_coord != CoordinateSystem::CART)
+   {
+
+    if(params._new_Lbox())
     {
       llx=fabs(aXMAX-aXMIN);
       lly=fabs(aYMAX-aYMIN);
@@ -11766,59 +11777,54 @@ size_t nlines = this->catalogue._NOBJS();
       llx=max(llx,lly);
       lly=max(lly,llz);
       llz=max(llx,lly);
+      new_lbox = llz;
     }
-  // Pass the new offsets to the params class only if not cartessian coordinates. If cartessian coords,
-  // xmin remains the one read in parameter file and xmax is xmin+Lbox,m assuming that we are dealing witha cube.
-  if(sys_coord>CoordinateSystem::CART)
-  {
-    this->params.set_Xoffset(0.5*(aXMAX+aXMIN));
-    this->params.set_Yoffset(0.5*(aYMAX+aYMIN));
-    this->params.set_Zoffset(0.5*(aZMAX+aZMIN));
-    this->params.set_xmin(aXMIN);
-    this->params.set_ymin(aYMIN);
-    this->params.set_zmin(aZMIN);
-    this->params.set_xmax(aXMAX);
-    this->params.set_ymax(aYMAX);
-    this->params.set_zmax(aZMAX);
- }
-  real_prec shift_x= this->params._Xoffset() - 0.5*this->params._Lbox();
-  real_prec shift_y= this->params._Yoffset() - 0.5*this->params._Lbox();
-  real_prec shift_z= this->params._Zoffset() - 0.5*this->params._Lbox();
-#ifdef _FULL_VERBOSE_
-  if(this->catalogue._type_of_object()=="RANDOM" ){
+   
+    new_lbox = llz;
 
-  cout<<"\t"<<YELLOW<<"Range in x:[" << aXMIN << ":" << aXMAX << "]" << endl;
-  cout<<"\t"<<YELLOW<<"Range in y:[" << aYMIN << ":" << aYMAX << "]" << endl;
-  cout<<"\t"<<YELLOW<<"Range in z:[" << aZMIN << ":" << aZMAX << "]" << endl;
-  cout<<"\t"<<YELLOW<<"New Range in x:[" << aXMIN-shift_x << ":" << aXMAX-shift_x << "]" << endl;
-  cout<<"\t"<<YELLOW<<"New Range in y:[" << aYMIN-shift_y << ":" << aYMAX-shift_y << "]" << endl;
-  cout<<"\t"<<YELLOW<<"New Range in z:[" << aZMIN-shift_z << ":" << aZMAX-shift_z << "]" << endl;
-  So.message_screen("Xoffset =",this->params._Xoffset());
-  So.message_screen("Yoffset =",this->params._Yoffset());
-  So.message_screen("Zoffset =",this->params._Zoffset());
+  // Pass the new offsets to the params class only if *not cartessian coordinates*. If cartessian coords,
+  // xmin remains the one read in parameter file and xmax is xmin+Lbox,m assuming that we are dealing witha cube.
+     this->params.set_Xoffset(0.5*(aXMAX+aXMIN));
+     this->params.set_Yoffset(0.5*(aYMAX+aYMIN));
+     this->params.set_Zoffset(0.5*(aZMAX+aZMIN));
+     this->params.set_xmin(aXMIN);
+     this->params.set_ymin(aYMIN);
+     this->params.set_zmin(aZMIN);
+     this->params.set_xmax(aXMAX);
+     this->params.set_ymax(aYMAX);
+     this->params.set_zmax(aZMAX);
   }
 
+#ifdef _FULL_VERBOSE_
   if(this->catalogue._type_of_object()=="RANDOM" )
-    {
-      if(this->params._new_Lbox())
-        So.message_screen("Overwriting value ", this->params._Lbox(), " with ", llz );
-      else
-        So.message_screen("Keeping input box lengh", this->params._Lbox());
-    }
+   {
+      real_prec shift_x= this->params._Xoffset() - 0.5*new_lbox;
+      real_prec shift_y= this->params._Yoffset() - 0.5*new_lbox;
+      real_prec shift_z= this->params._Zoffset() - 0.5*new_lbox;
+      cout<<YELLOW<<"Range in x:[" << aXMIN << ":" << aXMAX << "]" << endl;
+      cout<<YELLOW<<"Range in y:[" << aYMIN << ":" << aYMAX << "]" << endl;
+      cout<<YELLOW<<"Range in z:[" << aZMIN << ":" << aZMAX << "]" << endl;
+      cout<<YELLOW<<"New Range in x:[" << aXMIN-shift_x << ":" << aXMAX-shift_x << "]" << endl;
+      cout<<YELLOW<<"New Range in y:[" << aYMIN-shift_y << ":" << aYMAX-shift_y << "]" << endl;
+      cout<<YELLOW<<"New Range in z:[" << aZMIN-shift_z << ":" << aZMAX-shift_z << "]" << endl;
+      So.message_screen("Xoffset =",this->params._Xoffset());
+      So.message_screen("Yoffset =",this->params._Yoffset());
+      So.message_screen("Zoffset =",this->params._Zoffset());
+  }
+
 #endif
 #ifdef _USE_SEVERAL_RANDOM_FILES_
-  if(true==params._new_Lbox() && ir ==0) // The box is defined with the randoms. If nreading seveal, do it from the first file
+  if(params._new_Lbox() && ir ==0) // The box is defined with the randoms. If nreading seveal, do it from the first file
 #else
-  if(true==params._new_Lbox()) // The box is defined with the randoms
+  if(params._new_Lbox()) // The box is defined with the randoms
 #endif
-  {
-  if(this->catalogue._type_of_object()=="RANDOM" ){ // this is not so necesasary, as in POwer we will feed Fft and power with random_this->catalogue.params
-      So.message_screen("Computed box from random:", llz);
-      this->params.set_Lbox(llz);
-      this->params.derived_pars(); // This is only called if Lbox has changed
-  }
-   else
-      So.message_screen("Computed box from data:", llz);
+   {
+     if(this->catalogue._type_of_object()=="RANDOM" )
+      { // this is not so necesasary, as in POwer we will feed Fft and power with random_this->catalogue.params
+        So.message_screen("Overwriting box length from ", this->params._Lbox(), " to ", llz );
+        this->params.set_Lbox(llz);  // Assign the new Lbox.
+        this->params.derived_pars(); // This is only called if Lbox has changed
+      }
   }
   So.DONE();
 }
@@ -11852,7 +11858,6 @@ size_t nlines = this->catalogue._NOBJS();
    vector<real_prec> ow(MAX_NUMBER_WEIGHTS,0);
 #endif
    vector<real_prec>mark;
-
 
 
    if(true==marked)
@@ -11909,10 +11914,12 @@ size_t nlines = this->catalogue._NOBJS();
    double W_r=0;
    double S_r1=0;
    double S_r2=0;
+   double mean_z=0;
    double normal_bispectrum=0;
    real_prec vx=0;
    real_prec vy=0;
    real_prec vz=0;
+   bool tsample = this->params._clustering_space() == "galaxy_redshift_survey" ? true: false;
    
 #ifdef _USE_OMP_
 #ifdef _GET_BISPECTRUM_NUMBERS_
@@ -11957,13 +11964,15 @@ size_t nlines = this->catalogue._NOBJS();
            if(this->params._FKP_weight())
              we_fkp=1.0/(1.0+static_cast<double>(this->params._Pest())*nbar);
            ptotal_weight*=we_fkp;
-           if(true==marked)
+           if(marked)
                ptotal_weight*=mark[i];
            // Parameters for the Pk
            n_selected++;                                //number of selected objects
            W_r += ptotal_weight;                          //weighted number of selected objects
            S_r_power += ptotal_weight*ptotal_weight;                   //sum of the squared of weight
            normal_power += nbar*ptotal_weight*ptotal_weight;    //normalization of power spectrum
+           if (tsample)
+            mean_z += ptotal_weight * this->catalogue.redshift_at(i);
            // Parameters for the bispectrum: shot noise
 #ifdef _GET_BISPECTRUM_NUMBERS_
            real_prec ptotal_weight3 = ptotal_weight2 * ptotal_weight;
@@ -12044,6 +12053,9 @@ size_t nlines = this->catalogue._NOBJS();
         this->field_external[i]+=field[i];
      }
 #else
+
+   this->mean_redshift = tsample == true ? mean_z / W_r : this->params._redshift();  
+   this->params.set_mean_redshift(this->mean_redshift);
    this->n_gal = static_cast<size_t>(n_selected);
    this->w_g = static_cast<real_prec>(W_r);
    this->normal_p = static_cast<real_prec>(normal_power);
@@ -12051,7 +12063,7 @@ size_t nlines = this->catalogue._NOBJS();
    this->s_g = static_cast<real_prec>(S_r_power);
    this->sg1 = static_cast<real_prec>(S_r1);
    this->sg2 = static_cast<real_prec>(S_r2);
-   if(marked==true)
+   if(marked)
      {
        this->field_external_marked.resize(field.size(),0);
        this->field_external_marked=field;
@@ -12079,12 +12091,12 @@ size_t nlines = this->catalogue._NOBJS();
          j["Initial_slice"] = 20;
          j["sample"] = params._Name_survey();
          j["name"] = "Density";
-         j["redshift"] = params._redshift();
-         j["output_file"] = params._output_file_interpolated_field()+".dat";
+         j["redshift"] = this->params._clustering_space() == "galaxy_redshift_survey" ? this->mean_redshift : this->params._redshift();
+         j["output_file"] = this->params._output_file_interpolated_field()+".dat";
          jfile<<j.dump(4);
          cout<<"Generating json file "<<json_file_plot<<" for plotting"<<endl;  
          jfile.close();
-         system("python3 ../python/cosmolib_plots.py plot_file_interpolated_field.json &");
+         system("python3 ../Python/cosmolib_plots.py plot_file_interpolated_field.json &");
       }
 
 

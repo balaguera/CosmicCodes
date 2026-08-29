@@ -178,6 +178,11 @@ class FftwFunctions{
       @brief Parameter used to compute shot noise in bispectrum
   */
   real_prec sg2;
+//////////////////////////////////////////////////////////
+  /**
+      @brief Parameter used to compute shot noise in bispectrum
+  */
+  real_prec mean_redshift;
   //////////////////////////////////////////////////////////
   /**
    * @brief Used in the normalization in bispectrum
@@ -1376,6 +1381,12 @@ class FftwFunctions{
   * @return
   */
   void set_sg2(real_prec val){this->sg2=val;}
+  //////////////////////////////////////////////////////////
+  /**
+  * @brief
+  * @return
+  */
+  void set_mean_redshift(real_prec val){this->mean_redshift=val;}
   //////////////////////////////////////////////////////////
   /**
   * @brief

@@ -1946,9 +1946,15 @@ private :
   //////////////////////////////////////////////////////////
   /**
    * @brief Cosmological redshift
-   * @brief Read from input parameter file
+   * @brief Read from input parameter file0
    */
   real_prec redshift;
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Mean redshift.
+   * @brief OBtained form galaxy redshift survey
+   */
+  real_prec mean_redshift;
 
   //////////////////////////////////////////////////////////
   /**
@@ -4172,7 +4178,18 @@ public:
    */
   void set_cosmo_output(string utput){this->cosmo_output=utput;}
 
-
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief get/set the value of the private member
+   *  @return
+   */
+  void set_mean_redshift(real_prec utput){this->mean_redshift=utput;}
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief get/set the value of the private member
+   *  @return
+   */
+  real_prec _mean_redshift(){return this->mean_redshift;}
 
 
   //////////////////////////////////////////////////////////

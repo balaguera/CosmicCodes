@@ -2,12 +2,13 @@
 /**
  * @class <PowerSpectrumF>
  * @note Header file for the class PowerSpectrum.
+ * @section spec Spectral Analysis
  * The spectral analysis of cosmological probes aims at extracting most of the cosmological information by decomposing 
  * the signal of the perturbations in a given observable (e.g, CMB temperature, spatial distribution of galaxies). 
  * A motivation for this type of analysis comes from the behavior of early density fluctuations, which, evolving in a 
  * linear regime, acquired independent equations of evolution once decomposed in plane-waves. As such, spectral analysis of density perturbations is typically expressed in terms of Fourier decomposition.  Plane-waves are not the only possible basis on which the density fluctuations can be expanded. Despite of being ideal for analysis of $N$-body simulations (in which periodic boundary conditions are assumed) and for small area covered by redshift surveys, the analysis if wide area surveys imposes the need to extract the cosmological information by using different basis. In this section we will briefly motivate three different basis, each of which will be exposed in more detail later in this chapter. 
  *
- *The Fourier analysis consists in the harmonic decomposition based on plane waves as basis, that is
+ * The Fourier analysis consists in the harmonic decomposition based on plane waves as basis, that is
  * \f[
  * \langle \textbf{r}|\textbf{k}\rangle=e^{i\textbf{k}\cdot\textbf{r}},
  * \f]
@@ -37,6 +38,284 @@
  * Fourier transform of a real field \f$\delta(\textbf{r})\f$ is located in the first quadrant in the \f$k-\f$ space. We can understand 
  * the properties of the harmonic decomposition by recalling that, as in quantum mechanics, the wave function written in Cartesian coordinates for a free particle can be represented by plane-waves. In other words, plane-waves represent the eigenstates of the momentum operator, $\hat{p}|\textbf{k}\rangle=k|\textbf{k}\rangle$. Indeed, as a free particle, it's linear momentum is conserved. Keeping in mind that the linear momentum is the generator of translations in space, 
  * its conservation encodes a symmetry : this corresponds to the symmetry of isotropy.
+ * 
+ * @section est Discrete Fourier Transform and Power Spectrum Estimation
+ * 
+
+* In order to measure the power spectrum using the FKP estimator, we start by the
+* a Fourier transform of a discrete set of mass tracers. These mass tracers
+* are considered to be a sampling realization of an underlying continuous
+* density field; hence, the procedure is referred to as a discrete Fourier
+* transform (DFT).
+*
+* For the galaxy sample and the synthetic catalogue, we write
+*
+* @f[
+* n(\mathbf{r}) = \sum_i \delta^3(\mathbf{r}-\mathbf{r}_i),
+* @f]
+*
+*
+* such that the corresponding FKP field can be expressed as sums over the
+* positions of the galaxies in the real and synthetic catalogues. The DFT is
+*
+*
+* @f[
+* F(\mathbf{k}) =
+* \frac{1}{N}
+* \left[
+* \sum_{i=\mathrm{gal}}
+* w(\mathbf{r}_i)e^{i\mathbf{k}\cdot\mathbf{r}_i}
+* 
+* 
+* 
+* \alpha
+* \sum_{j=\mathrm{ran}}
+* w(\mathbf{r}_j)e^{i\mathbf{k}\cdot\mathbf{r}_j}
+* \right].
+* @f]
+
+* The wave vectors are distributed on a regular grid according to the
+* periodic boundary conditions imposed by the plane-wave expansion:
+* 
+* @f[
+* \mathbf{k} =
+* \left(
+* \frac{2\pi}{L}\hat{\mathbf{n}}_x,
+* \frac{2\pi}{L}\hat{\mathbf{n}}_y,
+* \frac{2\pi}{L}\hat{\mathbf{n}}_z
+* \right),
+* @f]
+* 
+* where @f$\hat{\mathbf{n}}_i@f$ are unit vectors along the Cartesian
+* directions in Fourier space and @f$L=V^{1/3}@f$, with @f$V@f$ the volume
+* of the sample.
+
+* Written in this form, the direct determination of the DFT scales as
+* @f$N_{\mathrm{obj}}N_{\mathrm{modes}}@f$, where
+* @f$N_{\mathrm{modes}}@f$ is the total number of Fourier modes to be
+* analysed. This is computationally inefficient for large galaxy redshift
+* surveys containing hundreds of millions of galaxies, making a direct DFT
+* prohibitively expensive.
+* 
+* Instead, we implement the Fast Fourier Transform (FFT) algorithm
+* @cite FFTW05. The FFT requires the interpolation of the galaxy density
+* field onto a regular grid. To this end, we implement an interpolation
+* scheme, or mass-assignment scheme (MAS hereafter), @cite 1988csup.book.....H.
+* 
+* The result is a regular cubic grid containing
+* @f$N_{\mathrm{FFTW}}^3@f$ elements, each with a weighted number of
+* objects @f$N_w(\mathbf{r})@f$. The FFT then consists of a DFT over the
+* positions of the grid cells:
+
+* @f[
+* F_0(\mathbf{k}) =
+* \frac{1}{N}
+* \sum_{j=1}^{M}
+* w(\mathbf{r}_j)
+* \left[
+* N_g(\mathbf{r}_j)
+
+* \alpha N_r(\mathbf{r}_j)
+* \right]
+* e^{i\mathbf{k}\cdot\mathbf{r}_j},
+* @f]
+
+* where @f$M@f$ is the total number of cells into which the volume has been
+* divided, and @f$N_g(\mathbf{r}_j)@f$ and
+* @f$N_r(\mathbf{r}_j)@f$ are the numbers of galaxies and random objects,
+* respectively, in the cell centred at @f$\mathbf{r}_j@f$.
+
+* In practice, each object is assigned a statistical weight, and it is this
+* weighted density field that is interpolated onto the grid using the MAS.
+* The parameter @f$\alpha@f$ is computed from the set of catalogues, while
+* the statistical weight is given by the product of the different weights
+* used in the analysis:
+* 
+* @f[
+* w(\mathbf{r}) =
+* w_{\mathrm{FKP}}(\mathbf{r})
+* \prod_i w_i(\mathbf{r}).
+* @f]
+* 
+* The correction for the mass-assignment scheme is obtained by dividing
+* @f$F_0(\mathbf{k})@f$ by the Fourier transform of the MAS:
+
+* @anchor massc
+* @f[
+* F(\mathbf{k}) =
+* \frac{F_0(\mathbf{k})}{W_{\mathrm{MAS}}(\mathbf{k})},
+* @f]
+* 
+* where @f$W_{\mathrm{MAS}}(\mathbf{k})@f$ denotes the Fourier transform of
+* the kernel used in the mass-assignment procedure:
+* 
+* @f[
+* W_{\mathrm{MAS}}(\mathbf{k}) =
+* \left[
+* \prod_{i=1}^{3}
+* \frac{
+* \sin\left(k_i\pi/(2k_{N_i})\right)
+* }{
+* k_i\pi/(2k_{N_i})
+* }
+* \right]^{2p},
+* @f]
+* 
+* with @f$k_{N_i}@f$ the Nyquist frequency in direction @f$i@f$, and
+* @f$p=1,2,3@f$ corresponding to the NGP, CIC, and TSC mass-assignment
+* schemes, respectively.
+
+
+* @subsection normalization_shotnoise Normalization and Shot Noise
+
+* Using the random sample, we compute the volume integrals defining the
+* normalization and the shot-noise correction. For the normalization:
+* @anchor eq_nn
+ *
+ * @f[
+ * N^2 =
+ * \int \frac{d^3k}{(2\pi)^3}|W(\mathbf{k})|^2
+ * =
+ * \int d^3r\,
+ * w^2(\mathbf{r})\bar{n}_g^2(\mathbf{r})
+ * \approx
+ * \alpha
+ * \sum_{i=\mathrm{ran}}
+ * w^2(\mathbf{r}_i)\bar{n}(\mathbf{r}_i).
+ * @f]
+ *
+ * The shot-noise contribution can similarly be written as a sum over random
+ * points:
+ *
+ * @anchor eq_sn
+ *
+ * @f[
+ * S(0) =
+ * \frac{\alpha(1+\alpha)}{N^2}
+ * \sum_{i=\mathrm{ran}}w^2(\mathbf{r}_i)
+ * =
+ * (1+\alpha)
+ * \frac{
+ * \sum_{i=\mathrm{ran}}w^2(\mathbf{r}_i)
+ * }{
+ * \sum_{i=\mathrm{ran}}
+ * \bar{n}(\mathbf{r}_i)w^2(\mathbf{r}_i)
+ * }.
+ * @f]
+ *
+ * For a volume-limited sample, @f$\bar{n}@f$ is constant and the expression
+ * reduces to
+ *
+ * @f[
+ * S(0)=\frac{1+\alpha}{\bar{n}}.
+ * @f]
+ *
+ * In the limit @f$\alpha\rightarrow0@f$, corresponding to perfect knowledge
+ * of the sample volume, this reduces to the standard shot-noise expression.
+ *
+ * @subsection shell_average Spherical Shell Averaging
+ *
+ * We finally evaluate the power spectrum averaged over spherical shells.
+ * The corresponding integral can be regarded as a Monte-Carlo estimate of
+ * the original integral, which becomes unbiased in the limit of an infinite
+ * number of sampled modes.
+ *
+ * However, a Monte-Carlo technique assumes a random distribution of points
+ * sampling the integration volume. This is not the case for Fourier modes
+ * sampled on a regular grid. The effect is particularly important on large
+ * scales, where only a small number of regularly distributed Fourier modes
+ * contribute to the estimate of the power spectrum. This reflects the
+ * contribution of cosmic variance to clustering measurements in Fourier
+ * space.
+ *
+ * The estimator of the one-dimensional, angle-averaged power spectrum is
+ *
+ * @f[
+ * \hat{P}(k_i) =
+ * \frac{1}{N(k_i)}
+ * \sum_{
+ * k_i-\Delta_k/2<|\mathbf{k}|<k_i+\Delta_k/2
+ * }
+ * |F(\mathbf{k})|^2
+ * -
+ * S(0),
+ * @f]
+ *
+ * where @f$N(k_i)@f$ is the number of modes in the spherical shell centred
+ * at @f$k_i@f$.
+ *
+ * The width of the spherical shell is defined as
+ *
+ * @anchor fc2
+ *
+ * @f[
+ * \Delta_k \equiv n_d\delta_k,
+ * @f]
+ *
+ * with
+ *
+ * @f[
+ * \delta_k \equiv
+ * \frac{1}{\sqrt{3}}
+ * \sqrt{
+ * \left(\frac{2\pi}{L_X}\right)^2+
+ * \left(\frac{2\pi}{L_Y}\right)^2+
+ * \left(\frac{2\pi}{L_Z}\right)^2
+ * }.
+ * @f]
+ *
+ * Here @f$n_d=1,2,\ldots@f$ is an integer, such that @f$\Delta_k@f$ is a
+ * multiple of the fundamental mode @f$\delta_k@f$. For a cubic grid:
+ *
+ * @f[
+ * \delta_k=\frac{2\pi}{L}.
+ * @f]
+ *
+ * The first bin is therefore @f$[0,\Delta_k)@f$, the second is
+ * @f$[\Delta_k,2\Delta_k)@f$, and so on. The zero mode is not considered
+ * when computing the shell-averaged power spectrum. Consequently, for
+ * @f$n_d=1@f$, the first power-spectrum bin
+ * @f$(0,\delta_k)@f$ is empty.
+ *
+ * In contrast, the zero mode is included when computing the window function.
+ * The value of @f$n_d@f$ can therefore be chosen independently for the
+ * power spectrum and the window-function power spectrum.
+ *
+ * @subsection window_function Window Function
+ *
+ * The Fourier transform of the window function is computed in a similar
+ * manner by interpolating the weighted random density field onto a mesh:
+ *
+ * @f[
+ * W(\mathbf{k}) =
+ * \frac{\alpha}{N}
+ * \sum_{j=1}^{M}
+ * w(\mathbf{r}_j)
+ * N_r(\mathbf{r}_j)
+ * e^{i\mathbf{k}\cdot\mathbf{r}_j}.
+ * @f]
+ *
+ * The shell-averaged window-function power spectrum is then
+ *
+ * @f[
+ * \hat{W}(k) =
+ * \frac{1}{N_{\mathbf{k}}}
+ * \sum_{
+ * k<|\mathbf{k}|<k+\delta k
+ * }
+ * |W(\mathbf{k})|^2
+ * -
+ * S_w(0),
+ * @f]
+ *
+ * where the shot-noise contribution associated with the window function is
+ *
+ * @f[
+ * S_w(0) =
+ * \frac{\alpha^2}{N^2}
+ * \sum_{i=\mathrm{ran}}w^2(\mathbf{r}_i).
+ * @f]
+ * 
  * @file PowerSpectrumF.h
  * @author Andres Balaguera-Antolínez
  * @callgraph
@@ -365,6 +644,11 @@ class PowerSpectrumF{
    *  @brief 
    */
   real_prec mean_density;
+  //////////////////////////////////////////////////////////
+  /**
+   *  @brief 
+   */
+  real_prec mean_redshift;
  //////////////////////////////////////////////////////////
   /**
    *  @brief 
@@ -497,22 +781,24 @@ class PowerSpectrumF{
   vector<s_info_in_bins> power_in_bins;
    //////////////////////////////////////////////////////////
   /**
-   * @brief Measurements of power spectrum
+   * @brief Measurements of power spectrum for a galaxy or cluster sample with redshifts
    * @details This function generates the estiametes of power spectrum ()
    *  (FKP, Yamamoto and their multipole decomposition) and the Bispectrum
    *  (using FKP). This method is aimed for realistic surveys in which a random file is expected to be provided
    *  along with (if defined in parameter file) a file with smoothed nbar tabulated
    * @param verbose: used to write on screen
    * @details This method reads input files and get power without touching the data, i-.e, does not make any binning in any property. It accepts catalogs as well as density fields.
-   * @note This methood has been adapted to the case in which the random catalogs are too large to be kept in memmory or they come in chunks of randoms
-   * with the SAME volume. The steps performed fr teh random catalog in this case are
-   * 1 Read catalog.
-   * 2 Get ready for nbar.
-   * 3 Transform to cartessian coord (assigning nbar if needed and searching for box side lenght, offsets and mins).
-   * 4 Interpolate on the mesh.
-   * 5 Update params.
-   * 6 Get window matrix if requested.
-   * 7 Release memmory from the catalog.
+
+   * @note This methood has been adapted to the case in which the random catalogues are too large to be kept in memmory or they come in chunks of randoms
+   * with the SAME volume. The steps performed for the random catalogue in this case are
+   * - **1 Read catalogue**.
+   * - **2 Get ready for nbar**
+   * - **3 Transform to cartessian coord (assigning nbar if needed and searching for box side lenght, offsets and mins)**
+   * - **4 Interpolate on the mesh**
+   * - **5 Update params**
+   * - **6 Get window matrix if requested**
+   * - **7 Release memmory from the catalogue**
+   *
    * If random file is too large, a loop over the chunks is done.
    * The a new box size is requested, the size of the box is measured from the randoms, and in particular, from the first chunk, such that the parameters in the PowerSpectrumF and FfftwFunctions are updatred with
    * @code
@@ -529,7 +815,10 @@ class PowerSpectrumF{
    * @author ABA
 */
   void measure_power_spectrum_data();
-
+  //////////////////////////////////////////////////////////
+/**
+  * @brief Measurements of power spectrum for a simulation
+*/
   void measure_power_spectrum_box();
 
   //////////////////////////////////////////////////////////
@@ -553,7 +842,7 @@ class PowerSpectrumF{
   /**
    * @brief Measurements of power spectrum
    * @details This function is to be called from inside the code where catalogs are allocated in a s_halo type structure.
-   * @param tracer: a s_Halo type container with the halo catalog.
+   * @param tracer: an instance of the @ref Catalogue class.
    * @param space: "real space" or ·"redshift space"
    * @param property : "_MASS_", or "_VMAX_". No more properties of the catalog are allowed at this function
 */
@@ -581,7 +870,7 @@ class PowerSpectrumF{
   void measure_power_spectrum_grid();
   //////////////////////////////////////////////////////////
   /**
-   * @brief measure the Power_Spectrum and/or the Bispectrum
+   * @brief Measure the Power_Spectrum and/or the Bispectrum
    * @details This function generates the estiametes of power spectrum ()
    *  (FKP, Yamamoto and their multipole decomposition) and the Bispectrum
    *  (using FKP).
@@ -912,6 +1201,11 @@ class PowerSpectrumF{
    * @brief Write log file with numbers used and derived in the measuremetn of power
    */
   string _file_power(){return this->file_power;}
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief Write log file with numbers used and derived in the measuremetn of power
+   */
+  real_prec _mean_redshift(){return this->mean_redshift;}
 
  //////////////////////////////////////////////////////////
   /**

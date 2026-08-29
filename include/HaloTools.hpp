@@ -329,6 +329,12 @@ private:
    * @private
    * @brief
    */
+  real_prec mean_redshift;
+  //////////////////////////////////////////////////////////
+  /**
+   * @private
+   * @brief
+   */
   real_prec min_mass;
   //////////////////////////////////////////////////////////
   /**
@@ -2115,6 +2121,11 @@ public:
    * @brief
    */
   ULONG _n_gal(){return this->n_gal;}
+  //////////////////////////////////////////////////////////
+  /**
+   * @brief
+   */
+  real_prec _mean_redshift(){return this->mean_redshift;}
   //////////////////////////////////////////////////////////
   /**
    * @brief

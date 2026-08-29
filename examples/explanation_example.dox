@@ -24,12 +24,12 @@
  *  string  par_file = argv[2];
  * \endcode
 
- and define an instance of the class Params (see \ref params)
+ and define an instance of the class Params:
  * \code
  *  Params params(par_file);
  * \endcode
 
- * Now, define a container to allocate the dark matter density field; the size of this array and the path to the file are givben in the parameter file (sectin \ref DarkMatterField):
+ * Now, define a container to allocate the dark matter density field; the size of this array (\c NGRID )and the path to the file are given in the parameter file (sectin \ref DarkMatterField) and read as methods from that same class:
  * \code
  * vector<real_prec> dm_field(params._NGRID(), 0); //Container for dm
  *\endcode
@@ -37,7 +37,8 @@
  * \code
  * File.read_array(params._Input_Directory_X() + params._Name_Catalog_X(), dm_field); 
  *\endcode
- * We now focus on the dar matter tracer catalog. To that aim, we define an instance of the class Catalogue, which will allocate all the information of the tracer catalog: 
+ * We now focus on the dar matter tracer catalog. To that aim, we define an instance of the class Catalogue, passing the objject of type Params and specifying the type of object under analysis. 
+ * This object contains all the information of the tracer catalogue: 
  * \code
  * Catalogue cat(params, "TRACER");
  *\endcode
@@ -77,7 +78,7 @@ We also define a container to allocate some tidal properties, such as the tidal 
  * \code
  *  const fs::path out_dir = params._Output_directory();
  *\endcode
- * We now use structure bending to collect output file names and name of containers 
+ * We now use structure bending to collect output file names and name of containers. First, we define a duplet with an output name and the name of the containers to be printed:
  * \code
  * std::vector<std::pair<std::string, std::vector<real_prec>&>> tracer_outputs = { //Using strucure bending
  *   {"alpha_tr", tr_alpha},
@@ -86,8 +87,7 @@ We also define a container to allocate some tidal properties, such as the tidal 
  *   {"l3_tr",    cwclass.lambda3}
  * };
  *\endcode
- * 
- * and print out the tidal anisotropy and the eigenvalues on the mesh: 
+ * and print out; in ths case we write the tidal anisotropy and the eigenvalues on the mesh (computed within the method \ref cwclass.get_tidal_anisotropy()): 
  * \code
  * for (const auto& [fname, data] : tracer_outputs)
  * {
@@ -116,7 +116,7 @@ We now perform the same procedure with the dark matter field:
  *      File.write_array(file_path.string(), data);
  *  }
  *\endcode
- * We are interested in assigning cosmic-web properties to the input tracers. We do this with the following steps. First, assign to each tracer (passed to \c htools as \catalog at inizialization) the ID of the cell where the tracer is located:
+ * We are interested in assigning cosmic-web properties to the input tracers. We do this with the following steps. First, assign to each tracer (passed to \c htools through the instance \c cat at inizialization) the ID of the cell where the tracer is located:
  * \code
  *  htools.assign_idgrid_to_tracers();
  *\endcode

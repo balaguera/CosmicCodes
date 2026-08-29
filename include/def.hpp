@@ -68,7 +68,7 @@ inline constexpr int POSITIVE_INT = 1;
  * @brief Mock Mode
 */
 #define _FULL_VERBOSE_
-#define _FULL_VERBOSE_ENTER_
+//#define _FULL_VERBOSE_ENTER_
 // ****************************************************************************************
 #ifdef _FULL_VERBOSE_
 //#define _VERBOSE_FREEMEM_

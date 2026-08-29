@@ -34,8 +34,7 @@ void ScreenOutput::welcome_message(){
  std::cout<<" ************************************************************************************"<<endl;
  std::cout<<" ************************************************************************************"<<endl;
  std::cout<<" POWER SPECTRUM OF COSMOLOGICAL MASS TRACERS USING FKP (+FFTW) ESTIMATOR            *"<<endl;
- std::cout<<" VERSION 1.3                                                                        *"<<endl;
- std::cout<<" For more documentation see README/README.pdf                                       *"<<endl;
+ std::cout<<" For more documentation see Doxygen                                                 *"<<endl;
  std::cout<<" ************************************************************************************"<<endl;
  std::cout<<" Starting time and date "<<ctime (&rawtime);
  std::cout<<" ************************************************************************************"<<endl;
@@ -64,8 +63,7 @@ void ScreenOutput::welcome_message_cl(){
  std::cout<<" ************************************************************************************"<<endl;
  std::cout<<" ANGULAR POWER SPECTRUM OF COSMOLOGICAL MASS TRACERS                                *"<<endl;
  std::cout<<" USING HEALPIX DECOMPOSITION AND PEEBLES ESTIMATOR                                  * "<<endl;
- std::cout<<" VERSION 1.0                                                                        *"<<endl ;
- std::cout<<" For more documentation see README/README.pdf                                       *"<<endl;
+ std::cout<<" For more documentation see Doxygen                                                 *"<<endl;
  std::cout<<" ************************************************************************************"<<endl;
  std::cout<<" Starting time and date"<<ctime (&rawtime);
  std::cout<<" ************************************************************************************"<<endl;
@@ -81,8 +79,7 @@ void ScreenOutput::welcome_message_fb(){
  std::cout<<" ************************************************************************************"<<endl;
  std::cout<<" 3D POWER SPECTRUM OF COSMOLOGICAL MASS TRACERS                                     *"<<endl;
  std::cout<<" USING THE FOURIER BESSEL DECOMPOSITION                                             * "<<endl;
- std::cout<<" VERSION 1.0                                                                        *"<<endl ;
- std::cout<<" For more documentation see README/README.pdf                                       *"<<endl;
+ std::cout<<" For more documentation see Doxygen                                                 *"<<endl;
  std::cout<<" ************************************************************************************"<<endl;
  std::cout<<" Starting time "<<ctime (&rawtime);
  std::cout<<" ************************************************************************************"<<endl;
@@ -94,15 +91,10 @@ void ScreenOutput::welcome_message_yama(){
   time_t rawtime;
   time (&rawtime);
   std::cout<<" "<<YELLOW<<endl;
-  std::cout<<" ***********************************************************************************"<<endl;
-  std::cout<<" ***********************************************************************************"<<endl;
-  std::cout<<" MULTIPOLE DECOMPOSITION OF THE THREE DIMENSIONAL POWER SPECTRUM OF COSMOLOGICAL   *"<<endl;
-  std::cout<<" MASS TRACERS USING YAMAMOTO ESTIMATOR (FFTW-based)                                *"<<endl;
-  std::cout<<" VERSION 1.1                                                                       *"<<endl;
-  std::cout<<" For more documentation see README/README.pdf                                      *"<<endl;
-  std::cout<<" ***********************************************************************************"<<endl;
+  std::cout<<" MULTIPOLE DECOMPOSITION OF THE THREE DIMENSIONAL POWER SPECTRUM OF COSMOLOGICAL"<<endl;
+  std::cout<<" MASS TRACERS USING YAMAMOTO ESTIMATOR (FFTW-based)"<<endl;
+  std::cout<<" For more documentation see Doxygen"<<endl;
   std::cout<<" Starting time "<<ctime (&rawtime);
-  std::cout<<" ***********************************************************************************"<<endl;
   std::cout<<RESET<<endl;
 
 }
@@ -114,8 +106,7 @@ void ScreenOutput::welcome_message_bispectrum(){
  std::cout<<" ************************************************************************************"<<endl;
  std::cout<<" ************************************************************************************"<<endl;
  std::cout<<" BISPECTRUM OF COSMOLOGICAL MASS TRACERS USING FKP ESTIMATOR                        *"<<endl;
- std::cout<<" VERSION 1.1                                                                        *"<<endl;
- std::cout<<" Documentation and warnings in readme.ps                                            *"<<endl;
+ std::cout<<" For more documentation see Doxygen                                                 *"<<endl;
  std::cout<<" ************************************************************************************"<<endl;
  std::cout<<" Starting time "<<ctime (&rawtime);
  std::cout<<" ************************************************************************************"<<endl;
@@ -132,8 +123,7 @@ void ScreenOutput::welcome_message_bispectrum_fast()
   std::cout<<" ************************************************************************************"<<endl;
   std::cout<<" BISPECTRUM OF COSMOLOGICAL MASS TRACERS USING FKP ESTIMATOR                        *"<<endl;
   std::cout<<" AND INVERSE FFTW TRICK                                                             *"<<endl;
-  std::cout<<" VERSION 1.0                                                                        *"<<endl;
-  std::cout<<" Documentation and warnings in readme.ps                                            *"<<endl;
+  std::cout<<" For more documentation see Doxygen                                                 *"<<endl;
   std::cout<<" ************************************************************************************"<<endl;
   std::cout<<" Starting time "<<ctime (&rawtime);
   std::cout<<" ************************************************************************************"<<endl;
@@ -228,7 +218,7 @@ void ScreenOutput::write_cosmo_parameters(void *p, void *pa)
 void ScreenOutput::write_cosmo_parameters(void *p)
 {
   struct s_CosmologicalParameters * s_cp= (struct s_CosmologicalParameters *)p;
-  std::cout<<BOLDCYAN<<" Input Cosmological parameters"<<RESET<<endl;
+  this->message_screen(" Cosmological parameters used to convert redshift to comoving distance");
   this->message_screen(" Omega matter =", s_cp->Om_matter);
   this->message_screen(" Omega vac =", s_cp->Om_vac);
   this->message_screen(" Omega baryons =", s_cp->Om_baryons);

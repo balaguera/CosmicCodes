@@ -5,13 +5,15 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * @class<Catalogue>
- * @brief Header file for the class Catalogue::
  * @file Catalogue.h
- * @title Class in charge of reading and analysing input catalogs
- * @details The methods in this class are desinged to generate different statistics from a catalog of dark matter tracers
+ * @brief Defines the Catalogue class.
+ * @class Catalogue
+ * @brief Handles the reading, storage, and analysis of input catalogues.
+ * The Catalogue class provides methods to read input catalogues and allocate
+ * their properties into internal data structures for subsequent processing
+ * and analysis.The methods in this class are desinged to allocate an input catalogue and its properties.
  * @author Andres Balaguera-Antolínez
- * @version 2.0
+ * @version 1.0
  * @date    2008-2024
  */
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +109,7 @@ class Catalogue{
   //////////////////////////////////////////////////////////
   /**
    * @private
-   * @brief Number of tracers in catalogue
+   * @brief Type of tracer under analysis
   */
   string type_of_object;
 
@@ -140,17 +142,17 @@ class Catalogue{
   //////////////////////////////////////////////////////////
   //   Velocities:
   /**
-   *@brief  Velocity component in  coord1  
+   *@brief  Velocity component in coord1  
    */
   vector<real_prec> vel1;
   //////////////////////////////////////////////////////////
   /**
-   *@brief   Velocity component in  coord2 
+   *@brief   Velocity component in coord2 
    */
   vector<real_prec> vel2;
   //////////////////////////////////////////////////////////
   /**
-   *@brief   Velocity component in  coord3 
+   *@brief   Velocity component in coord3 
    */
   vector<real_prec> vel3;
   //////////////////////////////////////////////////////////
@@ -645,6 +647,36 @@ public:
   /**
   * @brief Reads particle catalog in ascii format. 
   * @details This method reads the ascii file containing the catalog (with columns specified in the parameter file) and, contrary to the read_catalog approach, it associates the catalog to a single structure of vectors.
+  * @details The size of the catalog and the number of columsn are saved respectively in the class members
+  * @code 
+  * Catalogue::NOBJS
+  * \endcode
+  * and
+  * @code 
+  * Catalogue::NCOLS
+  * \endcode
+  * which can be retrieved by the linking methods
+  * @code 
+  * Catalogue::_NOBJS()
+  * \endcode
+  * and
+  * @code 
+  * Catalogue::_NCOLS()
+  * \endcode
+  * respectively.  
+  * @details For example, the information of the tracer mass is located in a vector 
+  * @code 
+  * Catalogue::mass
+  * \endcode
+  * The information of catalogue can be retrieved as
+  * @code 
+  * Parameters params (parameter file);
+  * Catalog cat(params);
+  * cat.read_catalogue_new(params._output_directory()+params._catalogue_file())
+  * for(auto i =0; i<cat._NOBJS();++i)
+  *   float mass=cat.mass[i];
+  * \endcode
+  * 
   */
    void read_catalog_new(string);
   //////////////////////////////////////////////////////////

@@ -82,7 +82,7 @@ int main(int argc, char *argv[]){
 
            //For input catalog to measure cross power spectrum:
 //          else if(params._measure_cross() && params._input_type()=="catalog")
- //           cPSF.measure_power_spectrum(false); HAY QUE HACE RESTA BIEN
+ //           cPSF.measure_power_spectrum(false); HAY QUE REVISAR ESTA
 
             // For input fields to measure power (auto power)
           else if(!params._measure_cross() && ( params._input_type()=="density_grid" || params._input_type()=="delta_grid") )
@@ -95,6 +95,7 @@ int main(int argc, char *argv[]){
           else if(!params._measure_cross() && params._input_type()=="catalog" && !params._use_random_catalog())
             cPSF.measure_power_spectrum_box(); // This is the default function
 
+          params.set_mean_redshift(cPSF._mean_redshift());  
 
           if(params._show_power_spectrum())
           {
@@ -103,14 +104,15 @@ int main(int argc, char *argv[]){
             j["kmin"] = cPSF._kvector_data(0);
             j["kmax"] = 2.0;
             j["sample"] = params._Name_survey();
-            j["redshift"] = params._redshift();
+            j["redshift"] = params._clustering_space() == "galaxy_redshift_survey" ? params._mean_redshift() : params._redshift();
             j["statistics"] = params._statistics();
             j["output_file"] = cPSF._file_power();
             j["clustering_space"] = params._clustering_space();
               
             cout<<"Generating json file "<<json_file_plot<<" for plotting"<<endl;  
+            jfile<<j.dump(4);
             jfile.close();
-            system("python3 ../python/cosmolib_plots.py plot_file_power_spectrum_measurement.json &");
+            system("python3 ../Python/cosmolib_plots.py plot_file_power_spectrum_measurement.json &");
           }
 
           break;
@@ -197,7 +199,7 @@ int main(int argc, char *argv[]){
           jfile<<j.dump(4);
           cout<<"Generating json file "<<json_file_plot<<" for plotting"<<endl;  
           jfile.close();
-          system("python3 ../python/cosmolib_plots.py plot_file_power_spectrum_grf.json &");
+          system("python3 ../Python/cosmolib_plots.py plot_file_power_spectrum_grf.json &");
     
           json_file_plot ="plot_file_grf.json";
           std::ofstream jfilen(json_file_plot); 
@@ -219,7 +221,7 @@ int main(int argc, char *argv[]){
           jfilen<<jn.dump(4);
           cout<<"Generating json file "<<json_file_plot<<" for plotting"<<endl;  
           jfilen.close();
-          system("python3 ../python/cosmolib_plots.py plot_file_grf.json &");
+          system("python3 ../Python/cosmolib_plots.py plot_file_grf.json &");
           break;
         }
       case 'm':  // toCOmput Marked correlation function

@@ -197,6 +197,7 @@ void FftwFunctions::get_parameters_estimator(bool verbose)
       So.message_screen("** alpha           =", this->alpha);
       So.message_screen("** Normalization   =", this->normal_power);
       So.message_screen("** Shot Noise      =", this->shot_noise);
+      So.message_screen("** Mean redshift   =", this->mean_redshift);
     }
   else{
     this->alpha=1.0; //This alfa should be zero when using a box. We set it to one correspondingly with that case,
