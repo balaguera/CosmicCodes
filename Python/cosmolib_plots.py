@@ -54,6 +54,12 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
 
 class COSMOLIB_PLOTS:
 
+    """
+    @brief Reads an input catalogue.
+
+    Reads JSON outputs from CosmicCodes and perform plots.
+    """
+
     def __init__(self,file):
         self.parameter_file=file
         print("Reading input file:",file)
@@ -322,7 +328,7 @@ class COSMOLIB_PLOTS:
         xtit, ytit=get_title_coords(np.log10(X_min), np.log10(X_max), np.log10(Y_min), np.log10(Y_max), 0.1, 0.2)
         plt.text(pow(10,xtit), pow(10,ytit),str(self.data["sample"]), fontsize=11)
         xtit, ytit=get_title_coords(np.log10(X_min), np.log10(X_max), np.log10(Y_min), np.log10(Y_max), 0.1, 0.15)
-        plt.text(pow(10,xtit), pow(10,ytit),"Cosmological redshift = "+str(self.data["redshift"]), fontsize=11)
+        plt.text(pow(10,xtit), pow(10,ytit), f"Redshift = {self.data['redshift']:.3f}", fontsize=11)
         xtit, ytit=get_title_coords(np.log10(X_min), np.log10(X_max), np.log10(Y_min), np.log10(Y_max), 0.1, 0.10)
         plt.text(pow(10,xtit), pow(10,ytit),"Estimator = "+str(self.data["statistics"]), fontsize=11)
 
