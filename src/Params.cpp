@@ -1729,7 +1729,7 @@ void Params::read_pars_json(std::string file){
     pname = "clustering_space";
     pname_c = "clustering_space";
     description = "Space where the statistics is to be computed. Applies only for simulations";
-    options = "string; real_space, redshift_space or galaxy_redshift_survey";
+    options = "string; real_space, redshift_space or GRS (for galaxy_redshift_survey)";
     this->clustering_space = FourierAnalysis.value(pname, "real_space");
     this->collect_params_info(pname, pname_c, this_section, description, options);
     this->parameter_string.emplace_back(pname, this->clustering_space);

@@ -604,8 +604,7 @@ void HaloTools::get_density_field_grid(std::string prop, vector<real_prec>&out)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void HaloTools::define_property_bins()
 {
-    So.enter(__PRETTY_FUNCTION__);
-    cout<<__LINE__<<endl;
+  So.enter(__PRETTY_FUNCTION__);
 #ifdef _USE_OMP_
    int NTHREADS = _NTHREADS_;  
    omp_set_num_threads(NTHREADS);
@@ -1508,7 +1507,9 @@ void HaloTools::get_property_function(string file)
 // Estimates of Abundance as a function of halo properties
 void HaloTools::get_property_function_cosmic_web_types(string file)
 {
-#ifndef _USE_CWC_
+  So.enter(__PRETTY_FUNCTION__);
+
+  #ifndef _USE_CWC_
   So.message_screen("Using ", __PRETTY_FUNCTION__);
   So.message_screen("Preprocessor directive _USE_CWC_ is not defined. Check in def.h file. Code ends here");
   exit(1);
@@ -1519,7 +1520,6 @@ void HaloTools::get_property_function_cosmic_web_types(string file)
   this->File.read_array(file_X,deltam);
   get_overdens(deltam, deltam);
   this->cwclass.get_CWC(deltam);
-  So.enter(__PRETTY_FUNCTION__);
 #ifdef _USE_OMP_
   int NTHREADS = _NTHREADS_;  // omp_get_max_threads();
   omp_set_num_threads(NTHREADS);
@@ -1947,6 +1947,7 @@ void HaloTools::get_HOD(string file)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void HaloTools::get_HOD_web_types(string file)
 {
+    So.enter(__PRETTY_FUNCTION__);
 #ifndef _USE_CWC_
     So.message_screen("Using ", __PRETTY_FUNCTION__);
     So.message_screen("_USE_CWC_ not defined. Check. BAM ends here");
@@ -1958,7 +1959,6 @@ void HaloTools::get_HOD_web_types(string file)
     this->File.read_array(file_X,deltam);
     get_overdens(deltam, deltam);
     this->cwclass.get_CWC(deltam);
-    So.enter(__PRETTY_FUNCTION__);
 #ifdef _USE_OMP_
    int NTHREADS = _NTHREADS_;  // omp_get_max_threads();
    omp_set_num_threads(NTHREADS);
@@ -2090,9 +2090,7 @@ void HaloTools:: get_distribution_reduced_mass_in_cell(){
 // Allocates the result in a class member container min_separation_in_cell[ID]=
 void HaloTools::get_stats_separation_in_cell()
 {
-#ifdef _FULL_VERBOSE_
-    this->So.enter(__PRETTY_FUNCTION__);
-#endif
+  this->So.enter(__PRETTY_FUNCTION__);
   int NTHREADS = omp_get_max_threads();
   omp_set_num_threads(NTHREADS);
 #ifdef _VERBOSE_CAT_
@@ -11795,7 +11793,7 @@ size_t nlines = this->catalogue._NOBJS();
      this->params.set_zmax(aZMAX);
   }
 
-#ifdef _FULL_VERBOSE_
+#ifdef _FULL_VERBOSE_DETAILS_
   if(this->catalogue._type_of_object()=="RANDOM" )
    {
       real_prec shift_x= this->params._Xoffset() - 0.5*new_lbox;
@@ -11821,7 +11819,7 @@ size_t nlines = this->catalogue._NOBJS();
    {
      if(this->catalogue._type_of_object()=="RANDOM" )
       { // this is not so necesasary, as in POwer we will feed Fft and power with random_this->catalogue.params
-        So.message_screen("Overwriting box length from ", this->params._Lbox(), " to ", llz );
+        So.message_screen("Overwriting box length from ", this->params._Lbox(), " to", llz );
         this->params.set_Lbox(llz);  // Assign the new Lbox.
         this->params.derived_pars(); // This is only called if Lbox has changed
       }
@@ -11919,7 +11917,7 @@ size_t nlines = this->catalogue._NOBJS();
    real_prec vx=0;
    real_prec vy=0;
    real_prec vz=0;
-   bool tsample = this->params._clustering_space() == "galaxy_redshift_survey" ? true: false;
+   bool tsample = this->params._clustering_space() == "GRS" ? true: false;
    
 #ifdef _USE_OMP_
 #ifdef _GET_BISPECTRUM_NUMBERS_
@@ -12091,7 +12089,7 @@ size_t nlines = this->catalogue._NOBJS();
          j["Initial_slice"] = 20;
          j["sample"] = params._Name_survey();
          j["name"] = "Density";
-         j["redshift"] = this->params._clustering_space() == "galaxy_redshift_survey" ? this->mean_redshift : this->params._redshift();
+         j["redshift"] = this->params._clustering_space() == "GRS" ? this->mean_redshift : this->params._redshift();
          j["output_file"] = this->params._output_file_interpolated_field()+".dat";
          jfile<<j.dump(4);
          cout<<"Generating json file "<<json_file_plot<<" for plotting"<<endl;  

@@ -67,8 +67,6 @@ int main(int argc, char *argv[]){
  
       case 'p':   // to mesure Power spectrum
         {
-
-          So.message_screen("Power Spectrum analysis");
           string json_file_plot ="plot_file_power_spectrum_measurement.json";
           std::ofstream jfile(json_file_plot);
           json j;

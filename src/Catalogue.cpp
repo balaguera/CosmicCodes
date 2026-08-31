@@ -620,7 +620,8 @@ void Catalogue::read_catalog_new(std::string input_file)
   int i_app_mag=-1;
   CoordinateSystem systemc;
 
- if(this->type_of_object=="TRACER" || this->type_of_object=="TRACER_REF" || this->type_of_object=="TRACER_MOCK" || this->type_of_object=="TRACER_MOCK_ONLY_COORDS"|| this->type_of_object=="TRACER_REF_ONLY_COORDS")
+
+  if(this->type_of_object=="TRACER" || this->type_of_object=="TRACER_REF" || this->type_of_object=="TRACER_MOCK" || this->type_of_object=="TRACER_MOCK_ONLY_COORDS"|| this->type_of_object=="TRACER_REF_ONLY_COORDS")
     {
       i_coord1= this->params._i_coord1_g();
       i_coord2= this->params._i_coord2_g();
@@ -680,6 +681,8 @@ void Catalogue::read_catalog_new(std::string input_file)
         i_redshift= this->params._i_coord3_r();// note that this applies only in the case in which coordsa are in pseudo*-equatorial, i.e, ra, dec, z.
     }
  
+      this->So.message_screen("Loading data");
+
       // List of avaibale entries for proeprties of tracer catalogue.
       std::vector<ColumnTuple> columns_to_load = {
       {&this->coord1, i_coord1, &this->info_coord1},
@@ -711,7 +714,6 @@ void Catalogue::read_catalog_new(std::string input_file)
   this->NOBJS = this->File.read_file(input_file, prop,_NTHREADS_);
   this->NCOLS=(static_cast<ULONG>(prop.size()/this->NOBJS));
   
-  this->So.message_screen("Loading data");
 
   for(auto& [vec_ptr, col_index, information] : columns_to_load)
       load_column(*vec_ptr, prop.data(), col_index, *information);

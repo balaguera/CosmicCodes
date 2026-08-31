@@ -188,16 +188,16 @@ void FftwFunctions::get_parameters_estimator(bool verbose)
       this->normal_bispectrum= this->alpha* normal_b;
       this->shot_noise_b1= sr1/( this->alpha* this->normal_bispectrum);
       this->shot_noise_b2=(1.- this->alpha* this->alpha)* sr2/( this->alpha* this->normal_bispectrum);
-      So.message_screen("** Ngal            =", this->n_gal);
-      So.message_screen("** Nran            =", this->n_ran);
-      So.message_screen("** Wg              =", this->w_g);
-      So.message_screen("** Wr              =", this->w_r);
-      So.message_screen("** Sg              =", this->s_g);
-      So.message_screen("** Sr              =", this->s_r);
-      So.message_screen("** alpha           =", this->alpha);
-      So.message_screen("** Normalization   =", this->normal_power);
-      So.message_screen("** Shot Noise      =", this->shot_noise);
-      So.message_screen("** Mean redshift   =", this->mean_redshift);
+      So.message_screen("Ngal            =", this->n_gal);
+      So.message_screen("Nran            =", this->n_ran);
+      So.message_screen("Wg              =", this->w_g);
+      So.message_screen("Wr              =", this->w_r);
+      So.message_screen("Sg              =", this->s_g);
+      So.message_screen("Sr              =", this->s_r);
+      So.message_screen("alpha           =", this->alpha);
+      So.message_screen("Normalization   =", this->normal_power);
+      So.message_screen("Shot Noise      =", this->shot_noise);
+      So.message_screen("Mean redshift   =", this->mean_redshift);
     }
   else{
     this->alpha=1.0; //This alfa should be zero when using a box. We set it to one correspondingly with that case,
@@ -209,10 +209,10 @@ void FftwFunctions::get_parameters_estimator(bool verbose)
     this->normal_bispectrum= normal_b;
     this->shot_noise_b1= this->sr1/(this->normal_b);
     this->shot_noise_b2= this->sr2/(normal_b);
-    So.message_screen("** Ngal            =", this->n_gal);
-    So.message_screen("** Wg              =", this->w_g);
-    So.message_screen("** Sg              =", this->s_g);
-    So.message_screen("** alpha           =", this->alpha);
+    So.message_screen("Ngal            =", this->n_gal);
+    So.message_screen("Wg              =", this->w_g);
+    So.message_screen("Sg              =", this->s_g);
+    So.message_screen("alpha           =", this->alpha);
   }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -453,8 +453,8 @@ void FftwFunctions::get_power_spectrum_yamamoto(vector<real_prec> &power_g0, vec
 #endif
     for(int i=0;i<this->params._NGRID_h();++i){
       // Moment l=0: should be equal to the monopole from FKP
-      // Given that this->shot_noise ya viene nomalizado, multiplico por normal_power
-      // para cancelar y dividir todo el parentesis de nuevo por la normalizacion
+      // Given that this->shot_noise comes already normalized, I multiply by normal_power
+      // to cancel and hence divide the quantity in parenthesis by the normalization factor
       this->data_g_y0[i] = (norm(this->data_g_out_y0[i]) - sn_aux*this->shot_noise*this->normal_power) * r_normal_power;
       // Moment l=2
       this->data_g_y2[i]=(2.*2.0+1.)*(this->data_g_out_y2[i].real()*this->data_g_out_y0[i].real()+this->data_g_out_y2[i].imag()*this->data_g_out_y0[i].imag()

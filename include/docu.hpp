@@ -181,31 +181,26 @@
  * Available options:
  *
  * - **Analyze an input catalog**
- *
  *   \code{.sh}
  *   ./htools.exe -c parameter_file
  *   \endcode
  *
  * - **Assign individual bias to an input catalog**
- *
  *   \code{.sh}
  *   ./htools.exe -b parameter_file
  *   \endcode
  *
  * - **Measure halo bias as a function of selected properties**
- *
  *   \code{.sh}
  *   ./htools.exe -s parameter_file
  *   \endcode
  *
  * - **Build galaxy catalogs from an input halo catalog using an HOD model**
- *
  *   \code{.sh}
  *   ./htools.exe -h parameter_file
  *   \endcode
  *
  * - **Build a mock catalog from a simulation snapshot using an input dN/dz**
- *
  *   \code{.sh}
  *   ./htools.exe -m parameter_file
  *   \endcode
@@ -276,34 +271,30 @@
 
  * @section sfaqs FAQS
  *
- * - **Do I need to know C++ to use the library?**
- *   <span class="tooltip">
- *     <span class="tooltip-trigger">Well...</span>
+ * -   <span class="tooltip">
+ *     <span class="tooltip-trigger">**Do I need to know C++ to use the library?**</span>
  *     <span class="tooltiptext">
  *      Sure! So if you are interested in Cosmolgy and c++, better be ready with some basic stuff about this programing language.       
  *     </span>
  *   </span>
 
- * - **Do I need to know cosmology to use the library?**
- *   <span class="tooltip">
- *     <span class="tooltip-trigger">Well...</span>
+ * -   <span class="tooltip">
+ *     <span class="tooltip-trigger">**Do I need to know cosmology to use the library?**.</span>
  *     <span class="tooltiptext">
- *      Sure! But not to be an expert. One of the main goals of the library is that you get familiar with some basic concepts of observational cosmology whilye playing with it.        
+ *      Sure! But not to be an expert. One of the main goals of the library is that you get familiar with some basic concepts of observational cosmology while playing with it.        
  *     </span>
  *   </span>
 
- * - **Can I help?**
- *   <span class="tooltip">
- *     <span class="tooltip-trigger">Well...</span>
+ * -  <span class="tooltip">
+ *     <span class="tooltip-trigger">**Can I help?**</span>
  *     <span class="tooltiptext">
  *      Sure! If you have some module which can be implemented in a certain cosmological context, we can add it to the libray.        
  *     </span>
  *   </span>
 
 
- * - **How can I read an input catalogue?**
- *   <span class="tooltip">
- *     <span class="tooltip-trigger">See how...</span>
+ * -  <span class="tooltip">
+ *     <span class="tooltip-trigger">**How can I read an input catalogue?**</span>
  *     <span class="tooltiptext">
  *       The method @ref Catalogue::read_catalog_new()
  *       allocates the properties of the input ASCII catalogue in a number
@@ -312,9 +303,8 @@
  *     </span>
  *   </span>
  *
- * - **How can I measure 3D power spectrum?**
- *   <span class="tooltip">
- *     <span class="tooltip-trigger">See how...</span>
+ * -   <span class="tooltip">
+ *     <span class="tooltip-trigger">**How can I measure 3D power spectrum?**</span>
  *     <span class="tooltiptext">
  *       The class @ref PowerSpectrumF offers a number of possibilities. In the simplest case, youn can load an N-body 
  *       simulation and use \ref PowerSpectrumF::measure_power_spectrum_box; as a guide, follow
@@ -329,9 +319,8 @@
  *   </span>
 
 
- * - **How can I measure the bias of dark matter tracers?**
- *   <span class="tooltip">
- *     <span class="tooltip-trigger">See how...</span>
+ * -  <span class="tooltip">
+ *     <span class="tooltip-trigger">**How can I measure the bias of dark matter tracers?**</span>
  *     <span class="tooltiptext">
  *       The class @ref PowerSpectrumF offers two aproaches. The first uses the standard estimationr through ratios of power spectra, \ref PowerSpectrumF::get_lss_bias(). 
  *       The second option is bsed on the assignment of individual tracer bias, using  \ref PowerSpectrumF::object_by_object_bias().
@@ -340,9 +329,8 @@
  *   </span>
 
 
- * - **How can I measure halo abundance?**
- *   <span class="tooltip">
- *     <span class="tooltip-trigger">See how...</span>
+ * -   <span class="tooltip">
+ *     <span class="tooltip-trigger">**How can I measure halo abundance?**</span>
  *     <span class="tooltiptext">
  *       Once you have read the parameter file and the catalogue, create an instance of the class \ref HaloTools and use the method @ref HaloTools::get_property_function()
          See more information in @ref HaloTools::analyze_cat().

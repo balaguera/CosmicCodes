@@ -29,7 +29,7 @@ void PowerSpectrumF::set_output_filenames ()
 #else
   this->file_power  = this->params._Output_directory()+this->params._statistics()+"_"+this->params._Name_survey()+"_Nft"+to_string(this->params._Nft())+"_"+this->params._mass_assignment_scheme()+"_"+this->params._file_power()+".txt";
   this->file_power_marked  = this->params._Output_directory()+this->params._statistics()+"_marked_"+params._Name_survey()+"_Nft"+to_string(this->params._Nft())+"_"+this->params._mass_assignment_scheme()+"_"+params._file_power()+".txt";
-  this->file_power_log = this->params._Output_directory()+this->params._statistics()+"_"+this->params._Name_survey()+"_Nft"+to_string(this->params._Nft())+"_"+this->params._mass_assignment_scheme()+"_"+params._file_power_log()+".log";
+  this->file_power_log = this->params._Output_directory()+this->params._statistics()+"_"+this->params._Name_survey()+"_Nft"+to_string(this->params._Nft())+"_"+this->params._mass_assignment_scheme()+"_"+params._file_power_log()+".json";
   this->file_MCF = this->params._Output_directory()+this->params._statistics()+"_"+this->params._Name_survey()+"_mark"+this->params._mark()+"_Real"+to_string(this->params._realization())+".txt";
 #endif
   this->file_power  = this->params._Output_directory()+this->params._statistics()+"_"+this->params._Name_survey()+"_Nft"+to_string(this->params._Nft())+"_"+this->params._mass_assignment_scheme()+"_"+this->params._file_power()+".txt";
@@ -50,89 +50,179 @@ void PowerSpectrumF::set_output_filenames ()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PowerSpectrumF::write_fftw_parameters()
 {
-  ofstream out;
-  out.open(this->file_power_log.c_str() , ios::out);
-  out.precision(12);
-  out.setf(ios::showpoint);
-  out.width(12);
+  std::ofstream jfile(this->file_power_log);
+  json output;
   time_t rawtime;
   time ( &rawtime );
-  out<<"******************************************************************************"<<endl;
-  out<<"******************************************************************************"<<endl;
-  out<<endl;
-  out<<BLUE<<"Log file generated on"<<RESET<<endl;
-  out<<ctime(&rawtime)<<endl;
-  out<<"******************************************************************************"<<endl;
-  out<<BLUE<<"INPUT FILES"<<RESET<<endl;
-  out<<"Input parameter file        "<<this->params._par_file()<<endl;
-  out<<"Name Survey                 "<<this->params._Name_survey()<<endl;
-  out<<"Tracer Catalog              "<<this->params._file_catalogue()<<endl;
-  if(this->params._use_random_catalog())
+  output["time"] = time(&rawtime);
+
+  output["Input parameter file"] = this->params._par_file();
+
+  output["survey"]["name"] = this->params._Name_survey();
+  output["survey"]["tracer_catalog"] = this->params._file_catalogue();
+
+  if (this->params._use_random_catalog())
   {
-      out<<"Random Catalog              "<<this->params._file_random()<<endl;
-      out<<"Smoothed dNdz               "<<this->params._file_nbar()<<endl;
-  }
-  else{
-      out<<"No random catalog requested"<<endl;
-  }
-  out<<"******************************************************************************"<<endl;
-  out<<BLUE<<"SELECTED OPTIONS"<<RESET<<endl;
-  out<<"Statistics                  "<<this->params._statistics()<<endl;
-  out<<"Mass Assignment Scheme      "<<this->params._mass_assignment_scheme()<<endl;
-  string enabbled = true == this->params._MAS_correction() ? "true" : "false";
-  out<<"MAS correction              "<<enabbled<<endl;
-  out<<"Lbox                        "<<this->params._Lbox()<<" Mpc/h"<<endl;
-  out<<"Nft                         "<<this->params._Nft()<<endl;
-  enabbled = true == this->params._FKP_weight() ? "true" : "false";
-  out<<"FKP weight                  "<<enabbled<<endl;
-  out<<"P_0                         "<<this->params._Pest()<<" (Mpc/h)^3"<<endl;
-  enabbled = true == this->params._SN_correction()  ? "true" : "false";
-  out<<"Shot-noise correction       "<<enabbled<<endl;
-  out<<"******************************************************************************"<<endl;
-  out<<BLUE<<"DERIVED QUANTITIES"<<RESET<<endl;
-  out<<"Number of objects           "<<this->fftw_functions._n_gal()<<endl;
-  out<<"Weighted number of objects  "<<this->fftw_functions._w_g()<<endl;
-  if(this->params._use_random_catalog())
-      out<<"Number of random objects    "<<this->fftw_functions._n_ran()<<endl;
-  if(this->params._use_random_catalog())
-      out<<"Weighted number of randoms  "<<this->fftw_functions._w_r()<<endl;
-  out<<"alpha                       "<<this->fftw_functions._alpha()<<endl;
-  out<<"Shot_noise                  "<<this->fftw_functions._shot_noise()<<" (Mpc/h)^3"<<endl;
-  if(this->params._use_random_catalog())
-      out<<"Shot_noise (window)         "<<this->fftw_functions._shot_noise_window()<<endl;
-  out<<"Normalization               "<<this->fftw_functions._normal_power()<<endl;
-  if(this->params._use_random_catalog())
-    out<<"Mean nbar(from weights)     "<<(this->fftw_functions._n_ran()-this->fftw_functions._w_r())/(this->params._Pest()*this->fftw_functions._w_r())<<" (Mpc h^-1)^(-3)"<<endl;
-  out<<"Sum nw² galaxies            "<<this->fftw_functions._s_g()<<endl;
-  if(this->params._use_random_catalog())
-      out<<"Sum nw² randoms             "<<this->fftw_functions._s_r()<<endl;
-  out<<"******************************************************************************"<<endl;
-  out<<BLUE<<"FOURIER INFORMATION"<<RESET<<endl;
-  out<<"Fundamental mode            "<<this->params._d_deltak_0()<<" h/Mpc"<<endl;
-  out<<"Bin size for P(k)           "<<this->params._d_DeltaK_data()<<" h/Mpc"<<endl;
-  if(this->params._use_random_catalog())
-      out<<"Bin size for W(k)           "<<this->params._d_DeltaK_window()<<" h/Mpc"<<endl;
-  out<<"Nyquist Frequency           "<<0.5*this->params._Nft()*(this->params._d_deltak_0())<<" h/Mpc"<<endl;
-  out<<"******************************************************************************"<<endl;
-  if(this->params._sys_of_coord_g()>CoordinateSystem::CART)
-  {
-    out<<BLUE<<"COSMOLOGICAL PARAMETERS"<<RESET<<endl;
-    out<<"Omega Matter                "<<this->params.s_cosmo_pars.Om_matter<<endl;
-    out<<"Omega Vac                   "<<this->params.s_cosmo_pars.Om_vac<<endl;
-    out<<"Omega baryons               "<<this->params.s_cosmo_pars.Om_baryons<<endl;
-    out<<"Omega curvature             "<<this->params.s_cosmo_pars.Om_k<<endl;
-    out<<"wde_eof                       "<<this->params.s_cosmo_pars.wde_eos<<endl;
-    out<<"Hubble parameter            "<<this->params.s_cosmo_pars.Hubble<<endl;
-    out<<"Sigma_8                     "<<this->params.s_cosmo_pars.sigma8<<endl;
-    out<<"Minimim redshift            "<<this->params._redshift_min_sample()<<endl;
-    out<<"Maximum redshift            "<<this->params._redshift_max_sample()<<endl;
+      output["survey"]["random_catalog"]["enabled"] = true;
+      output["survey"]["random_catalog"]["file"] = this->params._file_random();
+      output["survey"]["random_catalog"]["smoothed_dNdz"] = this->params._file_nbar();
   }
   else
-    out<<"No cosmologial parameters have been used. "<<endl;
-  out.close();
-  out<<"******************************************************************************"<<endl;
-  out<<"******************************************************************************"<<endl;
-  So.message_screen("Log-file written in ",this->file_power_log);
+  {
+      output["survey"]["random_catalog"]["enabled"] = false;
+  }
+
+  output["selected_options"]["statistics"] =
+      this->params._statistics();
+
+  output["selected_options"]["mass_assignment_scheme"] =
+      this->params._mass_assignment_scheme();
+
+  output["selected_options"]["MAS_correction"] =
+      this->params._MAS_correction();
+
+  output["selected_options"]["Lbox"] =
+      this->params._Lbox();
+
+  output["selected_options"]["Lbox_unit"] = "Mpc/h";
+
+  output["selected_options"]["Nft"] =
+      this->params._Nft();
+
+  output["selected_options"]["FKP_weight"] =
+      this->params._FKP_weight();
+
+  output["selected_options"]["P_0"] =
+      this->params._Pest();
+
+  output["selected_options"]["P_0_unit"] = "(Mpc/h)^3";
+
+  output["selected_options"]["shot_noise_correction"] =
+      this->params._SN_correction();
+
+
+  // Derived quantities
+  output["derived_quantities"]["number_of_objects"] =
+      this->fftw_functions._n_gal();
+
+  output["derived_quantities"]["weighted_number_of_objects"] =
+      this->fftw_functions._w_g();
+
+  if (this->params._use_random_catalog())
+  {
+      output["derived_quantities"]["number_of_random_objects"] =
+          this->fftw_functions._n_ran();
+
+      output["derived_quantities"]["weighted_number_of_randoms"] =
+          this->fftw_functions._w_r();
+  }
+
+  output["derived_quantities"]["alpha"] =
+      this->fftw_functions._alpha();
+
+  output["derived_quantities"]["shot_noise"] =
+      this->fftw_functions._shot_noise();
+
+  output["derived_quantities"]["shot_noise_unit"] =
+      "(Mpc/h)^3";
+
+  if (this->params._use_random_catalog())
+  {
+      output["derived_quantities"]["shot_noise_window"] =
+          this->fftw_functions._shot_noise_window();
+
+      output["derived_quantities"]["mean_nbar_from_weights"] =
+          (this->fftw_functions._n_ran() -
+          this->fftw_functions._w_r()) /
+          (this->params._Pest() *
+          this->fftw_functions._w_r());
+
+      output["derived_quantities"]["mean_nbar_unit"] =
+          "(Mpc h^-1)^(-3)";
+
+      output["derived_quantities"]["sum_nw2_randoms"] =
+          this->fftw_functions._s_r();
+  }
+
+  output["derived_quantities"]["normalization"] =
+      this->fftw_functions._normal_power();
+
+  output["derived_quantities"]["sum_nw2_galaxies"] =
+      this->fftw_functions._s_g();
+
+
+  // Fourier information
+  output["fourier_information"]["fundamental_mode"] =
+      this->params._d_deltak_0();
+
+  output["fourier_information"]["fundamental_mode_unit"] =
+      "h/Mpc";
+
+  output["fourier_information"]["bin_size_Pk"] =
+      this->params._d_DeltaK_data();
+
+  output["fourier_information"]["bin_size_Pk_unit"] =
+      "h/Mpc";
+
+  if (this->params._use_random_catalog())
+  {
+      output["fourier_information"]["bin_size_Wk"] =
+          this->params._d_DeltaK_window();
+
+      output["fourier_information"]["bin_size_Wk_unit"] =
+          "h/Mpc";
+  }
+
+  output["fourier_information"]["nyquist_frequency"] =
+      0.5 * this->params._Nft() *
+      this->params._d_deltak_0();
+
+  output["fourier_information"]["nyquist_frequency_unit"] =
+      "h/Mpc";
+
+
+  // Cosmological parameters
+  if (this->params._sys_of_coord_g() > CoordinateSystem::CART)
+  {
+      output["cosmological_parameters"]["used"] = true;
+
+      output["cosmological_parameters"]["omega_matter"] =
+          this->params.s_cosmo_pars.Om_matter;
+
+      output["cosmological_parameters"]["omega_vacuum"] =
+          this->params.s_cosmo_pars.Om_vac;
+
+      output["cosmological_parameters"]["omega_baryons"] =
+          this->params.s_cosmo_pars.Om_baryons;
+
+      output["cosmological_parameters"]["omega_curvature"] =
+          this->params.s_cosmo_pars.Om_k;
+
+      output["cosmological_parameters"]["wde_eos"] =
+          this->params.s_cosmo_pars.wde_eos;
+
+      output["cosmological_parameters"]["hubble_parameter"] =
+          this->params.s_cosmo_pars.Hubble;
+
+      output["cosmological_parameters"]["sigma_8"] =
+          this->params.s_cosmo_pars.sigma8;
+
+      output["cosmological_parameters"]["minimum_redshift"] =
+          this->params._redshift_min_sample();
+
+      output["cosmological_parameters"]["maximum_redshift"] =
+          this->params._redshift_max_sample();
+  }
+  else
+  {
+      output["cosmological_parameters"]["used"] = false;
+  }
+
+
+  // Print JSON
+   jfile<<output.dump(4);
+   jfile.close();
+   So.message_screen("Log-file written in ",this->file_power_log);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,9 +260,7 @@ void PowerSpectrumF::write_power_spectrum()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PowerSpectrumF::write_power_spectrum(bool write_sigma) ///PLeas unify the name of this function with write_power and modes
   {
-#ifdef _VERBOSE_POWER_
     this->So.enter(__PRETTY_FUNCTION__);
-#endif
     if(this->params._statistics()=="Pk_fkp")
       {
 #ifdef _WRITE_MULTIPOLES_
@@ -204,9 +292,7 @@ void PowerSpectrumF::write_power_spectrum(bool write_sigma) ///PLeas unify the n
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PowerSpectrumF::write_power_and_modes()
   {
-#ifdef _VERBOSE_POWER_
     this->So.enter(__PRETTY_FUNCTION__);
-#endif
     File.write_to_file2(this->file_power,this->kvector_data,this->pk0,this->modes_g,true);
     if(this->params._use_random_catalog())
       File.write_to_file2(this->file_window,this->kvector_data,this->pk_w,this->modes_g,true);
@@ -1855,9 +1941,8 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
      time_t time_POWER;
      time(&time_POWER);
 
-#ifdef _VERBOSE_POWER_
    this->So.enter(__PRETTY_FUNCTION__);
-#endif
+
    time_t start;
    time (&start);
 
@@ -3807,9 +3892,7 @@ void PowerSpectrumF::halo_bias_analysis(string space_p)
  void PowerSpectrumF::measure_marked_power_spectrum_grid(const vector<real_prec> &data_in,const vector<real_prec> &data_in_MW)
  {
 
-#ifdef _VERBOSE_POWER_
    this->So.enter(__PRETTY_FUNCTION__);
-#endif
 
 #ifdef _USE_OMP_
    int NTHREADS=_NTHREADS_;

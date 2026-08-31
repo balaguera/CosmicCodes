@@ -91,8 +91,7 @@ void ScreenOutput::welcome_message_yama(){
   time_t rawtime;
   time (&rawtime);
   std::cout<<" "<<YELLOW<<endl;
-  std::cout<<" MULTIPOLE DECOMPOSITION OF THE THREE DIMENSIONAL POWER SPECTRUM OF COSMOLOGICAL"<<endl;
-  std::cout<<" MASS TRACERS USING YAMAMOTO ESTIMATOR (FFTW-based)"<<endl;
+  std::cout<<" Power Spectrum analysis"<<endl;
   std::cout<<" For more documentation see Doxygen"<<endl;
   std::cout<<" Starting time "<<ctime (&rawtime);
   std::cout<<RESET<<endl;
@@ -218,14 +217,14 @@ void ScreenOutput::write_cosmo_parameters(void *p, void *pa)
 void ScreenOutput::write_cosmo_parameters(void *p)
 {
   struct s_CosmologicalParameters * s_cp= (struct s_CosmologicalParameters *)p;
-  this->message_screen(" Cosmological parameters used to convert redshift to comoving distance");
-  this->message_screen(" Omega matter =", s_cp->Om_matter);
-  this->message_screen(" Omega vac =", s_cp->Om_vac);
-  this->message_screen(" Omega baryons =", s_cp->Om_baryons);
-  this->message_screen(" Omega curv =", s_cp->Om_k);
-  this->message_screen(" Hubble par =", s_cp->Hubble);
-  this->message_screen(" Spectral index =", s_cp->spectral_index);
-  this->message_screen(" Sigma8 =", s_cp->sigma8);
+  this->message_screen("Cosmological parameters used to convert redshift to comoving distance");
+  this->message_screen("Omega matter =", s_cp->Om_matter);
+  this->message_screen("Omega vac =", s_cp->Om_vac);
+  this->message_screen("Omega baryons =", s_cp->Om_baryons);
+  this->message_screen("Omega curv =", s_cp->Om_k);
+  this->message_screen("Hubble par =", s_cp->Hubble);
+  this->message_screen("Spectral index =", s_cp->spectral_index);
+  this->message_screen("Sigma8 =", s_cp->sigma8);
 }
 ////////////////////////////////////////////////////////////////////////////
 void ScreenOutput::error_ncolumns(string fname){
@@ -247,7 +246,8 @@ void ScreenOutput::error_ncolumns(string fname){
   std::cout<<RESET;
 }
 ////////////////////////////////////////////////////////////////////////////
-void ScreenOutput::comp_time(time_t start, unsigned long full, unsigned long step){
+void ScreenOutput::comp_time(time_t start, unsigned long full, unsigned long step)
+{
   // THIS IS TIME CONSUMING
   double fraction=100.0*((double)(step))/((double)full);
   time_t end;
