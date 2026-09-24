@@ -4,7 +4,7 @@
     "Nft": 512,
     "Nslices": 20,
     "name": "Density",
-    "output_file": "/home/andres/data/Numerics/CosmicCODES/output_power/interpolated_feld.dat",
+    "output_file": "/home/andres/data/Numerics/CosmicCodes/output_power/interpolated_feld.dat",
     "redshift": 0.0,
     "sample": "UNITSIM_HALOS",
     "show_interpolated_field": true

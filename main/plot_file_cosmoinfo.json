@@ -10,7 +10,7 @@
     "column_redshift": 0,
     "cosmology": true,
     "growth": true,
-    "output_file": "/home/andres/data/Numerics/CosmicCODES/output_cosmolib/cosmology_inredshift.txt",
+    "output_file": "/home/andres/data/Numerics/CosmicCodes/output_cosmolib/cosmology_inredshift.txt",
     "zmax": 9.950004577636719,
     "zmin": 0.0010000000474974513
 }

@@ -196,7 +196,7 @@
         "min_kvalue_tracer_qbias" : 0.02,
         "max_kvalue_tracer_qbias" : 0.08,
         "max_multipole_tracer_lmbias" : 8,
-        "get_cwc_properties" : true,
+        "get_cwc_properties" : false,
         "print_catalogue": true
     }
  },
@@ -204,7 +204,7 @@
 
 "CWCAnalysis":{
     "status" : "on", 
-    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_power/",
+    "output_directory" : "/home/andres/data/Numerics/CosmicCodes/output_power/",
     "box_size" : 1000.0,
     "min_x_coord" : 0.0,
     "min_y_coord" : 0.0,
@@ -223,7 +223,7 @@
 
 "FourierAnalysis" :{
     "status" : "on", 
-    "output_directory" :  "/home/andres/data/Numerics/CosmicCODES/output_power/",
+    "output_directory" :  "/home/andres/data/Numerics/CosmicCodes/output_power/",
     "statistics" : "Pk_fkp",
     "type_of_object" : "TRACER_REF",
     "input_type" : "catalog",
@@ -415,7 +415,7 @@
 
 "AngularPowerSpectrum" :{   
     "status" : "off", 
-    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_hgaps/",
+    "output_directory" : "/home/andres/data/Numerics/CosmicCodes/output_hgaps/",
     "statistics" : "Cl",
     "harmonic_sampling" : "H",
     "type_of_angular_power_estimator" : "K",
@@ -505,8 +505,8 @@
     },
 
 "CosmologicalLibrary":{
-    "status" : "off", 
-    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_cosmolib/",
+    "status" : "on", 
+    "output_directory" : "/home/andres/data/Numerics/CosmicCodes/output_cosmolib/",
     "cosmological_redshift" :  0.0,
     "fixed_cosmological_redshift" : true,
     "min_redshift" : 0.001,
@@ -610,8 +610,8 @@
   },
 
 "MCMC" :{
-    "status" : "on", 
-    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_distance_priors/",
+    "status" : "off", 
+    "output_directory" : "/home/andres/data/Numerics/CosmicCodes/output_distance_priors/",
     "name_experiment" : "dpriors_cmb",
     "name_parameters" : ["Omega_matter", "Omega_baryon", "w_eos"],
     "initial_parameters" :          [0.5,  0.046,  -1.0],
@@ -631,11 +631,5 @@
     "dprior_ID": 2, 
     "dprior_JD": 1
 }
-
-
-
-
-
-
 
 }

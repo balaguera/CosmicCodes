@@ -3,7 +3,6 @@
     "status" : "off", 
     "redshift" : 0,
     "initial_redshift_sim" : 99.0,
-    "initial_redshift_delta" : 0.0,
     "ic_index" : 1,
     "realization_index" : 1,
     "length_side_box" : 1000
@@ -16,10 +15,10 @@
     "input_directory_ref_two" : "null",
     "input_directory_new" : "null",
     "input_directory_new_ref" : "null",
-    "catalogue_file_mesh" : "dm_field_p128_Nres512_MAS1_downsampled_average.dat", 
-    "catalogue_file_mesh_new" : "dm_field_p128_Nres512_MAS1_downsampled.dat",
-    "catalogue_file_mesh_new_ref" : "dm_field_p128_Nres512_MAS1_downsampled.dat",
-    "catalogue_file_mesh_ref_pdf" : "dm_field_p128_Nres512_MAS1_downsampled.dat",
+    "catalogue_file_mesh" : "null", 
+    "catalogue_file_mesh_new" : "null",
+    "catalogue_file_mesh_new_ref" : "null",
+    "catalogue_file_mesh_ref_pdf" : "null",
     "file_bin_x_coord" : "null",
     "file_bin_y_coord" : "null",
     "file_bin_z_coord" : "null",
@@ -67,6 +66,7 @@
     "i_rvir" : -1,
     "i_b_to_a" : -1,
     "i_c_to_a" : -1,
+    "convert_to_halo_ellipiticity_and_prolatness" : false,
     "i_star_formation" : -1,
     "i_color" : -1,
     "i_stellar_mass" : -1,
@@ -186,7 +186,7 @@
     "IndividualTracerBias":{
         "get_individual_tracer_bias" : true,
         "assign_bias_to_full_sample" : false,
-        "fraction_to_dilute_sample" : 0.2,
+        "fraction_to_dilute_sample" : 0.5,
         "get_tracer_relative_bias" : false,
         "get_tracer_quadratic_bias" : false,
         "get_tracer_bias_squared" : false,
@@ -195,7 +195,9 @@
         "min_kvalue_tracer_bias" : 0.02,
         "min_kvalue_tracer_qbias" : 0.02,
         "max_kvalue_tracer_qbias" : 0.08,
-        "max_multipole_tracer_lmbias" : 8
+        "max_multipole_tracer_lmbias" : 8,
+        "get_cwc_properties" : true,
+        "print_catalogue": false
     }
  },
 
@@ -221,8 +223,8 @@
 
 "FourierAnalysis" :{
     "status" : "on", 
-    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_sdss/",
-    "statistics" : "Pk_yb",
+    "output_directory" : "/home/andres/data/Numerics/CosmicCodes/output_sdss/",
+    "statistics" : "Pk_ys",
     "type_of_object" : "TRACER_REF",
     "input_type" : "catalog",
     "input_type_two" : "null",
@@ -237,9 +239,9 @@
     "measure_cross_power_using_b" : 2,
     "use_random_catalogue" : true,
     "get_new_line_of_sight" : false,
-    "clustering_space" : "galaxy redshift survey",
+    "clustering_space" : "GRS",
     "direction_for_rsd_plane_parallel" : 3,
-    "box_size" : 1000,
+    "box_size" : 2000.0,
     "box_size_lowres" : 1000,
     "get_new_box_size" : true,
     "min_x_coord" : 0,
@@ -250,7 +252,7 @@
     "ngrid_ft_lowres" : 128,   
     "ngrid_jk" : 5,   
     "output_interpolated_field" : false,
-    "show_interpolated_field" : false,
+    "show_interpolated_field" : true,
     "mass_assignment_scheme" : "TSC",
     "use_correction_mass_assignment_scheme" : true,
     "type_of_kshell_binning" : "linear",
@@ -259,7 +261,7 @@
     "ndel_kbinning_data" : 1,
     "ndel_kbinning_window" : 1,
     "use_fkp_weight" : true,
-    "estimated_power" : 200000.0,
+    "estimated_power" : 20000.0,
     "number_mu_bins" : 100,
     "use_shot_noise_correction" : true,
     "compute_fkp_variance" : false,
@@ -287,7 +289,7 @@
     "redshift_max_sample" : 0.6,
     "number_values_redshift" : 300,
     "area_survey_sky" : 41253,
-    "type_of_redshift" : "p", 
+    "type_of_redshift" : "s", 
     "type_of_sky_coverage" : "masked_sky", 
     "coordinate_system" : "galactic",
     "define_hemisphere" : "all",
@@ -449,6 +451,18 @@
     "use_min_max_redshift_from_nbar_file" : false
 },
 
+"LogNormalCatalogsAngularClustering":{
+    "output_directory" : "null",
+    "number_of_mocks" : 1, 
+    "input_cl_zbin1" : "null",
+    "input_cl_zbin2" : "null",
+    "input_cl_zbin3" : "null",
+    "input_file_mean_number_density_z": "null", 
+    "number_of_galaxies_in_zbin1" : 1,
+    "number_of_galaxies_in_zbin2" : 1,
+    "number_of_galaxies_in_zbin3" : 1
+}, 
+
 
 "FourierBessel" :{
     "status" : "off", 
@@ -459,7 +473,7 @@
 
 
 "InitialConditions" :{
-    "status" : "on", 
+    "status" : "off", 
     "inputmode" : 0,
     "seed" : 1,
     "seed_ref" : 0,
@@ -592,5 +606,30 @@
         "Get_SO_from_BN" :  false,
         "Delta_SO" :  220.0
     } 
-  }
+  },
+ 
+
+"MCMC" :{
+    "status" : "off", 
+    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_distance_priors/",
+    "name_experiment" : "dpriors_cmb",
+    "name_parameters" : ["Omega_matter", "Omega_baryon", "w_eos"],
+    "initial_parameters" :          [0.5,  0.046,  -1.0],
+    "prior_parameters_min_values" : [0.1,  0.01, -2.0],
+    "prior_parameters_max_values" : [1.0,  0.09, 0.0],
+    "proposal_parameters" :         [0.001,  0.001, 0.001],
+    "action_parameters" :  [0,  0,  0],
+    "random_initial_value_within_priors": true,
+    "number_of_accepted_models" :     1000,
+    "number_of_burnin_phase_models" : 700,
+    "number_of_post_burnin_phase_models" : 200,
+    "number_of_steps_to_update_covariance" : 5000,
+    "number_of_avoided_steps_to_get_stats" : 10,
+    "update_covariance": false,
+    "number_of_chains" : 10,
+    "use_distance_priors" : true,
+    "dprior_ID": 2, 
+    "dprior_JD": 1
+}
+
 }

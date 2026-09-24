@@ -5,9 +5,9 @@
     "Nslices": 20,
     "fa": true,
     "kmax_fa": 0.20000000298023224,
-    "output_file_fa": "/home/andres/data/Numerics/CosmicCODES/output_cosmolib/IC_FA_realization0_Nres512.dat",
-    "output_file_grf": "/home/andres/data/Numerics/CosmicCODES/output_cosmolib/IC_GRF_realization0_Nres512.dat",
-    "output_file_mixed": "/home/andres/data/Numerics/CosmicCODES/output_cosmolib/IC_mixed_realization0_Nres512.dat",
+    "output_file_fa": "/home/andres/data/Numerics/CosmicCodes/output_cosmolib/IC_FA_realization0_Nres512.dat",
+    "output_file_grf": "/home/andres/data/Numerics/CosmicCodes/output_cosmolib/IC_GRF_realization0_Nres512.dat",
+    "output_file_mixed": "/home/andres/data/Numerics/CosmicCodes/output_cosmolib/IC_mixed_realization0_Nres512.dat",
     "redshift": 0.0,
     "sample": "Fixed amplitude IC "
 }

@@ -59,11 +59,11 @@
     "i_mass" : 6,
     "i_vmax" : -7,
     "i_vrms" : -8,
-    "i_rs" : -9,
+    "i_rs" : 9,
     "i_spin" : -10,
-    "i_spin_bullock" : -14,
+    "i_spin_bullock" : 14,
     "i_virial" : -13,
-    "i_rvir" : -15,
+    "i_rvir" : 15,
     "i_b_to_a" : -11,
     "i_c_to_a" : -12,
     "convert_to_halo_ellipiticity_and_prolatness" : false,
@@ -117,7 +117,7 @@
 
 
 "BiasAnalysis":{
-    "status" : "off", 
+    "status" : "on", 
     "output_directory" : "null",
     "DarkMatter":{
         "nbins" : 200,
@@ -185,18 +185,18 @@
     },
     "IndividualTracerBias":{
         "get_individual_tracer_bias" : true,
-        "assign_bias_to_full_sample" : true,
+        "assign_bias_to_full_sample" : false,
         "fraction_to_dilute_sample" : 0.2,
         "get_tracer_relative_bias" : false,
         "get_tracer_quadratic_bias" : false,
         "get_tracer_bias_squared" : false,
         "get_tracer_bias_multipoles" : false,
-        "max_kvalue_tracer_bias" : 0.07,
+        "max_kvalue_tracer_bias" : 0.05,
         "min_kvalue_tracer_bias" : 0.02,
         "min_kvalue_tracer_qbias" : 0.02,
         "max_kvalue_tracer_qbias" : 0.08,
         "max_multipole_tracer_lmbias" : 8,
-        "get_cwc_properties" : true,
+        "get_cwc_properties" : false,
         "print_catalogue": true
     }
  },
@@ -223,7 +223,7 @@
 
 "FourierAnalysis" :{
     "status" : "on", 
-    "output_directory" :  "/home/andres/data/Numerics/CosmicCODES/output_power/",
+    "output_directory" :  "/home/andres/data/Numerics/CosmicCodes/output_power/",
     "statistics" : "Pk_fkp",
     "type_of_object" : "TRACER_REF",
     "input_type" : "catalog",
@@ -500,13 +500,13 @@
     "GaussianRandomField":{
         "max_kvalue_fa": 0.2,
         "number_of_gaussian_random_field" : 1,
-        "generate_fixed_amplitude_initial_conditions" : true
+        "generate_fixed_amplitude_initial_conditions" : false
        }
     },
 
 "CosmologicalLibrary":{
-    "status" : "on", 
-    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_cosmolib/",
+    "status" : "off", 
+    "output_directory" : "/home/andres/data/Numerics/CosmicCodesf/output_cosmolib/",
     "cosmological_redshift" :  0.0,
     "fixed_cosmological_redshift" : true,
     "min_redshift" : 0.001,
@@ -607,5 +607,31 @@
         "Get_SO_from_BN" :  false,
         "Delta_SO" :  220.0
     } 
-  }
+  },
+
+
+"MCMC" :{
+    "status" : "off", 
+    "output_directory" : "/home/andres/data/Numerics/CosmicCODES/output_distance_priors/",
+    "name_experiment" : "dpriors_cmb",
+    "name_parameters" : ["Omega_matter", "Omega_baryon", "w_eos"],
+    "initial_parameters" :          [0.5,  0.046,  -1.0],
+    "prior_parameters_min_values" : [0.1,  0.01, -2.0],
+    "prior_parameters_max_values" : [1.0,  0.09, 0.0],
+    "proposal_parameters" :         [0.001,  0.001, 0.001],
+    "action_parameters" :  [0,  0,  0],
+    "random_initial_value_within_priors": true,
+    "number_of_accepted_models" :     1000,
+    "number_of_burnin_phase_models" : 700,
+    "number_of_post_burnin_phase_models" : 200,
+    "number_of_steps_to_update_covariance" : 5000,
+    "number_of_avoided_steps_to_get_stats" : 10,
+    "update_covariance": false,
+    "number_of_chains" : 10,
+    "use_distance_priors" : true,
+    "dprior_ID": 2, 
+    "dprior_JD": 1
+}
+
+
 }
