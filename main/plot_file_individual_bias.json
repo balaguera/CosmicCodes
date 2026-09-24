@@ -1,6 +1,0 @@
-{
-    "column_bias": 1,
-    "column_mass": 0,
-    "output_new_catalog": "/home/andres/data/Numerics/CosmicCodes/output_power/diluted_cat_bias.txt",
-    "show_individual_halo_mass_bias": true
-}
