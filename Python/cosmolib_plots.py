@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Sep 16 15:23:29 2023
+@brief: Pyython scripts to display results obtained iwht the CosmicCodes library.
 @author: Andres Balaguera-Antolínez
-
 """
 
 import numpy as np
@@ -32,15 +31,49 @@ from scipy.ndimage import gaussian_filter
 
 
 def get_title_coords_d(xmin, xmax, ymin, ymax):
-    x_title=xmin+0.15*(xmax-xmin)
-    y_title=ymin+0.2*(ymax-ymin)
+    """
+    @brief Calculate the coordinates for placing a plot title.
+
+    The title is positioned with an offset of 15% of the x-axis
+    range from the minimum x-coordinate and 20% of the y-axis
+    range from the minimum y-coordinate.
+
+    @param xmin Minimum value of the x-coordinate.
+    @param xmax Maximum value of the x-coordinate.
+    @param ymin Minimum value of the y-coordinate.
+    @param ymax Maximum value of the y-coordinate.
+
+    @return A tuple containing the x- and y-coordinates of the title.
+    """
+
+    x_title = xmin + 0.15 * (xmax - xmin)
+    y_title = ymin + 0.20 * (ymax - ymin)
+
     return x_title, y_title
+
 
 def get_title_coords(xmin, xmax, ymin, ymax, fracx, fracy):
-    x_title=xmin+fracx*(xmax-xmin)
-    y_title=ymin+fracy*(ymax-ymin)
-    return x_title, y_title
+    """
+    @brief Calculate the coordinates for placing a plot title.
 
+    The title is positioned at a distance given by `fracx` and
+    `fracy` as fractions of the x- and y-axis ranges, respectively,
+    measured from the minimum coordinates.
+
+    @param xmin Minimum value of the x-coordinate.
+    @param xmax Maximum value of the x-coordinate.
+    @param ymin Minimum value of the y-coordinate.
+    @param ymax Maximum value of the y-coordinate.
+    @param fracx Fraction of the x-axis range at which to place the title.
+    @param fracy Fraction of the y-axis range at which to place the title.
+
+    @return A tuple containing the x- and y-coordinates of the title.
+    """
+
+    x_title = xmin + fracx * (xmax - xmin)
+    y_title = ymin + fracy * (ymax - ymin)
+
+    return x_title, y_title
 # ==========================================================================
 def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     new_cmap = colors.LinearSegmentedColormap.from_list(
@@ -51,22 +84,26 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
 # ==========================================================================
 # ==========================================================================
 # ==========================================================================
-
 class COSMOLIB_PLOTS:
-
     """
     @brief Reads an input catalogue.
-
-    Reads JSON outputs from CosmicCodes and perform plots.
+    @details Reads JSON outputs from CosmicCodes and perform plots.
     """
 
+ 
     def __init__(self,file):
+        """
+        @brief Inizialization
+        """
         self.parameter_file=file
         print("Reading input file:",file)
         with open(self.parameter_file, 'r',encoding="utf-8") as file:
            self.data = json.load(file)
     
     def plot_mass_dependent_quantities(self, quantity):
+        """
+        @brief Fucntion to plot mass dependent quantities such as mass function and halo bias.
+        """
         plt.figure()
 
         grid = plt.GridSpec(1,1, wspace=0.05, hspace=0.05)
@@ -161,6 +198,9 @@ class COSMOLIB_PLOTS:
 
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     def plot_density_profile(self, space):
+        """
+        @brief Function to plot halo density profiles in real and Fourier space.
+        """
         plt.figure()
         grid = plt.GridSpec(1,1, wspace=0.05, hspace=0.05)
 
@@ -240,6 +280,10 @@ class COSMOLIB_PLOTS:
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     def plot_power_spectrum_hmodel(self):
+        """
+        @brief Function to plot galaxy power spectrum in the Halo model.
+        """
+
         plt.figure()
         grid = plt.GridSpec(1,1, wspace=0.05, hspace=0.05)
 
@@ -302,6 +346,10 @@ class COSMOLIB_PLOTS:
 
 
     def plot_power_spectrum_measurement(self):
+        """
+        @brief Function to plot measurements of power spectrum.
+        """
+
         plt.figure()
         grid = plt.GridSpec(1,1, wspace=0.05, hspace=0.05)
 
@@ -372,6 +420,9 @@ class COSMOLIB_PLOTS:
 
 
     def plot_angular_power_spectrum_measurement(self):
+        """
+        @brief Function to plot measurements of angular power spectrum.
+        """
         plt.figure()
         grid = plt.GridSpec(1,1, wspace=0.05, hspace=0.05)
 
@@ -445,6 +496,10 @@ class COSMOLIB_PLOTS:
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     def plot_mixing_matrix_angular_power(self):
+        """
+        @brief Function to plot the mixing matrix of angular pwoer spectrum
+        """
+
         plt.figure()
         grid = plt.GridSpec(1,1, wspace=0.05, hspace=0.05)
 
@@ -513,6 +568,9 @@ class COSMOLIB_PLOTS:
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     def plot_tomographic_maps(self):
+        """
+        @brief Function to plot Mollewide projections for tomographic analysis.
+        """
 
         map = hp.read_map(self.data["mask_map"])
         hp.visufunc.mollview(map,title='Mask',min=np.min(map))
@@ -543,6 +601,9 @@ class COSMOLIB_PLOTS:
 
 
     def plot_power_spectrum_grf(self):
+        """
+        @brief Function to plot measurements of power spectrum when generating gaussian random fields.
+        """
         plt.figure()
         grid = plt.GridSpec(1,1, wspace=0.05, hspace=0.05)
 
@@ -624,6 +685,9 @@ class COSMOLIB_PLOTS:
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     def plot_cosmology_distances(self):
+        """
+        @brief Function to plot redshift dependent quantities in FRW cosmology
+        """
         plt.figure()
         grid = plt.GridSpec(1,1, wspace=0.05, hspace=0.05)
 
@@ -691,6 +755,9 @@ class COSMOLIB_PLOTS:
 
 
     def plot_cosmology_growth(self):
+        """
+        @brief Function to plot the growth function from FRW cosmoloy and linear perturbation.
+        """
         plt.figure()
         grid = plt.GridSpec(1,1, wspace=0.05, hspace=0.05)
 
@@ -751,9 +818,11 @@ class COSMOLIB_PLOTS:
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     def plot_interpolated_field(self):
+        """
+        @brief Function to plot interpolated density fields.
+        """
 
         plt.rc('text', usetex=True)  
-
 
         # set tick width
         mpl.rcParams['xtick.major.size'] = 5
@@ -817,6 +886,10 @@ class COSMOLIB_PLOTS:
 
 
     def plot_interpolated_field_GRF(self):
+        """
+        @brief Function to plot interpolated density fields for tasks linked to the generation of gaussian random fields.
+        """
+
         color='gist_earth'
         aspect='auto'
         lwidth = 1.5
@@ -973,6 +1046,10 @@ class COSMOLIB_PLOTS:
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     def plot_halo_mass_plane(self):
+        """
+        @brief Function to plot the halo bias - mass relation.
+        """
+
         cmap_two="RdBu"
         grid = plt.GridSpec(1,1, wspace=0.05, hspace=0.05)
         fraction=1.0
