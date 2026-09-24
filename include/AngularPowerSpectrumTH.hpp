@@ -1,8 +1,19 @@
+//////////////////////////////////////////////////////////
+/** 
+ *  @class <AngularPowerTH>
+ *  @ingroup classes
+ *  @brief This class defines methods used in the prediction of angular power spectrum based on 2d power spectrum and a selection function.
+ *  @file  AngularPowerSpectrumTH.h
+ *  @author Andres Balaguera-Antolínez
+ */
+//////////////////////////////////////////////////////////
+
+
 #ifndef __ANGULAR_POWER_SPECTRUM_TH__
 #define __ANGULAR_POWER_SPECTRUM_TH__
 
-//#define _WRTITE_OUTPUTS_APSTH_
 
+//#define _WRTITE_OUTPUTS_APSTH_
 
 // CLASS TO COMPUTE LINEAR AND NON LINEAR MATTER angular POWER SPECTRUM
 // BASED ON THE EISENSTEIN AND HU FITTING FORMULAE
@@ -27,16 +38,6 @@
 using namespace std;
 using namespace Constants;
 
-
-
-
-
-
-/**
- *  @class AngularPowerTH.h
- *  @brief The class AngularPowerTH_
- *
- */
 
 
 class AngularPowerTH{

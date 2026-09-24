@@ -6,6 +6,7 @@
  * @section contents Table of Contents
  *
  * - @ref intro_sec "Introduction"
+ *      - @ref intro_sec_m "Motivation"
  * - @ref dw "Download the Code and compilation"
  * - @ref exa "Applications and Examples"
  *   - @ref spar "Input Parameter File"
@@ -18,6 +19,9 @@
  *   - @ref cwlib "Cosmic-Web Analysis"
  *   - @ref clib "Cosmological Functions"
  *
+ * - @ref sfaqs "Some key concepts"
+ *   - @ref pk_fkp "Power Spectrum"
+ *   - @ref clib "Angular Power Spectrum"
  * - @ref sfaqs "FAQS"
  * - @ref dep "Library Dependencies"
  * - @ref pap "Related Publications"
@@ -32,20 +36,27 @@
  * large-scale structure of the Universe, using both N-body simulations or galaxy redshift surveys. Its main applications include:
  *
  * - Analysis of primary and secondary halo bias.
- * - Generation of halo mock catalogs using the Bias Assignment Method.
+ * - Generation of halo mock catalogues using the Bias Assignment Method.
  * - Measurement of the three-dimensional power spectrum of dark-matter tracers.
  * - Measurement of angular power spectra and tomographic analysis.
- * - Generation of random catalogs for clustering analyses.
- * - Generation of lognormal catalogs for tomographic analyses.
+ * - Generation of random catalogues for clustering analyses.
+ * - Generation of lognormal catalogues for tomographic analyses.
  * - Cosmological parameter estimation using Markov Chain Monte Carlo methods.
  * - Measurement of abundance statistics, including mass and luminosity functions.
- * - Analysis of halo and galaxy catalogs.
+ * - Analysis of halo and galaxy catalogues.
  * - Cosmic-web analysis.
  *
+ * @subsection intro_sec_m Motivation
+ * The **CosmicCodes** library is the result of years of code development aiming at performing statistical analysis for galaxy and cluster surveys such as
+ * - <a href = "https://www.mpe.mpg.de/~hxb/REFLEX/">REFLEX Galaxy Cluster Survey</a>
+ * - <a href = "https://www.sdss.org/">SDSS</a>
+ * - <a href = "https://www.cosmos.esa.int/web/euclid">Euclid mission</a>
+ * - <a href = "https://www.desi.lbl.gov/">DESI</a>
+ * - <a href = "https://science.nasa.gov/mission/roman-space-telescope/">Roman Telescope</a>
  *
  * @section dw Download the code and compilation
  *
- * The source codecan bu downloaded from 
+ * The source code can be downloaded from 
  * <a href="https://github.com/balaguera/CosmicCodes">GitHub</a>. 
  *
  * @note The code is distributed under a GNU-type license.
@@ -72,7 +83,7 @@
  * @subsection spar Input Parameter File
  *
  * The input parameter file is written in \c JSON (JavaScript object notation) format, with a number of sections dedicated to 
- * either input catalogs of methods (calculations such as power spectrum, luminosity function, cosmological parameter constraints etc). 
+ * either input catalogues of methods (calculations such as power spectrum, luminosity function, cosmological parameter constraints etc). 
  *
  * 
  * @note Go to \ref parameters_docu for detailed information on the parameters used in this library.
@@ -85,7 +96,7 @@
  * 
  * 
  * @subsection ssbias Bias Analysis
- * This example aims at performing the analysis of cosmological bias using as input dark matter and dark matter tracer catalogs.
+ * This example aims at performing the analysis of cosmological bias using as input dark matter and dark matter tracer catalogues.
  * The <a href = "../../../examples/bmt.cpp">example code</a> can be compiled with
  *
  * \code{.sh}
@@ -153,7 +164,7 @@
  * The <a href = "../../../examples/hgaps.cpp">example code</a> can be compiled with
  *
  * \code{.sh}
- * make angpower
+ * make hgaps
  * \endcode
  * Available options:
  *
@@ -167,7 +178,7 @@
  *   ./hgaps.exe -cross parameter_file.json
  *   \endcode
  *
- * @note The example to build log normal catalogs is under construction.
+ * @note The example to build log normal catalogues is under construction.
  * 
  *
  * @subsection sshtool Halo Tools
@@ -195,12 +206,12 @@
  *   ./htools.exe -s parameter_file
  *   \endcode
  *
- * - **Build galaxy catalogs from an input halo catalog using an HOD model**
+ * - **Build galaxy catalogues from an input halo catalog using an HOD model**
  *   \code{.sh}
  *   ./htools.exe -h parameter_file
  *   \endcode
  *
- * - **Build a mock catalog from a simulation snapshot using an input dN/dz**
+ * - **Build a mock catalogue from a simulation/snapshot using an input dN/dz**
  *   \code{.sh}
  *   ./htools.exe -m parameter_file
  *   \endcode
@@ -269,6 +280,10 @@
  * @note HOD predictions are currently under development.
  *
 
+ * @section skc Some Key Concepts
+ * - @ref pk_fkp Power Spectrum 
+ * - @ref ang_power Angular Power Spectrum
+  
  * @section sfaqs FAQS
  *
  * -   <span class="tooltip">
@@ -342,7 +357,9 @@
 
  * - **How can I measure luminosity function?**
 
+ * - **How can I forecast a linear power spectrum?**
 
+ * - **How can I measure a marked correlation function?**
 
 
  * @section dep Library Dependencies
@@ -378,7 +395,6 @@
  *     <span class="tooltiptext">
  *      Used to show basic results at the end of some computation.       
  *     </span>
- *   </span>
  *   </span>
  * -   <span class="tooltip">
  *     <span class="tooltip-trigger">\c JSON</span>
@@ -428,7 +444,7 @@
  *
  * - <a href="http://adsabs.harvard.edu/abs/2019MNRAS.483L..58B"> BAM: bias assignment method to generate mock catalogues </a>
  *
- * - <a href="https://ui.adsabs.harvard.edu/abs/2025A%26A...700A.207G/abstract"> Extracting cosmological information from the angular power spectrum of the 2MASS Photometric Redshift catalogue </a>
+ * - <a href="https://arxiv.org/pdf/1711.04583v2"> Extracting cosmological information from the angular power spectrum of the 2MASS Photometric Redshift catalogue </a>
  
  * - <a href="https://ui.adsabs.harvard.edu/abs/2012hcxa.confE..71B/abstract">
  *   The REFLEX II Galaxy Cluster sample: mock catalogues and clustering analysis</a>

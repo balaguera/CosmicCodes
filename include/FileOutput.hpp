@@ -1,11 +1,9 @@
 /**
  * @class<FileOutput>
- * @brief Header file for the class FileOutput::
+ * @ingroup classes
+ * @brief Methods dedicated to print in and out of inputs and results.
  * @file FileOutput.hpp
- * @title Methods for input/output in BAM
  * @author Andres Balaguera-Antolínez
- * @version   1.0
- * @date      2020
 */
 
 #ifndef __FILE_OUTPUT__

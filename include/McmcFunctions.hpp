@@ -1,9 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////
 /**
- * @class<McmcFunctions>
- * @brief Header file for the class McmcFunctions
+ * @class<McmcFunctions> 
+ * @ingroup classes
+ * @brief This class contains methods aimed to perform Monte Carlo Markov Chains.
  * @file McmcFunctions.cpp
- * @title Methods related to McmcFunctions
  * @author   ABA
  */
  ////////////////////////////////////////////////////////////////////////////

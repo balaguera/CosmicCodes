@@ -1,7 +1,8 @@
 ﻿//////////////////////////////////////////////////////////
 /** 
- *  @class AngularPowerSpectrum.h
- *  @brief Header file for the class AngularPowerSpectrum
+ *  @class <AngularPowerSpectrum>
+ *  @ingroup classes
+ *  @brief This class defines mnethods used in the measurements of angular power spectrum (tomographic analysis) 
  *  @file AngularPowerSpectrumF.h
  *  @author Andres Balaguera-Antolínez
  */

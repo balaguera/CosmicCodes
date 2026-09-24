@@ -1,10 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 /**
- * @class
- * @file BiasFunctions.h
- * @brief Header file for the class MassBiasFunction::
- * @title Functions related to interpolations of halo bias as a function of halo mass
+ * @class <MASS_BIAS_FUNCTIONS>
+ * @ingroup classes
+ * @brief This class contain methods related to different interpolations of halo bias as a function of halo mass, aimed at predictions of these observables.
  * @author Andres Balaguera-Antolínez
  * @version  1.0
  * @date     2017-2019

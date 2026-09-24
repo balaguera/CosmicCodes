@@ -1,15 +1,12 @@
 ////////////////////////////////////////////////////////////////////////////
 /**
  * @class <FftwFunctions>
- * @brief    Header file for the class FftwFunctions::
+ * @ingroup classes
+ * @brief    This class present methods aimed at performing operations in Fourier space, to measure power spectrum and bispectrum.
  * @file     FftwFunctions.h
- * @title    Manipulation of functions in Fourier space
  * @author   Andres Balaguera Antolinez
  * @author   Federico Marulli & Jennifer Pollack
  * @author   Optimization and parallelization by Luca Tornatore
- * @version  1.
- * @date     2013-2024
- * @details  See documentation
 */
 ////////////////////////////////////////////////////////////////////////////
 #ifndef __FFTW_FUNCTIONS__

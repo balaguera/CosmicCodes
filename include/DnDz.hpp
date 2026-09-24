@@ -110,15 +110,11 @@ struct s_dndz{
 
 /**
 * @class<DnDz>
+* @ingroup classes
+* @brief Methods related to the generation and measuremetns of redshift distributions and mean number densities
 * @file DndDz.h
-* @brief Header file for the class DnDz::
-* @title Functions related to the generation and measuremetns of redshift distributions and mean number densities
 * @author Andres Balaguera-Antolínez
-* @version 1.0
-* @date    2020
-* @details: This is an example of a main function to call bam. A file called cosmicatlas.cpp
 */
-
 
 
 

@@ -2,10 +2,9 @@
 //////////////////////////////////////////////////////////
 /**
  * @class<Cosmology>
- * @brief Header file for the class Cosmology::
- * @file CosmologicalFunctions.h
- * @title Functions to compute cosmological dependent quantities
- * @author ABA
+ * @ingroup classes
+ * @brief This class contains methods to compute redshift dependent FRW cosmological functions.
+ * @author Andrés Balaguera Antolinez
  * @callgraph
  * @date  2012-2023
  */

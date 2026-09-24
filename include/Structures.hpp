@@ -25,8 +25,8 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////
 /**
  * @struct<s_CosmologicalParameters>
- * @brief The s_CosmoInfo struct
- * @details Auxiliary structure containg cosmological parameters
+ * @ingroup structures
+ * @brief Auxiliary structure containg cosmological parameters
  */
 struct s_CosmologicalParameters
 {
@@ -336,10 +336,9 @@ struct s_CosmologicalParameters
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- * @brief
  * @struct<matrices>
- * @brief The matrices struct
- * @details Structure with 2d cointainers with c onariance matrices, used in FB analysis
+ * @ingroup structures
+ * @brief Structure with 2d cointainers with c onariance matrices, used in FB analysis
  */
 struct matrices{
   /**
@@ -378,10 +377,9 @@ struct matrices{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<params_clth>
- * @brief The params_clth struct
- * @details  Auxiliary strucure for the class:ClFunctions computation of theoretical angular power spectrum
+ * @ingroup structures
+ * @brief Auxiliary strucure for the class:ClFunctions computation of theoretical angular power spectrum
  */
 struct params_clth{
   /**
@@ -498,16 +496,15 @@ struct params_clth{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
- * @struct<s_aux>
- @brief Template structure s_aux
- @details This structure is created in order to avoid missconfusing of information among threads when using OMP
+*@struct<s_aux>
+*@ingroup structures
+*@brief This template structure is created in order to avoid missconfusing of information among threads when using OMP in the context of angular power spectrum predictions.
 */
 template<typename T>
 struct s_aux{
   /**
-   *@brief  */
-  s_CosmologicalParameters *scp_a; /** *@brief  */
+   *@brief Structure for cosmological parameters */
+  s_CosmologicalParameters *scp_a; 
   /**
    *@brief  */
   params_clth *s_clth; 
@@ -554,41 +551,41 @@ struct s_aux{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<A1>
- * @brief The A1 struct
- * @details Structure used in the passage from Cl to Ps to spped up calculations
+ * @brief Structure used in the transformation from angular power Cl to 3d power to speed up some key calculations.
  */
 struct A1{
   /**
-   *@brief  */
+   *@brief Structure for cosmological parameters */
   s_CosmologicalParameters *s_cp; 
   /**
-   *@brief  */
+   *@brief Container for tracer mass bins  */
   vector<gsl_real>MASS; 
   /**
-   *@brief  */
+   *@brief Container for halo mass function */
   vector<gsl_real>MASS_FUNCTION; 
   /**
-   *@brief  */
+   *@brief Container for halo bias */
   vector<gsl_real>MASS_BIAS; 
   /**
-   *@brief  */
+   *@brief  Auxiliary wavenumber*/
   real_prec aux_k; 
   /**
-   *@brief  */
+   *@brief  Auxiliary redshift*/
   real_prec aux_z; 
   /**
-   *@brief  */
+   *@brief  Auxiliary mass*/
   real_prec aux_m; 
 
 };
 ////////////////////////////////////////////////////////////////////////////
 
 /**
- * @brief The Catalog structure is aimed to allocate in vectos all properties of input catalog.
+ * structure<s_Catalogue>
+ * @ingroup structures
+ * @brief The Catalog structure is aimed to allocate in vectos all properties of input tracer catalog within the methods of the class @ref Catalogue.
  * @details This is to shift from vector<structure> approach to structure<vectors> which is more efficient.
- * @details A single tracer catalogue will be associated with a single Catalogue structure. This new structure also allows to inzialize memmory
+ * A single tracer catalogue will be associated with a single Catalogue structure. This new structure also allows to inzialize memmory
  * for properties that are only used (e.g, read). It’s actually the correct high-performance design.
  * Furthermore, since I am using a column storage model (prop[]), the vector of structures is fighlting that data model.
  */
@@ -1123,10 +1120,9 @@ struct A1{
 
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<experiments>
- * @brief The experiments struct
- * @details Containers used in the MCMC analysis of Cl. Used in class::HGAP
+ * @ingroup structures
+ * @brief This sctruture gathers containers used in the MCMC analysis of angular power spectrum. Used in \ref AngularPowerTH.
  */
 struct experiments{
   vector<vector<real_prec> > acc_par1;
@@ -1144,10 +1140,9 @@ struct experiments{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<s_data_structure>
- * @brief The s_data_structure struct
- * #details Auxiliary structure used in the measrement of power spectrum class::PowerSpectrum
+ * @ingroup structures
+ * @brief Auxiliary structure used in the methods for measurement of power spectrum, at \ref PowerSpectrumF
  */
 struct s_data_structure{
   /**
@@ -1168,14 +1163,13 @@ struct s_data_structure{
   vector<gsl_real> rr_c;
 };
 ////////////////////////////////////////////////////////////////////////////
-  class Catalogue;
+ //Predefinition of the class Catalogue
+ class Catalogue;
 
-//Structure containing the properties of the catalogs
 /**
- *@brief
  * @struct<s_data_structure>
- * @brief The s_data_structure struct
- * #details Auxiliary structure used in the measrement of power spectrum class::PowerSpectrum
+ * @ingroup structures
+ * @brief Auxiliary structure used in the measurement of power spectrum using direct sum, at \ref PowerSpectrumF.
  */
 struct s_data_structure_direct_sum{
   /**
@@ -1204,10 +1198,9 @@ struct s_data_structure_direct_sum{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<s_parameters_estimator>
- * @brief The s_parameters_estimator structure
- @details Auxiliary structure used in the measurement of power spectrum, fed in class::PowerSpectrum, used in class::FftwFunctions
+ * @ingroup structures
+ * @brief Auxiliary structure used in the measurement of power spectrum, at \ref PowerSpectrumF, used also in \ref FftwFunctions.
 */
 struct s_parameters_estimator{
   /**
@@ -1219,15 +1212,15 @@ struct s_parameters_estimator{
    */
   ULONG number_of_objects;
   /**
-   *@brief  number of selected random objects from which the P(k) will be measured
+   *@brief  Number of selected random objects from which the P(k) will be measured
    */
   ULONG number_of_randoms;
   /**
-   *@brief  weighted number of selected real objects from which the P(k) will be measured
+   *@brief  Weighted number of selected real objects from which the P(k) will be measured
    */
   real_prec w_number_of_objects;
   /**
-   *@brief weighted number of selected random objects from which the P(k) will be measured
+   *@brief Weighted number of selected random objects from which the P(k) will be measured
    */
   real_prec w_number_of_randoms;  
   /**
@@ -1251,7 +1244,7 @@ struct s_parameters_estimator{
    */
   real_prec normalization_window;
   /**
-   *@brief  Shot noise
+   *@brief  Poisson Shot-noise
    */
   real_prec shot_noise;         
   /**
@@ -1261,10 +1254,10 @@ struct s_parameters_estimator{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<s_parameters_box>
- * @brief The s_parameters_box struct
- */
+ * @ingroup structures
+ * @brief Auxiliary structure used in the measurement of power spectrum, at \ref PowerSpectrumF.
+   */
 struct s_parameters_box{
   //  string mas;       //Mass Assignment scheme
   //  string ave;        //Type of average
@@ -1277,7 +1270,8 @@ struct s_parameters_box{
 ////////////////////////////////////////////////////////////////////////////
 /**
  * @struct<s_params_box_mas>
- * @brief Auxiliary structure used to pass box arguments to different functions
+ * @ingroup structures
+* @brief Auxiliary structure used to pass box arguments to different functions in \ref PowerSpectrumF.
  */
 struct s_params_box_mas{
     /**
@@ -1339,10 +1333,9 @@ struct s_params_box_mas{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<s_minimums>
- * @brief The s_minimums struct
- * @details Auxiliary structure to allocate minimum values of properties used to characterize the bias in class::Bam
+ * @ingroup structures
+ * @brief Auxiliary structure to allocate minimum values of properties used to characterize the bias in class::Bam
  */
 struct s_minimums{
   real_prec prop0;  // Tracer property, counts
@@ -1361,10 +1354,9 @@ struct s_minimums{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<s_maximums>
- * @brief The s_maximums struct
- * @details Auxiliary structure to allocate  maximum values of properties used to characterize the bias in class::Bam
+ * @ingroup structures
+ * @brief Auxiliary structure to allocate  maximum values of properties used to characterize the bias in class::Bam
  */
 struct s_maximums{
   real_prec prop0;
@@ -1383,9 +1375,9 @@ struct s_maximums{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<s_Deltas>
- * @details Auxiliary structure to allocate  bin sizes in the different properties used to characterize the bias in class::Bam
+ * @ingroup structures
+ * @brief Auxiliary structure to allocate  bin sizes in the different properties used to characterize the bias in class::Bam
  */
 struct s_Deltas{
   /**
@@ -1432,12 +1424,12 @@ struct s_Deltas{
 /**
  *@brief
  * @struct<s_mass_members>
- * @details Strucure to allocate set of masses, coordinates and their ID (in the mesh) for tracers within a given bin of the multidimendional Theta (DM) properties
- * @details Used in the assignment of halo properties.
- * @details Example: Private variable in class::Bam
- * @code
- vector<s_mass_members> dm_properties_bins;
- *@endcode
+ * @ingroup structures
+ * @brief Strucure to allocate set of masses, coordinates and their ID (in the mesh) for tracers within a given bin of the multidimendional Theta (DM) properties. Used in the assignment of halo properties.
+ * Example: Private variable in \ref BMT: 
+ * @code 
+ * vector<s_mass_members> dm_properties_bins;
+ * @endcode
  */
 struct s_mass_members{
   /**
@@ -1460,13 +1452,12 @@ struct s_mass_members{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<s_nearest_cells struct>.
- @details This is used in NumericalMethods::get_neighbour_cells() 
- @details Structure containing the closest cell neighbours to a given cell
- @code
- vector<s_nearest_cells>nearest_cells_to_cell(NGRID);
- @endcode
+ * @ingroup structures
+* @brief Structure used in NumericalMethods::get_neighbour_cells(), ontaining the closest cell neighbours to a given cell
+* @code
+* vector<s_nearest_cells>nearest_cells_to_cell(NGRID);
+* @endcode
 */
 struct s_nearest_cells{
   /**
@@ -1485,24 +1476,24 @@ struct s_nearest_cells{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<s_cell_info struct>
- @details Structure for each cell of the mesh, containing the coordinates, mass, other properties, tracer-index and the position of the cell in the Theta-histgrams.
- Used in class::Catalog
- @code
- vector<s_cell_info> cell_info_tr(NGRID);
- for(ULONG i=0;i<halo[i].size() ;++i)
- {
-     ULONG ID=halo[i].GridID;
-     cell_info_tr[ID].posx_p.push_back(halo[i].coord1);  // and so on
- }
- @endcode
- @details The size of the containers of this structure is the number of tracers in each cell
- @code
- vector<int>Ncounts(NGRID,0);
- for(ULONG i=0;i<NGRID ;++i)
-    Ncounts[i] = cell_info_tr[i].posx.size();
- @endcode
+ * @ingroup structures
+* @brief Structure assigned for each cell of the mesh, containing the coordinates, mass, other properties, tracer-index and the position of the cell in the Theta-histgrams.
+* Used in \ref Catalogue as
+* @code
+* vector<s_cell_info> cell_info_tr(NGRID);
+* for(ULONG i=0;i<halo[i].size() ;++i)
+* {
+*     ULONG ID=halo[i].GridID;
+*     cell_info_tr[ID].posx_p.push_back(halo[i].coord1);  // and so on
+* }
+* @endcode
+* @details The size of the containers of this structure is the number of tracers in each cell
+* @code
+* vector<int>Ncounts(NGRID,0);
+* for(ULONG i=0;i<NGRID ;++i)
+*    Ncounts[i] = cell_info_tr[i].posx.size();
+* @endcode
 */
 struct s_cell_info{
   /**
@@ -1548,7 +1539,8 @@ struct s_cell_info{
 ////////////////////////////////////////////////////////////////////////////
 /**
  * @struct<s_cell_info_reduced>
- * @brief Structure desingned to contain the information of the ID of the tracers living in a cell
+ * @ingroup structures
+ * @brief Structure desingned to contain the information of the ID of tracers living in a cell
 */
 struct s_cell_info_reduced{
   /**
@@ -1562,9 +1554,9 @@ struct s_cell_info_reduced{
 };
 ////////////////////////////////////////////////////////////////////////////
 /**
- * @brief
  * @struct<s_dist_in_dmbins struct>
- * @details Strucure to allocate the list of masses in pairs that -within one bin of the dm properties- are separated by a distnace between m_min and MAXIMUM_DISTANCE_EXCLUSION
+ * @ingroup structures
+ * @brief Strucure to allocate the list of masses in pairs that -within one bin of the dm properties- are separated by a distnace between m_min and MAXIMUM_DISTANCE_EXCLUSION
 */
 struct s_dist_in_dmbins{
   /**
@@ -1578,13 +1570,13 @@ struct s_dist_in_dmbins{
 ////////////////////////////////////////////////////////////////////////////
 /**
  * @struct<s_power_in_bins>
+ * @ingroup structures
  * @brief Structure to allocate information of a number of measurements that come in differnt containers
  * @details Examples are : Power Spectrum (nmodes, k, l=0, l=2, l=4) or the primary and secondary bias.
  * @details For the power spetrum, one can define a container of thys type to allocate e.g. power in differnet mass bins
- * @details For primary bias, it is enough to define a single structure. FOr seconday bias
- * @it is advised ot define a vector of thys type-structure to allocate the bias in the different quartiles.
+ * @details For primary bias, it is enough to define a single structure. For seconday bias
+ * it is advised ot define a vector of this type-structure to allocate the bias in the different quartiles.
  * 
- * @author ABA
  */
 struct s_info_in_bins{
 /**

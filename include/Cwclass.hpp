@@ -1,7 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////
 /**
  * @class<Cwclass>
- * @brief Header file for the class Cwclass::
+ * @ingroup classes
+ * @brief This class defines methods to develop a cosmic web analysis based on the eigenvalues and eigentensors of the tidal field and the shear velocity field.
  * @file Cwclass.h
  * @title Functions related to Cosmic Web and V-WWeb classification
  * @author   ABA

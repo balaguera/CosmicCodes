@@ -1,12 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////
 /**
- * @class
+ * @class<Statistics>
+ * @brief This class defines methods aimed to compute cosmological statistical quantities, such as halo mass function, halo bias, mass dispersion.
  * @file Statistics.h
- * @brief Header file for the class Statistics::
- * @title Functions related to interpolations of mass function nand related halo statistics
  * @author Andres Balaguera-Antolínez
- * @version  1.0
- * @date     2017-2019
  */
 ////////////////////////////////////////////////////////////////////////////
 #ifndef _STATISTICS_

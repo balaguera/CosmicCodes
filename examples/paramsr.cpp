@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
     }
 
   Params params ("default_all_on.json");
-
+/*
   if (getenv("RUNNING_IN_XTERM") == nullptr) {
       std::string cmd = "RUNNING_IN_XTERM=1 xterm  -bg black -fg white  -hold -e ";
     // Add program name
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
       system(cmd.c_str());
       return 0;
   }
- 
+ */
 
   int option_index = 0;
   int c;

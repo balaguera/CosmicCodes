@@ -1,3 +1,11 @@
+/**
+ * @class<ScreenOutput>
+ * @brief Methods dedicated to communicate with user.
+ * @file ScreenOutput.hpp
+ * @author Andres Balaguera-Antolínez
+*/
+
+
 #ifndef _SCREEN_OUTPUT_
 #define _SCREEN_OUTPUT_
 ////////////////////////////////////////////////////////////////////////////

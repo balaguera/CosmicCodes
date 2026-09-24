@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
   string par_file = argv[2];
   Params param (par_file);
   CosmoLib Clib(param);
-
+/*
   if (getenv("RUNNING_IN_XTERM") == nullptr) {
 
         std::string cmd = "RUNNING_IN_XTERM=1 xterm -hold -e ";
@@ -45,7 +45,8 @@ int main(int argc, char *argv[]){
         system(cmd.c_str());
         return 0;
     }
- 
+ */
+
     // Verify that section in json file is active: 
   if(false==param.input_sections.CosmologicalLibrary)
      {

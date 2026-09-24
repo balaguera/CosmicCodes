@@ -1,3 +1,14 @@
+//////////////////////////////////////////////////////////
+/** 
+ *  @class <CorrelationFunctionTH>
+*   @ingroup classes
+ *  @brief This class defines methods used in the prediction of correlation function based on a power spectrum (Hankel transform).
+ *  @file  CorrelationFunctionTH.h
+ *  @author Andres Balaguera-Antolínez
+ */
+//////////////////////////////////////////////////////////
+
+
 
 #ifndef __CorrelationFunctionTH__
 #define __CorrelationFunctionTH__

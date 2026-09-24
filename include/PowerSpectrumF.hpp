@@ -1,6 +1,8 @@
 //////////////////////////////////////////////////////////
 /**
  * @class <PowerSpectrumF>
+ * @brief This clas contains methods aimed to perform measurements of Power spectrum frim an input catalogue and individual halo bias. 
+ * @file PowerSpectrumF.hpp
  * @note Header file for the class PowerSpectrum.
  * @section spec Spectral Analysis
  * The spectral analysis of cosmological probes aims at extracting most of the cosmological information by decomposing 

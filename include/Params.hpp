@@ -1,7 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /** @class<Params>
+ * @ingroup classes
+ *  @brief This class aims at managing the input parameters and make them available to other classes and methods.
  *  @file Params.h
- *  @brief Headers for class Params
  *  @author Andrés Balaguera-Antolínez,
  *  @date 2007-2024
  */
@@ -33,21 +34,34 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-
+/** 
+*@brief Auxiliary function for printing parameter information.
+*/
 void print_field(const std::string& label, const std::string& value);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/** 
+*@struct<s_properties_params>
+*@ingroup structures
+*@brief This structure allocates information on loaded sections from the json input parameter file, used in \ref Params.
+*/
 struct s_properties_params{
+/** *@brief Parmeter name */
   std::string par_name;
+/** *@brief Parmeter name inside the code*/
   std::string par_name_in_code;
+/** *@brief Descripotion */
   std::string description;
+  /** *@brief Sections loading this parameter */
   std::string loading_sections;
+/** *@brief Other options */
   std::string options;  
   real_prec default_f;
   std::string default_s;
   variant<ULONG, int, float, double, string> default_value;
   template <typename T>void set_par_default(const T& np){default_value=np;}
+/** *@brief Display of parameters */
 void show()
 {
     std::cout <<endl;
@@ -61,6 +75,11 @@ void show()
  
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/** 
+*@struct<s_sections>
+*@ingroup structures
+*@brief This structure allocates bools for each json section to indicate whether it is loaded or not. See \ref parameters_docu. 
+*/
 
 struct s_sections{
   bool Simulation;  
@@ -7313,7 +7332,7 @@ public:
    */
   bool _Get_peak_height_at_halo(){return this->Get_peak_height_at_halo;}
   //////////////////////////////////////////////////////////
-  /**
+  /** 
    *  @brief
    */
   real_prec _Scale_mach_number(){return this->Scale_mach_number;}

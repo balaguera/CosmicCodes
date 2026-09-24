@@ -1,11 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////
 /**
-* @class
-* @file DensityProfiles.h
-* @brief Header file for the class DensityProfiles::
-* @title Functions related to the generation of density profiles for dark matter haloes
-* @details Bias Assignment method for mock catalogs
-* @author Andres Balaguera-Antolínez
+ *  @class <DensityProfiles>
+ *  @ingroup classes
+ *  @brief This class contains methods related to the generation of density profiles for dark matter haloes
+ *  @file DensityProfiles.h
+ *  @author Andres Balaguera-Antolínez
 */
 ////////////////////////////////////////////////////////////////////////////
 
@@ -15,7 +14,6 @@
 # include "PowerSpectrumTH.hpp"
 # include "CosmologicalFunctions.hpp"
 # include "Statistics.hpp"
-
 
 using namespace std;
 

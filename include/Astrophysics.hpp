@@ -1,7 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////
 /**
  * @class<Astrophysics>
- * @brief Header file for the class Astrophysics
+ * @ingroup classes
+ * @brief This class is in charge of computing astrophyisical quantities such as scaling relations and galaxy properties.
  * @author ABA
  */
 ////////////////////////////////////////////////////////////////////////////
@@ -13,7 +14,6 @@
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 /**
- *@brief
  * @struct<s_astrophysical_parameters>
  * @brief The s_astrophysical_parameters struct
  * @details Structure containing parameters of gas-mass scaling relation in clusters

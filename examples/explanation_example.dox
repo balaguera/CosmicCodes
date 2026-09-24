@@ -5,17 +5,17 @@
  * Let us describe the example code tailored to develop a cosmic web analysis (see \ref cwlib)
 
 
- * For an implementation of the library, the \c .cpp code in \examples demand the header
+ * For an implementation of this library, the \c .cpp code in \examples demand the headers
  * \code
- *    # include "CosmiCalcLIB.hpp"
- *    using namespace std;
+ *  # include "CosmiCalcLIB.hpp"
+ *  using namespace std;
  * \endcode
 
- * Once in the main function, the first instances to create are those dealing with file managment (read and write, see \ref FileOutput), 
+ * Once in the \c main function, the first instances to be created are those for file managment (read and write, see \ref FileOutput), 
  * \code
  *  FileOutput File;
  * \endcode
- * and that in charge of communicating with the user (see \ref ScreenOutput):
+ * and that communicating with the user (see \ref ScreenOutput):
  * \code
  *  ScreenOutput So;
  * \endcode
@@ -23,30 +23,29 @@
 * \code
  *  string  par_file = argv[2];
  * \endcode
-
- and define an instance of the class Params:
+ * and define an instance of the class Params:
  * \code
  *  Params params(par_file);
  * \endcode
 
- * Now, define a container to allocate the dark matter density field; the size of this array (\c NGRID )and the path to the file are given in the parameter file (sectin \ref DarkMatterField) and read as methods from that same class:
+ * Define a container to allocate the input dark matter density field. The size of this array (\c NGRID) and the path to the file are given in the parameter file (section \ref DarkMatterField) and retrieved as methods from that same class:
  * \code
  * vector<real_prec> dm_field(params._NGRID(), 0); //Container for dm
  *\endcode
- * Then, read the binary file containing the dark matter field:
+ * Then read the binary file containing the dark matter field:
  * \code
  * File.read_array(params._Input_Directory_X() + params._Name_Catalog_X(), dm_field); 
  *\endcode
- * We now focus on the dar matter tracer catalog. To that aim, we define an instance of the class Catalogue, passing the objject of type Params and specifying the type of object under analysis. 
+ * We now focus on the dar matter tracer catalog. Define an instance of the class @ref Catalogue, passing the object of type \c Params and specifying the type of object under analysis. 
  * This object contains all the information of the tracer catalogue: 
  * \code
  * Catalogue cat(params, "TRACER");
  *\endcode
- * Then, we read the input catalogue:
+ * Read the input catalogue, passing the path to the input file as an argument of the following method:
  * \code
  * cat.read_catalog_new(params._Input_dir_cat() + params._file_catalogue())
  *\endcode
- * In order to analyze the catalog,. we define an instance of the class Htool (see \ref htools)
+ * To analyze the catalog, we define an instance of the class \ref htools, passing the params and the cataloghe as inizialization:
  * \code
  *  HaloTools htools(params, cat)
  *\endcode

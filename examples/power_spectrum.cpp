@@ -29,7 +29,7 @@ int main(int argc, char *argv[]){
 
   string par_file=argv[2];
   Params params(par_file);
-
+/*
   if (getenv("RUNNING_IN_XTERM") == nullptr) {
       std::string cmd = "RUNNING_IN_XTERM=1 xterm -bg black -fg white -hold -e ";
     // Add program name
@@ -42,7 +42,8 @@ int main(int argc, char *argv[]){
       system(cmd.c_str());
       return 0;
       }
-  // Verify that section in json file is active: 
+*/
+      // Verify that section in json file is active: 
   if(false==params.input_sections.FourierAnalysis)
     {
       throw std::runtime_error("Section Fourier Analysis is not enabled in parameter file"); 
@@ -102,7 +103,7 @@ int main(int argc, char *argv[]){
             j["kmin"] = cPSF._kvector_data(0);
             j["kmax"] = 2.0;
             j["sample"] = params._Name_survey();
-            j["redshift"] = params._clustering_space() == "galaxy_redshift_survey" ? params._mean_redshift() : params._redshift();
+            j["redshift"] = params._clustering_space() == "GRS" ? params._mean_redshift() : params._redshift();
             j["statistics"] = params._statistics();
             j["output_file"] = cPSF._file_power();
             j["clustering_space"] = params._clustering_space();

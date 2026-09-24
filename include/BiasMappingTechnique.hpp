@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////
 /**
  * @class<BiasMT>
- * @brief Header file for the class BiasMT::
+ * @ingroup classes
+ * @brief This class is in charge of calculations for the Bias Mapping technique for the construction of mock catalogs.
  * @file BiasMappingTechnique.h
- * @title Bias Mapping Technique for mock catalogs
  * @author Andres Balaguera-Antolínez.
  * @details Based on the BiasAssignment Method developed by A Balaguera and F.S.Kitaura
  * @version   1.0

@@ -1,9 +1,9 @@
 // ************************************************************************************************************************************************************************** //
 // ************************************************************************************************************************************************************************** //
 /** @file CosmoLib.cpp
- *
- * @brief This file contains headers of the class CosmoLib
- * @details The class Cosmolib generates estaimates of a number of cosmlogical observables
+ * @class <CosmoLib>
+ * @ingroup classes
+ * @brief This class shows methods  to perform preductions of halo observables, abundance and power spectrum. 
  * @author Andres Balaguera Antolinez
  * @date 2007-2024
  */

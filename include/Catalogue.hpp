@@ -6,10 +6,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * @file Catalogue.h
+ * @ingroup classes
  * @brief Defines the Catalogue class.
  * @class Catalogue
- * @brief Handles the reading, storage, and analysis of input catalogues.
- * The Catalogue class provides methods to read input catalogues and allocate
+ * @brief The Catalogue class provides methods to read input catalogues and allocate
  * their properties into internal data structures for subsequent processing
  * and analysis.The methods in this class are desinged to allocate an input catalogue and its properties.
  * @author Andres Balaguera-Antolínez

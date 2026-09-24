@@ -4636,7 +4636,7 @@ void PowerSpectrumF::get_window_matrix_multipole(Catalogue &random)
        for(int ell=0; ell<=lmax;++ell) // loop over l
        {
   
-          vector<real_prec>power_cross(Kmax_bin,0); // debe estar en el loop sobre l
+          vector<real_prec>power_cross(Kmax_bin,0); // debe estar dentro del loop sobre l
           real_prec hll=0;
           for(int mm=-ell; mm<=ell; ++mm) // loop over m
            {
@@ -5977,7 +5977,8 @@ void PowerSpectrumF::object_by_object_qbias(Catalogue & tracer_cat, vector<real_
 
          meanWN/=static_cast<real_prec>(IC_field_grf.size());
 
-         this->So.message_screen("Mean WN =",meanWN);
+         if(jthread ==0)
+           this->So.message_screen("Mean WN =",meanWN);
 
          //measure variance of the field sigma²
          real_prec sigmaWN=0;
@@ -5986,7 +5987,8 @@ void PowerSpectrumF::object_by_object_qbias(Catalogue & tracer_cat, vector<real_
 
          sigmaWN/=static_cast<real_prec>(IC_field_grf.size()-1);
 
-         this->So.message_screen("Sigma² WN =",sigmaWN);
+         if(jthread ==0)
+           this->So.message_screen("Sigma² WN =",sigmaWN);
 
              // Nrmalize field to get sigma² = 1
          real_prec factor=static_cast<double>(sqrt(sigmaWN));
@@ -6013,14 +6015,16 @@ void PowerSpectrumF::object_by_object_qbias(Catalogue & tracer_cat, vector<real_
            sigmaWN+=(IC_field_grf[i]-meanWN)*(IC_field_grf[i]-meanWN);
          sigmaWN/=static_cast<real_prec>(IC_field_grf.size()-1);
            }
-         this->So.message_screen("New Sigma² WN =",sigmaWN);
+        if(jthread ==0)
+          this->So.message_screen("New Sigma² WN =",sigmaWN);
 
 
          do_fftw_r2c(Nft ,IC_field_grf,IC_FOURIER_GRF);
 
          real_prec factorN=static_cast<real_prec>(Ngrid);
 #endif
-         So.message_screen("Going for GRF");
+        if(jthread ==0)
+        So.message_screen("Going for GRF");
          // Loop over half of the Fourier box
              for(int i=0; i < Nft;++i)
                {
@@ -6087,8 +6091,7 @@ void PowerSpectrumF::object_by_object_qbias(Catalogue & tracer_cat, vector<real_
          }
         }
     }
- 
-     else if(false==this->params._Generate_FA())
+    else if(false==this->params._Generate_FA())
      {
        for(ULONG i=0;i<IC_TH.size();++i)
          if(nmodes[i]>0)
@@ -6108,15 +6111,15 @@ void PowerSpectrumF::object_by_object_qbias(Catalogue & tracer_cat, vector<real_
 #else
        fftwf_free(IC_FOURIER_GRF);
 #endif
-       if(true==this->params._Generate_FA())
-     {
+      if(true==this->params._Generate_FA())
+      {
        IC_field_fa.resize(Ngrid,0);
        do_fftw_c2r(Nft ,IC_FOURIER_FA,IC_field_fa);
        IC_field_mixed.resize(Ngrid,0);
        do_fftw_c2r(Nft ,IC_FOURIER_MIXED,IC_field_mixed);
        fftw_free(IC_FOURIER_MIXED);
        fftw_free(IC_FOURIER_FA);
-     }
+      }
        So.DONE();
        vector<real_prec>IC_field_grf_lr(Ngrid_LR,0);
        vector<real_prec>IC_field_grf_paired_lr(Ngrid_LR,0);

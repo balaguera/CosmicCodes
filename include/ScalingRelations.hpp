@@ -1,3 +1,10 @@
+/**
+ *  @class <ScalingRelations>
+ *  @ingroup classes
+ *  @brief This class contains methods related to the link between tracer properties
+ *  @file DensityProfiles.h
+ *  @author Andres Balaguera-Antolínez
+*/
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 #ifndef __SCALINGRELATIONS__

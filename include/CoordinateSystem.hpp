@@ -1,7 +1,8 @@
 //////////////////////////////////////////////////////////
 /**
- * @brief Header file
-*  @file CoordinateSystem.h
+
+ * @file CoordinateSystem.h
+ * @brief This class contains methods aimed at performing coordinate transforms.
  * @details  Functions used to transform coordiante system in the catalogues
  * @author Andres Balaguera-Antolínez (ABA)
  * @version 1.0

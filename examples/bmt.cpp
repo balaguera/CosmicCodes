@@ -75,16 +75,16 @@ void ind_bias(Params &params)
        json ja;
        ja["output_file"] = fileb.string();
        ja["show_bias_field"] = true;
-          ja["Lbox"] = params._Lbox();
-          ja["Nft"] = params._Nft();
+       ja["Lbox"] = params._Lbox();
+      ja["Nft"] = params._Nft();
           ja["sample"] = params._Name_survey();
           ja["name"] = "Halo effective bias";
           ja["Initial_slice"] = static_cast<int>(floor(params._Nft()/2.));
           ja["Nslices"] = static_cast<int>(floor(params._Nft()/10));
           jfilef<<ja.dump(4);
           jfilef.close();
-          system("python3 ../python/cosmolib_plots.py plot_file_bias_field.json &");
-        }
+          system("python3 ../Python/cosmolib_plots.py plot_file_bias_field.json &");
+      }
       else
         {
 
@@ -110,7 +110,7 @@ void ind_bias(Params &params)
 
       if(params._i_mass_g()<0)
         {
-          So.message_warning("Input catalog does not contain mass information");
+          So.message_warning("Input catalogue does not contain tracer mass.");
           exit(1);
         }
  
@@ -226,7 +226,7 @@ int main(int argc, char *argv[]){
 
 
   ScreenOutput So(start_all, "logfile_bmt.log");
-
+/*
   if (getenv("RUNNING_IN_XTERM") == nullptr) {
 
         std::string cmd = "RUNNING_IN_XTERM=1 xterm -hold -e ";
@@ -243,6 +243,7 @@ int main(int argc, char *argv[]){
         system(cmd.c_str());
         return 0;
     }
+*/
 
   if(argc==1){
     So.usage(argv[0]);

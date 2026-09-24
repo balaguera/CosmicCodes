@@ -1,10 +1,9 @@
 //////////////////////////////////////////////////////////
 /**
- * @file PowerSpectrumTH.h
- * @brief This file contains methods of the class PowerSpectrum
- * @details CLASS TO COMPUTE LINEAR AND NON LINEAR MATTER POWER SPECTRUM BASED ON THE EISENSTEIN AND HU FITTING FORMULAE AND THE HALO-FIT FROM SMITH ET AL.
+ * @class <PowerSpectrumTH>
+ * @brief This class define methods to provide preductions of linear and non linear power spectrum based on the Eisenstain and Hu fitting formulae and halo fit.
+ * @file PowerSpectrumTH.hpp
  * @author Andres Balaguera Antolinez
- * @date 2007-2023
  */
 //////////////////////////////////////////////////////////
 #ifndef __POWER_SPECTRUMTH__

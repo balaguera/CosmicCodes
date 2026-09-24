@@ -1,7 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////
 /**
  * @class<HOD>
- * @brief Header file for the class HOD::
+ * @ingroup classes
+ * @brief This class contains methods related to calculations within the framework of HOD.
  * @file HOD.h
  * @title Functions related to HOD analysis
  * @author ABA
