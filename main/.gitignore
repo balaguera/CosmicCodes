@@ -2,3 +2,4 @@ INIT_PARS_SDSS/
 INIT_PARS_TNG/
 INIT_PARS_UNITSIM/
 *sh
+plot*json
