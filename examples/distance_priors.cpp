@@ -413,9 +413,9 @@ void run_mcmc(string par_file, int ch)
         // NOTE: Metropolis-Hasting Algorithm: get acceptance probability MH with the prior information
         int weight_param=1; 
         mcmc.MHalgorithm(curr_H, prop_H, current_number_of_accepted_models, weight_param);
-          //--------------------------------------------
-          // NOTE: Save accepted parameters (or models)
-        mcmc.write_accepted_models(j, current_number_of_accepted_models, weight_param, write_sc); 
+        //--------------------------------------------
+        // NOTE: Save accepted parameters (or models) DEPRECATED
+        //mcmc.write_accepted_models(j, current_number_of_accepted_models, weight_param, write_sc); 
           //--------------------------------------------
           // NOTE: Compute the acceptance rate
         if(nchains<2 || !write_sc)
@@ -432,7 +432,7 @@ void run_mcmc(string par_file, int ch)
            }          
         //--------------------------------------------
 
-        }while (current_number_of_accepted_models < params._number_of_accepted_models());
+        }while (current_number_of_accepted_models <= params._number_of_accepted_models());
         
 
         double total_acceptance_rate = 100.0*static_cast<double>(current_number_of_accepted_models)/static_cast<double>(j); 
@@ -476,9 +476,10 @@ int main(int argc, char *argv[]){
   Params params(par_file);
 
 
-  if(false==params.input_sections.MCMC)
+  if(!params.input_sections.MCMC)
     {
-     throw std::runtime_error("Section MCMC is not enabled in parameter file"); 
+     cout<<RED<<"Attention!"<<RESET<<endl;
+     throw std::runtime_error("Section MCMC is not enabled in parameter file."); 
      exit(0);
     }
 
@@ -499,10 +500,12 @@ int main(int argc, char *argv[]){
       {
         case 'r' :
           {
-            So.message_screen("MCMC for cosmological_distance_priors");
+            cout<<endl;  
+            So.message_screen("MCMC example for cosmological parameters based on distance priors");
+            cout<<endl;  
             So.message_screen("Number of parallel chains: ", n_chains);   
             So.message_screen("Number of fitting parameters: ", n_pars);   
-
+            So.message_screen("Running ...");   
 #pragma omp parallel num_threads(n_chains)
             {        
               int thread=omp_get_thread_num();

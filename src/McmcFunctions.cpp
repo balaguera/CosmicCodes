@@ -48,9 +48,7 @@ void McmcFunctions::set_mcmc_vectors(){
      gsl_rng_set (this->gBaseRand, get_seed(this->seed_index)+1);
      lpout.open(chain_file_name);
      this->parameters.resize(this->params._number_of_fit_parameters());
-     this->weight.resize(this->params._number_of_accepted_models());
-     this->chiss.resize(this->params._number_of_accepted_models());
-     this->weight.resize(this->params._number_of_fit_parameters());
+
      this->acc_parameters.resize(this->params._number_of_fit_parameters());
 
       // NOTE: Set the initial parameters according to the action requested in par file.
@@ -89,10 +87,6 @@ void McmcFunctions::set_mcmc_vectors(){
   this->tail_probabilities.push_back(0.1587);
   this->tail_probabilities.push_back(0.0228);
   this->tail_probabilities.push_back(0.0013);
-
-
-  weight.resize(this->params._number_of_accepted_models(),0);
-  chiss.resize(this->params._number_of_accepted_models(),0);
 
 
 #ifdef _USE_HMS_
@@ -460,11 +454,11 @@ void McmcFunctions::gelman_rubbin_diag( vector<vector<vector<double>>> &acca_par
   for(size_t i=0;i<R.size();++i)
     {
       if(R[i]>1.03)
-        cout<<YELLOW<<"R ["<<this->params.name_parameters[i]<<"]"<<RED<<": "<<R[i]<<": Chains not converged for this parameter"<<RESET<<endl;
+        std::cout<<YELLOW<<"R ["<<this->params.name_parameters[i]<<"]"<<RED<<": "<<R[i]<<": Chains not converged for this parameter"<<RESET<<endl;
       else
-        cout<<YELLOW<<"R ["<<this->params.name_parameters[i]<<"]"<<CYAN<<": "<<R[i]<<": Chains converged for this parameter"<<RESET<<endl;
+        std::cout<<YELLOW<<"R ["<<this->params.name_parameters[i]<<"]"<<CYAN<<": "<<R[i]<<": Chains converged for this parameter"<<RESET<<endl;
     }  
-    cout<<endl;
+    std::cout<<endl;
     return ;
    
 }
@@ -616,7 +610,8 @@ void McmcFunctions::likelihood_full(int lmin, int lmax, vector<matrices>&VM,real
 
 // Metropolis-Hasting algorithm:
 void McmcFunctions::MHalgorithm(real_prec &curr_loglike, real_prec &prop_loglike, size_t &acc, int &weight_here){
-double MH=0;
+
+  double MH=0;
   /*
   for(size_t kl=0;kl<this->parameters.size();kl++)
   { 
@@ -650,38 +645,64 @@ double MH=0;
 
   double posterior_ratio= std::exp(-0.5*prop_loglike+0.5*curr_loglike);
   int ip=0;
-   while((this->parameters[ip]>=this->params.prior_parameters_min_values[ip]) && (this->parameters[ip]<= this->params.prior_parameters_max_values[ip]) && (ip<this->parameters.size()))
-   {
-    ip++;
-   }
+  const size_t n = this->parameters.size();
+  while((ip < n) &&
+        (this->parameters[ip] > this->params.prior_parameters_min_values[ip]) &&
+        (this->parameters[ip] < this->params.prior_parameters_max_values[ip]))
+  {
+      ip++;
+  }
 
-   if(ip<this->parameters.size())
+  if(ip<this->parameters.size())
      MH=0;
    else
     MH=min(1.0,static_cast<double>(posterior_ratio));
 
+
+  lpout<< std::fixed << std::setprecision(10);
+
   double xx=gsl_rng_uniform (this->gBaseRand);
 
-  if(xx<MH)
+  if(xx<MH)      // Accept this step
   {
-     // Accept this step
-      acc++;
-      curr_loglike=prop_loglike;
-      this->chiss[acc]=prop_loglike;
-      this->weight[acc]=num_1;
+      if(acc>1) // print previous step
+        {
+          this->lpout<<this->chiss[acc-1]<<"\t"<<this->weight[acc-1]<<"\t";
+          for(size_t jk=0;jk<this->parameters.size();jk++)
+          {
+            this->lpout<<this->acc_parameters[jk][acc-1];
+            if (jk + 1 < this->parameters.size())
+              this->lpout << "\t"; 
+          }
+          this->lpout << "\n";
+      }
+
+      // Move to next model
+
       weight_here=num_1;
+      acc++;     // add one to the counter of accepted models
+      curr_loglike=prop_loglike;
+      this->chiss.push_back(prop_loglike); 
+      this->weight.push_back(1);
       for(size_t ip=0;ip<this->parameters.size();++ip)
         this->acc_parameters[ip].push_back(this->parameters[ip]);
     }
-  else   // Do not accept this step, return to then last accepted step
-    {
-      for(int ip=0;ip<this->parameters.size();++ip)
-       this->parameters[ip]=this->acc_parameters[ip].back();
-
+  else   // Do not accept this step, return to then last accepted step                                                                                              
+   {
      weight_here=0;
-     this->weight[acc]++;
+     for(int ip=0;ip<this->parameters.size();++ip)
+      {
+        if (!this->acc_parameters[ip].empty())
+            this->parameters[ip] = this->acc_parameters[ip].back();
+        else {
+            std::cerr << "Empty acc_parameters at ip=" << ip << std::endl;
+            abort();
+         }
+      }
+    this->weight.back()++; //add 1 as many times as this model has been visited.
   }
-return;
+
+  return;
 }
 
 
@@ -690,17 +711,20 @@ return;
 void McmcFunctions::write_accepted_models(int j, size_t acc, int weight_here, bool screen)
   {
 
-  size_t macc=acc-this->weight[acc];
+    // This as been mergerd with MH in order to write properly the weights.
+
   size_t wacc=acc-1;
+  size_t macc=acc-this->weight[wacc];// suspiscious
+
   lpout<< std::fixed << std::setprecision(10);
 // NOTE: Write in output file:
 
-  if(acc>1 && weight_here!=0)
+  if(acc>1 && weight_here>0)
     {
       this->lpout<<this->chiss[wacc]<<"\t"<<this->weight[wacc]<<"\t";
       for(size_t jk=0;jk<this->parameters.size();jk++)
       {
-         this->lpout<<this->acc_parameters[jk][macc];
+         this->lpout<<this->acc_parameters[jk][wacc];
          if (jk + 1 < this->parameters.size())
            this->lpout << "\t"; 
       }
@@ -708,19 +732,18 @@ void McmcFunctions::write_accepted_models(int j, size_t acc, int weight_here, bo
     // Write in the screen:  *
       if(screen)
        {
-          cout<<endl;
+          std::cout<<endl;
           So.message_screen("Step accepted. Info:");
           So.message_screen("Step = ",j);
-          So.message_screen("# of accepted = ",wacc);
-          So.message_screen("Acceptance rate = ",100.0*wacc/static_cast<double>(j)," %");
-          So.message_screen("log_likelihood = ",this->chiss[macc]);
-          So.message_screen("Weight at this point = ",weight[wacc]);
+          So.message_screen("Number of accepted models = ",acc);
+          So.message_screen("Acceptance rate = ",100.0*acc/static_cast<double>(j)," %");
+          So.message_screen("log_likelihood = ",this->chiss[wacc]);
+          So.message_screen("Weight at this model = ",this->weight[wacc]);
           for(size_t jk=0;jk<this->parameters.size();jk++)
-            So.message_screen(this->params.name_parameters[jk]+ "= ",this->parameters[jk]);
-          cout<<endl;
+            So.message_screen(this->params.name_parameters[jk]+ "= ",this->acc_parameters[jk][wacc]);
+          std::cout<<endl;
       }
    }
-
 }
 // ************************************************************************************************
 // ************************************************************************************************
@@ -2018,7 +2041,7 @@ void McmcFunctions::posterior2d_combined_experiments(string fname_mean, string f
 // ************************************************************************* *
 void McmcFunctions::analyze_chains(int ip_parameter){
     double pdfmax=0;
- #ifdef _RUN_PARALLEL_CHAINS_
+#ifdef _RUN_PARALLEL_CHAINS_
   size_t slab=0;
 #else
   size_t slab=params._number_of_burnin_phase_models()+params._number_of_post_burnin_phase_models();
@@ -2273,8 +2296,6 @@ void McmcFunctions::get_covariance_parameters()
   if(this->params._update_covariance())
     slab+=this->params._number_of_post_burnin_phase_models(); 
 
-
-  
   vector<vector< vector<double>>> acc_par_chains;
   
   if(nchains>1)
@@ -2289,8 +2310,6 @@ void McmcFunctions::get_covariance_parameters()
   {
     vector<float>prop;
     string file = this->params._Output_directory()+this->params._name_experiment()+"_chain"+to_string(ch)+".txt";
-
-   // message_screen("Reading chain in ",file);
 
     size_t nacc = File.read_file(file, prop, 1);
     size_t Ncols=(static_cast<size_t>(prop.size()/nacc));
@@ -2309,18 +2328,17 @@ void McmcFunctions::get_covariance_parameters()
             this->acc_parameters[ip].push_back(val);
           }
      }
-  if(nchains>1)
-  {
-    for(size_t ip=0; ip< this->params._number_of_fit_parameters();++ip)
-      {
-        for(size_t i = slab ; i < nacc ;++i)
-          {
-            double val = prop[2+ip+i*Ncols];
-            acc_par_chains[ip][ch].push_back(val);    // Used to get Gelman Rubbin diagnostics
-          }
-     }
-   }
-
+    if(nchains>1)
+    {
+      for(size_t ip=0; ip< this->params._number_of_fit_parameters();++ip)
+        {
+          for(size_t i = slab ; i < nacc ;++i)
+            {
+              double val = prop[2+ip+i*Ncols];
+              acc_par_chains[ip][ch].push_back(val);    // Used to get Gelman Rubbin diagnostics
+            }
+      }
+    }
   }
 
   if(nchains>1)
@@ -2330,6 +2348,7 @@ void McmcFunctions::get_covariance_parameters()
   }
   
   string ffile = this->params._Output_directory()+this->params._name_experiment()+"_merged_chains.txt";
+
   So.message_screen("Writting merged chains in file", ffile);
   ofstream lp; lp.open(ffile.c_str());  
   lp << std::fixed << std::setprecision(10);

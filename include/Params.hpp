@@ -4081,7 +4081,7 @@ public:
   {
     this->init_pars();
     this->read_pars_json(par_file);
-    this->read_pars(par_file);//this has enabled the reading of input file, and leave only post-proc opoerations
+    this->read_pars(par_file);//this has disabled the reading of input file, and can only do post-proc opoerations
     this->derived_pars();
   }
   //////////////////////////////////////////////////////////

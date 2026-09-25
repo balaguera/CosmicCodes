@@ -5349,6 +5349,7 @@ void Params::read_pars_json(std::string file){
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define _USE_JSON_
+
 void Params::read_pars(string file)
 {
 
@@ -5577,13 +5578,17 @@ void Params::read_pars(string file)
     exit(1);
   }
 #endif
+
+/*
 #ifdef _USE_TWO_REFS_MOCKS_
   if(Number_of_references<Number_of_new_mocks)
   {
-    cout<<RED<<"Warning: NUmber of references smaller than number of mocks to build simulstaneously"<<RESET<<std::endl;
+    cout<<RED<<"Warning: Number of references smaller than number of mocks to build simulstaneously"<<RESET<<std::endl;
   }
 #endif
-  if(this->mass_assignment_scheme=="NGP") {
+*/
+
+ if(this->mass_assignment_scheme=="NGP") {
     this->mass_assignment = MassAssignment ::NGP;
   }
   else if(this->mass_assignment_scheme=="CIC") {
