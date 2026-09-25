@@ -12,3 +12,4 @@ main/generate_param_files_voids_80.sh
 main/*exe
 main/nulldiluted_cat_bias.txt
 *.o
+examples/*.o
