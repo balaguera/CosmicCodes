@@ -253,15 +253,6 @@ int main(int argc, char *argv[]){
   string par_file = argv[2];
   Params params(par_file);
  
-  int option_index = 0;
-  int c;
-    static struct option long_options[] = {
-        {"bmt", required_argument, 0, 'b'},
-        {"ibas",  required_argument, 0, 'i'},
-        {"pbias",  required_argument, 0, 's'},
-        {"sbias",  required_argument, 0, 'x'},
-        {0, 0, 0, 0}
-    };
   
 
   if(!params.input_sections.DarkMatterCatalogue)
@@ -282,7 +273,18 @@ int main(int argc, char *argv[]){
      exit(0);
   }
 
-  while ((c = getopt_long(argc, argv, "b:i:",long_options, &option_index)) != -1) 
+  int option_index = 0;
+  int c;
+  static struct option long_options[] = {
+        {"bmt",   required_argument, 0, 'b'},
+        {"ibas",  required_argument, 0, 'i'},
+        {"pbias", required_argument, 0, 'p'},
+        {"sbias", required_argument, 0, 's'},
+        {0, 0, 0, 0}
+    };
+
+
+  while ((c = getopt_long(argc, argv, "b:i:p:s:",long_options, &option_index)) != -1) 
    {
       switch (c)
        {
@@ -300,14 +302,12 @@ int main(int argc, char *argv[]){
               ind_bias(params);
               break;
           }
-
-        case 's': // Compute bias as a funciton of intrinsic properties
+        case 'p': // Compute bias as a funciton of intrinsic properties
           {
             bias_prop(params);
             break;
           }
-
-        case 'x':  // SECONDARY BIAS ANALYSIS
+        case 's':  // SECONDARY BIAS ANALYSIS
           {
             So.welcome_message_c();
             params.set_mass_assignment_scheme("CIC");

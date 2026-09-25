@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
   string par_file=argv[2];
   Params params(par_file);
 
+ /* 
   if (getenv("RUNNING_IN_XTERM") == nullptr) {
       std::string cmd = "RUNNING_IN_XTERM=1 xterm -bg black -fg white -hold -e ";
     // Add program name
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
       return 0;
       }
 
+      */
   if(!params.input_sections.HaloAnalysis)
     {
       throw std::runtime_error("Section Halo Analysis is not enabled in parameter file"); 
@@ -53,19 +55,19 @@ int main(int argc, char *argv[])
 
   int option_index = 0;
   int c;
-    static struct option long_options[] = {
-        {"a", required_argument, 0, 'c'},
+  static struct option long_options[] = {
+        {"an", required_argument, 0, 'a'},
         {"hod", required_argument, 0, 'h'},
         {"mock",  required_argument, 0, 'm'},
         {0, 0, 0, 0}
     };
 
-  while ((c = getopt_long(argc, argv, "c:h:b:u:s:m:",long_options, &option_index)) != -1)
+  while ((c = getopt_long(argc, argv, "a:h:m:",long_options, &option_index)) != -1)
   {
   
     switch (c) {
   
-    case 'c': // to read input tracer catalg and analyze it.
+    case 'a': // to read input tracer catalg and analyze it.
     {
 
       Catalogue cat(params, "TRACER");

@@ -1330,8 +1330,6 @@ public:
 
 #endif
 
-
-
     this->So.enter(__PRETTY_FUNCTION__);
 #ifdef _FULL_VERBOSE_
     So.message_screen("Loading parameters for BiasMT. THIS HAS TO BE UPDATED> USE THEM DIRECTLY FROM THE PARAMS CLASS");
@@ -1341,7 +1339,7 @@ public:
 
 
     // --------------------------------------------------------------------------------------------
-    if(true==this->BiasMT_mode)
+    if(this->BiasMT_mode)
       {
 #ifdef _GET_BiasMT_REALIZATIONS_
 	ifstream nxo;
@@ -1372,8 +1370,7 @@ public:
 #endif
       }
 
-    if(true==this->BiasMT_mode)
-
+    if(this->BiasMT_mode)
       this->dm_already_done=false;
     // Feed the structure for cosmological parameters
     // This is also done in LPT, so verify that these lines are also in its init par member

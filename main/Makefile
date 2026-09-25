@@ -23,7 +23,7 @@ dir_CFITSIO_LIB=$(AUX_DIR)cfitsio/
 # Libraries
 PYTHON_INC := $(shell python3-config --embed --includes)
 PYTHON_LIB := $(shell python3-config --embed  --ldflags)
-LIBS_GSL     = -lgsl -lgslcblas -lopenblas -lutil -lboost_iostreams -lboost_system -lboost_filesystem -lm $(PYTHON_LIB)
+LIBS_GSL     = -lgsl -lgslcblas -lopenblas -lutil -lboost_iostreams -lboost_filesystem -lm $(PYTHON_LIB)
 ##################################################################################
 # fftw libraries
 LIBS_FFTW    = -L/usr/local/lib/ -lfftw3 -lfftw3f -lfftw3f_omp -lfftw3_omp
@@ -183,13 +183,14 @@ help:
 	@echo "$(GREEN)CosmicCodes compiling options"
 	@echo ""
 	@echo "$(BLUE)make params: $(GREEN)creates executable for the params code "
-	@echo "	  $(GREEN)execute with $(BLUE)./params.exe -n name_of_parameter $(GREEN)to get information on a given parameter of the json parameter file"		
-	@echo "	  $(GREEN)execute with $(BLUE)./params.exe -s parameter_file.json $(GREEN)to get information of the set of parameters present in the json parameter file"		
+	@echo "	  $(GREEN)execute with $(BLUE)./params.exe -par name_of_parameter $(GREEN)to get information on a given parameter of the json parameter file"		
+	@echo "	  $(GREEN)execute with $(BLUE)./params.exe -show parameter_file.json $(GREEN)to get information of the set of parameters present in the json parameter file"		
 	@echo ""
 	@echo "$(BLUE)make cosmolib: $(GREEN)creates executable for the Cosmolib code"
+	@echo "	  $(GREEN)execute with $(BLUE)./cosmolib.exe --cosmology parameter_file.json $(GREEN)to get redshift dependent quantities"
 	@echo "	  $(GREEN)execute with $(BLUE)./cosmolib.exe --hmodel parameter_file.json $(GREEN)to get halo model outputs (with plots)"
 	@echo ""
-	@echo "$(BLUE)make bmt: $(GREEN)creates executable for the computation of bias related propertioes of dark matter tracers"
+	@echo "$(BLUE)make bmt: $(GREEN)creates executable for the computation of bias related properties of dark matter tracers"
 	@echo "	  $(GREEN)execute with $(BLUE)./bmt.exe -bmt parameter_file.json $(GREEN) to run the Bias Mapping Technique."
 	@echo "	  $(GREEN)execute with $(BLUE)./bmt.exe -ibias parameter_file.json $(GREEN) to assign individual bias to input tracers."
 	@echo "	  $(GREEN)execute with $(BLUE)./bmt.exe -pbias parameter_file.json $(GREEN) to produce plots of bias vs halo properties."
@@ -210,7 +211,9 @@ help:
 	@echo "	  $(RED)Note: This is still under merging/construction stages"		
 	@echo ""
 	@echo "$(BLUE)make htools: $(GREEN)creates executable for the analysis of halo catalogs "
-	@echo "	  $(GREEN)execute with $(BLUE)./htools.exe parameter_file.json" 
+	@echo "	  $(GREEN)execute with $(BLUE)./htools.exe -analyze parameter_file.json" to analyze input tracer catalogue 
+	@echo "	  $(GREEN)execute with $(BLUE)./htools.exe -hod parameter_file.json" to generate a galaxy catalogue from a halo sample using HOD.
+	@echo "	  $(GREEN)execute with $(BLUE)./htools.exe -mock parameter_file.json" to generate a mock catalogue from an halo snapshot. 
 	@echo ""
 	@echo "$(BLUE)make gtools: $(GREEN)creates executable for the analysis of galaxy samples "
 	@echo "	  $(GREEN)execute with $(BLUE)./gtools.exe parameter_file.json"

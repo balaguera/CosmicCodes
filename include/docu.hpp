@@ -18,6 +18,7 @@
  *   - @ref ssgtool "Galaxy Tools"
  *   - @ref cwlib "Cosmic-Web Analysis"
  *   - @ref clib "Cosmological Functions"
+ *   - @ref mcmc "MCMC analysis"
  *
  * - @ref sfaqs "Some key concepts"
  *   - @ref pk_fkp "Power Spectrum"
@@ -177,8 +178,7 @@
   *   \code{.sh}
  *   ./hgaps.exe -cross parameter_file.json
  *   \endcode
- *
- * @note The example to build log normal catalogues is under construction.
+ * @note The module in charge of the production of log-normal catalogues is under construction.
  * 
  *
  * @subsection sshtool Halo Tools
@@ -193,28 +193,25 @@
  *
  * - **Analyze an input catalog**
  *   \code{.sh}
- *   ./htools.exe -c parameter_file
+ *   $ ./htools.exe -analyze parameter_file
  *   \endcode
- *
- * - **Assign individual bias to an input catalog**
- *   \code{.sh}
- *   ./htools.exe -b parameter_file
- *   \endcode
- *
+*
  * - **Measure halo bias as a function of selected properties**
  *   \code{.sh}
- *   ./htools.exe -s parameter_file
+ *   $ ./htools.exe -s parameter_file
  *   \endcode
  *
  * - **Build galaxy catalogues from an input halo catalog using an HOD model**
  *   \code{.sh}
- *   ./htools.exe -h parameter_file
+ *   $ ./htools.exe -hod parameter_file
  *   \endcode
  *
  * - **Build a mock catalogue from a simulation/snapshot using an input dN/dz**
  *   \code{.sh}
- *   ./htools.exe -m parameter_file
+ *   $ ./htools.exe -mock parameter_file
  *   \endcode
+ * 
+ * @note This module is currently under development.
  *
  *
  * @subsection ssgtool Galaxy Tools
@@ -222,39 +219,39 @@
  * The <a href = "../../../examples/galtools.cpp">example code</a> can be compiled with
  *
  * \code{.sh}
- * make gtools
+ * $ make gtools
  * \endcode
  *
  * The program is executed as:
  *
  * \code{.sh}
- * ./gtools.exe parameter_file
+ * $ ./gtools.exe parameter_file
  * \endcode
  *
  * @note This module is currently under development.
  *
  *
  * @subsection cwlib Cosmic-Web Analysis
- * With this excample we aim at showing the approach to follow, using a halo population read from an N-body simulation, to perform cosmic-web analysis based on the todal field -or velocity shear- from the tracers or de dark matter particles in a N-body simulation.
+ * With this example we aim at showing the steps to follow, based on a halo population read from an N-body simulation, to perform cosmic-web analysis based on the todal field -or velocity shear- from the tracers or de dark matter particles in a N-body simulation.
  * The <a href = "../../../examples/cosmic_web.cpp">example code</a> can be compiled with
  *
  * \code{.sh}
- * make cosmicweb
+ * $ make cosmicweb
  * \endcode
  *
  * To perform a cosmic-web analysis:
  *
  * \code{.sh}
- * ./cosmicweb.exe -cwc parameter_file.json
+ * $ ./cosmicweb.exe -cwc parameter_file.json
  * \endcode
  *
  *
  * @subsection clib Cosmological Functions
  *
- * The <a href = "../../../examples/cosmolib.cpp">example code</a> can be compiled with
+ * This example computes predictions from FRW cosmological model and clustering in the framework of the halo model. The <a href = "../../../examples/cosmolib.cpp">example code</a> can be compiled with
  *
  * \code{.sh}
- * make cosmolib
+ * $ make cosmolib
  * \endcode
  *
  * Available options:
@@ -262,24 +259,32 @@
  * - **Obtain theoretical predictions for cosmological functions at fixed redshift**
  *
  *   \code{.sh}
- *   ./cosmolib.exe -c parameter_file
+ *  $ ./cosmolib.exe -cosmology parameter_file
  *   \endcode
  *
  * - **Obtain theoretical HOD predictions**
  *
  *   \code{.sh}
- *   ./cosmolib.exe -h parameter_file
+ *  $ ./cosmolib.exe -hmodel parameter_file
  *   \endcode
  *
  * - **Obtain theoretical predictions for redshift-dependent quantities**
  *
  *   \code{.sh}
- *   ./cosmolib.exe -z parameter_file
+ *  $ ./cosmolib.exe -z parameter_file
  *   \endcode
  *
- * @note HOD predictions are currently under development.
- *
 
+ * @subsection mcmc MCMC analysis
+ *
+ * This example showas the stepa to use a MCMC machinery, specifically using \c Distance \c Priors obtained form the analysis of CMB by WMAP and Planck. The <a href = "../../../examples/distance_proprs.cpp">example code</a> can be compiled with
+ *   \code{.sh}
+ *  $ ./distance_priors.exe -run parameter_file
+ *   \endcode
+ *
+ *  
+ *
+ *
  * @section skc Some Key Concepts
  * - @ref pk_fkp Power Spectrum 
  * - @ref ang_power Angular Power Spectrum

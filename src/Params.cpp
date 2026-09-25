@@ -5207,6 +5207,7 @@ void Params::read_pars_json(std::string file){
 
 
   pname="output_directory";
+  pname_c="Output_directory";
   this->Output_directory = MCMC.value(pname, "null");
   description = "Output directory";
   options = "string";
@@ -5216,6 +5217,7 @@ void Params::read_pars_json(std::string file){
 
 
   pname="name_experiment";
+  pname_c="name_experiment";
   this->name_experiment = MCMC.value(pname, "null");
   description = "String to identify the experiment used to extract information from.";
   options = "string";
@@ -5224,6 +5226,7 @@ void Params::read_pars_json(std::string file){
 
   
   pname="name_parameters";
+  pname_c="name_parameters";
   this->name_parameters =  MCMC.value(pname, std::vector<string>{});
   description = "Names of the fitting parameters";
   options = "vector of string";
@@ -5233,6 +5236,7 @@ void Params::read_pars_json(std::string file){
 
 
   pname="prior_parameters_min_values";
+  pname_c="prior_parameters_min_values";
   this->prior_parameters_min_values =  MCMC.value(pname, std::vector<double>{});
   description = "Minimum values defining priors";
   options = "vector of floats";
@@ -5242,6 +5246,7 @@ void Params::read_pars_json(std::string file){
 
 
   pname="prior_parameters_max_values";
+  pname_c="prior_parameters_max_values";
   this->prior_parameters_max_values =  MCMC.value(pname, std::vector<double>{});
   description = "Maximum values defining priors";
   options = "vector of floats";
@@ -5250,6 +5255,7 @@ void Params::read_pars_json(std::string file){
     throw std::runtime_error("Missing prior_parameters_max_values");
 
   pname="proposal_parameters";
+  pname_c="proposal_parameters";
   this->proposal_parameters =  MCMC.value(pname, std::vector<double>{});
   description = "Proposal (steps) to sample the posterior distribution for each parameter";
   options = "vector of floats";
@@ -5258,6 +5264,7 @@ void Params::read_pars_json(std::string file){
     throw std::runtime_error("Missing step_size_parameters");
 
   pname="initial_parameters";
+  pname_c="initial_parameters";
   this->initial_parameters =  MCMC.value(pname, std::vector<double>{});
   description = "Intial values of parameters";
   options = "vector of floats";
@@ -5266,22 +5273,24 @@ void Params::read_pars_json(std::string file){
     throw std::runtime_error("Missing initial_parameters");
   
   pname="action_parameters";
+  pname_c="action_parameters";
   this->action_parameters =  MCMC.value(pname, std::vector<int>{});
-  description = "Action to be taken for each parameter.";
+  description = "Action to be taken by each parameter in the set up of an MCMC procedure.";
   options = "0 for varying parametr, 1 for fixed, 2 for varying with gaussian proposal.";
   if(action_parameters.empty())
     throw std::runtime_error("Missing action_parameters");
   this->number_of_fit_parameters=proposal_parameters.size();    
 
   pname = "random_initial_value_within_priors";
+  pname_c = "random_initial_value_within_priors";
   this->random_initial_value_within_priors =MCMC.value(pname, false);
   description = "Set true if initial point in parameter space is to be selected randomly from the prior. If false, it stats from the initial values";
   options = "bool";
   this->collect_params_info(pname, pname_c, this_section, description, options);
   this->parameter_boolean.emplace_back(pname, this->random_initial_value_within_priors);
 
-
   pname="number_of_accepted_models";
+  pname_c="number_of_accepted_models";
   this->number_of_accepted_models = MCMC.value(pname, 1);
   description = "Number accepted models within the MCMC";
   options = "size_t";
@@ -5289,6 +5298,7 @@ void Params::read_pars_json(std::string file){
   this->parameter_number.emplace_back(pname, this->number_of_accepted_models);
 
   pname="number_of_burnin_phase_models";
+  pname_c="number_of_burnin_phase_models";
   this->number_of_burnin_phase_models = MCMC.value(pname, 1);
   description = "Number of burn-in models";
   options = "size_t";
@@ -5296,6 +5306,7 @@ void Params::read_pars_json(std::string file){
   this->parameter_number.emplace_back(pname, this->number_of_burnin_phase_models);
 
   pname="number_of_post_burnin_phase_models";
+  pname_c="number_of_post_burnin_phase_models";
   this->number_of_post_burnin_phase_models = MCMC.value(pname, 1);
   description = "Number of post burn-in models, used to define a range in which the covariance matrix is updated.";
   options = "size_t";
@@ -5303,44 +5314,60 @@ void Params::read_pars_json(std::string file){
   this->parameter_number.emplace_back(pname, this->number_of_post_burnin_phase_models);
 
   pname="number_of_steps_to_update_covariance";
+  pname_c="number_of_steps_to_update_covariance";
   this->number_of_steps_to_update_covariance = MCMC.value(pname, 1);
   description = "Number of steps out separating updats of covariance matrices.";
   options = "size_t";
   this->collect_params_info(pname, pname_c, this_section, description, options);
 
   pname="number_of_avoided_steps_to_get_stats";
+  pname_c="number_of_avoided_steps_to_get_stats";
   this->number_of_avoided_steps_to_get_stats=MCMC.value(pname, 1);
   description = "Number of steps avoided to compute statistics after burn-in phase.";
   options = "size_t";
   this->collect_params_info(pname, pname_c, this_section, description, options);
 
+
   pname="update_covariance";
+  pname_c="update_covariance";
   this->update_covariance = MCMC.value(pname, false);
   description = "Update covariance matrix after the burn-in phase and during after_burn_in models";
   options = "bool";
   this->collect_params_info(pname, pname_c, this_section, description, options);
+  this->parameter_boolean.emplace_back(pname, this->update_covariance);
 
 
   pname="number_of_chains";
+  pname_c="number_of_chains";
   this->number_of_chains = MCMC.value(pname, 1);
-  description = "Number of Markoff chains to be run in parallel";
+  description = "Number of Markoff chains to be run in parallel.";
   options = "size_t";
   this->collect_params_info(pname, pname_c, this_section, description, options);
   this->parameter_number.emplace_back(pname, this->number_of_chains);
 
   pname="use_distance_priors";
+  pname_c="use_distance_priors";
   this->use_distance_priors = MCMC.value(pname, false);
   options = "true, false";
   description = "Use CMB distance priors for MCMC analysis of cosmological parameters";
   this->collect_params_info(pname, pname_c, this_section, description, options);
+  this->parameter_boolean.emplace_back(pname, this->use_distance_priors);
 
   pname="dprior_ID";
+  pname_c="dprior_ID";
   this->dprior_ID = MCMC.value(pname, 1);
-  options = "int";
+  options = "int, 1, 2, 4. See documentation.";
   description = "Specify CMB priors MCMC analysis of cosmological parameters";
+  this->collect_params_info(pname, pname_c, this_section, description, options);
+  this->parameter_number.emplace_back(pname, this->dprior_ID);
 
   pname="dprior_JD";
+  pname_c="dprior_JD";
   this->dprior_JD = MCMC.value(pname, 1);
+  options = "int, 1 ... 8. See documentation. ";
+  description = "Specify CMB priors MCMC analysis of cosmological parameters";
+  this->collect_params_info(pname, pname_c, this_section, description, options);
+  this->parameter_number.emplace_back(pname, this->dprior_JD);
 
   }
 }

@@ -28,6 +28,9 @@ import healpy as hp
 import subprocess
 import matplotlib.colors as colors
 from scipy.ndimage import gaussian_filter
+from scipy.stats import gaussian_kde
+from matplotlib.ticker import MultipleLocator
+
 
 
 def get_title_coords_d(xmin, xmax, ymin, ymax):
@@ -235,7 +238,7 @@ class COSMOLIB_PLOTS:
 
         plt.title("Dark matter halo density profile")
         xtit, ytit=get_title_coords_d(np.log10(X_min), np.log10(X_max), np.log10(Y_min), np.log10(Y_max))
-        plt.text(pow(10,xtit), pow(10,ytit), "z  = "+str(self.data["redshift"])+"    Halo mass " +"{:.3e}".format(self.data["Mass"]), fontsize=11)
+        plt.text(pow(10,xtit), pow(10,ytit), "z  = "+str(self.data["redshift"])+"    Halo mass " +"{:.3e}".format(self.data["Mass"])+r"$M_{\odot}$", fontsize=11)
 
         file_name=self.data["output_file_galaxy_power_spectrum"]
         if os.path.isfile(file_name):
@@ -768,7 +771,7 @@ class COSMOLIB_PLOTS:
         X_max_max=X_max
         tick_x=1  # this sets the label every 0.05 in x
         min_locator_x=8
-        Y_min=0
+        Y_min=0.001
         Y_max=1.
         Y_max_max=5
         tick_y=1.0
@@ -1179,14 +1182,395 @@ class COSMOLIB_PLOTS:
         plt.tight_layout()
 
 
+
+
+
+    def plot_cosmological_constraints_dpriors(self):
+
+        file = self.data["file_chains"]
+
+        nbins = 100 
+        n_skip = self.data["burn_in_number"]
+
+        adata = np.loadtxt(file, skiprows=n_skip)
+
+        if adata.ndim == 1:
+            adata = adata[np.newaxis, :]
+
+        x = adata[:, 2]   # Omega_m
+        y = adata[:, 4]   # w_eos
+
+
+        # ============================================================
+        # DATA LIMITS
+        # ============================================================
+
+        xmin_data, xmax_data = x.min(), x.max()
+        ymin_data, ymax_data = y.min(), y.max()
+
+        #print("Data limits:")
+        #print("xmin =", xmin_data)
+        #print("xmax =", xmax_data)
+        #print("ymin =", ymin_data)
+        #print("ymax =", ymax_data)
+        #print("burn-in =", n_skip)
+
+
+        # ============================================================
+        # PLOT LIMITS
+        #
+        # Define these ONLY ONCE.
+        # These limits are used by ALL panels.
+        # ============================================================
+
+        # ============================================================
+        # PLOT LIMITS
+        # ============================================================
+
+        xmin_data = np.min(x)
+        xmax_data = np.max(x)
+
+        ymin_data = np.min(y)
+        ymax_data = np.max(y)
+
+        #print("Data limits:")
+        #print("xmin =", xmin_data)
+        #print("xmax =", xmax_data)
+        #print("ymin =", ymin_data)
+        #print("ymax =", ymax_data)
+
+        # Desired limits
+        xmin = min(0.5, xmin_data)
+        xmax = max(0.5, xmax_data)
+
+        ymin = min(-2.0, ymin_data)
+        ymax = max(0.0, ymax_data)
+
+        # Make sure limits are strictly increasing
+        if xmax <= xmin:
+            dx = max(abs(xmin) * 0.05, 1e-3)
+            xmin -= dx
+            xmax += dx
+
+        if ymax <= ymin:
+            dy = max(abs(ymin) * 0.05, 1e-3)
+            ymin -= dy
+            ymax += dy
+
+        #print("Plot limits:")
+        #print("xmin =", xmin)
+        #print("xmax =", xmax)
+        #print("ymin =", ymin)
+        #print("ymax =", ymax)
+
+
+        # ============================================================
+        # KDE
+        # ============================================================
+
+        xy = np.vstack([x, y])
+        kde = gaussian_kde(xy)
+
+        xi = np.linspace(xmin, xmax, nbins)
+        yi = np.linspace(ymin, ymax, nbins)
+
+        X, Y = np.meshgrid(xi, yi)
+
+        Z = kde(np.vstack([X.ravel(), Y.ravel()]))
+        Z = Z.reshape(X.shape)
+
+        # Normalize to probability
+        Z /= Z.sum()
+
+
+        # ============================================================
+        # CONFIDENCE LEVELS
+        # ============================================================
+
+        Z_flat = np.sort(Z.ravel())[::-1]
+        Z_cum = np.cumsum(Z_flat)
+
+        levels = []
+
+        for c in [0.68, 0.997]:
+            idx = np.where(Z_cum >= c)[0][0]
+            levels.append(Z_flat[idx])
+
+        levels = sorted(levels)
+
+
+        # ============================================================
+        # FIGURE LAYOUT
+        # ============================================================
+
+        fig = plt.figure(figsize=(6, 6))
+
+        gs = fig.add_gridspec(
+            2, 2,
+            width_ratios=[4, 1],
+            height_ratios=[1, 4],
+            wspace=0.05,
+            hspace=0.05
+        )
+
+        ax_histx = fig.add_subplot(gs[0, 0])
+        ax_histy = fig.add_subplot(gs[1, 1])
+        ax_main  = fig.add_subplot(gs[1, 0])
+
+
+        # ============================================================
+        # MAIN CONTOUR
+        # ============================================================
+
+        ax_main.contour(
+            X, Y, Z,
+            levels=levels,
+            colors='black',
+            alpha=0.4
+        )
+
+        ax_main.contourf(
+            X, Y, Z,
+            levels=levels + [Z.max()],
+            alpha=0.3
+        )
+
+
+        # ============================================================
+        # MARGINAL HISTOGRAMS
+        #
+        # Use exactly the same limits as the main panel.
+        # ============================================================
+
+        xbins = np.linspace(xmin, xmax, 50)
+        ybins = np.linspace(ymin, ymax, 50)
+
+        ax_histx.hist(
+            x,
+            bins=xbins,
+            density=True,
+            color='gray',
+            alpha=0.5
+        )
+
+        ax_histy.hist(
+            y,
+            bins=ybins,
+            density=True,
+            orientation='horizontal',
+            color='gray',
+            alpha=0.5
+        )
+
+
+        # ============================================================
+        # FORCE IDENTICAL LIMITS
+        # ============================================================
+
+        ax_main.set_xlim(xmin, xmax)
+        ax_main.set_ylim(ymin, ymax)
+
+        ax_histx.set_xlim(xmin, xmax)
+        ax_histy.set_ylim(ymin, ymax)
+
+
+        # ============================================================
+        # CLEAN AXES
+        # ============================================================
+
+        ax_histx.set_xticks([])
+        ax_histy.set_yticks([])
+
+        ax_histx.grid(alpha=0.1)
+        ax_histy.grid(alpha=0.1)
+        ax_main.grid(alpha=0.1)
+
+
+        # ============================================================
+        # TICKS
+        # ============================================================
+
+        lwidth = 2.0
+
+        ax_main.tick_params(
+            which='major',
+            direction='in',
+            top=True,
+            right=True,
+            length=8,
+            width=1.5
+        )
+
+        ax_main.tick_params(
+            which='minor',
+            direction='in',
+            top=True,
+            right=True,
+            length=4,
+            width=1.5
+        )
+
+        for ax in [ax_histx, ax_histy]:
+
+            ax.tick_params(
+                which='major',
+                direction='in',
+                top=True,
+                labelleft=False,
+                labelbottom=False,
+                labelright=False,
+                right=True,
+                length=6,
+                width=1.5
+            )
+
+            ax.tick_params(
+                which='minor',
+                direction='in',
+                top=True,
+                labelleft=False,
+                right=True,
+                length=3,
+                width=1.5
+            )
+
+
+        # ============================================================
+        # FRAME
+        # ============================================================
+
+        for ax in [ax_main, ax_histx, ax_histy]:
+
+            for spine in ax.spines.values():
+                spine.set_linewidth(lwidth)
+
+
+        # ============================================================
+        # TICK LOCATORS
+        # ============================================================
+
+        for ax in [ax_main, ax_histx]:
+
+            ax.xaxis.set_major_locator(
+                MultipleLocator(0.1)
+            )
+
+            ax.xaxis.set_minor_locator(
+                MultipleLocator(0.05)
+            )
+
+
+        for ax in [ax_main, ax_histy]:
+
+            ax.yaxis.set_major_locator(
+                MultipleLocator(0.4)
+            )
+
+            ax.yaxis.set_minor_locator(
+                MultipleLocator(0.2)
+            )
+
+
+        # ============================================================
+        # LABELS
+        # ============================================================
+
+        ax_main.set_xlabel(
+            r"$\Omega_{m}$",
+            fontsize=12
+        )
+
+        ax_main.set_ylabel(
+            r"$w_{eos}$",
+            fontsize=12
+        )
+
+
+        # ============================================================
+        # STATISTICS
+        # ============================================================
+
+        filej = self.data["file_statistics"]
+
+        with open(filej, 'r', encoding="utf-8") as jf:
+            dataj = json.load(jf)
+
+        kvalue = dataj["Omega_matter"]["Mean"]
+        emin_k = dataj["Omega_matter"]["Lower 1sigma"]
+        emax_k = dataj["Omega_matter"]["Upper 1sigma"]
+
+        Tvalue = dataj["w_eos"]["Mean"]
+        emin_T = dataj["w_eos"]["Lower 1sigma"]
+        emax_T = dataj["w_eos"]["Upper 1sigma"]
+
+
+        # ============================================================
+        # TEXT
+        # ============================================================
+
+        mean_str = f"{Tvalue:.2f}"
+        min_str  = f"{emin_T:.2f}"
+        max_str  = f"{emax_T:.2f}"
+
+        ax_main.text(
+            0.4,
+            -0.6    ,
+            r"$w=" + mean_str +
+            r"^{+" + max_str +
+            r"}_{-" + min_str + r"}$",
+            fontsize=10
+        )
+
+
+        mean_str = f"{kvalue:.2f}"
+        min_str  = f"{emin_k:.2f}"
+        max_str  = f"{emax_k:.2f}"
+
+        ax_main.text(
+            0.4,
+            -0.4,
+            r"$\Omega_{m}=" + mean_str +
+            r"^{+" + max_str +
+            r"}_{-" + min_str + r"}$",
+            fontsize=10
+        )
+        # ============================================================
+        # REFERENCE LINES
+        # ============================================================
+
+        ax_main.axhline(
+            Tvalue,
+            color='black',
+            linestyle='--',
+            linewidth=0.5,
+            alpha=0.5
+        )
+
+        ax_main.axvline(
+            kvalue,
+            color='black',
+            linestyle='--',
+            linewidth=0.5,
+            alpha=0.5
+        )
+
+
+        # ============================================================
+        # LEGEND
+        # ============================================================
+
+#        ax_main.legend("Distance priors")
+
+
+        return fig
+
 #========================================================================================
 #========================================================================================
 #========================================================================================
 #========================================================================================
 #========================================================================================
-print("=========================================================")
-print("Python script to plot functions computed in CosmicCodes")
-print("=========================================================")
+print("  ")
+print("Running python script to plot functions computed in CosmicCodes")
 
 
 
@@ -1269,5 +1653,10 @@ if plotCosmo.data.get("show_tomographic_maps", False):
 if plotCosmo.data.get("show_mixing_matrix", False):
     print("Showing maps")
     plotCosmo.plot_mixing_matrix_angular_power()
+
+if plotCosmo.data.get("show_dpriors", False):
+    print("Showing cosmological constraints from distance priors")
+    plotCosmo.plot_cosmological_constraints_dpriors()
+
 
 plt.show()

@@ -2403,10 +2403,12 @@ void McmcFunctions::output_parameters()
     So.message_screen("Printing plot parameters in file", json_file_plots);
     std::ofstream jfile(json_file_plots);
     json j;
+    j["show_dpriors"]      = true;
     j["mean_parameter"]      = this->mean_parameter;
     j["sigma_max"]      = this->upper_bound_sigma;
     j["sigma_min"]      = this->lower_bound_sigma;
     j["file_chains"]         = this->chain_file_name;
+    j["file_statistics"]         = json_file_params;
     j["burn_in_number"]      = this->params._number_of_burnin_phase_models();
     j["parameter_names"]     = this->params.name_parameters;
     j["parameter_priors_min"]     = this->params.prior_parameters_min_values;

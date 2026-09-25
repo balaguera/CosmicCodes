@@ -65,7 +65,7 @@ inline constexpr int POSITIVE_INT = 1;
 #endif
 // ****************************************************************************************
 /**
- * @brief Mock Mode
+ * @brief Full verbose
 */
 #define _FULL_VERBOSE_
 //#define _FULL_VERBOSE_DETAILS_
