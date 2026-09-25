@@ -13,3 +13,4 @@ main/*exe
 main/nulldiluted_cat_bias.txt
 *.o
 examples/*.o
+examples/*.o
